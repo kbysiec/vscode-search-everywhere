@@ -24,11 +24,12 @@
       "runtimeExecutable": "${execPath}",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}",
-				"--extensionTestsPath=${workspaceFolder}/dist/test/suite/index",
-				"--disable-extensions"
+        "--extensionTestsPath=${workspaceFolder}/dist/test/index",
+        "--disable-extensions"
       ],
       "outFiles": ["${workspaceFolder}/dist/test/**/*.js"],
-      "preLaunchTask": "${defaultBuildTask}"
+      "preLaunchTask": "${defaultBuildTask}",
+      "postDebugTask": "npm: cov:fixpaths"
     }
   ]
 }

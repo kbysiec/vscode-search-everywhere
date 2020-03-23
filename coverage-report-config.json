@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "relativeSourcePath": "../../",
+  "relativeCoverageDir": "../../coverage",
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/test/**/**.js",
+    "**/coverage/**/**.js"
+  ],
+  "includePid": false,
+  "reports": ["html", "lcov", "json", "text-summary"],
+  "verbose": false
+}
