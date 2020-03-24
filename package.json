@@ -22,14 +22,18 @@
     "Browser"
   ],
   "activationEvents": [
-    "onCommand:extension.helloWorld"
+    "*"
   ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "extension.helloWorld",
-        "title": "Hello World"
+        "command": "searchEverywhere.search",
+        "title": "Search everywhere: Search"
+      },
+      {
+        "command": "searchEverywhere.reload",
+        "title": "Search everywhere: Reload"
       }
     ]
   },
