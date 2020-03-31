@@ -12,8 +12,33 @@ class ExtensionController {
     );
   }
 
-  search(): void {
+  async search(): Promise<void> {
+    await this.loadQuickPickData();
     this.quickPick.show();
+  }
+
+  private async loadQuickPickData(): Promise<void> {
+    this.quickPick.showLoading(true);
+    const data = await this.getQuickPickData();
+    this.quickPick.loadItems(data);
+    this.quickPick.showLoading(false);
+  }
+
+  private async getQuickPickData(): Promise<QuickPickItem[]> {
+    const qpItems: QuickPickItem[] = [
+      {
+        label: "fake-1.ts",
+        uri: vscode.Uri.file("./test/mock/fake/fake-1.ts"),
+        symbolKind: 0
+      },
+      {
+        label: "fake-2.ts",
+        uri: vscode.Uri.file("./test/mock/fake/fake-2.ts"),
+        symbolKind: 0
+      }
+    ];
+
+    return qpItems;
   }
 
   private onQuickPickSubmit = (qpItem: QuickPickItem) => {

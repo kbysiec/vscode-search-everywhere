@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import ExtensionController from "./extensionController";
 
 export async function search(extensionController: ExtensionController) {
-  extensionController.search();
+  await extensionController.search();
 }
 
 export async function reload(extensionController: ExtensionController) {

@@ -24,7 +24,7 @@ describe("ExtensionController", () => {
   });
 
   describe("constructor", () => {
-    it("should quick pick be initialized", () => {
+    it("should extension controller be initialized", () => {
       extensionController = new ExtensionController(context);
 
       assert.exists(extensionController);
@@ -37,6 +37,24 @@ describe("ExtensionController", () => {
       await extensionController.search();
 
       assert.equal(showStub.calledOnce, true);
+    });
+  });
+
+  describe("loadQuickPickData", () => {
+    it("should load data to quick pick", async () => {
+      sinon
+        .stub(extensionControllerAny, "getQuickPickData")
+        .returns(Promise.resolve(mock.qpItems));
+      await extensionControllerAny.loadQuickPickData();
+
+      assert.equal(extensionControllerAny.quickPick.quickPick.items.length, 2);
+    });
+  });
+
+  describe("getQuickPickData", () => {
+    it("should return data for quick pick", async () => {
+      const qpItems = await extensionControllerAny.getQuickPickData();
+      assert.equal(qpItems.length, 2);
     });
   });
 
