@@ -1,71 +1,41 @@
 import * as vscode from "vscode";
-import { assert, expect } from "chai";
+import { assert } from "chai";
 import * as sinon from "sinon";
 import * as extension from "../../extension";
+import ExtensionController from "../../extensionController";
+import { getExtensionContext } from "../util/mockFactory";
 
 describe("extension", () => {
   let context: vscode.ExtensionContext;
+  let extensionController: ExtensionController;
 
-  before(function() {
-    context = {
-      subscriptions: [],
-      workspaceState: {
-        get: () => {},
-        update: () => Promise.resolve()
-      },
-      globalState: {
-        get: () => {},
-        update: () => Promise.resolve()
-      },
-      extensionPath: "",
-      storagePath: "",
-      globalStoragePath: "",
-      logPath: "",
-      asAbsolutePath: (relativePath: string) => relativePath
-    };
+  before(() => {
+    context = getExtensionContext();
+    extensionController = new ExtensionController(context);
   });
 
-  afterEach(function() {
+  // beforeEach(() => {
+  //   extensionController = new ExtensionController(context);
+  // });
+
+  afterEach(() => {
     sinon.restore();
   });
 
-  describe("activate", function() {
-    it("should function exist", function() {
-      const actual = typeof extension.activate;
-      const expected = "function";
-      assert.equal(actual, expected);
-    });
-
-    it("should register two commands", async function() {
-      const stub = sinon.stub(vscode.commands, "registerCommand");
-      // const spy = sinon.spy(stub);
-      const context: vscode.ExtensionContext = {
-        subscriptions: [],
-        workspaceState: {
-          get: () => {},
-          update: () => Promise.resolve()
-        },
-        globalState: {
-          get: () => {},
-          update: () => Promise.resolve()
-        },
-        extensionPath: "",
-        storagePath: "",
-        globalStoragePath: "",
-        logPath: "",
-        asAbsolutePath: (relativePath: string) => relativePath
-      };
-
+  describe("activate", () => {
+    it("should register two commands", async () => {
+      const registerCommandStub = sinon.stub(
+        vscode.commands,
+        "registerCommand"
+      );
       await extension.activate(context);
 
-      const actual = stub.calledTwice;
-      const expected = true;
-      assert.equal(actual, expected);
+      assert.equal(registerCommandStub.calledTwice, true);
     });
   });
 
-  describe("deactivate", function() {
-    it("should function exist", function() {
+  describe("deactivate", () => {
+    it("should function exist", () => {
       const spy = sinon.spy(console, "log");
       const actual = typeof extension.deactivate;
       const expected = "function";
@@ -77,41 +47,24 @@ describe("extension", () => {
     });
   });
 
-  describe("search", function() {
-    it("should function exist", function() {
-      const actual = typeof extension.search;
-      const expected = "function";
+  describe("search", () => {
+    it("should extensionController.search method be invoked", () => {
+      const searchStub = sinon.stub(extensionController, "search");
+      extension.search(extensionController);
 
-      assert.equal(actual, expected);
-    });
-
-    it("should function search be called", function() {
-      const stub = sinon.stub(vscode.window, "showInformationMessage");
-
-      extension.search(context);
-      const actual = stub.calledOnce;
-      const expected = true;
-
-      assert.equal(actual, expected);
+      assert.equal(searchStub.calledOnce, true);
     });
   });
 
-  describe("reload", function() {
-    it("should function exist", function() {
-      const actual = typeof extension.reload;
-      const expected = "function";
+  describe("reload", () => {
+    it("should vscode.window.showInformationMessage method be invoked", () => {
+      const showInformationMessageStub = sinon.stub(
+        vscode.window,
+        "showInformationMessage"
+      );
+      extension.reload(extensionController);
 
-      assert.equal(actual, expected);
-    });
-
-    it("should function reload be called", function() {
-      const stub = sinon.stub(vscode.window, "showInformationMessage");
-
-      extension.reload(context);
-      const actual = stub.calledOnce;
-      const expected = true;
-
-      assert.equal(actual, expected);
+      assert.equal(showInformationMessageStub.calledOnce, true);
     });
   });
 });
