@@ -1,11 +1,17 @@
 import * as vscode from "vscode";
 import QuickPick from "./quickPick";
 import QuickPickItem from "./interface/quickPickItem";
+import DataService from "./dataService";
+import Utils from "./utils";
 
 class ExtensionController {
   private quickPick: QuickPick;
+  private dataService: DataService;
+  private utils: Utils;
 
   constructor(private extensionContext: vscode.ExtensionContext) {
+    this.dataService = new DataService();
+    this.utils = new Utils();
     this.quickPick = new QuickPick(
       this.onQuickPickSubmit,
       this.onQuickPickChangeValue
@@ -25,20 +31,9 @@ class ExtensionController {
   }
 
   private async getQuickPickData(): Promise<QuickPickItem[]> {
-    const qpItems: QuickPickItem[] = [
-      {
-        label: "fake-1.ts",
-        uri: vscode.Uri.file("./test/mock/fake/fake-1.ts"),
-        symbolKind: 0
-      },
-      {
-        label: "fake-2.ts",
-        uri: vscode.Uri.file("./test/mock/fake/fake-2.ts"),
-        symbolKind: 0
-      }
-    ];
-
-    return qpItems;
+    const data = await this.dataService.getData();
+    const qpData = this.utils.prepareQpData(data);
+    return qpData;
   }
 
   private onQuickPickSubmit = (qpItem: QuickPickItem) => {

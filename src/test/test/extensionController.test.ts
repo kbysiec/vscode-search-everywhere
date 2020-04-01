@@ -53,8 +53,15 @@ describe("ExtensionController", () => {
 
   describe("getQuickPickData", () => {
     it("should return data for quick pick", async () => {
-      const qpItems = await extensionControllerAny.getQuickPickData();
-      assert.equal(qpItems.length, 2);
+      sinon
+        .stub(extensionControllerAny.dataService, "getData")
+        .returns(Promise.resolve(mock.items));
+      await extensionControllerAny.getQuickPickData();
+
+      assert.deepEqual(
+        extensionControllerAny.quickPick.quickPick.items,
+        mock.qpItems
+      );
     });
   });
 
