@@ -7,8 +7,8 @@ import * as mock from "../mock/quickPick.mock";
 describe("QuickPick", () => {
   let quickPick: QuickPick;
   let quickPickAny: any;
-  let onSubmitCallback: sinon.SinonSpy;
-  let onChangeValueCallback: sinon.SinonSpy;
+  let onSubmitCallback: sinon.SinonStub;
+  let onChangeValueCallback: sinon.SinonStub;
 
   before(() => {
     quickPick = new QuickPick(onSubmitCallback, onChangeValueCallback);
