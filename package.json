@@ -26,6 +26,47 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
+    "configuration": {
+      "title": "Search everywhere",
+      "properties": {
+        "searchEverywhere.exclude": {
+          "type": "array",
+          "default": [
+            "**/.git",
+            "**/.svn",
+            "**/.hg",
+            "**/.CVS",
+            "**/.DS_Store",
+            "**/package-lock.json",
+            "**/yarn.lock",
+            "**/node_modules/**",
+            "**/bower_components/**",
+            "**/coverage/**",
+            "**/.vscode/**",
+            "**/.vscode-test/**",
+            "**/.history/**",
+            "**/.cache/**",
+            "**/.cache-loader/**",
+            "**/out/**",
+            "**/dist/**"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "description": "An array of globs. Any file matching these globs will be excluded from searching."
+        },
+        "searchEverywhere.include": {
+          "type": "array",
+          "default": [
+            "**/*.{js,jsx,ts,tsx}"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "description": "An array of globs. Any file matching these globs will be included from searching."
+        }
+      }
+    },
     "commands": [
       {
         "command": "searchEverywhere.search",
