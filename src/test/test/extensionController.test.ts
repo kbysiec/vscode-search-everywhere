@@ -65,17 +65,62 @@ describe("ExtensionController", () => {
     });
   });
 
+  describe("openSelected", () => {
+    let openTextDocumentStub: sinon.SinonStub;
+    let showTextDocumentStub: sinon.SinonStub;
+    let selectQpItemStub: sinon.SinonStub;
+
+    beforeEach(() => {
+      openTextDocumentStub = sinon.stub(vscode.workspace, "openTextDocument");
+      showTextDocumentStub = sinon.stub(vscode.window, "showTextDocument");
+      selectQpItemStub = sinon.stub(extensionControllerAny, "selectQpItem");
+    });
+
+    it("should open selected qpItem with uri scheme equals to 'file'", async () => {
+      await extensionControllerAny.openSelected(mock.qpItem);
+
+      assert.equal(openTextDocumentStub.calledOnce, true);
+      assert.equal(showTextDocumentStub.calledOnce, true);
+      assert.equal(selectQpItemStub.calledOnce, true);
+    });
+
+    it("should open selected qpItem with uri scheme equals to 'untitled'", async () => {
+      await extensionControllerAny.openSelected(mock.qpItemUntitled);
+
+      assert.equal(openTextDocumentStub.calledOnce, true);
+      assert.equal(showTextDocumentStub.calledOnce, true);
+      assert.equal(selectQpItemStub.calledOnce, true);
+    });
+  });
+
+  describe("selectQpItem", () => {
+    it("should editor.revealRange method be called", async () => {
+      const document = await vscode.workspace.openTextDocument(
+        mock.itemUntitledUri
+      );
+      const editor = await vscode.window.showTextDocument(document);
+      const editorRevealRangeStub = sinon.stub(editor, "revealRange");
+
+      await extensionControllerAny.selectQpItem(editor, mock.qpItem);
+
+      assert.equal(editorRevealRangeStub.calledOnce, true);
+
+      await vscode.commands.executeCommand(
+        "workbench.action.closeActiveEditor"
+      );
+    });
+  });
+
   describe("onQuickPickSubmit", () => {
-    it("should vscode.window.showInformationMessage method be invoked", async () => {
-      const showInformationMessageStub = sinon.stub(
-        vscode.window,
-        "showInformationMessage"
+    it("should openSelected method be invoked", async () => {
+      const openSelectedStub = sinon.stub(
+        extensionControllerAny,
+        "openSelected"
       );
       const qpItem = mock.qpItem;
       await extensionControllerAny.onQuickPickSubmit(qpItem);
 
-      const expectedText = `Selected qpItem label: ${qpItem.label}`;
-      assert.equal(showInformationMessageStub.calledWith(expectedText), true);
+      assert.equal(openSelectedStub.calledWith(qpItem), true);
     });
   });
 

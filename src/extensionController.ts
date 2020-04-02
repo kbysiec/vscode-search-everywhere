@@ -36,13 +36,33 @@ class ExtensionController {
     return qpData;
   }
 
-  private onQuickPickSubmit = (qpItem: QuickPickItem) => {
-    vscode.window.showInformationMessage(
-      `Selected qpItem label: ${qpItem.label}`
+  private async openSelected(qpItem: QuickPickItem): Promise<void> {
+    const document = await vscode.workspace.openTextDocument(
+      qpItem.uri!.scheme === "file" ? (qpItem.uri!.fsPath as any) : qpItem.uri
     );
+    const editor = await vscode.window.showTextDocument(document);
+    this.selectQpItem(editor, qpItem);
+  }
+
+  private selectQpItem(editor: vscode.TextEditor, qpItem: QuickPickItem): void {
+    const { range } = qpItem;
+    const start = new vscode.Position(
+      range!.start.line,
+      range!.start.character
+    );
+    editor.selection = new vscode.Selection(start, start);
+
+    editor.revealRange(
+      range as vscode.Range,
+      vscode.TextEditorRevealType.Default
+    );
+  }
+
+  private onQuickPickSubmit = async (qpItem: QuickPickItem): Promise<void> => {
+    await this.openSelected(qpItem);
   };
 
-  private onQuickPickChangeValue = (text: string) => {
+  private onQuickPickChangeValue = (text: string): void => {
     vscode.window.showInformationMessage(`Current text: ${text}`);
   };
 }
