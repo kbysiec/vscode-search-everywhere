@@ -5,7 +5,7 @@ import Utils from "../../utils";
 import * as mock from "../mock/utils.mock";
 import QuickPick from "../../interface/quickPickItem";
 
-describe("Utis", () => {
+describe("Utils", () => {
   let utils: Utils;
   let utilsAny: any;
 
@@ -51,8 +51,8 @@ describe("Utis", () => {
         .value(mock.workspaceFolders);
       const workspaceFoldersPaths = utilsAny.getWorkspaceFoldersPaths();
       const expected = [
-        "\\test\\path\\to\\workspace",
-        "\\test2\\path2\\to2\\workspace2"
+        vscode.Uri.file("/test/path/to/workspace").fsPath,
+        vscode.Uri.file("/test2/path2/to2/workspace2").fsPath,
       ];
 
       assert.deepEqual(workspaceFoldersPaths, expected);
