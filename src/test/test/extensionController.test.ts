@@ -32,11 +32,31 @@ describe("ExtensionController", () => {
   });
 
   describe("search", () => {
-    it("should quickPick.show method be invoked", async () => {
+    it(`should quickPick.show method be invoked if workspace contains
+      at least one folder opened`, async () => {
       const showStub = sinon.stub(extensionControllerAny.quickPick, "show");
+      sinon
+        .stub(extensionControllerAny.utils, "hasWorkspaceAnyFolder")
+        .returns(true);
       await extensionController.search();
 
       assert.equal(showStub.calledOnce, true);
+    });
+
+    it(`should display notification if workspace contains does not contain
+      any folder opened`, async () => {
+      const showStub = sinon.stub(extensionControllerAny.quickPick, "show");
+      const printNoFolderOpenedMessageStub = sinon.stub(
+        extensionControllerAny,
+        "printNoFolderOpenedMessage"
+      );
+      sinon
+        .stub(extensionControllerAny.utils, "hasWorkspaceAnyFolder")
+        .returns(false);
+      await extensionController.search();
+
+      assert.equal(showStub.calledOnce, false);
+      assert.equal(printNoFolderOpenedMessageStub.calledOnce, true);
     });
   });
 
@@ -100,7 +120,6 @@ describe("ExtensionController", () => {
       );
       const editor = await vscode.window.showTextDocument(document);
       const editorRevealRangeStub = sinon.stub(editor, "revealRange");
-
       await extensionControllerAny.selectQpItem(editor, mock.qpItem);
 
       assert.equal(editorRevealRangeStub.calledOnce, true);
@@ -108,6 +127,18 @@ describe("ExtensionController", () => {
       await vscode.commands.executeCommand(
         "workbench.action.closeActiveEditor"
       );
+    });
+  });
+
+  describe("printNoFolderOpenedMessage", () => {
+    it("should display notification", async () => {
+      const showInformationMessageStub = sinon.stub(
+        vscode.window,
+        "showInformationMessage"
+      );
+      extensionControllerAny.printNoFolderOpenedMessage();
+
+      assert.equal(showInformationMessageStub.calledOnce, true);
     });
   });
 

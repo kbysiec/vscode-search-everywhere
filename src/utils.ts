@@ -2,6 +2,13 @@ import * as vscode from "vscode";
 import QuickPickItem from "./interface/quickPickItem";
 
 class Utils {
+  hasWorkspaceAnyFolder(): boolean {
+    return !!(
+      vscode.workspace.workspaceFolders &&
+      vscode.workspace.workspaceFolders.length
+    );
+  }
+
   prepareQpData(data: vscode.Uri[]): QuickPickItem[] {
     return this.mapDataToQpData(data);
   }
@@ -28,11 +35,11 @@ class Utils {
       symbolKind,
       range: {
         start,
-        end
+        end,
       },
       label: name,
       detail: this.normalizeUriPath(uri.fsPath),
-      description
+      description,
     } as QuickPickItem;
   }
 

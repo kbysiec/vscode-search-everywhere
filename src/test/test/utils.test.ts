@@ -21,6 +21,20 @@ describe("Utils", () => {
     sinon.restore();
   });
 
+  describe("hasWorkspaceAnyFolder", () => {
+    it("should return true if workspace contains at least one folder", () => {
+      sinon.stub(vscode.workspace, "workspaceFolders").value(["/#"]);
+
+      assert.equal(utils.hasWorkspaceAnyFolder(), true);
+    });
+
+    it("should return false if workspace does not contain any folder", () => {
+      sinon.stub(vscode.workspace, "workspaceFolders").value([]);
+
+      assert.equal(utils.hasWorkspaceAnyFolder(), false);
+    });
+  });
+
   describe("prepareQpData", () => {
     it("should return quick pick data", () => {
       assert.deepEqual(utils.prepareQpData(mock.items), mock.qpItems);

@@ -19,8 +19,12 @@ class ExtensionController {
   }
 
   async search(): Promise<void> {
-    await this.loadQuickPickData();
-    this.quickPick.show();
+    if (this.utils.hasWorkspaceAnyFolder()) {
+      await this.loadQuickPickData();
+      this.quickPick.show();
+    } else {
+      this.printNoFolderOpenedMessage();
+    }
   }
 
   private async loadQuickPickData(): Promise<void> {
@@ -55,6 +59,12 @@ class ExtensionController {
     editor.revealRange(
       range as vscode.Range,
       vscode.TextEditorRevealType.Default
+    );
+  }
+
+  private printNoFolderOpenedMessage() {
+    vscode.window.showInformationMessage(
+      "Workspace doesn't contain any folder opened"
     );
   }
 
