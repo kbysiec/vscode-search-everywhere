@@ -142,6 +142,16 @@ describe("ExtensionController", () => {
     });
   });
 
+  describe("initComponents", () => {
+    it("should init components", async () => {
+      extensionControllerAny.initComponents();
+
+      assert.equal(typeof extensionControllerAny.dataService, "object");
+      assert.equal(typeof extensionControllerAny.utils, "object");
+      assert.equal(typeof extensionControllerAny.quickPick, "object");
+    });
+  });
+
   describe("onQuickPickSubmit", () => {
     it("should openSelected method be invoked", async () => {
       const openSelectedStub = sinon.stub(

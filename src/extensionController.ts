@@ -5,17 +5,12 @@ import DataService from "./dataService";
 import Utils from "./utils";
 
 class ExtensionController {
-  private quickPick: QuickPick;
-  private dataService: DataService;
-  private utils: Utils;
+  private quickPick!: QuickPick;
+  private dataService!: DataService;
+  private utils!: Utils;
 
   constructor(private extensionContext: vscode.ExtensionContext) {
-    this.dataService = new DataService();
-    this.utils = new Utils();
-    this.quickPick = new QuickPick(
-      this.onQuickPickSubmit,
-      this.onQuickPickChangeValue
-    );
+    this.initComponents();
   }
 
   async search(): Promise<void> {
@@ -65,6 +60,15 @@ class ExtensionController {
   private printNoFolderOpenedMessage() {
     vscode.window.showInformationMessage(
       "Workspace doesn't contain any folder opened"
+    );
+  }
+
+  private initComponents(): void {
+    this.dataService = new DataService();
+    this.utils = new Utils();
+    this.quickPick = new QuickPick(
+      this.onQuickPickSubmit,
+      this.onQuickPickChangeValue
     );
   }
 
