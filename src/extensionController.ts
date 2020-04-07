@@ -57,7 +57,7 @@ class ExtensionController {
     );
   }
 
-  private printNoFolderOpenedMessage() {
+  private printNoFolderOpenedMessage(): void {
     vscode.window.showInformationMessage(
       "Workspace doesn't contain any folder opened"
     );

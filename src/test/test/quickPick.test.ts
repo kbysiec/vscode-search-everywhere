@@ -68,10 +68,9 @@ describe("QuickPick", () => {
 
   describe("submit", () => {
     it("should callback be invoked with selected item as argument", () => {
-      const qpItem = mock.qpItem;
-      quickPickAny.submit(qpItem, onSubmitCallback);
+      quickPickAny.submit(mock.qpItem, onSubmitCallback);
 
-      assert.equal(onSubmitCallback.calledWith(qpItem), true);
+      assert.equal(onSubmitCallback.calledWith(mock.qpItem), true);
     });
 
     it("should callback not be invoked without selected item as argument", () => {
@@ -93,11 +92,10 @@ describe("QuickPick", () => {
   describe("onDidAccept", () => {
     it("should submit method be invoked with selected item as argument", () => {
       const submitStub = sinon.stub(quickPickAny, "submit");
-      const qpItem = mock.qpItem;
-      quickPickAny.quickPick.selectedItems[0] = qpItem;
+      quickPickAny.quickPick.selectedItems[0] = mock.qpItem;
       quickPickAny.onDidAccept(onSubmitCallback);
 
-      assert.equal(submitStub.calledWith(qpItem, onSubmitCallback), true);
+      assert.equal(submitStub.calledWith(mock.qpItem, onSubmitCallback), true);
     });
   });
 

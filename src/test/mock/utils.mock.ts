@@ -22,7 +22,7 @@ const qpItems: QuickPickItem[] = [
   {
     label: "fake-2.ts",
     description: "File",
-    detail: "\\.\\fake\\fake-2.ts",
+    detail: "/./fake/fake-2.ts",
     uri: vscode.Uri.file("./fake/fake-2.ts"),
     symbolKind: 0,
     range: {

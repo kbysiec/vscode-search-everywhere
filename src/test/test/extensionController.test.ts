@@ -158,10 +158,9 @@ describe("ExtensionController", () => {
         extensionControllerAny,
         "openSelected"
       );
-      const qpItem = mock.qpItem;
-      await extensionControllerAny.onQuickPickSubmit(qpItem);
+      await extensionControllerAny.onQuickPickSubmit(mock.qpItem);
 
-      assert.equal(openSelectedStub.calledWith(qpItem), true);
+      assert.equal(openSelectedStub.calledWith(mock.qpItem), true);
     });
   });
 
