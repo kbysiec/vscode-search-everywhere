@@ -9,7 +9,7 @@ class QuickPick {
     this.quickPick.matchOnDetail = true;
     this.quickPick.matchOnDescription = true;
 
-    this.quickPick.onDidHide(this.onDidHide);
+    this.quickPick.onDidHide(this.onDidHide.bind(this));
     this.quickPick.onDidAccept(this.onDidAccept.bind(this, onSubmitCallback));
     this.quickPick.onDidChangeValue(
       this.onDidChangeValue.bind(this, onChangeValueCallback)
