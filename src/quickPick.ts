@@ -4,16 +4,14 @@ import QuickPickItem from "./interface/quickPickItem";
 class QuickPick {
   private quickPick: vscode.QuickPick<QuickPickItem>;
 
-  constructor(onSubmitCallback: Function, onChangeValueCallback: Function) {
+  constructor() {
     this.quickPick = vscode.window.createQuickPick();
     this.quickPick.matchOnDetail = true;
     this.quickPick.matchOnDescription = true;
 
-    this.quickPick.onDidHide(this.onDidHide.bind(this));
-    this.quickPick.onDidAccept(this.onDidAccept.bind(this, onSubmitCallback));
-    this.quickPick.onDidChangeValue(
-      this.onDidChangeValue.bind(this, onChangeValueCallback)
-    );
+    this.quickPick.onDidHide(this.onDidHide);
+    this.quickPick.onDidAccept(this.onDidAccept);
+    this.quickPick.onDidChangeValue(this.onDidChangeValue);
   }
 
   show(): void {
@@ -32,25 +30,44 @@ class QuickPick {
     this.quickPick.value = text;
   }
 
-  private submit(selectedItem: QuickPickItem, callback: Function): void {
-    selectedItem && callback(selectedItem);
+  private submit(selectedItem: QuickPickItem): void {
+    selectedItem && this.openSelected(selectedItem);
   }
 
-  private onDidChangeValue(
-    onChangeValueCallback: Function,
-    text: string
-  ): void {
-    onChangeValueCallback(text);
+  private async openSelected(qpItem: QuickPickItem): Promise<void> {
+    const document = await vscode.workspace.openTextDocument(
+      qpItem.uri!.scheme === "file" ? (qpItem.uri!.fsPath as any) : qpItem.uri
+    );
+    const editor = await vscode.window.showTextDocument(document);
+    this.selectQpItem(editor, qpItem);
   }
 
-  private onDidAccept(onSubmitCallback: Function): void {
+  private selectQpItem(editor: vscode.TextEditor, qpItem: QuickPickItem): void {
+    const { range } = qpItem;
+    const start = new vscode.Position(
+      range!.start.line,
+      range!.start.character
+    );
+    editor.selection = new vscode.Selection(start, start);
+
+    editor.revealRange(
+      range as vscode.Range,
+      vscode.TextEditorRevealType.Default
+    );
+  }
+
+  private onDidChangeValue = (text: string): void => {
+    vscode.window.showInformationMessage(`Current text: ${text}`);
+  };
+
+  private onDidAccept = (): void => {
     const selectedItem = this.quickPick.selectedItems[0];
-    this.submit(selectedItem, onSubmitCallback);
-  }
+    this.submit(selectedItem);
+  };
 
-  private onDidHide(): void {
+  private onDidHide = (): void => {
     this.setText("");
-  }
+  };
 }
 
 export default QuickPick;

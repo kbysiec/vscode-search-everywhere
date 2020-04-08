@@ -1,3 +1,4 @@
+import * as vscode from "vscode";
 import { assert } from "chai";
 import * as sinon from "sinon";
 import QuickPick from "../../quickPick";
@@ -7,16 +8,12 @@ import * as mock from "../mock/quickPick.mock";
 describe("QuickPick", () => {
   let quickPick: QuickPick;
   let quickPickAny: any;
-  let onSubmitCallback: sinon.SinonStub;
-  let onChangeValueCallback: sinon.SinonStub;
 
   before(() => {
-    quickPick = new QuickPick(onSubmitCallback, onChangeValueCallback);
+    quickPick = new QuickPick();
   });
 
   beforeEach(() => {
-    onSubmitCallback = sinon.stub();
-    onChangeValueCallback = sinon.stub();
     quickPickAny = quickPick as any;
   });
 
@@ -26,7 +23,7 @@ describe("QuickPick", () => {
 
   describe("constructor", () => {
     it("should quick pick be initialized", () => {
-      quickPick = new QuickPick(onSubmitCallback, onChangeValueCallback);
+      quickPick = new QuickPick();
 
       assert.exists(quickPick);
     });
@@ -67,25 +64,77 @@ describe("QuickPick", () => {
   });
 
   describe("submit", () => {
-    it("should callback be invoked with selected item as argument", () => {
-      quickPickAny.submit(mock.qpItem, onSubmitCallback);
+    it("should openSelected method be invoked with selected item as argument", () => {
+      const openSelectedStub = sinon.stub(quickPickAny, "openSelected");
+      quickPickAny.submit(mock.qpItem);
 
-      assert.equal(onSubmitCallback.calledWith(mock.qpItem), true);
+      assert.equal(openSelectedStub.calledWith(mock.qpItem), true);
     });
 
-    it("should callback not be invoked without selected item as argument", () => {
-      quickPickAny.submit(undefined, onSubmitCallback);
+    it("should openSelected method not be invoked without selected item as argument", () => {
+      const openSelectedStub = sinon.stub(quickPickAny, "openSelected");
+      quickPickAny.submit(undefined);
 
-      assert.equal(onSubmitCallback.calledOnce, false);
+      assert.equal(openSelectedStub.calledOnce, false);
+    });
+  });
+
+  describe("openSelected", () => {
+    let openTextDocumentStub: sinon.SinonStub;
+    let showTextDocumentStub: sinon.SinonStub;
+    let selectQpItemStub: sinon.SinonStub;
+
+    beforeEach(() => {
+      openTextDocumentStub = sinon.stub(vscode.workspace, "openTextDocument");
+      showTextDocumentStub = sinon.stub(vscode.window, "showTextDocument");
+      selectQpItemStub = sinon.stub(quickPickAny, "selectQpItem");
+    });
+
+    it("should open selected qpItem with uri scheme equals to 'file'", async () => {
+      await quickPickAny.openSelected(mock.qpItem);
+
+      assert.equal(openTextDocumentStub.calledOnce, true);
+      assert.equal(showTextDocumentStub.calledOnce, true);
+      assert.equal(selectQpItemStub.calledOnce, true);
+    });
+
+    it("should open selected qpItem with uri scheme equals to 'untitled'", async () => {
+      await quickPickAny.openSelected(mock.qpItemUntitled);
+
+      assert.equal(openTextDocumentStub.calledOnce, true);
+      assert.equal(showTextDocumentStub.calledOnce, true);
+      assert.equal(selectQpItemStub.calledOnce, true);
+    });
+  });
+
+  describe("selectQpItem", () => {
+    it("should editor.revealRange method be called", async () => {
+      const document = await vscode.workspace.openTextDocument(
+        mock.itemUntitledUri
+      );
+      const editor = await vscode.window.showTextDocument(document);
+      const editorRevealRangeStub = sinon.stub(editor, "revealRange");
+      await quickPickAny.selectQpItem(editor, mock.qpItem);
+
+      assert.equal(editorRevealRangeStub.calledOnce, true);
+
+      await vscode.commands.executeCommand(
+        "workbench.action.closeActiveEditor"
+      );
     });
   });
 
   describe("onDidChangeValue", () => {
-    it("should callback be invoked with text as argument", () => {
+    it("should invoke vscode.window.showInformationMessage be invoked with text as argument", () => {
+      const showInformationMessageStub = sinon.stub(
+        vscode.window,
+        "showInformationMessage"
+      );
       const text = "test text";
-      quickPickAny.onDidChangeValue(onChangeValueCallback, text);
+      quickPickAny.onDidChangeValue(text);
 
-      assert.equal(onChangeValueCallback.calledWith(text), true);
+      const expectedText = `Current text: ${text}`;
+      assert.equal(showInformationMessageStub.calledWith(expectedText), true);
     });
   });
 
@@ -93,9 +142,9 @@ describe("QuickPick", () => {
     it("should submit method be invoked with selected item as argument", () => {
       const submitStub = sinon.stub(quickPickAny, "submit");
       quickPickAny.quickPick.selectedItems[0] = mock.qpItem;
-      quickPickAny.onDidAccept(onSubmitCallback);
+      quickPickAny.onDidAccept();
 
-      assert.equal(submitStub.calledWith(mock.qpItem, onSubmitCallback), true);
+      assert.equal(submitStub.calledWith(mock.qpItem), true);
     });
   });
 

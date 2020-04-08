@@ -13,7 +13,7 @@ export function deactivate() {
   console.log('Extension "vscode-search-everywhere" has been deactivated.');
 }
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
   console.log(
     'Congratulations, your extension "vscode-search-everywhere" is now active!'
   );
@@ -32,4 +32,6 @@ export function activate(context: vscode.ExtensionContext) {
       reload.bind(null, extensionController)
     )
   );
+
+  await extensionController.startup();
 }

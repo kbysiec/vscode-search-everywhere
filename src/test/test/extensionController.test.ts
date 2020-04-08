@@ -47,7 +47,7 @@ describe("ExtensionController", () => {
       any folder opened`, async () => {
       const showStub = sinon.stub(extensionControllerAny.quickPick, "show");
       const printNoFolderOpenedMessageStub = sinon.stub(
-        extensionControllerAny,
+        extensionControllerAny.utils,
         "printNoFolderOpenedMessage"
       );
       sinon
@@ -60,14 +60,70 @@ describe("ExtensionController", () => {
     });
   });
 
+  describe("startup", () => {
+    it("should cacheWorkspaceFiles method be invoked", async () => {
+      const cacheWorkspaceFilesStub = sinon.stub(
+        extensionControllerAny,
+        "cacheWorkspaceFiles"
+      );
+      await extensionControllerAny.startup();
+
+      assert.equal(cacheWorkspaceFilesStub.calledOnce, true);
+    });
+  });
+
   describe("loadQuickPickData", () => {
-    it("should load data to quick pick", async () => {
+    it("should load data to quick pick from cache", async () => {
       sinon
-        .stub(extensionControllerAny, "getQuickPickData")
+        .stub(extensionControllerAny, "getQuickPickDataFromCache")
         .returns(Promise.resolve(mock.qpItems));
       await extensionControllerAny.loadQuickPickData();
 
       assert.equal(extensionControllerAny.quickPick.quickPick.items.length, 2);
+    });
+
+    it("should load empty array to quick pick if cache is empty", async () => {
+      sinon
+        .stub(extensionControllerAny, "getQuickPickDataFromCache")
+        .returns(Promise.resolve());
+      await extensionControllerAny.loadQuickPickData();
+
+      assert.equal(extensionControllerAny.quickPick.quickPick.items.length, 0);
+    });
+  });
+
+  describe("cacheWorkspaceFiles", () => {
+    it("should reset cache to initial empty state", async () => {
+      const clearCacheStub = sinon.stub(
+        extensionControllerAny.cache,
+        "clearCache"
+      );
+      await extensionControllerAny.cacheWorkspaceFiles();
+
+      assert.equal(clearCacheStub.calledOnce, true);
+    });
+
+    it("should index all workspace files", async () => {
+      const getQuickPickDataStub = sinon.stub(
+        extensionControllerAny,
+        "getQuickPickData"
+      );
+      await extensionControllerAny.cacheWorkspaceFiles();
+
+      assert.equal(getQuickPickDataStub.calledOnce, true);
+    });
+
+    it("should update cache with indexed workspace files", async () => {
+      const updateDataCacheStub = sinon.stub(
+        extensionControllerAny.cache,
+        "updateDataCache"
+      );
+      sinon
+        .stub(extensionControllerAny, "getQuickPickData")
+        .returns(mock.qpItems);
+      await extensionControllerAny.cacheWorkspaceFiles();
+
+      assert.equal(updateDataCacheStub.calledWith(mock.qpItems), true);
     });
   });
 
@@ -76,69 +132,23 @@ describe("ExtensionController", () => {
       sinon
         .stub(extensionControllerAny.dataService, "getData")
         .returns(Promise.resolve(mock.items));
-      await extensionControllerAny.getQuickPickData();
 
       assert.deepEqual(
-        extensionControllerAny.quickPick.quickPick.items,
+        await extensionControllerAny.getQuickPickData(),
         mock.qpItems
       );
     });
   });
 
-  describe("openSelected", () => {
-    let openTextDocumentStub: sinon.SinonStub;
-    let showTextDocumentStub: sinon.SinonStub;
-    let selectQpItemStub: sinon.SinonStub;
+  describe("getQuickPickDataFromCache", () => {
+    it("should cache.getDataFromCache method be invoked", () => {
+      const getDataFromCacheStub = sinon
+        .stub(extensionControllerAny.cache, "getDataFromCache")
+        .returns(Promise.resolve(mock.items));
 
-    beforeEach(() => {
-      openTextDocumentStub = sinon.stub(vscode.workspace, "openTextDocument");
-      showTextDocumentStub = sinon.stub(vscode.window, "showTextDocument");
-      selectQpItemStub = sinon.stub(extensionControllerAny, "selectQpItem");
-    });
+      extensionControllerAny.getQuickPickDataFromCache();
 
-    it("should open selected qpItem with uri scheme equals to 'file'", async () => {
-      await extensionControllerAny.openSelected(mock.qpItem);
-
-      assert.equal(openTextDocumentStub.calledOnce, true);
-      assert.equal(showTextDocumentStub.calledOnce, true);
-      assert.equal(selectQpItemStub.calledOnce, true);
-    });
-
-    it("should open selected qpItem with uri scheme equals to 'untitled'", async () => {
-      await extensionControllerAny.openSelected(mock.qpItemUntitled);
-
-      assert.equal(openTextDocumentStub.calledOnce, true);
-      assert.equal(showTextDocumentStub.calledOnce, true);
-      assert.equal(selectQpItemStub.calledOnce, true);
-    });
-  });
-
-  describe("selectQpItem", () => {
-    it("should editor.revealRange method be called", async () => {
-      const document = await vscode.workspace.openTextDocument(
-        mock.itemUntitledUri
-      );
-      const editor = await vscode.window.showTextDocument(document);
-      const editorRevealRangeStub = sinon.stub(editor, "revealRange");
-      await extensionControllerAny.selectQpItem(editor, mock.qpItem);
-
-      assert.equal(editorRevealRangeStub.calledOnce, true);
-
-      await vscode.commands.executeCommand(
-        "workbench.action.closeActiveEditor"
-      );
-    });
-  });
-
-  describe("printNoFolderOpenedMessage", () => {
-    it("should display notification", async () => {
-      const showInformationMessageStub = sinon.stub(
-        vscode.window,
-        "showInformationMessage"
-      );
-      extensionControllerAny.printNoFolderOpenedMessage();
-
-      assert.equal(showInformationMessageStub.calledOnce, true);
+      assert.equal(getDataFromCacheStub.calledOnce, true);
     });
   });
 
@@ -150,32 +160,6 @@ describe("ExtensionController", () => {
       assert.equal(typeof extensionControllerAny.dataService, "object");
       assert.equal(typeof extensionControllerAny.utils, "object");
       assert.equal(typeof extensionControllerAny.quickPick, "object");
-    });
-  });
-
-  describe("onQuickPickSubmit", () => {
-    it("should openSelected method be invoked", async () => {
-      const openSelectedStub = sinon.stub(
-        extensionControllerAny,
-        "openSelected"
-      );
-      await extensionControllerAny.onQuickPickSubmit(mock.qpItem);
-
-      assert.equal(openSelectedStub.calledWith(mock.qpItem), true);
-    });
-  });
-
-  describe("onQuickPickChangeValue", () => {
-    it("should vscode.window.showInformationMessage method be invoked", async () => {
-      const showInformationMessageStub = sinon.stub(
-        vscode.window,
-        "showInformationMessage"
-      );
-      const text = "test text";
-      await extensionControllerAny.onQuickPickChangeValue(text);
-
-      const expectedText = `Current text: ${text}`;
-      assert.equal(showInformationMessageStub.calledWith(expectedText), true);
     });
   });
 });

@@ -4,17 +4,17 @@ import QuickPickItem from "./interface/quickPickItem";
 import DataService from "./dataService";
 import Utils from "./utils";
 import Cache from "./cache";
+import DataConverter from "./dataConverter";
 
 class ExtensionController {
   private quickPick!: QuickPick;
   private dataService!: DataService;
+  private dataConverter!: DataConverter;
   private utils!: Utils;
   private cache!: Cache;
 
   constructor(private extensionContext: vscode.ExtensionContext) {
     this.initComponents();
-
-    this.cache.clearCache();
   }
 
   async search(): Promise<void> {
@@ -22,68 +22,44 @@ class ExtensionController {
       await this.loadQuickPickData();
       this.quickPick.show();
     } else {
-      this.printNoFolderOpenedMessage();
+      this.utils.printNoFolderOpenedMessage();
     }
+  }
+
+  async startup(): Promise<void> {
+    await this.cacheWorkspaceFiles();
+  }
+
+  private async cacheWorkspaceFiles(): Promise<void> {
+    this.cache.clearCache();
+    const qpData = await this.getQuickPickData();
+    this.cache.updateDataCache(qpData);
   }
 
   private async loadQuickPickData(): Promise<void> {
     this.quickPick.showLoading(true);
-    const data = await this.getQuickPickData();
+    const data = (await this.getQuickPickDataFromCache()) || [];
     this.quickPick.loadItems(data);
     this.quickPick.showLoading(false);
   }
 
   private async getQuickPickData(): Promise<QuickPickItem[]> {
     const data = await this.dataService.getData();
-    const qpData = this.utils.prepareQpData(data);
+    const qpData = this.dataConverter.prepareQpData(data);
     return qpData;
   }
 
-  private async openSelected(qpItem: QuickPickItem): Promise<void> {
-    const document = await vscode.workspace.openTextDocument(
-      qpItem.uri!.scheme === "file" ? (qpItem.uri!.fsPath as any) : qpItem.uri
-    );
-    const editor = await vscode.window.showTextDocument(document);
-    this.selectQpItem(editor, qpItem);
-  }
-
-  private selectQpItem(editor: vscode.TextEditor, qpItem: QuickPickItem): void {
-    const { range } = qpItem;
-    const start = new vscode.Position(
-      range!.start.line,
-      range!.start.character
-    );
-    editor.selection = new vscode.Selection(start, start);
-
-    editor.revealRange(
-      range as vscode.Range,
-      vscode.TextEditorRevealType.Default
-    );
-  }
-
-  private printNoFolderOpenedMessage(): void {
-    vscode.window.showInformationMessage(
-      "Workspace doesn't contain any folder opened"
-    );
+  private getQuickPickDataFromCache(): QuickPickItem[] | undefined {
+    return this.cache.getDataFromCache();
   }
 
   private initComponents(): void {
     this.cache = new Cache(this.extensionContext);
     this.dataService = new DataService(this.cache);
+    this.dataConverter = new DataConverter();
     this.utils = new Utils();
-    this.quickPick = new QuickPick(
-      this.onQuickPickSubmit,
-      this.onQuickPickChangeValue
-    );
+    this.quickPick = new QuickPick();
   }
-
-  private onQuickPickSubmit = async (qpItem: QuickPickItem): Promise<void> => {
-    await this.openSelected(qpItem);
-  };
-
-  private onQuickPickChangeValue = (text: string): void => {
-    vscode.window.showInformationMessage(`Current text: ${text}`);
-  };
 }
 
 export default ExtensionController;
