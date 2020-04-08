@@ -1,12 +1,27 @@
 import * as vscode from "vscode";
+import Cache from "./cache";
 
 class Config {
+  constructor(private cache: Cache) {}
+
   getExclude(): string[] {
-    return this.getConfigurationByKey<string[]>("exclude", []);
+    const key = "exclude";
+    let value = this.cache.getConfigFromCacheByKey<string[]>(key);
+    if (!value) {
+      value = this.getConfigurationByKey<string[]>(key, []);
+      this.cache.updateConfigCacheByKey(key, value);
+    }
+    return value as string[];
   }
 
   getInclude(): string[] {
-    return this.getConfigurationByKey<string[]>("include", []);
+    const key = "include";
+    let value = this.cache.getConfigFromCacheByKey<string[]>(key);
+    if (!value) {
+      value = this.getConfigurationByKey<string[]>(key, []);
+      this.cache.updateConfigCacheByKey(key, value);
+    }
+    return value as string[];
   }
 
   private getConfigurationByKey<T>(key: string, defaultValue: T): T {

@@ -1,11 +1,12 @@
 import * as vscode from "vscode";
 import Config from "./config";
+import Cache from "./cache";
 
 class DataService {
   private config: Config;
 
-  constructor() {
-    this.config = new Config();
+  constructor(cache: Cache) {
+    this.config = new Config(cache);
   }
 
   async getData(): Promise<vscode.Uri[]> {

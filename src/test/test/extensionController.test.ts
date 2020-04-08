@@ -146,6 +146,7 @@ describe("ExtensionController", () => {
     it("should init components", async () => {
       extensionControllerAny.initComponents();
 
+      assert.equal(typeof extensionControllerAny.cache, "object");
       assert.equal(typeof extensionControllerAny.dataService, "object");
       assert.equal(typeof extensionControllerAny.utils, "object");
       assert.equal(typeof extensionControllerAny.quickPick, "object");

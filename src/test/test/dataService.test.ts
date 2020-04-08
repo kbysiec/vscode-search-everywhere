@@ -3,13 +3,17 @@ import { assert } from "chai";
 import * as sinon from "sinon";
 import DataService from "../../dataService";
 import * as mock from "../mock/dataService.mock";
+import { getCacheStub } from "../util/mockFactory";
+import Cache from "../../cache";
 
 describe("DataService", () => {
   let dataService: DataService;
   let dataServiceAny: any;
+  let cacheStub: Cache;
 
   before(() => {
-    dataService = new DataService();
+    cacheStub = getCacheStub();
+    dataService = new DataService(cacheStub);
   });
 
   beforeEach(() => {
@@ -22,7 +26,7 @@ describe("DataService", () => {
 
   describe("constructor", () => {
     it("should data service be initialized", () => {
-      dataService = new DataService();
+      dataService = new DataService(cacheStub);
 
       assert.exists(dataService);
     });

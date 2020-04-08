@@ -3,14 +3,18 @@ import QuickPick from "./quickPick";
 import QuickPickItem from "./interface/quickPickItem";
 import DataService from "./dataService";
 import Utils from "./utils";
+import Cache from "./cache";
 
 class ExtensionController {
   private quickPick!: QuickPick;
   private dataService!: DataService;
   private utils!: Utils;
+  private cache!: Cache;
 
   constructor(private extensionContext: vscode.ExtensionContext) {
     this.initComponents();
+
+    this.cache.clearCache();
   }
 
   async search(): Promise<void> {
@@ -64,7 +68,8 @@ class ExtensionController {
   }
 
   private initComponents(): void {
-    this.dataService = new DataService();
+    this.cache = new Cache(this.extensionContext);
+    this.dataService = new DataService(this.cache);
     this.utils = new Utils();
     this.quickPick = new QuickPick(
       this.onQuickPickSubmit,
