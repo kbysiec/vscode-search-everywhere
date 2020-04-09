@@ -27,23 +27,23 @@ describe("Cache", () => {
     updateStub.resetHistory();
   });
 
-  describe("getDataFromCache", () => {
+  describe("getData", () => {
     it("should return array of indexed symbols and files from cache", () => {
       sinon.stub(context.workspaceState, "get").returns(mock.qpItems);
 
-      assert.deepEqual(cache.getDataFromCache(), mock.qpItems);
+      assert.deepEqual(cache.getData(), mock.qpItems);
     });
 
     it("should return empty array if cache is undefined", () => {
       sinon.stub(context.workspaceState, "get").returns(undefined);
 
-      assert.deepEqual(cache.getDataFromCache(), []);
+      assert.deepEqual(cache.getData(), []);
     });
   });
 
-  describe("updateDataCache", () => {
+  describe("updateData", () => {
     it("should update cache with new array", () => {
-      cache.updateDataCache(mock.qpItems);
+      cache.updateData(mock.qpItems);
 
       assert.equal(
         updateStub.calledWith(appConfig.dataCacheKey, mock.qpItems),
@@ -52,7 +52,7 @@ describe("Cache", () => {
     });
   });
 
-  describe("getConfigFromCacheByKey", () => {
+  describe("getConfigByKey", () => {
     it("should return config value from cache", () => {
       const key = "searchEverywhere.exclude";
       sinon
@@ -60,7 +60,7 @@ describe("Cache", () => {
         .returns({ [key]: mock.configuration[key] });
 
       assert.deepEqual(
-        cache.getConfigFromCacheByKey<string[]>(key),
+        cache.getConfigByKey<string[]>(key),
         mock.configuration[key]
       );
     });
@@ -69,11 +69,11 @@ describe("Cache", () => {
       const key = "searchEverywhere.exclude";
       sinon.stub(context.workspaceState, "get").returns(undefined);
 
-      assert.equal(cache.getConfigFromCacheByKey<string[]>(key), undefined);
+      assert.equal(cache.getConfigByKey<string[]>(key), undefined);
     });
   });
 
-  describe("updateConfigCacheByKey", () => {
+  describe("updateConfigByKey", () => {
     it("should update config value in cache if cache object exists", () => {
       const key = "searchEverywhere.exclude";
       const newExcludePatterns = ["**/node_modules/**", ".gitignore"];
@@ -82,7 +82,7 @@ describe("Cache", () => {
         ...mock.configuration,
         ...{ [key]: newExcludePatterns },
       };
-      cache.updateConfigCacheByKey(key, newExcludePatterns);
+      cache.updateConfigByKey(key, newExcludePatterns);
 
       assert.equal(
         updateStub.calledWith(appConfig.configCacheKey, newConfig),
@@ -91,11 +91,11 @@ describe("Cache", () => {
     });
   });
 
-  describe("updateConfigCacheByKey", () => {
+  describe("updateConfigByKey", () => {
     it("should update config value in cache if cache object exists", () => {
       const key = "searchEverywhere.exclude";
       sinon.stub(context.workspaceState, "get").returns(mock.configuration);
-      cache.updateConfigCacheByKey(key, mock.newExcludePatterns);
+      cache.updateConfigByKey(key, mock.newExcludePatterns);
 
       assert.equal(
         updateStub.calledWith(appConfig.configCacheKey, mock.newConfiguration),
@@ -106,7 +106,7 @@ describe("Cache", () => {
     it("should create cache object if it does not exist and set config value", () => {
       const key = "searchEverywhere.exclude";
       sinon.stub(context.workspaceState, "get").returns(undefined);
-      cache.updateConfigCacheByKey(key, mock.newExcludePatterns);
+      cache.updateConfigByKey(key, mock.newExcludePatterns);
 
       assert.equal(
         updateStub.calledWith(appConfig.configCacheKey, mock.newConfiguration),
@@ -115,9 +115,9 @@ describe("Cache", () => {
     });
   });
 
-  describe("clearCache", () => {
+  describe("clear", () => {
     it("should remove all values from cache", () => {
-      cache.clearCache();
+      cache.clear();
 
       assert.equal(updateStub.calledTwice, true);
     });

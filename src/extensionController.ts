@@ -31,9 +31,9 @@ class ExtensionController {
   }
 
   private async cacheWorkspaceFiles(): Promise<void> {
-    this.cache.clearCache();
+    this.cache.clear();
     const qpData = await this.getQuickPickData();
-    this.cache.updateDataCache(qpData);
+    this.cache.updateData(qpData);
   }
 
   private async loadQuickPickData(): Promise<void> {
@@ -50,7 +50,7 @@ class ExtensionController {
   }
 
   private getQuickPickDataFromCache(): QuickPickItem[] | undefined {
-    return this.cache.getDataFromCache();
+    return this.cache.getData();
   }
 
   private initComponents(): void {

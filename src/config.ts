@@ -6,20 +6,20 @@ class Config {
 
   getExclude(): string[] {
     const key = "exclude";
-    let value = this.cache.getConfigFromCacheByKey<string[]>(key);
+    let value = this.cache.getConfigByKey<string[]>(key);
     if (!value) {
       value = this.getConfigurationByKey<string[]>(key, []);
-      this.cache.updateConfigCacheByKey(key, value);
+      this.cache.updateConfigByKey(key, value);
     }
     return value as string[];
   }
 
   getInclude(): string[] {
     const key = "include";
-    let value = this.cache.getConfigFromCacheByKey<string[]>(key);
+    let value = this.cache.getConfigByKey<string[]>(key);
     if (!value) {
       value = this.getConfigurationByKey<string[]>(key, []);
-      this.cache.updateConfigCacheByKey(key, value);
+      this.cache.updateConfigByKey(key, value);
     }
     return value as string[];
   }

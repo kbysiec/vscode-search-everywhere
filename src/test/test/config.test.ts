@@ -52,7 +52,7 @@ describe("Config", () => {
       const section = "searchEverywhere";
       const key = "exclude";
       const value = mock.configuration[section][key];
-      sinon.stub(configAny.cache, "getConfigFromCacheByKey").returns(value);
+      sinon.stub(configAny.cache, "getConfigByKey").returns(value);
 
       assert.equal(config.getExclude(), value);
     });
@@ -70,7 +70,7 @@ describe("Config", () => {
       const section = "searchEverywhere";
       const key = "include";
       const value = mock.configuration[section][key];
-      sinon.stub(configAny.cache, "getConfigFromCacheByKey").returns(value);
+      sinon.stub(configAny.cache, "getConfigByKey").returns(value);
 
       assert.equal(config.getInclude(), value);
     });

@@ -94,13 +94,10 @@ describe("ExtensionController", () => {
 
   describe("cacheWorkspaceFiles", () => {
     it("should reset cache to initial empty state", async () => {
-      const clearCacheStub = sinon.stub(
-        extensionControllerAny.cache,
-        "clearCache"
-      );
+      const clearStub = sinon.stub(extensionControllerAny.cache, "clear");
       await extensionControllerAny.cacheWorkspaceFiles();
 
-      assert.equal(clearCacheStub.calledOnce, true);
+      assert.equal(clearStub.calledOnce, true);
     });
 
     it("should index all workspace files", async () => {
@@ -114,16 +111,16 @@ describe("ExtensionController", () => {
     });
 
     it("should update cache with indexed workspace files", async () => {
-      const updateDataCacheStub = sinon.stub(
+      const updateDataStub = sinon.stub(
         extensionControllerAny.cache,
-        "updateDataCache"
+        "updateData"
       );
       sinon
         .stub(extensionControllerAny, "getQuickPickData")
         .returns(mock.qpItems);
       await extensionControllerAny.cacheWorkspaceFiles();
 
-      assert.equal(updateDataCacheStub.calledWith(mock.qpItems), true);
+      assert.equal(updateDataStub.calledWith(mock.qpItems), true);
     });
   });
 
@@ -141,14 +138,14 @@ describe("ExtensionController", () => {
   });
 
   describe("getQuickPickDataFromCache", () => {
-    it("should cache.getDataFromCache method be invoked", () => {
-      const getDataFromCacheStub = sinon
-        .stub(extensionControllerAny.cache, "getDataFromCache")
+    it("should cache.getData method be invoked", () => {
+      const getDataStub = sinon
+        .stub(extensionControllerAny.cache, "getData")
         .returns(Promise.resolve(mock.items));
 
       extensionControllerAny.getQuickPickDataFromCache();
 
-      assert.equal(getDataFromCacheStub.calledOnce, true);
+      assert.equal(getDataStub.calledOnce, true);
     });
   });
 

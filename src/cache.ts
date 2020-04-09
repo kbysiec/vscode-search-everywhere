@@ -5,7 +5,7 @@ import { appConfig } from "./appConfig";
 class Cache {
   constructor(private extensionContext: vscode.ExtensionContext) {}
 
-  getDataFromCache(): QuickPickItem[] | undefined {
+  getData(): QuickPickItem[] | undefined {
     const cache: any = this.extensionContext.workspaceState.get(
       appConfig.dataCacheKey
     );
@@ -16,11 +16,11 @@ class Cache {
     return data;
   }
 
-  updateDataCache(data: QuickPickItem[]): void {
+  updateData(data: QuickPickItem[]): void {
     this.extensionContext.workspaceState.update(appConfig.dataCacheKey, data);
   }
 
-  getConfigFromCacheByKey<T>(key: string): T | undefined {
+  getConfigByKey<T>(key: string): T | undefined {
     const cache: any = this.extensionContext.workspaceState.get(
       appConfig.configCacheKey
     );
@@ -31,7 +31,7 @@ class Cache {
     return config;
   }
 
-  updateConfigCacheByKey<T>(key: string, value: T): void {
+  updateConfigByKey<T>(key: string, value: T): void {
     let cache: any = this.extensionContext.workspaceState.get(
       appConfig.dataCacheKey
     );
@@ -45,7 +45,7 @@ class Cache {
     );
   }
 
-  clearCache(): void {
+  clear(): void {
     this.extensionContext.workspaceState.update(appConfig.dataCacheKey, []);
     this.extensionContext.workspaceState.update(appConfig.configCacheKey, {});
   }
