@@ -63,7 +63,7 @@ describe("ExtensionController", () => {
   describe("startup", () => {
     it("should cacheWorkspaceFiles method be invoked", async () => {
       const cacheWorkspaceFilesStub = sinon.stub(
-        extensionControllerAny,
+        extensionControllerAny.workspace,
         "cacheWorkspaceFiles"
       );
       await extensionControllerAny.startup();
@@ -75,7 +75,7 @@ describe("ExtensionController", () => {
   describe("loadQuickPickData", () => {
     it("should load data to quick pick from cache", async () => {
       sinon
-        .stub(extensionControllerAny, "getQuickPickDataFromCache")
+        .stub(extensionControllerAny.workspace, "getQuickPickDataFromCache")
         .returns(Promise.resolve(mock.qpItems));
       await extensionControllerAny.loadQuickPickData();
 
@@ -84,68 +84,11 @@ describe("ExtensionController", () => {
 
     it("should load empty array to quick pick if cache is empty", async () => {
       sinon
-        .stub(extensionControllerAny, "getQuickPickDataFromCache")
+        .stub(extensionControllerAny.workspace, "getQuickPickDataFromCache")
         .returns(Promise.resolve());
       await extensionControllerAny.loadQuickPickData();
 
       assert.equal(extensionControllerAny.quickPick.quickPick.items.length, 0);
-    });
-  });
-
-  describe("cacheWorkspaceFiles", () => {
-    it("should reset cache to initial empty state", async () => {
-      const clearStub = sinon.stub(extensionControllerAny.cache, "clear");
-      await extensionControllerAny.cacheWorkspaceFiles();
-
-      assert.equal(clearStub.calledOnce, true);
-    });
-
-    it("should index all workspace files", async () => {
-      const getQuickPickDataStub = sinon.stub(
-        extensionControllerAny,
-        "getQuickPickData"
-      );
-      await extensionControllerAny.cacheWorkspaceFiles();
-
-      assert.equal(getQuickPickDataStub.calledOnce, true);
-    });
-
-    it("should update cache with indexed workspace files", async () => {
-      const updateDataStub = sinon.stub(
-        extensionControllerAny.cache,
-        "updateData"
-      );
-      sinon
-        .stub(extensionControllerAny, "getQuickPickData")
-        .returns(mock.qpItems);
-      await extensionControllerAny.cacheWorkspaceFiles();
-
-      assert.equal(updateDataStub.calledWith(mock.qpItems), true);
-    });
-  });
-
-  describe("getQuickPickData", () => {
-    it("should return data for quick pick", async () => {
-      sinon
-        .stub(extensionControllerAny.dataService, "getData")
-        .returns(Promise.resolve(mock.items));
-
-      assert.deepEqual(
-        await extensionControllerAny.getQuickPickData(),
-        mock.qpItems
-      );
-    });
-  });
-
-  describe("getQuickPickDataFromCache", () => {
-    it("should cache.getData method be invoked", () => {
-      const getDataStub = sinon
-        .stub(extensionControllerAny.cache, "getData")
-        .returns(Promise.resolve(mock.items));
-
-      extensionControllerAny.getQuickPickDataFromCache();
-
-      assert.equal(getDataStub.calledOnce, true);
     });
   });
 
@@ -154,8 +97,8 @@ describe("ExtensionController", () => {
       extensionControllerAny.initComponents();
 
       assert.equal(typeof extensionControllerAny.cache, "object");
-      assert.equal(typeof extensionControllerAny.dataService, "object");
       assert.equal(typeof extensionControllerAny.utils, "object");
+      assert.equal(typeof extensionControllerAny.workspace, "object");
       assert.equal(typeof extensionControllerAny.quickPick, "object");
     });
   });

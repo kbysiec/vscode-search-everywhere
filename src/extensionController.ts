@@ -5,13 +5,13 @@ import DataService from "./dataService";
 import Utils from "./utils";
 import Cache from "./cache";
 import DataConverter from "./dataConverter";
+import Workspace from "./workspace";
 
 class ExtensionController {
   private quickPick!: QuickPick;
-  private dataService!: DataService;
-  private dataConverter!: DataConverter;
   private utils!: Utils;
   private cache!: Cache;
+  private workspace!: Workspace;
 
   constructor(private extensionContext: vscode.ExtensionContext) {
     this.initComponents();
@@ -27,37 +27,20 @@ class ExtensionController {
   }
 
   async startup(): Promise<void> {
-    await this.cacheWorkspaceFiles();
-  }
-
-  private async cacheWorkspaceFiles(): Promise<void> {
-    this.cache.clear();
-    const qpData = await this.getQuickPickData();
-    this.cache.updateData(qpData);
+    await this.workspace.cacheWorkspaceFiles();
   }
 
   private async loadQuickPickData(): Promise<void> {
     this.quickPick.showLoading(true);
-    const data = (await this.getQuickPickDataFromCache()) || [];
+    const data = (await this.workspace.getQuickPickDataFromCache()) || [];
     this.quickPick.loadItems(data);
     this.quickPick.showLoading(false);
   }
 
-  private async getQuickPickData(): Promise<QuickPickItem[]> {
-    const data = await this.dataService.getData();
-    const qpData = this.dataConverter.prepareQpData(data);
-    return qpData;
-  }
-
-  private getQuickPickDataFromCache(): QuickPickItem[] | undefined {
-    return this.cache.getData();
-  }
-
   private initComponents(): void {
     this.cache = new Cache(this.extensionContext);
-    this.dataService = new DataService(this.cache);
-    this.dataConverter = new DataConverter();
     this.utils = new Utils();
+    this.workspace = new Workspace(this.cache);
     this.quickPick = new QuickPick();
   }
 }
