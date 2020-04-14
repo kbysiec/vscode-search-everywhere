@@ -9,7 +9,7 @@ class Workspace {
   private dataService: DataService;
   private dataConverter: DataConverter;
 
-  constructor(private cache: Cache) {
+  constructor(private cache: Cache, private utils: Utils) {
     this.dataService = new DataService(this.cache);
     this.dataConverter = new DataConverter();
   }
@@ -18,6 +18,10 @@ class Workspace {
     this.cache.clear();
     const qpData = await this.getQuickPickData();
     this.cache.updateData(qpData);
+  }
+
+  async registerEventListeners(): Promise<void> {
+    vscode.workspace.onDidChangeConfiguration(this.onDidChangeConfiguration);
   }
 
   getQuickPickDataFromCache(): QuickPickItem[] | undefined {
@@ -29,6 +33,14 @@ class Workspace {
     const qpData = this.dataConverter.prepareQpData(data);
     return qpData;
   }
+
+  private onDidChangeConfiguration = async (
+    event: vscode.ConfigurationChangeEvent
+  ): Promise<void> => {
+    if (this.utils.hasConfigurationChanged(event)) {
+      await this.cacheWorkspaceFiles();
+    }
+  };
 }
 
 export default Workspace;

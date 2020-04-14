@@ -1,20 +1,18 @@
 import * as vscode from "vscode";
 import QuickPick from "./quickPick";
-import QuickPickItem from "./interface/quickPickItem";
-import DataService from "./dataService";
 import Utils from "./utils";
 import Cache from "./cache";
-import DataConverter from "./dataConverter";
 import Workspace from "./workspace";
 
 class ExtensionController {
-  private quickPick!: QuickPick;
   private utils!: Utils;
   private cache!: Cache;
   private workspace!: Workspace;
+  private quickPick!: QuickPick;
 
   constructor(private extensionContext: vscode.ExtensionContext) {
     this.initComponents();
+    this.workspace.registerEventListeners();
   }
 
   async search(): Promise<void> {
@@ -40,7 +38,7 @@ class ExtensionController {
   private initComponents(): void {
     this.cache = new Cache(this.extensionContext);
     this.utils = new Utils();
-    this.workspace = new Workspace(this.cache);
+    this.workspace = new Workspace(this.cache, this.utils);
     this.quickPick = new QuickPick();
   }
 }

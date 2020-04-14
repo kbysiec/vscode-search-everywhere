@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import * as sinon from "sinon";
 import Cache from "../../cache";
+import Utils from "../../utils";
 
 export function getExtensionContext(): vscode.ExtensionContext {
   return {
@@ -25,4 +26,8 @@ export function getCacheStub(): Cache {
   const cacheStubTemp: any = sinon.createStubInstance(Cache);
   cacheStubTemp.extensionContext = getExtensionContext();
   return cacheStubTemp as Cache;
+}
+
+export function getUtilsStub(): Utils {
+  return sinon.createStubInstance(Utils);
 }

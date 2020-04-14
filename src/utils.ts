@@ -8,6 +8,10 @@ class Utils {
     );
   }
 
+  hasConfigurationChanged(event: vscode.ConfigurationChangeEvent): boolean {
+    return event.affectsConfiguration("searchEverywhere");
+  }
+
   printNoFolderOpenedMessage(): void {
     vscode.window.showInformationMessage(
       "Workspace doesn't contain any folder opened"

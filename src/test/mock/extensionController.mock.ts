@@ -1,16 +1,6 @@
 import * as vscode from "vscode";
 import QuickPickItem from "../../interface/quickPickItem";
 
-export const qpItem: QuickPickItem = {
-  label: "fake-1.ts",
-  uri: vscode.Uri.file("./fake/fake-1.ts"),
-  symbolKind: 0,
-  range: {
-    start: new vscode.Position(0, 0),
-    end: new vscode.Position(0, 0),
-  },
-};
-
 const qpItems: QuickPickItem[] = [
   {
     label: "fake-1.ts",
@@ -41,8 +31,3 @@ qpItems.forEach((qpItem: any) => {
   qpItem.detail = qpItem.uri.fsPath;
 });
 export { qpItems };
-
-export const items: vscode.Uri[] = [
-  "./fake/fake-1.ts",
-  "./fake/fake-2.ts",
-].map((path: string) => vscode.Uri.file(path));

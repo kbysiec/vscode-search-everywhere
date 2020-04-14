@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { assert } from "chai";
 import * as sinon from "sinon";
 import Utils from "../../utils";
+import * as mock from "../mock/utils.mock";
 
 describe("Utils", () => {
   let utils: Utils;
@@ -25,6 +26,22 @@ describe("Utils", () => {
       sinon.stub(vscode.workspace, "workspaceFolders").value([]);
 
       assert.equal(utils.hasWorkspaceAnyFolder(), false);
+    });
+  });
+
+  describe("hasConfigurationChanged", () => {
+    it("should return true if extension configuration has changed", () => {
+      assert.equal(
+        utils.hasConfigurationChanged(mock.getConfigurationChangeEvent(true)),
+        true
+      );
+    });
+
+    it("should return false if extension configuration has not changed", () => {
+      assert.equal(
+        utils.hasConfigurationChanged(mock.getConfigurationChangeEvent(false)),
+        false
+      );
     });
   });
 

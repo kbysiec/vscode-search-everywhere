@@ -36,3 +36,7 @@ export const items: vscode.Uri[] = [
   "./fake/fake-1.ts",
   "./fake/fake-2.ts",
 ].map((path: string) => vscode.Uri.file(path));
+
+export const configurationChangeEvent = {
+  affectsConfiguration: () => true,
+};
