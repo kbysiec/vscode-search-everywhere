@@ -61,21 +61,21 @@ describe("ExtensionController", () => {
   });
 
   describe("startup", () => {
-    it("should cacheWorkspaceFiles method be invoked", async () => {
-      const cacheWorkspaceFilesStub = sinon.stub(
+    it("should indexWorkspace method be invoked", async () => {
+      const indexWorkspaceStub = sinon.stub(
         extensionControllerAny.workspace,
-        "cacheWorkspaceFiles"
+        "indexWorkspace"
       );
       await extensionControllerAny.startup();
 
-      assert.equal(cacheWorkspaceFilesStub.calledOnce, true);
+      assert.equal(indexWorkspaceStub.calledOnce, true);
     });
   });
 
   describe("loadQuickPickData", () => {
     it("should load data to quick pick from cache", async () => {
       sinon
-        .stub(extensionControllerAny.workspace, "getQuickPickDataFromCache")
+        .stub(extensionControllerAny.workspace, "getData")
         .returns(Promise.resolve(mock.qpItems));
       await extensionControllerAny.loadQuickPickData();
 
@@ -84,7 +84,7 @@ describe("ExtensionController", () => {
 
     it("should load empty array to quick pick if cache is empty", async () => {
       sinon
-        .stub(extensionControllerAny.workspace, "getQuickPickDataFromCache")
+        .stub(extensionControllerAny.workspace, "getData")
         .returns(Promise.resolve());
       await extensionControllerAny.loadQuickPickData();
 

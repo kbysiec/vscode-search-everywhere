@@ -14,9 +14,9 @@ class Workspace {
     this.dataConverter = new DataConverter();
   }
 
-  async cacheWorkspaceFiles(): Promise<void> {
+  async indexWorkspace(): Promise<void> {
     this.cache.clear();
-    const qpData = await this.getQuickPickData();
+    const qpData = await this.downloadData();
     this.cache.updateData(qpData);
   }
 
@@ -27,13 +27,13 @@ class Workspace {
     );
   }
 
-  getQuickPickDataFromCache(): QuickPickItem[] | undefined {
+  getData(): QuickPickItem[] | undefined {
     return this.cache.getData();
   }
 
-  private async getQuickPickData(): Promise<QuickPickItem[]> {
-    const data = await this.dataService.getData();
-    const qpData = this.dataConverter.prepareQpData(data);
+  private async downloadData(): Promise<QuickPickItem[]> {
+    const data = await this.dataService.fetchData();
+    const qpData = this.dataConverter.convertToQpData(data);
     return qpData;
   }
 
@@ -41,7 +41,7 @@ class Workspace {
     event: vscode.ConfigurationChangeEvent
   ): Promise<void> => {
     if (this.utils.hasConfigurationChanged(event)) {
-      await this.cacheWorkspaceFiles();
+      await this.indexWorkspace();
     }
   };
 
@@ -49,7 +49,7 @@ class Workspace {
     event: vscode.WorkspaceFoldersChangeEvent
   ): Promise<void> => {
     if (this.utils.hasWorkspaceChanged(event)) {
-      await this.cacheWorkspaceFiles();
+      await this.indexWorkspace();
     }
   };
 }

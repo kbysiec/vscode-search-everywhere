@@ -9,7 +9,7 @@ class DataService {
     this.config = new Config(cache);
   }
 
-  async getData(): Promise<vscode.Uri[]> {
+  async fetchData(): Promise<vscode.Uri[]> {
     const includePatterns = this.getIncludePatterns();
     const excludePatterns = this.getExcludePatterns();
     const files = await vscode.workspace.findFiles(

@@ -32,12 +32,12 @@ describe("DataService", () => {
     });
   });
 
-  describe("getData", () => {
+  describe("fetchData", () => {
     it("should return vscode.Uri[] containing workspace data", async () => {
       sinon
         .stub(vscode.workspace, "findFiles")
         .returns(Promise.resolve(mock.items));
-      const items = await dataService.getData();
+      const items = await dataService.fetchData();
 
       assert.equal(items.length, 2);
     });

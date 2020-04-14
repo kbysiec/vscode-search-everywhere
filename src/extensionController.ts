@@ -25,12 +25,12 @@ class ExtensionController {
   }
 
   async startup(): Promise<void> {
-    await this.workspace.cacheWorkspaceFiles();
+    await this.workspace.indexWorkspace();
   }
 
   private async loadQuickPickData(): Promise<void> {
     this.quickPick.showLoading(true);
-    const data = (await this.workspace.getQuickPickDataFromCache()) || [];
+    const data = (await this.workspace.getData()) || [];
     this.quickPick.loadItems(data);
     this.quickPick.showLoading(false);
   }

@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import QuickPickItem from "./interface/quickPickItem";
 
 class DataConverter {
-  prepareQpData(data: vscode.Uri[]): QuickPickItem[] {
+  convertToQpData(data: vscode.Uri[]): QuickPickItem[] {
     return this.mapDataToQpData(data);
   }
 

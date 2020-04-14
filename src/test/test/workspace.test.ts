@@ -40,25 +40,25 @@ describe("Workspace", () => {
     });
   });
 
-  describe("cacheWorkspaceFiles", () => {
+  describe("indexWorkspace", () => {
     it("should reset cache to initial empty state", async () => {
       const clearStub = sinon.stub(workspaceAny.cache, "clear");
-      await workspace.cacheWorkspaceFiles();
+      await workspace.indexWorkspace();
 
       assert.equal(clearStub.calledOnce, true);
     });
 
     it("should index all workspace files", async () => {
-      const getQuickPickDataStub = sinon.stub(workspaceAny, "getQuickPickData");
-      await workspace.cacheWorkspaceFiles();
+      const downloadDataStub = sinon.stub(workspaceAny, "downloadData");
+      await workspace.indexWorkspace();
 
-      assert.equal(getQuickPickDataStub.calledOnce, true);
+      assert.equal(downloadDataStub.calledOnce, true);
     });
 
     it("should update cache with indexed workspace files", async () => {
       const updateDataStub = sinon.stub(workspaceAny.cache, "updateData");
-      sinon.stub(workspaceAny, "getQuickPickData").returns(mock.qpItems);
-      await workspace.cacheWorkspaceFiles();
+      sinon.stub(workspaceAny, "downloadData").returns(mock.qpItems);
+      await workspace.indexWorkspace();
 
       assert.equal(updateDataStub.calledWith(mock.qpItems), true);
     });
@@ -81,81 +81,69 @@ describe("Workspace", () => {
     });
   });
 
-  describe("getQuickPickDataFromCache", () => {
+  describe("getData", () => {
     it("should cache.getData method be invoked", () => {
       const getDataStub = sinon
         .stub(workspaceAny.cache, "getData")
         .returns(Promise.resolve(mock.items));
 
-      workspace.getQuickPickDataFromCache();
+      workspace.getData();
 
       assert.equal(getDataStub.calledOnce, true);
     });
   });
 
-  describe("getQuickPickData", () => {
+  describe("downloadData", () => {
     it("should return data for quick pick", async () => {
       sinon
-        .stub(workspaceAny.dataService, "getData")
+        .stub(workspaceAny.dataService, "fetchData")
         .returns(Promise.resolve(mock.items));
 
-      assert.deepEqual(await workspaceAny.getQuickPickData(), mock.qpItems);
+      assert.deepEqual(await workspaceAny.downloadData(), mock.qpItems);
     });
   });
 
   describe("onDidChangeConfiguration", () => {
     it("should reindex workspace if extension configuration has changed", async () => {
       sinon.stub(workspaceAny.utils, "hasConfigurationChanged").returns(true);
-      const cacheWorkspaceFilesStub = sinon.stub(
-        workspaceAny,
-        "cacheWorkspaceFiles"
-      );
+      const indexWorkspaceStub = sinon.stub(workspaceAny, "indexWorkspace");
       await workspaceAny.onDidChangeConfiguration(
         getConfigurationChangeEvent(true)
       );
 
-      assert.equal(cacheWorkspaceFilesStub.calledOnce, true);
+      assert.equal(indexWorkspaceStub.calledOnce, true);
     });
 
     it("should do nothing if extension configuration has not changed", async () => {
       sinon.stub(workspaceAny.utils, "hasConfigurationChanged").returns(false);
-      const cacheWorkspaceFilesStub = sinon.stub(
-        workspaceAny,
-        "cacheWorkspaceFiles"
-      );
+      const indexWorkspaceStub = sinon.stub(workspaceAny, "indexWorkspace");
       await workspaceAny.onDidChangeConfiguration(
         getConfigurationChangeEvent(false)
       );
 
-      assert.equal(cacheWorkspaceFilesStub.calledOnce, false);
+      assert.equal(indexWorkspaceStub.calledOnce, false);
     });
   });
 
   describe("onDidChangeWorkspaceFolders", () => {
     it("should reindex workspace if amount of opened folders in workspace has changed", async () => {
       sinon.stub(workspaceAny.utils, "hasWorkspaceChanged").returns(true);
-      const cacheWorkspaceFilesStub = sinon.stub(
-        workspaceAny,
-        "cacheWorkspaceFiles"
-      );
+      const indexWorkspaceStub = sinon.stub(workspaceAny, "indexWorkspace");
       await workspaceAny.onDidChangeWorkspaceFolders(
         getWorkspaceFoldersChangeEvent(true)
       );
 
-      assert.equal(cacheWorkspaceFilesStub.calledOnce, true);
+      assert.equal(indexWorkspaceStub.calledOnce, true);
     });
 
     it("should do nothing if extension configuration has not changed", async () => {
       sinon.stub(workspaceAny.utils, "hasWorkspaceChanged").returns(false);
-      const cacheWorkspaceFilesStub = sinon.stub(
-        workspaceAny,
-        "cacheWorkspaceFiles"
-      );
+      const indexWorkspaceStub = sinon.stub(workspaceAny, "indexWorkspace");
       await workspaceAny.onDidChangeWorkspaceFolders(
         getWorkspaceFoldersChangeEvent(false)
       );
 
-      assert.equal(cacheWorkspaceFilesStub.calledOnce, false);
+      assert.equal(indexWorkspaceStub.calledOnce, false);
     });
   });
 });

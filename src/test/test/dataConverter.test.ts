@@ -21,13 +21,13 @@ describe("DataConverter", () => {
     sinon.restore();
   });
 
-  describe("prepareQpData", () => {
+  describe("convertToQpData", () => {
     it("should return quick pick data", () => {
-      assert.deepEqual(dataConverter.prepareQpData(mock.items), mock.qpItems);
+      assert.deepEqual(dataConverter.convertToQpData(mock.items), mock.qpItems);
     });
 
     it("should return empty array", () => {
-      assert.deepEqual(dataConverter.prepareQpData([]), []);
+      assert.deepEqual(dataConverter.convertToQpData([]), []);
     });
   });
 
