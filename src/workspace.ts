@@ -22,6 +22,9 @@ class Workspace {
 
   async registerEventListeners(): Promise<void> {
     vscode.workspace.onDidChangeConfiguration(this.onDidChangeConfiguration);
+    vscode.workspace.onDidChangeWorkspaceFolders(
+      this.onDidChangeWorkspaceFolders
+    );
   }
 
   getQuickPickDataFromCache(): QuickPickItem[] | undefined {
@@ -38,6 +41,14 @@ class Workspace {
     event: vscode.ConfigurationChangeEvent
   ): Promise<void> => {
     if (this.utils.hasConfigurationChanged(event)) {
+      await this.cacheWorkspaceFiles();
+    }
+  };
+
+  private onDidChangeWorkspaceFolders = async (
+    event: vscode.WorkspaceFoldersChangeEvent
+  ): Promise<void> => {
+    if (this.utils.hasWorkspaceChanged(event)) {
       await this.cacheWorkspaceFiles();
     }
   };

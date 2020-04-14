@@ -31,3 +31,25 @@ export function getCacheStub(): Cache {
 export function getUtilsStub(): Utils {
   return sinon.createStubInstance(Utils);
 }
+
+export const getWorkspaceFoldersChangeEvent = (flag: boolean) => {
+  return flag
+    ? {
+        added: [
+          {
+            uri: vscode.Uri.file("#"),
+            name: "test workspace folder",
+            index: 1,
+          },
+        ],
+        removed: [],
+      }
+    : {
+        added: [],
+        removed: [],
+      };
+};
+
+export const getConfigurationChangeEvent = (flag: boolean) => ({
+  affectsConfiguration: () => flag,
+});

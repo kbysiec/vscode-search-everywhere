@@ -8,6 +8,10 @@ class Utils {
     );
   }
 
+  hasWorkspaceChanged(event: vscode.WorkspaceFoldersChangeEvent): boolean {
+    return !!event.added.length || !!event.removed.length;
+  }
+
   hasConfigurationChanged(event: vscode.ConfigurationChangeEvent): boolean {
     return event.affectsConfiguration("searchEverywhere");
   }

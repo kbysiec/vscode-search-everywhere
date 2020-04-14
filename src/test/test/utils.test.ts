@@ -2,7 +2,10 @@ import * as vscode from "vscode";
 import { assert } from "chai";
 import * as sinon from "sinon";
 import Utils from "../../utils";
-import * as mock from "../mock/utils.mock";
+import {
+  getConfigurationChangeEvent,
+  getWorkspaceFoldersChangeEvent,
+} from "../util/mockFactory";
 
 describe("Utils", () => {
   let utils: Utils;
@@ -29,17 +32,33 @@ describe("Utils", () => {
     });
   });
 
+  describe("hasWorkspaceChanged", () => {
+    it("should return true if amount of opened folders in workspace has changed", () => {
+      assert.equal(
+        utils.hasWorkspaceChanged(getWorkspaceFoldersChangeEvent(true)),
+        true
+      );
+    });
+
+    it("should return false if amount of opened folders in workspace has not changed", () => {
+      assert.equal(
+        utils.hasWorkspaceChanged(getWorkspaceFoldersChangeEvent(false)),
+        false
+      );
+    });
+  });
+
   describe("hasConfigurationChanged", () => {
     it("should return true if extension configuration has changed", () => {
       assert.equal(
-        utils.hasConfigurationChanged(mock.getConfigurationChangeEvent(true)),
+        utils.hasConfigurationChanged(getConfigurationChangeEvent(true)),
         true
       );
     });
 
     it("should return false if extension configuration has not changed", () => {
       assert.equal(
-        utils.hasConfigurationChanged(mock.getConfigurationChangeEvent(false)),
+        utils.hasConfigurationChanged(getConfigurationChangeEvent(false)),
         false
       );
     });

@@ -3,7 +3,12 @@ import { assert } from "chai";
 import * as sinon from "sinon";
 import Workspace from "../../workspace";
 import * as mock from "../mock/workspace.mock";
-import { getCacheStub, getUtilsStub } from "../util/mockFactory";
+import {
+  getCacheStub,
+  getUtilsStub,
+  getConfigurationChangeEvent,
+  getWorkspaceFoldersChangeEvent,
+} from "../util/mockFactory";
 import Cache from "../../cache";
 import Utils from "../../utils";
 
@@ -65,9 +70,14 @@ describe("Workspace", () => {
         vscode.workspace,
         "onDidChangeConfiguration"
       );
+      const onDidChangeWorkspaceFoldersStub = sinon.stub(
+        vscode.workspace,
+        "onDidChangeWorkspaceFolders"
+      );
       await workspace.registerEventListeners();
 
       assert.equal(onDidChangeConfigurationStub.calledOnce, true);
+      assert.equal(onDidChangeWorkspaceFoldersStub.calledOnce, true);
     });
   });
 
@@ -101,7 +111,7 @@ describe("Workspace", () => {
         "cacheWorkspaceFiles"
       );
       await workspaceAny.onDidChangeConfiguration(
-        mock.configurationChangeEvent
+        getConfigurationChangeEvent(true)
       );
 
       assert.equal(cacheWorkspaceFilesStub.calledOnce, true);
@@ -114,7 +124,35 @@ describe("Workspace", () => {
         "cacheWorkspaceFiles"
       );
       await workspaceAny.onDidChangeConfiguration(
-        mock.configurationChangeEvent
+        getConfigurationChangeEvent(false)
+      );
+
+      assert.equal(cacheWorkspaceFilesStub.calledOnce, false);
+    });
+  });
+
+  describe("onDidChangeWorkspaceFolders", () => {
+    it("should reindex workspace if amount of opened folders in workspace has changed", async () => {
+      sinon.stub(workspaceAny.utils, "hasWorkspaceChanged").returns(true);
+      const cacheWorkspaceFilesStub = sinon.stub(
+        workspaceAny,
+        "cacheWorkspaceFiles"
+      );
+      await workspaceAny.onDidChangeWorkspaceFolders(
+        getWorkspaceFoldersChangeEvent(true)
+      );
+
+      assert.equal(cacheWorkspaceFilesStub.calledOnce, true);
+    });
+
+    it("should do nothing if extension configuration has not changed", async () => {
+      sinon.stub(workspaceAny.utils, "hasWorkspaceChanged").returns(false);
+      const cacheWorkspaceFilesStub = sinon.stub(
+        workspaceAny,
+        "cacheWorkspaceFiles"
+      );
+      await workspaceAny.onDidChangeWorkspaceFolders(
+        getWorkspaceFoldersChangeEvent(false)
       );
 
       assert.equal(cacheWorkspaceFilesStub.calledOnce, false);
