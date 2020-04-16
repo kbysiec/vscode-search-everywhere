@@ -65,7 +65,7 @@ describe("Cache", () => {
       );
     });
 
-    it("should return undefined if cache does not contain value for passed key", () => {
+    it("should return undefined if cache does not contain value for given key", () => {
       const key = "searchEverywhere.exclude";
       sinon.stub(context.workspaceState, "get").returns(undefined);
 

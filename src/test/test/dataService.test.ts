@@ -62,7 +62,7 @@ describe("DataService", () => {
   });
 
   describe("patternsAsString", () => {
-    it("should return empty string if passed array is empty", () => {
+    it("should return empty string if given array is empty", () => {
       const patterns: string[] = [];
 
       assert.equal(
@@ -71,7 +71,7 @@ describe("DataService", () => {
       );
     });
 
-    it(`should return string with one pattern if passed array
+    it(`should return string with one pattern if given array
       contains one element`, () => {
       const patterns = ["**/node_modules/**"];
 
@@ -82,7 +82,7 @@ describe("DataService", () => {
     });
 
     it(`should return string with patterns separated by comma surrounded
-      with curly braces if passed array contains more than one element`, () => {
+      with curly braces if given array contains more than one element`, () => {
       const patterns = [
         "**/node_modules/**",
         "**/bower_components/**",
