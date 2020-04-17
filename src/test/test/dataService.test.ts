@@ -3,17 +3,26 @@ import { assert } from "chai";
 import * as sinon from "sinon";
 import DataService from "../../dataService";
 import * as mock from "../mock/dataService.mock";
-import { getCacheStub } from "../util/mockFactory";
+import {
+  getCacheStub,
+  getUtilsStub,
+  getDocumentSymbolItemSingleLine,
+  getWorkspaceData,
+  getDocumentSymbolItemSingleLineArray,
+} from "../util/mockFactory";
 import Cache from "../../cache";
+import Utils from "../../utils";
 
 describe("DataService", () => {
   let dataService: DataService;
   let dataServiceAny: any;
   let cacheStub: Cache;
+  let utilsStub: Utils;
 
   before(() => {
     cacheStub = getCacheStub();
-    dataService = new DataService(cacheStub);
+    utilsStub = getUtilsStub();
+    dataService = new DataService(cacheStub, utilsStub);
   });
 
   beforeEach(() => {
@@ -26,20 +35,24 @@ describe("DataService", () => {
 
   describe("constructor", () => {
     it("should data service be initialized", () => {
-      dataService = new DataService(cacheStub);
+      dataService = new DataService(cacheStub, utilsStub);
 
       assert.exists(dataService);
     });
   });
 
   describe("fetchData", () => {
-    it("should return vscode.Uri[] containing workspace data", async () => {
+    it("should return array of vscode.Uri or vscode.DocumentSymbol items with workspace data", async () => {
       sinon
         .stub(vscode.workspace, "findFiles")
         .returns(Promise.resolve(mock.items));
+      sinon
+        .stub(dataServiceAny, "loadAllSymbolsForUri")
+        .returns(Promise.resolve(getDocumentSymbolItemSingleLineArray(1)));
+
       const items = await dataService.fetchData();
 
-      assert.equal(items.length, 2);
+      assert.equal(items.count, 4);
     });
   });
 
@@ -92,6 +105,140 @@ describe("DataService", () => {
       assert.equal(
         dataServiceAny.patternsAsString(patterns),
         `{${patterns.join(",")}}`
+      );
+    });
+  });
+
+  describe("includeSymbols", () => {
+    it("should include symbols to workspaceData", async () => {
+      sinon
+        .stub(dataServiceAny, "getSymbolsForUri")
+        .returns(Promise.resolve(getDocumentSymbolItemSingleLineArray(3)));
+      const workspaceData = getWorkspaceData();
+      await dataServiceAny.includeSymbols(workspaceData, [mock.uriItem]);
+
+      assert.equal(workspaceData.count, 3);
+    });
+
+    it("should repeat trial to get symbols for file if returned undefined", async () => {
+      const sleepStub = sinon
+        .stub(dataServiceAny.utils, "sleep")
+        .returns(Promise.resolve());
+      sinon
+        .stub(dataServiceAny, "getSymbolsForUri")
+        .returns(Promise.resolve(undefined));
+      const workspaceData = getWorkspaceData();
+      await dataServiceAny.includeSymbols(workspaceData, [mock.uriItem]);
+
+      assert.equal(workspaceData.count, 0);
+      assert.equal(sleepStub.callCount, 9);
+    });
+  });
+
+  describe("includeUris", () => {
+    it("should include uris to empty workspaceData", () => {
+      const workspaceData = getWorkspaceData();
+      dataServiceAny.includeUris(workspaceData, mock.items);
+
+      assert.equal(workspaceData.count, 2);
+    });
+
+    it("should include uris to workspaceData containing data", () => {
+      const workspaceData = getWorkspaceData([mock.uriItem]);
+      dataServiceAny.includeUris(workspaceData, mock.items);
+
+      assert.equal(workspaceData.count, 2);
+    });
+  });
+
+  describe("ifUriExistsInArray", () => {
+    it("should return true if uri already is included in array", () => {
+      assert.equal(
+        dataServiceAny.ifUriExistsInArray(mock.items, mock.uriItem),
+        true
+      );
+    });
+
+    it("should return false if uri already is not included in array", () => {
+      assert.equal(dataServiceAny.ifUriExistsInArray([], mock.uriItem), false);
+    });
+
+    it("should return false if given item is vscode.DocumentSymbol not vscode.Uri type", () => {
+      assert.equal(
+        dataServiceAny.ifUriExistsInArray(
+          mock.items,
+          getDocumentSymbolItemSingleLine()
+        ),
+        false
+      );
+    });
+  });
+
+  describe("getSymbolsForUri", () => {
+    it("should return array of vscode.DocumentSymbol for given uri", async () => {
+      const documentSymbolItems = getDocumentSymbolItemSingleLineArray(2);
+      sinon
+        .stub(dataServiceAny, "loadAllSymbolsForUri")
+        .returns(Promise.resolve(documentSymbolItems));
+
+      assert.deepEqual(
+        await dataServiceAny.getSymbolsForUri(mock.uriItem),
+        documentSymbolItems
+      );
+    });
+
+    it("should return undefined", async () => {
+      sinon
+        .stub(dataServiceAny, "loadAllSymbolsForUri")
+        .returns(Promise.resolve(undefined));
+
+      assert.deepEqual(
+        await dataServiceAny.getSymbolsForUri(mock.uriItem),
+        undefined
+      );
+    });
+  });
+
+  describe("loadAllSymbolsForUri", () => {
+    it(`should vscode.commands.executeCommand be method invoked
+      with vscode.executeDocumentSymbolProvider given as first parameter`, async () => {
+      const executeCommandStub = sinon.stub(vscode.commands, "executeCommand");
+      await dataServiceAny.loadAllSymbolsForUri(mock.uriItem);
+
+      assert.equal(
+        executeCommandStub.calledWith("vscode.executeDocumentSymbolProvider"),
+        true
+      );
+    });
+  });
+
+  describe("reduceAndFlatSymbolsArrayForUri", () => {
+    it("should return flat array of vscode.DocumentSymbol", async () => {
+      assert.deepEqual(
+        await dataServiceAny.reduceAndFlatSymbolsArrayForUri(
+          mock.documentSymbolItems
+        ),
+        mock.flatDocumentSymbolItems
+      );
+    });
+  });
+
+  describe("hasSymbolChildren", () => {
+    it("should return true if symbol has children", async () => {
+      assert.deepEqual(
+        await dataServiceAny.hasSymbolChildren(
+          mock.documentSymbolItemWithChildren
+        ),
+        true
+      );
+    });
+
+    it("should return false if symbol has not children", async () => {
+      assert.deepEqual(
+        await dataServiceAny.hasSymbolChildren(
+          getDocumentSymbolItemSingleLine()
+        ),
+        false
       );
     });
   });

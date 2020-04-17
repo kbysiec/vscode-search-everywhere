@@ -1,22 +1,29 @@
 import * as vscode from "vscode";
 import Config from "./config";
 import Cache from "./cache";
+import WorkspaceData from "./interface/workspaceData";
+import Utils from "./utils";
 
 class DataService {
   private config: Config;
 
-  constructor(cache: Cache) {
+  constructor(cache: Cache, private utils: Utils) {
     this.config = new Config(cache);
   }
 
-  async fetchData(): Promise<vscode.Uri[]> {
+  async fetchData(): Promise<WorkspaceData> {
     const includePatterns = this.getIncludePatterns();
     const excludePatterns = this.getExcludePatterns();
-    const files = await vscode.workspace.findFiles(
+    const workspaceData: WorkspaceData = this.utils.createWorkspaceData();
+    const uris = await vscode.workspace.findFiles(
       includePatterns,
       excludePatterns
     );
-    return files;
+
+    await this.includeSymbols(workspaceData, uris);
+    this.includeUris(workspaceData, uris);
+
+    return workspaceData;
   }
 
   private getIncludePatterns(): string {
@@ -37,6 +44,113 @@ class DataService {
     } else {
       return `{${patterns.join(",")}}`;
     }
+  }
+
+  private async includeSymbols(
+    workspaceData: WorkspaceData,
+    uris: vscode.Uri[]
+  ): Promise<void> {
+    const maxCounter = 10;
+    for (let i = 0; i < uris.length; i++) {
+      const uri = uris[i];
+      let counter = 0;
+      let symbolsForUri: vscode.DocumentSymbol[] | undefined;
+
+      do {
+        symbolsForUri = await this.getSymbolsForUri(uri);
+        if (counter) {
+          await this.utils.sleep(120);
+        }
+        counter++;
+      } while (symbolsForUri === undefined && counter < maxCounter);
+
+      symbolsForUri &&
+        symbolsForUri.length &&
+        workspaceData.items.set(uri.fsPath, {
+          uri,
+          elements: symbolsForUri,
+        });
+
+      workspaceData.count += symbolsForUri ? symbolsForUri.length : 0;
+    }
+  }
+
+  private includeUris(workspaceData: WorkspaceData, uris: vscode.Uri[]): void {
+    uris.forEach((uri: vscode.Uri) => {
+      const array = workspaceData.items.get(uri.fsPath);
+      if (array) {
+        const exists = this.ifUriExistsInArray(array.elements, uri);
+
+        if (!exists) {
+          array.elements.push(uri);
+          workspaceData.count++;
+        }
+      } else {
+        workspaceData.items.set(uri.fsPath, {
+          uri,
+          elements: [uri],
+        });
+        workspaceData.count++;
+      }
+    });
+  }
+
+  private ifUriExistsInArray(
+    array: Array<vscode.Uri | vscode.DocumentSymbol>,
+    uri: vscode.Uri
+  ) {
+    return array.some((uriInArray: vscode.Uri | vscode.DocumentSymbol) => {
+      if (!uri.hasOwnProperty("range")) {
+        uriInArray = uriInArray as vscode.Uri;
+        return uriInArray.fsPath === uri.fsPath;
+      }
+      return false;
+    });
+  }
+
+  private async getSymbolsForUri(
+    uri: vscode.Uri
+  ): Promise<vscode.DocumentSymbol[] | undefined> {
+    const symbols = await this.loadAllSymbolsForUri(uri);
+    return symbols ? this.reduceAndFlatSymbolsArrayForUri(symbols) : undefined;
+  }
+
+  private async loadAllSymbolsForUri(
+    uri: vscode.Uri
+  ): Promise<vscode.DocumentSymbol[] | undefined> {
+    return await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
+      "vscode.executeDocumentSymbolProvider",
+      uri
+    );
+  }
+
+  private reduceAndFlatSymbolsArrayForUri(
+    symbols: vscode.DocumentSymbol[],
+    parentName?: string
+  ): vscode.DocumentSymbol[] {
+    const flatSymbolsArray: vscode.DocumentSymbol[] = [];
+    const splitter = this.utils.getSplitter();
+
+    symbols.forEach((symbol: vscode.DocumentSymbol) => {
+      if (parentName) {
+        parentName = parentName.split(splitter)[0];
+        symbol.name = `${parentName}${splitter}${symbol.name}`;
+      }
+      flatSymbolsArray.push(symbol);
+
+      if (this.hasSymbolChildren(symbol)) {
+        flatSymbolsArray.push(
+          ...this.reduceAndFlatSymbolsArrayForUri(symbol.children, symbol.name)
+        );
+      }
+      symbol.children = [];
+    });
+
+    return flatSymbolsArray;
+  }
+
+  private hasSymbolChildren(symbol: vscode.DocumentSymbol): boolean {
+    return symbol.children && symbol.children.length ? true : false;
   }
 }
 

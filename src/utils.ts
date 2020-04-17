@@ -1,4 +1,6 @@
 import * as vscode from "vscode";
+import WorkspaceData from "./interface/workspaceData";
+import Item from "./interface/item";
 
 class Utils {
   hasWorkspaceAnyFolder(): boolean {
@@ -20,6 +22,21 @@ class Utils {
     vscode.window.showInformationMessage(
       "Workspace doesn't contain any folder opened"
     );
+  }
+
+  createWorkspaceData(): WorkspaceData {
+    return {
+      items: new Map<string, Item>(),
+      count: 0,
+    };
+  }
+
+  sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  getSplitter(): string {
+    return "§&§";
   }
 }
 

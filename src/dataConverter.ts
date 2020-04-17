@@ -1,18 +1,68 @@
 import * as vscode from "vscode";
 import QuickPickItem from "./interface/quickPickItem";
+import WorkspaceData from "./interface/workspaceData";
+import Utils from "./utils";
+import Item from "./interface/item";
 
 class DataConverter {
-  convertToQpData(data: vscode.Uri[]): QuickPickItem[] {
-    return this.mapDataToQpData(data);
+  constructor(private utils: Utils) {}
+
+  convertToQpData(data: WorkspaceData): QuickPickItem[] {
+    return this.mapDataToQpData(data.items);
   }
 
-  private mapDataToQpData(data: vscode.Uri[]): QuickPickItem[] {
+  private mapDataToQpData(data: Map<string, Item>): QuickPickItem[] {
     const qpData: QuickPickItem[] = [];
 
-    data.forEach((uri: vscode.Uri) => {
-      qpData.push(this.mapUriToQpItem(uri));
+    data.forEach((item: Item) => {
+      item.elements.forEach((element: vscode.Uri | vscode.DocumentSymbol) => {
+        qpData.push(this.mapItemElementToQpItem(item.uri, element));
+      });
     });
     return qpData;
+  }
+
+  private mapItemElementToQpItem(
+    uri: vscode.Uri,
+    item: vscode.DocumentSymbol | vscode.Uri
+  ): QuickPickItem {
+    if (item.hasOwnProperty("range")) {
+      item = item as vscode.DocumentSymbol;
+      return this.mapDocumentSymbolToQpItem(uri, item);
+    } else {
+      item = item as vscode.Uri;
+      return this.mapUriToQpItem(item);
+    }
+  }
+
+  private mapDocumentSymbolToQpItem(
+    uri: vscode.Uri,
+    symbol: vscode.DocumentSymbol
+  ): QuickPickItem {
+    const splitter = this.utils.getSplitter();
+    const symbolName = symbol.name.split(splitter);
+    const parent = symbolName.length === 2 ? symbolName[0] : "";
+    const name = symbolName.length === 2 ? symbolName[1] : symbol.name;
+
+    const description = `${vscode.SymbolKind[symbol.kind]} at ${
+      symbol.range.isSingleLine
+        ? `line: ${symbol.range.start.line + 1}`
+        : `lines: ${symbol.range.start.line + 1} - ${symbol.range.end.line}${
+            parent ? ` in ${parent}` : ""
+          }`
+    }`;
+
+    return {
+      uri,
+      symbolKind: symbol.kind,
+      range: {
+        start: symbol.range.start,
+        end: symbol.range.end,
+      },
+      label: name,
+      detail: this.normalizeUriPath(uri.fsPath),
+      description,
+    };
   }
 
   private mapUriToQpItem(uri: vscode.Uri): QuickPickItem {

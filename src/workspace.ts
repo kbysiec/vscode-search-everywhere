@@ -10,8 +10,8 @@ class Workspace {
   private dataConverter: DataConverter;
 
   constructor(private cache: Cache, private utils: Utils) {
-    this.dataService = new DataService(this.cache);
-    this.dataConverter = new DataConverter();
+    this.dataService = new DataService(this.cache, this.utils);
+    this.dataConverter = new DataConverter(this.utils);
   }
 
   async indexWorkspace(): Promise<void> {

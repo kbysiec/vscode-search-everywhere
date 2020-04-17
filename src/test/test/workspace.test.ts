@@ -8,6 +8,7 @@ import {
   getUtilsStub,
   getConfigurationChangeEvent,
   getWorkspaceFoldersChangeEvent,
+  getWorkspaceData,
 } from "../util/mockFactory";
 import Cache from "../../cache";
 import Utils from "../../utils";
@@ -97,7 +98,7 @@ describe("Workspace", () => {
     it("should return data for quick pick", async () => {
       sinon
         .stub(workspaceAny.dataService, "fetchData")
-        .returns(Promise.resolve(mock.items));
+        .returns(Promise.resolve(getWorkspaceData(mock.items)));
 
       assert.deepEqual(await workspaceAny.downloadData(), mock.qpItems);
     });

@@ -1,10 +1,11 @@
 import * as vscode from "vscode";
-import { assert } from "chai";
+import { assert, expect } from "chai";
 import * as sinon from "sinon";
 import Utils from "../../utils";
 import {
   getConfigurationChangeEvent,
   getWorkspaceFoldersChangeEvent,
+  getWorkspaceData,
 } from "../util/mockFactory";
 
 describe("Utils", () => {
@@ -73,6 +74,41 @@ describe("Utils", () => {
       utils.printNoFolderOpenedMessage();
 
       assert.equal(showInformationMessageStub.calledOnce, true);
+    });
+  });
+
+  describe("createWorkspaceData", () => {
+    it("should create workspaceData object", () => {
+      assert.deepEqual(utils.createWorkspaceData(), getWorkspaceData());
+    });
+  });
+
+  describe("sleep", () => {
+    it("should be fulfilled", async () => {
+      const clock = sinon.useFakeTimers();
+      let fulfilled = false;
+      const sleepPromise = utils.sleep(1000);
+
+      sleepPromise.then(() => {
+        fulfilled = true;
+      });
+
+      // let event loop cycle
+      // https://stackoverflow.com/questions/51526312/testing-setinterval-with-sinon-faketimers-not-working
+      await Promise.resolve();
+      clock.tick(999);
+      expect(fulfilled).to.be.false;
+      clock.tick(2);
+      await Promise.resolve();
+      expect(fulfilled).to.be.true;
+
+      clock.restore();
+    });
+  });
+
+  describe("getSplitter", () => {
+    it("should return splitter string", () => {
+      assert.equal(utils.getSplitter(), "§&§");
     });
   });
 });
