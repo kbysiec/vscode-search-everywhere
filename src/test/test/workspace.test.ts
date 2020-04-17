@@ -2,13 +2,14 @@ import * as vscode from "vscode";
 import { assert } from "chai";
 import * as sinon from "sinon";
 import Workspace from "../../workspace";
-import * as mock from "../mock/workspace.mock";
 import {
   getCacheStub,
   getUtilsStub,
   getConfigurationChangeEvent,
   getWorkspaceFoldersChangeEvent,
   getWorkspaceData,
+  getItems,
+  getQpItems,
 } from "../util/mockFactory";
 import Cache from "../../cache";
 import Utils from "../../utils";
@@ -58,10 +59,10 @@ describe("Workspace", () => {
 
     it("should update cache with indexed workspace files", async () => {
       const updateDataStub = sinon.stub(workspaceAny.cache, "updateData");
-      sinon.stub(workspaceAny, "downloadData").returns(mock.qpItems);
+      sinon.stub(workspaceAny, "downloadData").returns(getQpItems());
       await workspace.indexWorkspace();
 
-      assert.equal(updateDataStub.calledWith(mock.qpItems), true);
+      assert.equal(updateDataStub.calledWith(getQpItems()), true);
     });
   });
 
@@ -86,7 +87,7 @@ describe("Workspace", () => {
     it("should cache.getData method be invoked", () => {
       const getDataStub = sinon
         .stub(workspaceAny.cache, "getData")
-        .returns(Promise.resolve(mock.items));
+        .returns(Promise.resolve(getItems()));
 
       workspace.getData();
 
@@ -96,11 +97,12 @@ describe("Workspace", () => {
 
   describe("downloadData", () => {
     it("should return data for quick pick", async () => {
+      const items = getItems();
       sinon
         .stub(workspaceAny.dataService, "fetchData")
-        .returns(Promise.resolve(getWorkspaceData(mock.items)));
+        .returns(Promise.resolve(getWorkspaceData(items)));
 
-      assert.deepEqual(await workspaceAny.downloadData(), mock.qpItems);
+      assert.deepEqual(await workspaceAny.downloadData(), getQpItems());
     });
   });
 

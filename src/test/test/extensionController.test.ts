@@ -2,8 +2,7 @@ import * as vscode from "vscode";
 import { assert } from "chai";
 import * as sinon from "sinon";
 import ExtensionController from "../../extensionController";
-import * as mock from "../mock/extensionController.mock";
-import { getExtensionContext } from "../util/mockFactory";
+import { getExtensionContext, getQpItems } from "../util/mockFactory";
 
 describe("ExtensionController", () => {
   let context: vscode.ExtensionContext;
@@ -76,7 +75,7 @@ describe("ExtensionController", () => {
     it("should load data to quick pick from cache", async () => {
       sinon
         .stub(extensionControllerAny.workspace, "getData")
-        .returns(Promise.resolve(mock.qpItems));
+        .returns(Promise.resolve(getQpItems()));
       await extensionControllerAny.loadQuickPickData();
 
       assert.equal(extensionControllerAny.quickPick.quickPick.items.length, 2);

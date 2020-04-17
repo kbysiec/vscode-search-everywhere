@@ -9,6 +9,8 @@ import {
   getDocumentSymbolItemSingleLine,
   getWorkspaceData,
   getDocumentSymbolItemSingleLineArray,
+  getItems,
+  getItem,
 } from "../util/mockFactory";
 import Cache from "../../cache";
 import Utils from "../../utils";
@@ -45,7 +47,7 @@ describe("DataService", () => {
     it("should return array of vscode.Uri or vscode.DocumentSymbol items with workspace data", async () => {
       sinon
         .stub(vscode.workspace, "findFiles")
-        .returns(Promise.resolve(mock.items));
+        .returns(Promise.resolve(getItems()));
       sinon
         .stub(dataServiceAny, "loadAllSymbolsForUri")
         .returns(Promise.resolve(getDocumentSymbolItemSingleLineArray(1)));
@@ -115,7 +117,7 @@ describe("DataService", () => {
         .stub(dataServiceAny, "getSymbolsForUri")
         .returns(Promise.resolve(getDocumentSymbolItemSingleLineArray(3)));
       const workspaceData = getWorkspaceData();
-      await dataServiceAny.includeSymbols(workspaceData, [mock.uriItem]);
+      await dataServiceAny.includeSymbols(workspaceData, [getItem()]);
 
       assert.equal(workspaceData.count, 3);
     });
@@ -128,7 +130,7 @@ describe("DataService", () => {
         .stub(dataServiceAny, "getSymbolsForUri")
         .returns(Promise.resolve(undefined));
       const workspaceData = getWorkspaceData();
-      await dataServiceAny.includeSymbols(workspaceData, [mock.uriItem]);
+      await dataServiceAny.includeSymbols(workspaceData, [getItem()]);
 
       assert.equal(workspaceData.count, 0);
       assert.equal(sleepStub.callCount, 9);
@@ -138,14 +140,14 @@ describe("DataService", () => {
   describe("includeUris", () => {
     it("should include uris to empty workspaceData", () => {
       const workspaceData = getWorkspaceData();
-      dataServiceAny.includeUris(workspaceData, mock.items);
+      dataServiceAny.includeUris(workspaceData, getItems());
 
       assert.equal(workspaceData.count, 2);
     });
 
     it("should include uris to workspaceData containing data", () => {
-      const workspaceData = getWorkspaceData([mock.uriItem]);
-      dataServiceAny.includeUris(workspaceData, mock.items);
+      const workspaceData = getWorkspaceData([getItem()]);
+      dataServiceAny.includeUris(workspaceData, getItems());
 
       assert.equal(workspaceData.count, 2);
     });
@@ -154,19 +156,19 @@ describe("DataService", () => {
   describe("ifUriExistsInArray", () => {
     it("should return true if uri already is included in array", () => {
       assert.equal(
-        dataServiceAny.ifUriExistsInArray(mock.items, mock.uriItem),
+        dataServiceAny.ifUriExistsInArray(getItems(), getItem()),
         true
       );
     });
 
     it("should return false if uri already is not included in array", () => {
-      assert.equal(dataServiceAny.ifUriExistsInArray([], mock.uriItem), false);
+      assert.equal(dataServiceAny.ifUriExistsInArray([], getItem()), false);
     });
 
     it("should return false if given item is vscode.DocumentSymbol not vscode.Uri type", () => {
       assert.equal(
         dataServiceAny.ifUriExistsInArray(
-          mock.items,
+          getItems(),
           getDocumentSymbolItemSingleLine()
         ),
         false
@@ -182,7 +184,7 @@ describe("DataService", () => {
         .returns(Promise.resolve(documentSymbolItems));
 
       assert.deepEqual(
-        await dataServiceAny.getSymbolsForUri(mock.uriItem),
+        await dataServiceAny.getSymbolsForUri(getItem()),
         documentSymbolItems
       );
     });
@@ -193,7 +195,7 @@ describe("DataService", () => {
         .returns(Promise.resolve(undefined));
 
       assert.deepEqual(
-        await dataServiceAny.getSymbolsForUri(mock.uriItem),
+        await dataServiceAny.getSymbolsForUri(getItem()),
         undefined
       );
     });
@@ -203,7 +205,7 @@ describe("DataService", () => {
     it(`should vscode.commands.executeCommand be method invoked
       with vscode.executeDocumentSymbolProvider given as first parameter`, async () => {
       const executeCommandStub = sinon.stub(vscode.commands, "executeCommand");
-      await dataServiceAny.loadAllSymbolsForUri(mock.uriItem);
+      await dataServiceAny.loadAllSymbolsForUri(getItem());
 
       assert.equal(
         executeCommandStub.calledWith("vscode.executeDocumentSymbolProvider"),
@@ -216,7 +218,7 @@ describe("DataService", () => {
     it("should return flat array of vscode.DocumentSymbol", async () => {
       assert.deepEqual(
         await dataServiceAny.reduceAndFlatSymbolsArrayForUri(
-          mock.documentSymbolItems
+          getDocumentSymbolItemSingleLineArray(2, true)
         ),
         mock.flatDocumentSymbolItems
       );
@@ -227,7 +229,7 @@ describe("DataService", () => {
     it("should return true if symbol has children", async () => {
       assert.deepEqual(
         await dataServiceAny.hasSymbolChildren(
-          mock.documentSymbolItemWithChildren
+          getDocumentSymbolItemSingleLine("", true)
         ),
         true
       );

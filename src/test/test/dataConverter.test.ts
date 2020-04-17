@@ -10,6 +10,10 @@ import {
   getDocumentSymbolItemSingleLine,
   getDocumentSymbolItemMultiLine,
   getDocumentSymbolQpItemMultiLine,
+  getItems,
+  getQpItems,
+  getItem,
+  getQpItem,
 } from "../util/mockFactory";
 
 describe("DataConverter", () => {
@@ -40,9 +44,10 @@ describe("DataConverter", () => {
 
   describe("convertToQpData", () => {
     it("should return quick pick data", () => {
+      const items = getItems();
       assert.deepEqual(
-        dataConverter.convertToQpData(getWorkspaceData(mock.items)),
-        mock.qpItems
+        dataConverter.convertToQpData(getWorkspaceData(items)),
+        getQpItems()
       );
     });
 
@@ -53,9 +58,10 @@ describe("DataConverter", () => {
 
   describe("mapDataToQpData", () => {
     it("should return quick pick data", () => {
+      const items = getItems();
       assert.deepEqual(
-        dataConverterAny.mapDataToQpData(getWorkspaceData(mock.items).items),
-        mock.qpItems
+        dataConverterAny.mapDataToQpData(getWorkspaceData(items).items),
+        getQpItems()
       );
     });
 
@@ -71,7 +77,7 @@ describe("DataConverter", () => {
     it("should return quick pick item by invoking mapDocumentSymbolToQpItem method", () => {
       assert.deepEqual(
         dataConverterAny.mapItemElementToQpItem(
-          mock.uriItem,
+          getItem(),
           getDocumentSymbolItemSingleLine()
         ),
         mock.qpItemDocumentSymbolSingleLine
@@ -80,8 +86,8 @@ describe("DataConverter", () => {
 
     it("should return quick pick item by invoking mapUriToQpItem method", () => {
       assert.deepEqual(
-        dataConverterAny.mapItemElementToQpItem(mock.uriItem, mock.uriItem),
-        mock.qpItem
+        dataConverterAny.mapItemElementToQpItem(getItem(), getItem()),
+        getQpItem()
       );
     });
   });
@@ -90,7 +96,7 @@ describe("DataConverter", () => {
     it("should return quick pick item for single line document symbol", () => {
       assert.deepEqual(
         dataConverterAny.mapDocumentSymbolToQpItem(
-          mock.uriItem,
+          getItem(),
           getDocumentSymbolItemSingleLine()
         ),
         mock.qpItemDocumentSymbolSingleLine
@@ -100,7 +106,7 @@ describe("DataConverter", () => {
     it("should return quick pick item for multi line document symbol with parent", () => {
       assert.deepEqual(
         dataConverterAny.mapDocumentSymbolToQpItem(
-          mock.uriItem,
+          getItem(),
           getDocumentSymbolItemMultiLine()
         ),
         getDocumentSymbolQpItemMultiLine()
@@ -110,7 +116,7 @@ describe("DataConverter", () => {
     it("should return quick pick item for multi line document symbol with empty parent", () => {
       assert.deepEqual(
         dataConverterAny.mapDocumentSymbolToQpItem(
-          mock.uriItem,
+          getItem(),
           getDocumentSymbolItemMultiLine(true)
         ),
         getDocumentSymbolQpItemMultiLine(true)
@@ -120,10 +126,7 @@ describe("DataConverter", () => {
 
   describe("mapUriToQpItem", () => {
     it("should return quick pick item", () => {
-      assert.deepEqual(
-        dataConverterAny.mapUriToQpItem(mock.uriItem),
-        mock.qpItem
-      );
+      assert.deepEqual(dataConverterAny.mapUriToQpItem(getItem()), getQpItem());
     });
   });
 
@@ -134,8 +137,8 @@ describe("DataConverter", () => {
         .value(mock.workspaceFolders);
 
       assert.equal(
-        dataConverterAny.normalizeUriPath(mock.item.fsPath),
-        mock.qpItem.uri!.fsPath
+        dataConverterAny.normalizeUriPath(getItem().fsPath),
+        getQpItem().uri!.fsPath
       );
     });
   });

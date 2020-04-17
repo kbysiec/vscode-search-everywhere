@@ -5,7 +5,7 @@ import Cache from "../../cache";
 import QuickPick from "../../interface/quickPickItem";
 import { appConfig } from "../../appConfig";
 import * as mock from "../mock/cache.mock";
-import { getExtensionContext } from "../util/mockFactory";
+import { getExtensionContext, getQpItems } from "../util/mockFactory";
 
 describe("Cache", () => {
   let cache: Cache;
@@ -29,9 +29,9 @@ describe("Cache", () => {
 
   describe("getData", () => {
     it("should return array of indexed symbols and files from cache", () => {
-      sinon.stub(context.workspaceState, "get").returns(mock.qpItems);
+      sinon.stub(context.workspaceState, "get").returns(getQpItems());
 
-      assert.deepEqual(cache.getData(), mock.qpItems);
+      assert.deepEqual(cache.getData(), getQpItems());
     });
 
     it("should return empty array if cache is undefined", () => {
@@ -43,10 +43,10 @@ describe("Cache", () => {
 
   describe("updateData", () => {
     it("should update cache with new array", () => {
-      cache.updateData(mock.qpItems);
+      cache.updateData(getQpItems());
 
       assert.equal(
-        updateStub.calledWith(appConfig.dataCacheKey, mock.qpItems),
+        updateStub.calledWith(appConfig.dataCacheKey, getQpItems()),
         true
       );
     });

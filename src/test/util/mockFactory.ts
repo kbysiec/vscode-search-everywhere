@@ -71,8 +71,87 @@ export const getWorkspaceData = (items: vscode.Uri[] = []): WorkspaceData => {
   };
 };
 
+export const getUntitledItem = (): vscode.Uri => {
+  const itemUntitledUri = vscode.Uri.file("./fake/fake-1.ts");
+  (itemUntitledUri as any).scheme = "untitled";
+  return itemUntitledUri;
+};
+
+export const getItem = (withPath: boolean = false): vscode.Uri => {
+  return vscode.Uri.file(
+    `${withPath ? "./test/path/to/workspace" : "."}/fake/fake-1.ts`
+  );
+};
+
+export const getItems = (): vscode.Uri[] => {
+  return ["./fake/fake-1.ts", "./fake/fake-2.ts"].map((path: string) =>
+    vscode.Uri.file(path)
+  );
+};
+
+export const getQpItem = (): QuickPickItem => {
+  const qpItem = {
+    label: "fake-1.ts",
+    description: "File",
+    detail: "/./fake/fake-1.ts",
+    uri: vscode.Uri.file("./fake/fake-1.ts"),
+    symbolKind: 0,
+    range: {
+      start: new vscode.Position(0, 0),
+      end: new vscode.Position(0, 0),
+    },
+  };
+  const qpItemAny = qpItem as any;
+  qpItemAny.uri._fsPath = qpItemAny.uri.fsPath;
+  qpItemAny.detail = qpItemAny.uri.fsPath;
+
+  return qpItem;
+};
+
+export const getUntitledQpItem = (): QuickPickItem => {
+  return {
+    label: "fake-1.ts",
+    uri: getUntitledItem(),
+    symbolKind: 0,
+  };
+};
+
+export const getQpItems = (): QuickPickItem[] => {
+  const qpItems = [
+    {
+      label: "fake-1.ts",
+      description: "File",
+      detail: "/./fake/fake-1.ts",
+      uri: vscode.Uri.file("./fake/fake-1.ts"),
+      symbolKind: 0,
+      range: {
+        start: new vscode.Position(0, 0),
+        end: new vscode.Position(0, 0),
+      },
+    },
+    {
+      label: "fake-2.ts",
+      description: "File",
+      detail: "\\.\\fake\\fake-2.ts",
+      uri: vscode.Uri.file("./fake/fake-2.ts"),
+      symbolKind: 0,
+      range: {
+        start: new vscode.Position(0, 0),
+        end: new vscode.Position(0, 0),
+      },
+    },
+  ];
+  qpItems.forEach((qpItem: any) => {
+    qpItem.uri._fsPath = qpItem.uri.fsPath;
+    qpItem.detail = qpItem.uri.fsPath;
+  });
+
+  return qpItems;
+};
+
 export const getDocumentSymbolItemSingleLine = (
-  suffix?: string | number
+  suffix?: string | number,
+  withChild: boolean = false
 ): vscode.DocumentSymbol => {
   return {
     name: `test name${suffix ? ` ${suffix}` : ""}`,
@@ -86,16 +165,34 @@ export const getDocumentSymbolItemSingleLine = (
       new vscode.Position(0, 0),
       new vscode.Position(0, 0)
     ),
-    children: [],
+    children: withChild
+      ? [
+          {
+            name: `test child name${suffix ? ` ${suffix}` : ""}`,
+            detail: `test child details${suffix ? ` ${suffix}` : ""}`,
+            kind: 1,
+            range: new vscode.Range(
+              new vscode.Position(0, 0),
+              new vscode.Position(0, 0)
+            ),
+            selectionRange: new vscode.Range(
+              new vscode.Position(0, 0),
+              new vscode.Position(0, 0)
+            ),
+            children: [],
+          },
+        ]
+      : [],
   };
 };
 
 export const getDocumentSymbolItemSingleLineArray = (
-  count: number = 0
+  count: number = 0,
+  withChild: boolean = false
 ): vscode.DocumentSymbol[] => {
   const array: vscode.DocumentSymbol[] = [];
-  for (let i = 0; i < count; i++) {
-    array.push(getDocumentSymbolItemSingleLine(i));
+  for (let i = 1; i <= count; i++) {
+    array.push(getDocumentSymbolItemSingleLine(i, withChild));
   }
   return array;
 };
