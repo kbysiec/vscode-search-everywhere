@@ -111,4 +111,30 @@ describe("Utils", () => {
       assert.equal(utils.getSplitter(), "§&§");
     });
   });
+
+  describe("countWordInstances", () => {
+    it("should count word instances in given text", () => {
+      const instances = utils.countWordInstances(
+        "test string with xxxtestxxx value",
+        "test"
+      );
+      assert.equal(instances, 2);
+    });
+  });
+
+  describe("getNthIndex", () => {
+    it("should return index of second occurrence of word in given text", () => {
+      const index = utils.getNthIndex(
+        "test string with xxxtestxxx value",
+        "test",
+        2
+      );
+      assert.equal(index, 20);
+    });
+
+    it("should return -1 if word does not occur in given text", () => {
+      const index = utils.getNthIndex("string with value", "test", 2);
+      assert.equal(index, -1);
+    });
+  });
 });

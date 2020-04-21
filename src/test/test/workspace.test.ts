@@ -10,6 +10,12 @@ import {
   getWorkspaceData,
   getItems,
   getQpItems,
+  getQpItem,
+  getItem,
+  getDirectory,
+  getQpItemsSymbolAndUri,
+  getQpItemsSymbolAndUriExt,
+  getTextDocumentChangeEvent,
 } from "../util/mockFactory";
 import Cache from "../../cache";
 import Utils from "../../utils";
@@ -76,10 +82,15 @@ describe("Workspace", () => {
         vscode.workspace,
         "onDidChangeWorkspaceFolders"
       );
+      const onDidChangeTextDocumentStub = sinon.stub(
+        vscode.workspace,
+        "onDidChangeTextDocument"
+      );
       await workspace.registerEventListeners();
 
       assert.equal(onDidChangeConfigurationStub.calledOnce, true);
       assert.equal(onDidChangeWorkspaceFoldersStub.calledOnce, true);
+      assert.equal(onDidChangeTextDocumentStub.calledOnce, true);
     });
   });
 
@@ -103,6 +114,178 @@ describe("Workspace", () => {
         .returns(Promise.resolve(getWorkspaceData(items)));
 
       assert.deepEqual(await workspaceAny.downloadData(), getQpItems());
+    });
+  });
+
+  describe("updateCacheByPath", () => {
+    it(`should remove old data for given uri and get
+      new data if exists in workspace`, async () => {
+      sinon
+        .stub(workspaceAny.dataService, "isUriExistingInWorkspace")
+        .returns(Promise.resolve(true));
+      sinon
+        .stub(workspaceAny, "downloadData")
+        .returns(Promise.resolve(getQpItemsSymbolAndUri()));
+      const updateDataStub = sinon.stub(workspaceAny.cache, "updateData");
+      const getDataStub = sinon.stub(workspaceAny, "getData");
+      getDataStub.onFirstCall().returns(getQpItems());
+      getDataStub.onSecondCall().returns(getQpItems(1));
+
+      await workspaceAny.updateCacheByPath(getItem());
+
+      assert.equal(updateDataStub.calledTwice, true);
+      assert.deepEqual(updateDataStub.args[1][0], getQpItemsSymbolAndUriExt());
+    });
+
+    it(`should find items with old uris, replace the path
+      with new uri after directory renaming`, async () => {
+      sinon
+        .stub(workspaceAny.dataService, "isUriExistingInWorkspace")
+        .returns(Promise.resolve(false));
+
+      workspaceAny.urisForDirectoryPathUpdate = getItems(1);
+      workspaceAny.directoryUriBeforePathUpdate = getDirectory("./fake/");
+
+      const downloadDataStub = sinon
+        .stub(workspaceAny, "downloadData")
+        .returns(Promise.resolve(getQpItemsSymbolAndUri("./test/fake-files/")));
+      sinon.stub(workspaceAny, "getData").returns(getQpItems(1));
+      const updateDataStub = sinon.stub(workspaceAny.cache, "updateData");
+
+      await workspaceAny.updateCacheByPath(getDirectory("./test/fake-files/"));
+
+      assert.equal(
+        downloadDataStub.calledWith(getItems(1, "./test/fake-files/")),
+        true
+      );
+      assert.equal(updateDataStub.calledOnce, true);
+      assert.equal(
+        updateDataStub.calledWith(
+          getQpItemsSymbolAndUriExt("./test/fake-files/")
+        ),
+        true
+      );
+    });
+
+    it(`should do nothing if for given directory uri
+      there is not any item for replace the path`, async () => {
+      sinon
+        .stub(workspaceAny.dataService, "isUriExistingInWorkspace")
+        .returns(Promise.resolve(false));
+      const updateDataStub = sinon.stub(workspaceAny.cache, "updateData");
+
+      await workspaceAny.updateCacheByPath(getDirectory("./test/fake-files/"));
+
+      assert.equal(updateDataStub.called, false);
+    });
+
+    it("should indexWorkspace method be invoked if error is thrown", async () => {
+      sinon
+        .stub(workspaceAny.dataService, "isUriExistingInWorkspace")
+        .returns(Promise.resolve(true));
+      sinon.stub(workspaceAny, "removeFromCacheByPath").throws("test error");
+      const indexWorkspaceStub = sinon.stub(workspaceAny, "indexWorkspace");
+
+      await workspaceAny.updateCacheByPath(getItem());
+
+      assert.equal(indexWorkspaceStub.calledOnce, true);
+    });
+  });
+
+  describe("removeFromCacheByPath", () => {
+    it("should do nothing if getData method returns undefined", async () => {
+      const updateDataStub = sinon.stub(workspaceAny.cache, "updateData");
+      sinon.stub(workspaceAny, "getData").returns(undefined);
+
+      await workspaceAny.removeFromCacheByPath(getItem());
+
+      assert.equal(updateDataStub.called, false);
+    });
+
+    it("should remove given item from stored data", async () => {
+      const updateDataStub = sinon.stub(workspaceAny.cache, "updateData");
+      sinon.stub(workspaceAny, "getData").returns(getQpItems());
+      sinon
+        .stub(workspaceAny.dataService, "isUriExistingInWorkspace")
+        .returns(Promise.resolve(true));
+
+      await workspaceAny.removeFromCacheByPath(getItem());
+
+      assert.equal(
+        updateDataStub.calledWith(getQpItems(1, undefined, 1)),
+        true
+      );
+    });
+
+    it(`should remove items from stored data for
+      given renamed directory uri`, async () => {
+      const updateDataStub = sinon.stub(workspaceAny.cache, "updateData");
+      sinon.stub(workspaceAny, "getData").returns(getQpItems());
+      sinon
+        .stub(workspaceAny.dataService, "isUriExistingInWorkspace")
+        .returns(Promise.resolve(false));
+
+      await workspaceAny.removeFromCacheByPath(getDirectory("./fake/"));
+
+      assert.equal(updateDataStub.calledWith([]), true);
+    });
+  });
+
+  describe("getUrisForDirectoryPathUpdate", () => {
+    it(`should return uris containing renamed directory
+      name and file symbol kind`, async () => {
+      const qpItems = getQpItems();
+      qpItems[1] = getQpItem("./test/fake-files/", 2);
+      assert.deepEqual(
+        await workspaceAny.getUrisForDirectoryPathUpdate(
+          qpItems,
+          getDirectory("./fake/")
+        ),
+        getItems(1, undefined, undefined, true)
+      );
+    });
+  });
+
+  describe("mergeWithDataFromCache", () => {
+    it("should return QuickPickItem[] containing merged cached and given data", () => {
+      sinon.stub(workspaceAny, "getData").returns(getQpItems());
+      assert.deepEqual(
+        workspaceAny.mergeWithDataFromCache(getQpItems(1, undefined, 2)),
+        getQpItems(3)
+      );
+    });
+
+    it("should return QuickPickItem[] containing given data if cache is empty", () => {
+      sinon.stub(workspaceAny, "getData").returns(undefined);
+      assert.deepEqual(
+        workspaceAny.mergeWithDataFromCache(getQpItems(1)),
+        getQpItems(1)
+      );
+    });
+  });
+
+  describe("updateUrisWithNewDirectoryName", () => {
+    it("should return vscode.Uri[] with updated directory path", () => {
+      assert.deepEqual(
+        workspaceAny.updateUrisWithNewDirectoryName(
+          getItems(),
+          getDirectory("./fake/"),
+          getDirectory("./test/fake-files/")
+        ),
+        getItems(2, "./test/fake-files/")
+      );
+    });
+
+    it(`should return unchanged vscode.Uri[]
+      if old directory path does not exist in workspace`, () => {
+      assert.deepEqual(
+        workspaceAny.updateUrisWithNewDirectoryName(
+          getItems(),
+          getDirectory("./fake/not-exist/"),
+          getDirectory("./test/fake-files/")
+        ),
+        getItems(2, "./fake/")
+      );
     });
   });
 
@@ -147,6 +330,42 @@ describe("Workspace", () => {
       );
 
       assert.equal(indexWorkspaceStub.calledOnce, false);
+    });
+  });
+
+  describe("onDidChangeTextDocument", () => {
+    it(`should updateCacheByPath method be invoked
+      if text document has changed and exists in workspace`, async () => {
+      sinon
+        .stub(workspaceAny.dataService, "isUriExistingInWorkspace")
+        .returns(Promise.resolve(true));
+      const updateDataStub = sinon.stub(workspaceAny, "updateCacheByPath");
+      const textDocumentChangeEvent = await getTextDocumentChangeEvent(true);
+      await workspaceAny.onDidChangeTextDocument(textDocumentChangeEvent);
+
+      assert.equal(updateDataStub.calledOnce, true);
+    });
+
+    it(`should do nothing if text document does not exist in workspace`, async () => {
+      sinon
+        .stub(workspaceAny.dataService, "isUriExistingInWorkspace")
+        .returns(Promise.resolve(false));
+      const updateDataStub = sinon.stub(workspaceAny, "updateCacheByPath");
+      const textDocumentChangeEvent = await getTextDocumentChangeEvent(true);
+      await workspaceAny.onDidChangeTextDocument(textDocumentChangeEvent);
+
+      assert.equal(updateDataStub.calledOnce, false);
+    });
+
+    it(`should do nothing if text document has not changed`, async () => {
+      sinon
+        .stub(workspaceAny.dataService, "isUriExistingInWorkspace")
+        .returns(Promise.resolve(true));
+      const updateDataStub = sinon.stub(workspaceAny, "updateCacheByPath");
+      const textDocumentChangeEvent = await getTextDocumentChangeEvent();
+      await workspaceAny.onDidChangeTextDocument(textDocumentChangeEvent);
+
+      assert.equal(updateDataStub.calledOnce, false);
     });
   });
 });

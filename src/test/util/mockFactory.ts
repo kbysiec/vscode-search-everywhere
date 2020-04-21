@@ -57,6 +57,20 @@ export const getConfigurationChangeEvent = (flag: boolean) => ({
   affectsConfiguration: () => flag,
 });
 
+export const getTextDocumentChangeEvent = async (
+  shouldContentBeChanged: boolean = false
+): Promise<vscode.TextDocumentChangeEvent> => {
+  const itemUntitled = getUntitledItem();
+  const textDocumentChangeEvent = {
+    document: await vscode.workspace.openTextDocument(itemUntitled),
+    contentChanges: [],
+  };
+  shouldContentBeChanged &&
+    (textDocumentChangeEvent as any).contentChanges.push("test change");
+
+  return textDocumentChangeEvent;
+};
+
 export const getWorkspaceData = (items: vscode.Uri[] = []): WorkspaceData => {
   const itemsMap = new Map<string, Item>();
   items.forEach((item: vscode.Uri) =>
@@ -71,30 +85,48 @@ export const getWorkspaceData = (items: vscode.Uri[] = []): WorkspaceData => {
   };
 };
 
+export const getDirectory = (path: string): vscode.Uri => {
+  return vscode.Uri.file(path);
+};
+
 export const getUntitledItem = (): vscode.Uri => {
   const itemUntitledUri = vscode.Uri.file("./fake/fake-1.ts");
   (itemUntitledUri as any).scheme = "untitled";
   return itemUntitledUri;
 };
 
-export const getItem = (withPath: boolean = false): vscode.Uri => {
-  return vscode.Uri.file(
-    `${withPath ? "./test/path/to/workspace" : "."}/fake/fake-1.ts`
-  );
+export const getItem = (
+  path: string = "/./fake/",
+  suffix: string | number = 1,
+  fixPrivateFsPathProperty: boolean = false
+): vscode.Uri => {
+  const item = vscode.Uri.file(`${path}fake-${suffix ? `${suffix}` : ""}.ts`);
+  fixPrivateFsPathProperty && ((item as any)._fsPath = item.fsPath);
+  return item;
 };
 
-export const getItems = (): vscode.Uri[] => {
-  return ["./fake/fake-1.ts", "./fake/fake-2.ts"].map((path: string) =>
-    vscode.Uri.file(path)
-  );
+export const getItems = (
+  count: number = 2,
+  path: string = "/./fake/",
+  suffixStartOffset: number = 0,
+  fixPrivateFsPathProperty: boolean = false
+): vscode.Uri[] => {
+  const array: vscode.Uri[] = [];
+  for (let i = 1; i <= count; i++) {
+    array.push(getItem(path, i + suffixStartOffset, fixPrivateFsPathProperty));
+  }
+  return array;
 };
 
-export const getQpItem = (): QuickPickItem => {
+export const getQpItem = (
+  path: string = "/./fake/",
+  suffix: string | number = 1
+): QuickPickItem => {
   const qpItem = {
-    label: "fake-1.ts",
+    label: `fake-${suffix ? `${suffix}` : ""}.ts`,
     description: "File",
-    detail: "/./fake/fake-1.ts",
-    uri: vscode.Uri.file("./fake/fake-1.ts"),
+    detail: `${path}fake-${suffix ? `${suffix}` : ""}.ts`,
+    uri: vscode.Uri.file(`${path}fake-${suffix ? `${suffix}` : ""}.ts`),
     symbolKind: 0,
     range: {
       start: new vscode.Position(0, 0),
@@ -116,37 +148,16 @@ export const getUntitledQpItem = (): QuickPickItem => {
   };
 };
 
-export const getQpItems = (): QuickPickItem[] => {
-  const qpItems = [
-    {
-      label: "fake-1.ts",
-      description: "File",
-      detail: "/./fake/fake-1.ts",
-      uri: vscode.Uri.file("./fake/fake-1.ts"),
-      symbolKind: 0,
-      range: {
-        start: new vscode.Position(0, 0),
-        end: new vscode.Position(0, 0),
-      },
-    },
-    {
-      label: "fake-2.ts",
-      description: "File",
-      detail: "\\.\\fake\\fake-2.ts",
-      uri: vscode.Uri.file("./fake/fake-2.ts"),
-      symbolKind: 0,
-      range: {
-        start: new vscode.Position(0, 0),
-        end: new vscode.Position(0, 0),
-      },
-    },
-  ];
-  qpItems.forEach((qpItem: any) => {
-    qpItem.uri._fsPath = qpItem.uri.fsPath;
-    qpItem.detail = qpItem.uri.fsPath;
-  });
-
-  return qpItems;
+export const getQpItems = (
+  count: number = 2,
+  path: string = "/./fake/",
+  suffixStartOffset: number = 0
+): QuickPickItem[] => {
+  const array: QuickPickItem[] = [];
+  for (let i = 1; i <= count; i++) {
+    array.push(getQpItem(path, i + suffixStartOffset));
+  }
+  return array;
 };
 
 export const getDocumentSymbolItemSingleLine = (
@@ -237,4 +248,83 @@ export const getDocumentSymbolQpItemMultiLine = (
   qpItemAny.detail = qpItemAny.uri.fsPath;
 
   return qpItem;
+};
+
+export const getQpItemsSymbolAndUri = (path: string = "/./fake/") => {
+  const qpItemsSymbolAndUri: QuickPickItem[] = [
+    {
+      label: "fake-2.ts",
+      description: "File",
+      detail: `${path}fake-2.ts`,
+      uri: vscode.Uri.file(`${path}fake-2.ts`),
+      symbolKind: 0,
+      range: {
+        start: new vscode.Position(0, 0),
+        end: new vscode.Position(0, 0),
+      },
+    },
+    {
+      label: "test symbol name",
+      description: "Module at lines: 1 - 3 in test parent",
+      detail: `${path}fake-2.ts`,
+      uri: vscode.Uri.file(`${path}fake-2.ts`),
+      symbolKind: 1,
+      range: {
+        start: new vscode.Position(0, 0),
+        end: new vscode.Position(3, 0),
+      },
+    },
+  ];
+
+  qpItemsSymbolAndUri.forEach((qpItem: any) => {
+    qpItem.uri._fsPath = qpItem.uri.fsPath;
+    qpItem.detail = qpItem.uri.fsPath;
+  });
+
+  return qpItemsSymbolAndUri;
+};
+
+export const getQpItemsSymbolAndUriExt = (path: string = "/./fake/") => {
+  const qpItemsSymbolAndUriExt: QuickPickItem[] = [
+    {
+      label: "fake-1.ts",
+      description: "File",
+      detail: "/./fake/fake-1.ts",
+      uri: vscode.Uri.file("/./fake/fake-1.ts"),
+      symbolKind: 0,
+      range: {
+        start: new vscode.Position(0, 0),
+        end: new vscode.Position(0, 0),
+      },
+    },
+    {
+      label: "fake-2.ts",
+      description: "File",
+      detail: `${path}fake-2.ts`,
+      uri: vscode.Uri.file(`${path}fake-2.ts`),
+      symbolKind: 0,
+      range: {
+        start: new vscode.Position(0, 0),
+        end: new vscode.Position(0, 0),
+      },
+    },
+    {
+      label: "test symbol name",
+      description: "Module at lines: 1 - 3 in test parent",
+      detail: `${path}fake-2.ts`,
+      uri: vscode.Uri.file(`${path}fake-2.ts`),
+      symbolKind: 1,
+      range: {
+        start: new vscode.Position(0, 0),
+        end: new vscode.Position(3, 0),
+      },
+    },
+  ];
+
+  qpItemsSymbolAndUriExt.forEach((qpItem: any) => {
+    qpItem.uri._fsPath = qpItem.uri.fsPath;
+    qpItem.detail = qpItem.uri.fsPath;
+  });
+
+  return qpItemsSymbolAndUriExt;
 };

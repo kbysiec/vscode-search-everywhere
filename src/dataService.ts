@@ -11,19 +11,35 @@ class DataService {
     this.config = new Config(cache);
   }
 
-  async fetchData(): Promise<WorkspaceData> {
-    const includePatterns = this.getIncludePatterns();
-    const excludePatterns = this.getExcludePatterns();
+  async fetchData(uris?: vscode.Uri[]): Promise<WorkspaceData> {
     const workspaceData: WorkspaceData = this.utils.createWorkspaceData();
-    const uris = await vscode.workspace.findFiles(
-      includePatterns,
-      excludePatterns
-    );
+    const uriItems = await this.getUris(uris);
 
-    await this.includeSymbols(workspaceData, uris);
-    this.includeUris(workspaceData, uris);
+    await this.includeSymbols(workspaceData, uriItems);
+    this.includeUris(workspaceData, uriItems);
 
     return workspaceData;
+  }
+
+  async isUriExistingInWorkspace(uri: vscode.Uri): Promise<boolean> {
+    const uris = await this.fetchUris();
+    return uris.some(
+      (existingUri: vscode.Uri) => existingUri.fsPath === uri.fsPath
+    );
+  }
+
+  private async fetchUris(): Promise<vscode.Uri[]> {
+    const includePatterns = this.getIncludePatterns();
+    const excludePatterns = this.getExcludePatterns();
+    return await vscode.workspace.findFiles(includePatterns, excludePatterns);
+  }
+
+  private async getUris(uris?: vscode.Uri[]): Promise<vscode.Uri[]> {
+    if (uris && uris.length) {
+      return uris;
+    } else {
+      return await this.fetchUris();
+    }
   }
 
   private getIncludePatterns(): string {

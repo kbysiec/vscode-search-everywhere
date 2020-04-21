@@ -24,6 +24,12 @@ class Utils {
     );
   }
 
+  printErrorMessage(error: Error): void {
+    vscode.window.showInformationMessage(
+      `Something went wrong... Extension encountered the following error: ${error.message}`
+    );
+  }
+
   createWorkspaceData(): WorkspaceData {
     return {
       items: new Map<string, Item>(),
@@ -37,6 +43,22 @@ class Utils {
 
   getSplitter(): string {
     return "§&§";
+  }
+
+  countWordInstances(text: string, word: string): number {
+    return text.split(word).length - 1;
+  }
+
+  getNthIndex(text: string, word: string, occurrenceNumber: number): number {
+    const length = text.length;
+    let index = -1;
+    while (occurrenceNumber-- && index++ < length) {
+      index = text.indexOf(word, index);
+      if (index < 0) {
+        break;
+      }
+    }
+    return index;
   }
 }
 

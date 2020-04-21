@@ -58,6 +58,57 @@ describe("DataService", () => {
     });
   });
 
+  describe("isUriExistingInWorkspace", () => {
+    it("should return true if uri exists in workspace", async () => {
+      sinon
+        .stub(dataServiceAny, "fetchUris")
+        .returns(Promise.resolve(getItems()));
+
+      const item = getItem();
+      assert.equal(await dataService.isUriExistingInWorkspace(item), true);
+    });
+
+    it("should return false if uri does not exist in workspace", async () => {
+      sinon
+        .stub(dataServiceAny, "fetchUris")
+        .returns(Promise.resolve(getItems()));
+
+      const item = getItem("./test/path/to/workspace");
+      assert.equal(await dataService.isUriExistingInWorkspace(item), false);
+    });
+  });
+
+  describe("fetchUris", () => {
+    it("should return array of vscode.Uri items", async () => {
+      const items = getItems();
+      sinon.stub(vscode.workspace, "findFiles").returns(Promise.resolve(items));
+
+      assert.equal(await dataServiceAny.fetchUris(), items);
+    });
+  });
+
+  describe("getUris", () => {
+    it("should return array of vscode.Uri items by invoking fetchUris method (uris param not given)", async () => {
+      const items = getItems();
+      sinon.stub(dataServiceAny, "fetchUris").returns(Promise.resolve(items));
+
+      assert.equal(await dataServiceAny.getUris(), items);
+    });
+
+    it("should return array of vscode.Uri items by invoking fetchUris method (given uris param is an empty array)", async () => {
+      const items = getItems();
+      sinon.stub(dataServiceAny, "fetchUris").returns(Promise.resolve(items));
+
+      assert.equal(await dataServiceAny.getUris([]), items);
+    });
+
+    it("should return array of vscode.Uri items (given uris param is an array with items)", async () => {
+      const items = getItems();
+
+      assert.equal(await dataServiceAny.getUris(items), items);
+    });
+  });
+
   describe("getIncludePatterns", () => {
     it("should return string[] containing include patterns", () => {
       const patterns = ["**/*.{js}"];
