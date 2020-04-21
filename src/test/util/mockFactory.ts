@@ -71,6 +71,18 @@ export const getTextDocumentChangeEvent = async (
   return textDocumentChangeEvent;
 };
 
+export const getFileWatcherStub = () => {
+  return {
+    ignoreCreateEvents: false,
+    ignoreChangeEvents: false,
+    ignoreDeleteEvents: false,
+    onDidChange: sinon.stub(),
+    onDidCreate: sinon.stub(),
+    onDidDelete: sinon.stub(),
+    dispose: () => {},
+  };
+};
+
 export const getWorkspaceData = (items: vscode.Uri[] = []): WorkspaceData => {
   const itemsMap = new Map<string, Item>();
   items.forEach((item: vscode.Uri) =>

@@ -4,6 +4,7 @@ import Utils from "./utils";
 import DataService from "./dataService";
 import DataConverter from "./dataConverter";
 import QuickPickItem from "./interface/quickPickItem";
+import { appConfig } from "./appConfig";
 
 class Workspace {
   private dataService: DataService;
@@ -16,7 +17,7 @@ class Workspace {
   constructor(
     private cache: Cache,
     private utils: Utils,
-    private onDidChangeTextDocumentCallback: Function
+    private onDidChangeRemoveCreateCallback: Function
   ) {
     this.dataService = new DataService(this.cache, this.utils);
     this.dataConverter = new DataConverter(this.utils);
@@ -34,6 +35,11 @@ class Workspace {
       this.onDidChangeWorkspaceFolders
     );
     vscode.workspace.onDidChangeTextDocument(this.onDidChangeTextDocument);
+
+    const fileWatcher = vscode.workspace.createFileSystemWatcher(
+      appConfig.globPattern
+    );
+    fileWatcher.onDidChange(this.onDidFileSave);
   }
 
   getData(): QuickPickItem[] | undefined {
@@ -166,7 +172,17 @@ class Workspace {
 
     if (isUriExistingInWorkspace && event.contentChanges.length) {
       await this.updateCacheByPath(uri);
-      await this.onDidChangeTextDocumentCallback();
+      await this.onDidChangeRemoveCreateCallback();
+    }
+  };
+
+  private onDidFileSave = async (uri: vscode.Uri) => {
+    const isUriExistingInWorkspace = await this.dataService.isUriExistingInWorkspace(
+      uri
+    );
+    if (isUriExistingInWorkspace) {
+      await this.updateCacheByPath(uri);
+      await this.onDidChangeRemoveCreateCallback();
     }
   };
 }

@@ -16,6 +16,7 @@ import {
   getQpItemsSymbolAndUri,
   getQpItemsSymbolAndUriExt,
   getTextDocumentChangeEvent,
+  getFileWatcherStub,
 } from "../util/mockFactory";
 import Cache from "../../cache";
 import Utils from "../../utils";
@@ -25,16 +26,16 @@ describe("Workspace", () => {
   let workspaceAny: any;
   let cacheStub: Cache;
   let utilsStub: Utils;
-  let onDidChangeTextDocumentCallbackStub: sinon.SinonStub;
+  let onDidChangeRemoveCreateCallbackStub: sinon.SinonStub;
 
   before(() => {
     cacheStub = getCacheStub();
     utilsStub = getUtilsStub();
-    onDidChangeTextDocumentCallbackStub = sinon.stub();
+    onDidChangeRemoveCreateCallbackStub = sinon.stub();
     workspace = new Workspace(
       cacheStub,
       utilsStub,
-      onDidChangeTextDocumentCallbackStub
+      onDidChangeRemoveCreateCallbackStub
     );
   });
 
@@ -44,7 +45,7 @@ describe("Workspace", () => {
 
   afterEach(() => {
     sinon.restore();
-    onDidChangeTextDocumentCallbackStub.resetHistory();
+    onDidChangeRemoveCreateCallbackStub.resetHistory();
   });
 
   describe("constructor", () => {
@@ -52,7 +53,7 @@ describe("Workspace", () => {
       workspace = new Workspace(
         cacheStub,
         utilsStub,
-        onDidChangeTextDocumentCallbackStub
+        onDidChangeRemoveCreateCallbackStub
       );
 
       assert.exists(workspace);
@@ -97,11 +98,18 @@ describe("Workspace", () => {
         vscode.workspace,
         "onDidChangeTextDocument"
       );
+      const fileWatcherStub = getFileWatcherStub();
+      const createFileSystemWatcherStub = sinon
+        .stub(vscode.workspace, "createFileSystemWatcher")
+        .returns(fileWatcherStub);
+
       await workspace.registerEventListeners();
 
       assert.equal(onDidChangeConfigurationStub.calledOnce, true);
       assert.equal(onDidChangeWorkspaceFoldersStub.calledOnce, true);
       assert.equal(onDidChangeTextDocumentStub.calledOnce, true);
+      assert.equal(createFileSystemWatcherStub.calledOnce, true);
+      assert.equal(fileWatcherStub.onDidChange.calledOnce, true);
     });
   });
 
@@ -357,7 +365,7 @@ describe("Workspace", () => {
       assert.equal(updateDataStub.calledOnce, true);
     });
 
-    it(`should onDidChangeTextDocumentCallback method be invoked
+    it(`should onDidChangeRemoveCreateCallback method be invoked
       if text document has changed and exists in workspace`, async () => {
       sinon
         .stub(workspaceAny.dataService, "isUriExistingInWorkspace")
@@ -366,7 +374,7 @@ describe("Workspace", () => {
       const textDocumentChangeEvent = await getTextDocumentChangeEvent(true);
       await workspaceAny.onDidChangeTextDocument(textDocumentChangeEvent);
 
-      assert.equal(onDidChangeTextDocumentCallbackStub.calledOnce, true);
+      assert.equal(onDidChangeRemoveCreateCallbackStub.calledOnce, true);
     });
 
     it(`should do nothing if text document does not exist in workspace`, async () => {
@@ -387,6 +395,30 @@ describe("Workspace", () => {
       const updateDataStub = sinon.stub(workspaceAny, "updateCacheByPath");
       const textDocumentChangeEvent = await getTextDocumentChangeEvent();
       await workspaceAny.onDidChangeTextDocument(textDocumentChangeEvent);
+
+      assert.equal(updateDataStub.calledOnce, false);
+    });
+  });
+
+  describe("onDidFileSave", () => {
+    it(`should updateCacheByPath method be invoked
+      if file or directory has been renamed and exists in workspace`, async () => {
+      sinon
+        .stub(workspaceAny.dataService, "isUriExistingInWorkspace")
+        .returns(Promise.resolve(true));
+      const updateDataStub = sinon.stub(workspaceAny, "updateCacheByPath");
+      await workspaceAny.onDidFileSave(getItem());
+
+      assert.equal(updateDataStub.calledOnce, true);
+    });
+
+    it(`should do nothing if file or directory has been
+      renamed but does not exist in workspace`, async () => {
+      sinon
+        .stub(workspaceAny.dataService, "isUriExistingInWorkspace")
+        .returns(Promise.resolve(false));
+      const updateDataStub = sinon.stub(workspaceAny, "updateCacheByPath");
+      await workspaceAny.onDidFileSave(getItem());
 
       assert.equal(updateDataStub.calledOnce, false);
     });
