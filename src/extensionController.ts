@@ -26,6 +26,7 @@ class ExtensionController {
 
   async startup(): Promise<void> {
     await this.workspace.indexWorkspace();
+    await this.loadQuickPickData();
   }
 
   private async loadQuickPickData(): Promise<void> {
@@ -38,7 +39,11 @@ class ExtensionController {
   private initComponents(): void {
     this.cache = new Cache(this.extensionContext);
     this.utils = new Utils();
-    this.workspace = new Workspace(this.cache, this.utils);
+    this.workspace = new Workspace(
+      this.cache,
+      this.utils,
+      this.loadQuickPickData.bind(this)
+    );
     this.quickPick = new QuickPick();
   }
 }

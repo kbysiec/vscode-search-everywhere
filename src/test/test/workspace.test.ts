@@ -25,11 +25,17 @@ describe("Workspace", () => {
   let workspaceAny: any;
   let cacheStub: Cache;
   let utilsStub: Utils;
+  let onDidChangeTextDocumentCallbackStub: sinon.SinonStub;
 
   before(() => {
     cacheStub = getCacheStub();
     utilsStub = getUtilsStub();
-    workspace = new Workspace(cacheStub, utilsStub);
+    onDidChangeTextDocumentCallbackStub = sinon.stub();
+    workspace = new Workspace(
+      cacheStub,
+      utilsStub,
+      onDidChangeTextDocumentCallbackStub
+    );
   });
 
   beforeEach(() => {
@@ -38,11 +44,16 @@ describe("Workspace", () => {
 
   afterEach(() => {
     sinon.restore();
+    onDidChangeTextDocumentCallbackStub.resetHistory();
   });
 
   describe("constructor", () => {
     it("should workspace be initialized", () => {
-      workspace = new Workspace(cacheStub, utilsStub);
+      workspace = new Workspace(
+        cacheStub,
+        utilsStub,
+        onDidChangeTextDocumentCallbackStub
+      );
 
       assert.exists(workspace);
     });
@@ -344,6 +355,18 @@ describe("Workspace", () => {
       await workspaceAny.onDidChangeTextDocument(textDocumentChangeEvent);
 
       assert.equal(updateDataStub.calledOnce, true);
+    });
+
+    it(`should onDidChangeTextDocumentCallback method be invoked
+      if text document has changed and exists in workspace`, async () => {
+      sinon
+        .stub(workspaceAny.dataService, "isUriExistingInWorkspace")
+        .returns(Promise.resolve(true));
+      sinon.stub(workspaceAny, "updateCacheByPath");
+      const textDocumentChangeEvent = await getTextDocumentChangeEvent(true);
+      await workspaceAny.onDidChangeTextDocument(textDocumentChangeEvent);
+
+      assert.equal(onDidChangeTextDocumentCallbackStub.calledOnce, true);
     });
 
     it(`should do nothing if text document does not exist in workspace`, async () => {

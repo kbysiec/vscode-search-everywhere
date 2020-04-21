@@ -13,7 +13,11 @@ class Workspace {
   private directoryUriBeforePathUpdate?: vscode.Uri;
   private fileSymbolKind: number = 0;
 
-  constructor(private cache: Cache, private utils: Utils) {
+  constructor(
+    private cache: Cache,
+    private utils: Utils,
+    private onDidChangeTextDocumentCallback: Function
+  ) {
     this.dataService = new DataService(this.cache, this.utils);
     this.dataConverter = new DataConverter(this.utils);
   }
@@ -162,6 +166,7 @@ class Workspace {
 
     if (isUriExistingInWorkspace && event.contentChanges.length) {
       await this.updateCacheByPath(uri);
+      await this.onDidChangeTextDocumentCallback();
     }
   };
 }
