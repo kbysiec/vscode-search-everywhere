@@ -111,6 +111,7 @@ describe("Workspace", () => {
       assert.equal(createFileSystemWatcherStub.calledOnce, true);
       assert.equal(fileWatcherStub.onDidChange.calledOnce, true);
       assert.equal(fileWatcherStub.onDidCreate.calledOnce, true);
+      assert.equal(fileWatcherStub.onDidDelete.calledOnce, true);
     });
   });
 
@@ -431,6 +432,18 @@ describe("Workspace", () => {
       await workspaceAny.onDidFileFolderCreate(getItem());
 
       assert.equal(updateDataStub.calledOnce, true);
+    });
+  });
+
+  describe("onDidFileFolderDelete", () => {
+    it("should removeFromCacheByPath method be invoked", async () => {
+      const removeFromCacheByPathStub = sinon.stub(
+        workspaceAny,
+        "removeFromCacheByPath"
+      );
+      await workspaceAny.onDidFileFolderDelete(getItem());
+
+      assert.equal(removeFromCacheByPathStub.calledOnce, true);
     });
   });
 });

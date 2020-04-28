@@ -41,6 +41,7 @@ class Workspace {
     );
     fileWatcher.onDidChange(this.onDidFileSave);
     fileWatcher.onDidCreate(this.onDidFileFolderCreate);
+    fileWatcher.onDidDelete(this.onDidFileFolderDelete);
   }
 
   getData(): QuickPickItem[] | undefined {
@@ -189,6 +190,11 @@ class Workspace {
 
   private onDidFileFolderCreate = async (uri: vscode.Uri) => {
     await this.updateCacheByPath(uri);
+    await this.onDidChangeRemoveCreateCallback();
+  };
+
+  private onDidFileFolderDelete = async (uri: vscode.Uri) => {
+    await this.removeFromCacheByPath(uri);
     await this.onDidChangeRemoveCreateCallback();
   };
 }
