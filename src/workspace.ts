@@ -40,6 +40,7 @@ class Workspace {
       appConfig.globPattern
     );
     fileWatcher.onDidChange(this.onDidFileSave);
+    fileWatcher.onDidCreate(this.onDidFileFolderCreate);
   }
 
   getData(): QuickPickItem[] | undefined {
@@ -184,6 +185,11 @@ class Workspace {
       await this.updateCacheByPath(uri);
       await this.onDidChangeRemoveCreateCallback();
     }
+  };
+
+  private onDidFileFolderCreate = async (uri: vscode.Uri) => {
+    await this.updateCacheByPath(uri);
+    await this.onDidChangeRemoveCreateCallback();
   };
 }
 

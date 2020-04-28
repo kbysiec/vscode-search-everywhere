@@ -110,6 +110,7 @@ describe("Workspace", () => {
       assert.equal(onDidChangeTextDocumentStub.calledOnce, true);
       assert.equal(createFileSystemWatcherStub.calledOnce, true);
       assert.equal(fileWatcherStub.onDidChange.calledOnce, true);
+      assert.equal(fileWatcherStub.onDidCreate.calledOnce, true);
     });
   });
 
@@ -421,6 +422,15 @@ describe("Workspace", () => {
       await workspaceAny.onDidFileSave(getItem());
 
       assert.equal(updateDataStub.calledOnce, false);
+    });
+  });
+
+  describe("onDidFileFolderCreate", () => {
+    it("should updateCacheByPath method be invoked", async () => {
+      const updateDataStub = sinon.stub(workspaceAny, "updateCacheByPath");
+      await workspaceAny.onDidFileFolderCreate(getItem());
+
+      assert.equal(updateDataStub.calledOnce, true);
     });
   });
 });
