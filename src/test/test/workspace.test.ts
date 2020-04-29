@@ -310,6 +310,20 @@ describe("Workspace", () => {
     });
   });
 
+  describe("cleanDirectoryRenamingData", () => {
+    it("should variables values related to directory renaming be set to undefined", () => {
+      sinon
+        .stub(workspaceAny, "directoryUriBeforePathUpdate")
+        .value(getDirectory("#"));
+      sinon.stub(workspaceAny, "urisForDirectoryPathUpdate").value(getItems());
+
+      workspaceAny.cleanDirectoryRenamingData();
+
+      assert.equal(workspaceAny.directoryUriBeforePathUpdate, undefined);
+      assert.equal(workspaceAny.urisForDirectoryPathUpdate, undefined);
+    });
+  });
+
   describe("onDidChangeConfiguration", () => {
     it("should reindex workspace if extension configuration has changed", async () => {
       sinon.stub(workspaceAny.utils, "hasConfigurationChanged").returns(true);

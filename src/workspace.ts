@@ -6,6 +6,8 @@ import DataConverter from "./dataConverter";
 import QuickPickItem from "./interface/quickPickItem";
 import { appConfig } from "./appConfig";
 
+const debounce = require("debounce");
+
 class Workspace {
   private dataService: DataService;
   private dataConverter: DataConverter;
@@ -40,7 +42,7 @@ class Workspace {
       appConfig.globPattern
     );
     fileWatcher.onDidChange(this.onDidFileSave);
-    fileWatcher.onDidCreate(this.onDidFileFolderCreate);
+    fileWatcher.onDidCreate(debounce(this.onDidFileFolderCreate, 260));
     fileWatcher.onDidDelete(this.onDidFileFolderDelete);
   }
 
@@ -62,6 +64,8 @@ class Workspace {
       let data: QuickPickItem[];
 
       if (isUriExistingInWorkspace) {
+        this.cleanDirectoryRenamingData();
+
         await this.removeFromCacheByPath(uri);
         data = await this.downloadData([uri]);
         data = this.mergeWithDataFromCache(data);
@@ -80,8 +84,7 @@ class Workspace {
           data = this.mergeWithDataFromCache(data);
           this.cache.updateData(data);
         }
-        this.directoryUriBeforePathUpdate = undefined;
-        this.urisForDirectoryPathUpdate = undefined;
+        this.cleanDirectoryRenamingData();
       }
     } catch (error) {
       this.utils.printErrorMessage(error);
@@ -146,6 +149,11 @@ class Workspace {
       );
       return vscode.Uri.file(path);
     });
+  }
+
+  private cleanDirectoryRenamingData() {
+    this.directoryUriBeforePathUpdate = undefined;
+    this.urisForDirectoryPathUpdate = undefined;
   }
 
   private onDidChangeConfiguration = async (

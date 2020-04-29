@@ -114,5 +114,8 @@
   },
   "bugs": {
     "url": ""
+  },
+  "dependencies": {
+    "debounce": "^1.2.0"
   }
 }
