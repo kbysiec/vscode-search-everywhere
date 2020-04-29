@@ -60,14 +60,11 @@ describe("ExtensionController", () => {
   });
 
   describe("startup", () => {
-    it("should indexWorkspace method be invoked", async () => {
-      const indexWorkspaceStub = sinon.stub(
-        extensionControllerAny.workspace,
-        "indexWorkspace"
-      );
+    it("should index method be invoked", async () => {
+      const indexStub = sinon.stub(extensionControllerAny.workspace, "index");
       await extensionControllerAny.startup();
 
-      assert.equal(indexWorkspaceStub.calledOnce, true);
+      assert.equal(indexStub.calledOnce, true);
     });
   });
 

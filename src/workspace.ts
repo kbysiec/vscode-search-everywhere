@@ -5,12 +5,16 @@ import DataService from "./dataService";
 import DataConverter from "./dataConverter";
 import QuickPickItem from "./interface/quickPickItem";
 import { appConfig } from "./appConfig";
+import ActionType from "./enum/actionType";
+import Action from "./interface/action";
+import ActionProcessor from "./actionProcessor";
 
 const debounce = require("debounce");
 
 class Workspace {
   private dataService: DataService;
   private dataConverter: DataConverter;
+  private actionProcessor: ActionProcessor;
 
   private urisForDirectoryPathUpdate?: vscode.Uri[];
   private directoryUriBeforePathUpdate?: vscode.Uri;
@@ -23,9 +27,18 @@ class Workspace {
   ) {
     this.dataService = new DataService(this.cache, this.utils);
     this.dataConverter = new DataConverter(this.utils);
+    this.actionProcessor = new ActionProcessor(onDidChangeRemoveCreateCallback);
   }
 
-  async indexWorkspace(): Promise<void> {
+  async index() {
+    await this.registerAction(
+      ActionType.Rebuild,
+      this.indexWorkspace.bind(this),
+      "index"
+    );
+  }
+
+  private async indexWorkspace(): Promise<void> {
     this.cache.clear();
     const qpData = await this.downloadData();
     this.cache.updateData(qpData);
@@ -88,7 +101,11 @@ class Workspace {
       }
     } catch (error) {
       this.utils.printErrorMessage(error);
-      await this.indexWorkspace();
+      await this.registerAction(
+        ActionType.Rebuild,
+        this.indexWorkspace.bind(this),
+        "on error catch"
+      );
     }
   }
 
@@ -156,11 +173,29 @@ class Workspace {
     this.urisForDirectoryPathUpdate = undefined;
   }
 
+  private async registerAction(
+    type: ActionType,
+    fn: Function,
+    comment: string,
+    uri?: vscode.Uri
+  ): Promise<void> {
+    const action: Action = {
+      type,
+      fn,
+      comment,
+    };
+    await this.actionProcessor.register(action);
+  }
+
   private onDidChangeConfiguration = async (
     event: vscode.ConfigurationChangeEvent
   ): Promise<void> => {
     if (this.utils.hasConfigurationChanged(event)) {
-      await this.indexWorkspace();
+      await this.registerAction(
+        ActionType.Rebuild,
+        this.indexWorkspace.bind(this),
+        "onDidChangeConfiguration"
+      );
     }
   };
 
@@ -168,7 +203,11 @@ class Workspace {
     event: vscode.WorkspaceFoldersChangeEvent
   ): Promise<void> => {
     if (this.utils.hasWorkspaceChanged(event)) {
-      await this.indexWorkspace();
+      await this.registerAction(
+        ActionType.Rebuild,
+        this.indexWorkspace.bind(this),
+        "onDidChangeWorkspaceFolders"
+      );
     }
   };
 
@@ -181,8 +220,11 @@ class Workspace {
     );
 
     if (isUriExistingInWorkspace && event.contentChanges.length) {
-      await this.updateCacheByPath(uri);
-      await this.onDidChangeRemoveCreateCallback();
+      await this.registerAction(
+        ActionType.Update,
+        this.updateCacheByPath.bind(this, uri),
+        "onDidChangeTextDocument"
+      );
     }
   };
 
@@ -191,19 +233,32 @@ class Workspace {
       uri
     );
     if (isUriExistingInWorkspace) {
-      await this.updateCacheByPath(uri);
-      await this.onDidChangeRemoveCreateCallback();
+      await this.registerAction(
+        ActionType.Update,
+        this.updateCacheByPath.bind(this, uri),
+        "onDidFileSave"
+      );
     }
   };
 
   private onDidFileFolderCreate = async (uri: vscode.Uri) => {
-    await this.updateCacheByPath(uri);
-    await this.onDidChangeRemoveCreateCallback();
+    // necessary to invoke updateCacheByPath after removeCacheByPath
+    // TODO: check if necessary
+    // await this.utils.sleep(1);
+
+    await this.registerAction(
+      ActionType.Update,
+      this.updateCacheByPath.bind(this, uri),
+      "onDidFileFolderCreate"
+    );
   };
 
   private onDidFileFolderDelete = async (uri: vscode.Uri) => {
-    await this.removeFromCacheByPath(uri);
-    await this.onDidChangeRemoveCreateCallback();
+    await this.registerAction(
+      ActionType.Remove,
+      this.removeFromCacheByPath.bind(this, uri),
+      "onDidFileFolderDelete"
+    );
   };
 }
 

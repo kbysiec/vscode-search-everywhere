@@ -5,6 +5,8 @@ import Utils from "../../utils";
 import WorkspaceData from "../../interface/workspaceData";
 import QuickPickItem from "../../interface/quickPickItem";
 import Item from "../../interface/item";
+import ActionType from "../../enum/actionType";
+import Action from "../../interface/action";
 
 export function getExtensionContext(): vscode.ExtensionContext {
   return {
@@ -339,4 +341,39 @@ export const getQpItemsSymbolAndUriExt = (path: string = "/./fake/") => {
   });
 
   return qpItemsSymbolAndUriExt;
+};
+
+const getRandomActionType = (): ActionType => {
+  const count = Object.keys(ActionType).length; //items count
+  const index = Math.round(Math.random() * count); //random index
+  return Object.values(ActionType)[index];
+};
+
+export const getAction = (
+  type?: ActionType,
+  comment: string = "test comment"
+): Action => {
+  return {
+    type: type || getRandomActionType(),
+    fn: sinon.stub(),
+    comment,
+  };
+};
+
+export const getActions = (
+  count: number = 2,
+  action?: Action,
+  type?: ActionType,
+  comment?: string
+): Action[] => {
+  const array: Action[] = [];
+
+  for (let i = 1; i <= count; i++) {
+    if (action) {
+      array.push(action);
+    } else {
+      array.push(getAction(type, `${comment} ${i}`));
+    }
+  }
+  return array;
 };

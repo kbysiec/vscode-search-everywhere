@@ -20,6 +20,7 @@ import {
 } from "../util/mockFactory";
 import Cache from "../../cache";
 import Utils from "../../utils";
+import ActionType from "../../enum/actionType";
 
 describe("Workspace", () => {
   let workspace: Workspace;
@@ -60,17 +61,28 @@ describe("Workspace", () => {
     });
   });
 
+  describe("index", () => {
+    it(`should registerAction method be invoked
+      which register rebuild action with indexWorkspace method`, async () => {
+      const registerActionStub = sinon.stub(workspaceAny, "registerAction");
+      await workspace.index();
+
+      assert.equal(registerActionStub.calledOnce, true);
+      assert.equal(registerActionStub.args[0][0], ActionType.Rebuild);
+    });
+  });
+
   describe("indexWorkspace", () => {
     it("should reset cache to initial empty state", async () => {
       const clearStub = sinon.stub(workspaceAny.cache, "clear");
-      await workspace.indexWorkspace();
+      await workspaceAny.indexWorkspace();
 
       assert.equal(clearStub.calledOnce, true);
     });
 
     it("should index all workspace files", async () => {
       const downloadDataStub = sinon.stub(workspaceAny, "downloadData");
-      await workspace.indexWorkspace();
+      await workspaceAny.indexWorkspace();
 
       assert.equal(downloadDataStub.calledOnce, true);
     });
@@ -78,7 +90,7 @@ describe("Workspace", () => {
     it("should update cache with indexed workspace files", async () => {
       const updateDataStub = sinon.stub(workspaceAny.cache, "updateData");
       sinon.stub(workspaceAny, "downloadData").returns(getQpItems());
-      await workspace.indexWorkspace();
+      await workspaceAny.indexWorkspace();
 
       assert.equal(updateDataStub.calledWith(getQpItems()), true);
     });
@@ -200,16 +212,18 @@ describe("Workspace", () => {
       assert.equal(updateDataStub.called, false);
     });
 
-    it("should indexWorkspace method be invoked if error is thrown", async () => {
+    it(`should registerAction method be invoked which
+      register rebuild action with indexWorkspace method if error is thrown`, async () => {
       sinon
         .stub(workspaceAny.dataService, "isUriExistingInWorkspace")
         .returns(Promise.resolve(true));
       sinon.stub(workspaceAny, "removeFromCacheByPath").throws("test error");
-      const indexWorkspaceStub = sinon.stub(workspaceAny, "indexWorkspace");
+      const registerActionStub = sinon.stub(workspaceAny, "registerAction");
 
       await workspaceAny.updateCacheByPath(getItem());
 
-      assert.equal(indexWorkspaceStub.calledOnce, true);
+      assert.equal(registerActionStub.calledOnce, true);
+      assert.equal(registerActionStub.args[0][0], ActionType.Rebuild);
     });
   });
 
@@ -325,60 +339,66 @@ describe("Workspace", () => {
   });
 
   describe("onDidChangeConfiguration", () => {
-    it("should reindex workspace if extension configuration has changed", async () => {
+    it(`should registerAction method be invoked which register
+      rebuild action with indexWorkspace method if extension configuration has changed`, async () => {
       sinon.stub(workspaceAny.utils, "hasConfigurationChanged").returns(true);
-      const indexWorkspaceStub = sinon.stub(workspaceAny, "indexWorkspace");
+      const registerActionStub = sinon.stub(workspaceAny, "registerAction");
       await workspaceAny.onDidChangeConfiguration(
         getConfigurationChangeEvent(true)
       );
 
-      assert.equal(indexWorkspaceStub.calledOnce, true);
+      assert.equal(registerActionStub.calledOnce, true);
+      assert.equal(registerActionStub.args[0][0], ActionType.Rebuild);
     });
 
     it("should do nothing if extension configuration has not changed", async () => {
       sinon.stub(workspaceAny.utils, "hasConfigurationChanged").returns(false);
-      const indexWorkspaceStub = sinon.stub(workspaceAny, "indexWorkspace");
+      const registerActionStub = sinon.stub(workspaceAny, "registerAction");
       await workspaceAny.onDidChangeConfiguration(
         getConfigurationChangeEvent(false)
       );
 
-      assert.equal(indexWorkspaceStub.calledOnce, false);
+      assert.equal(registerActionStub.calledOnce, false);
     });
   });
 
   describe("onDidChangeWorkspaceFolders", () => {
-    it("should reindex workspace if amount of opened folders in workspace has changed", async () => {
+    it(`should registerAction method be invoked which register
+      rebuild action with indexWorkspace method if amount of opened folders in workspace has changed`, async () => {
       sinon.stub(workspaceAny.utils, "hasWorkspaceChanged").returns(true);
-      const indexWorkspaceStub = sinon.stub(workspaceAny, "indexWorkspace");
+      const registerActionStub = sinon.stub(workspaceAny, "registerAction");
       await workspaceAny.onDidChangeWorkspaceFolders(
         getWorkspaceFoldersChangeEvent(true)
       );
 
-      assert.equal(indexWorkspaceStub.calledOnce, true);
+      assert.equal(registerActionStub.calledOnce, true);
+      assert.equal(registerActionStub.args[0][0], ActionType.Rebuild);
     });
 
     it("should do nothing if extension configuration has not changed", async () => {
       sinon.stub(workspaceAny.utils, "hasWorkspaceChanged").returns(false);
-      const indexWorkspaceStub = sinon.stub(workspaceAny, "indexWorkspace");
+      const registerActionStub = sinon.stub(workspaceAny, "registerAction");
       await workspaceAny.onDidChangeWorkspaceFolders(
         getWorkspaceFoldersChangeEvent(false)
       );
 
-      assert.equal(indexWorkspaceStub.calledOnce, false);
+      assert.equal(registerActionStub.calledOnce, false);
     });
   });
 
   describe("onDidChangeTextDocument", () => {
-    it(`should updateCacheByPath method be invoked
-      if text document has changed and exists in workspace`, async () => {
+    it(`should registerAction method be invoked which register
+      remove action with removeFromCacheByUri method if text document
+      has changed and exists in workspace`, async () => {
       sinon
         .stub(workspaceAny.dataService, "isUriExistingInWorkspace")
         .returns(Promise.resolve(true));
-      const updateDataStub = sinon.stub(workspaceAny, "updateCacheByPath");
+      const registerActionStub = sinon.stub(workspaceAny, "registerAction");
       const textDocumentChangeEvent = await getTextDocumentChangeEvent(true);
       await workspaceAny.onDidChangeTextDocument(textDocumentChangeEvent);
 
-      assert.equal(updateDataStub.calledOnce, true);
+      assert.equal(registerActionStub.calledOnce, true);
+      assert.equal(registerActionStub.args[0][0], ActionType.Update);
     });
 
     it(`should onDidChangeRemoveCreateCallback method be invoked
@@ -397,35 +417,37 @@ describe("Workspace", () => {
       sinon
         .stub(workspaceAny.dataService, "isUriExistingInWorkspace")
         .returns(Promise.resolve(false));
-      const updateDataStub = sinon.stub(workspaceAny, "updateCacheByPath");
+      const registerActionStub = sinon.stub(workspaceAny, "registerAction");
       const textDocumentChangeEvent = await getTextDocumentChangeEvent(true);
       await workspaceAny.onDidChangeTextDocument(textDocumentChangeEvent);
 
-      assert.equal(updateDataStub.calledOnce, false);
+      assert.equal(registerActionStub.calledOnce, false);
     });
 
     it(`should do nothing if text document has not changed`, async () => {
       sinon
         .stub(workspaceAny.dataService, "isUriExistingInWorkspace")
         .returns(Promise.resolve(true));
-      const updateDataStub = sinon.stub(workspaceAny, "updateCacheByPath");
+      const registerActionStub = sinon.stub(workspaceAny, "registerAction");
       const textDocumentChangeEvent = await getTextDocumentChangeEvent();
       await workspaceAny.onDidChangeTextDocument(textDocumentChangeEvent);
 
-      assert.equal(updateDataStub.calledOnce, false);
+      assert.equal(registerActionStub.calledOnce, false);
     });
   });
 
   describe("onDidFileSave", () => {
-    it(`should updateCacheByPath method be invoked
-      if file or directory has been renamed and exists in workspace`, async () => {
+    it(`should registerAction method be invoked which register
+      update action with updateCacheByUri method if file or directory has
+      been renamed and exists in workspace`, async () => {
       sinon
         .stub(workspaceAny.dataService, "isUriExistingInWorkspace")
         .returns(Promise.resolve(true));
-      const updateDataStub = sinon.stub(workspaceAny, "updateCacheByPath");
+      const registerActionStub = sinon.stub(workspaceAny, "registerAction");
       await workspaceAny.onDidFileSave(getItem());
 
-      assert.equal(updateDataStub.calledOnce, true);
+      assert.equal(registerActionStub.calledOnce, true);
+      assert.equal(registerActionStub.args[0][0], ActionType.Update);
     });
 
     it(`should do nothing if file or directory has been
@@ -433,31 +455,32 @@ describe("Workspace", () => {
       sinon
         .stub(workspaceAny.dataService, "isUriExistingInWorkspace")
         .returns(Promise.resolve(false));
-      const updateDataStub = sinon.stub(workspaceAny, "updateCacheByPath");
+      const registerActionStub = sinon.stub(workspaceAny, "registerAction");
       await workspaceAny.onDidFileSave(getItem());
 
-      assert.equal(updateDataStub.calledOnce, false);
+      assert.equal(registerActionStub.calledOnce, false);
     });
   });
 
   describe("onDidFileFolderCreate", () => {
-    it("should updateCacheByPath method be invoked", async () => {
-      const updateDataStub = sinon.stub(workspaceAny, "updateCacheByPath");
+    it(`should registerAction method be invoked which register
+      update action with updateCacheByUri method`, async () => {
+      const registerActionStub = sinon.stub(workspaceAny, "registerAction");
       await workspaceAny.onDidFileFolderCreate(getItem());
 
-      assert.equal(updateDataStub.calledOnce, true);
+      assert.equal(registerActionStub.calledOnce, true);
+      assert.equal(registerActionStub.args[0][0], ActionType.Update);
     });
   });
 
   describe("onDidFileFolderDelete", () => {
-    it("should removeFromCacheByPath method be invoked", async () => {
-      const removeFromCacheByPathStub = sinon.stub(
-        workspaceAny,
-        "removeFromCacheByPath"
-      );
+    it(`should registerAction method be invoked which register
+      remove action with removeFromCacheByUri method`, async () => {
+      const registerActionStub = sinon.stub(workspaceAny, "registerAction");
       await workspaceAny.onDidFileFolderDelete(getItem());
 
-      assert.equal(removeFromCacheByPathStub.calledOnce, true);
+      assert.equal(registerActionStub.calledOnce, true);
+      assert.equal(registerActionStub.args[0][0], ActionType.Remove);
     });
   });
 });
