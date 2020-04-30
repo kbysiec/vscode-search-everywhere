@@ -17,6 +17,7 @@ import {
   getQpItemsSymbolAndUriExt,
   getTextDocumentChangeEvent,
   getFileWatcherStub,
+  getFileRenameEvent,
 } from "../util/mockFactory";
 import Cache from "../../cache";
 import Utils from "../../utils";
@@ -431,6 +432,31 @@ describe("Workspace", () => {
       const registerActionStub = sinon.stub(workspaceAny, "registerAction");
       const textDocumentChangeEvent = await getTextDocumentChangeEvent();
       await workspaceAny.onDidChangeTextDocument(textDocumentChangeEvent);
+
+      assert.equal(registerActionStub.calledOnce, false);
+    });
+  });
+
+  describe("onDidRenameFiles", () => {
+    it(`should registerAction method be invoked which register
+      remove action with removeFromCacheByUri method if workspace
+      contains more than one folder`, async () => {
+      sinon
+        .stub(workspaceAny.utils, "hasWorkspaceMoreThanOneFolder")
+        .returns(true);
+      const registerActionStub = sinon.stub(workspaceAny, "registerAction");
+      await workspaceAny.onDidRenameFiles(getFileRenameEvent());
+
+      assert.equal(registerActionStub.calledOnce, true);
+      assert.equal(registerActionStub.args[0][0], ActionType.Remove);
+    });
+
+    it("should do nothing if workspace contains either one folder or any", async () => {
+      sinon
+        .stub(workspaceAny.utils, "hasWorkspaceMoreThanOneFolder")
+        .returns(false);
+      const registerActionStub = sinon.stub(workspaceAny, "registerAction");
+      await workspaceAny.onDidRenameFiles(getFileRenameEvent());
 
       assert.equal(registerActionStub.calledOnce, false);
     });

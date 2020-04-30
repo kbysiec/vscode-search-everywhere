@@ -73,6 +73,15 @@ export const getTextDocumentChangeEvent = async (
   return textDocumentChangeEvent;
 };
 
+export const getFileRenameEvent = () => ({
+    files: [
+      {
+        oldUri: vscode.Uri.file('./#'),
+        newUri: vscode.Uri.file('./test/#'),
+      }
+    ]
+});
+
 export const getFileWatcherStub = () => {
   return {
     ignoreCreateEvents: false,

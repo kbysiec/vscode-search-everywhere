@@ -33,6 +33,20 @@ describe("Utils", () => {
     });
   });
 
+  describe("hasWorkspaceMoreThanOneFolder", () => {
+    it("should return true if workspace contains more than one folder", () => {
+      sinon.stub(vscode.workspace, "workspaceFolders").value(["/#", "/test/#"]);
+
+      assert.equal(utils.hasWorkspaceMoreThanOneFolder(), true);
+    });
+
+    it("should return false if workspace contains either one folder or any", () => {
+      sinon.stub(vscode.workspace, "workspaceFolders").value(["/#"]);
+
+      assert.equal(utils.hasWorkspaceMoreThanOneFolder(), false);
+    });
+  });
+
   describe("hasWorkspaceChanged", () => {
     it("should return true if amount of opened folders in workspace has changed", () => {
       assert.equal(

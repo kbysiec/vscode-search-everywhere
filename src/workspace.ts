@@ -27,7 +27,9 @@ class Workspace {
   ) {
     this.dataService = new DataService(this.cache, this.utils);
     this.dataConverter = new DataConverter(this.utils);
-    this.actionProcessor = new ActionProcessor(onDidChangeRemoveCreateCallback);
+    this.actionProcessor = new ActionProcessor(
+      this.onDidChangeRemoveCreateCallback
+    );
   }
 
   async index() {
@@ -45,16 +47,20 @@ class Workspace {
   }
 
   async registerEventListeners(): Promise<void> {
-    vscode.workspace.onDidChangeConfiguration(this.onDidChangeConfiguration);
+    vscode.workspace.onDidChangeConfiguration(
+      debounce(this.onDidChangeConfiguration, 250)
+    );
     vscode.workspace.onDidChangeWorkspaceFolders(
-      this.onDidChangeWorkspaceFolders
+      debounce(this.onDidChangeWorkspaceFolders, 250)
     );
     vscode.workspace.onDidChangeTextDocument(this.onDidChangeTextDocument);
+    vscode.workspace.onDidRenameFiles(this.onDidRenameFiles);
 
     const fileWatcher = vscode.workspace.createFileSystemWatcher(
       appConfig.globPattern
     );
     fileWatcher.onDidChange(this.onDidFileSave);
+    // necessary to invoke updateCacheByPath after removeCacheByPath
     fileWatcher.onDidCreate(debounce(this.onDidFileFolderCreate, 260));
     fileWatcher.onDidDelete(this.onDidFileFolderDelete);
   }
@@ -228,6 +234,24 @@ class Workspace {
     }
   };
 
+  /* fileWatcher.onDidDelete(this.onDelete) is not invoked if workspace
+    contains more than one folder opened. It is a workaround for this
+    visual studio code issue.
+ */
+  // TODO Submit issue on github
+  private onDidRenameFiles = async (event: vscode.FileRenameEvent) => {
+    const uri = event.files[0].oldUri;
+    const hasWorkspaceMoreThanOneFolder = this.utils.hasWorkspaceMoreThanOneFolder();
+
+    if (hasWorkspaceMoreThanOneFolder) {
+      await this.registerAction(
+        ActionType.Remove,
+        this.removeFromCacheByPath.bind(this, uri),
+        "onDidRenameFiles"
+      );
+    }
+  };
+
   private onDidFileSave = async (uri: vscode.Uri) => {
     const isUriExistingInWorkspace = await this.dataService.isUriExistingInWorkspace(
       uri
@@ -244,7 +268,7 @@ class Workspace {
   private onDidFileFolderCreate = async (uri: vscode.Uri) => {
     // necessary to invoke updateCacheByPath after removeCacheByPath
     // TODO: check if necessary
-    // await this.utils.sleep(1);
+    await this.utils.sleep(1);
 
     await this.registerAction(
       ActionType.Update,

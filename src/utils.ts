@@ -10,6 +10,13 @@ class Utils {
     );
   }
 
+  hasWorkspaceMoreThanOneFolder(): boolean {
+    return !!(
+      vscode.workspace.workspaceFolders &&
+      vscode.workspace.workspaceFolders.length > 1
+    );
+  }
+
   hasWorkspaceChanged(event: vscode.WorkspaceFoldersChangeEvent): boolean {
     return !!event.added.length || !!event.removed.length;
   }
