@@ -25,8 +25,7 @@ class ExtensionController {
   }
 
   async startup(): Promise<void> {
-    await this.workspace.index();
-    await this.loadQuickPickData();
+    await this.workspace.indexWithProgress();
   }
 
   private async loadQuickPickData(): Promise<void> {

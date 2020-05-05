@@ -11,6 +11,7 @@ import {
   getDocumentSymbolItemSingleLineArray,
   getItems,
   getItem,
+  getEventEmitter,
 } from "../util/mockFactory";
 import Cache from "../../cache";
 import Utils from "../../utils";
@@ -185,6 +186,20 @@ describe("DataService", () => {
 
       assert.equal(workspaceData.count, 0);
       assert.equal(sleepStub.callCount, 9);
+    });
+
+    it("should emit onDidItemIndexed event after item indexing", async () => {
+      const eventEmitter = getEventEmitter();
+      sinon
+        .stub(dataServiceAny, "onDidItemIndexedEventEmitter")
+        .value(eventEmitter);
+      sinon
+        .stub(dataServiceAny, "getSymbolsForUri")
+        .returns(Promise.resolve(getDocumentSymbolItemSingleLineArray(3)));
+      const workspaceData = getWorkspaceData();
+      await dataServiceAny.includeSymbols(workspaceData, [getItem()]);
+
+      assert.equal(eventEmitter.fire.calledOnce, true);
     });
   });
 

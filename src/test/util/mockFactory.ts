@@ -74,12 +74,12 @@ export const getTextDocumentChangeEvent = async (
 };
 
 export const getFileRenameEvent = () => ({
-    files: [
-      {
-        oldUri: vscode.Uri.file('./#'),
-        newUri: vscode.Uri.file('./test/#'),
-      }
-    ]
+  files: [
+    {
+      oldUri: vscode.Uri.file("./#"),
+      newUri: vscode.Uri.file("./test/#"),
+    },
+  ],
 });
 
 export const getFileWatcherStub = () => {
@@ -386,3 +386,7 @@ export const getActions = (
   }
   return array;
 };
+
+export const getEventEmitter = () => ({ fire: sinon.stub() });
+export const getSubscription = () => ({ dispose: sinon.stub() });
+export const getProgress = (value: number = 0) => ({ report: sinon.stub(), value });

@@ -6,6 +6,11 @@ import Utils from "./utils";
 
 class DataService {
   private config: Config;
+  private onDidItemIndexedEventEmitter: vscode.EventEmitter<
+    number
+  > = new vscode.EventEmitter();
+  readonly onDidItemIndexed: vscode.Event<number> = this
+    .onDidItemIndexedEventEmitter.event;
 
   constructor(cache: Cache, private utils: Utils) {
     this.config = new Config(cache);
@@ -88,6 +93,8 @@ class DataService {
         });
 
       workspaceData.count += symbolsForUri ? symbolsForUri.length : 0;
+
+      this.onDidItemIndexedEventEmitter.fire(uris.length);
     }
   }
 

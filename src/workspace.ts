@@ -20,30 +20,31 @@ class Workspace {
   private directoryUriBeforePathUpdate?: vscode.Uri;
   private fileSymbolKind: number = 0;
 
+  private progressStep: number = 0;
+  private currentProgressValue: number = 0;
+
   constructor(
     private cache: Cache,
     private utils: Utils,
-    private onDidChangeRemoveCreateCallback: Function
+    onDidChangeRemoveCreateCallback: Function
   ) {
     this.dataService = new DataService(this.cache, this.utils);
     this.dataConverter = new DataConverter(this.utils);
-    this.actionProcessor = new ActionProcessor(
-      this.onDidChangeRemoveCreateCallback
-    );
+    this.actionProcessor = new ActionProcessor(onDidChangeRemoveCreateCallback);
   }
 
-  async index() {
-    await this.registerAction(
-      ActionType.Rebuild,
-      this.indexWorkspace.bind(this),
-      "index"
-    );
-  }
-
-  private async indexWorkspace(): Promise<void> {
-    this.cache.clear();
-    const qpData = await this.downloadData();
-    this.cache.updateData(qpData);
+  async indexWithProgress(): Promise<void> {
+    if (this.utils.hasWorkspaceAnyFolder()) {
+      await vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: "Indexing workspace files and symbols...",
+        },
+        this.indexWithProgressTask.bind(this)
+      );
+    } else {
+      this.utils.printNoFolderOpenedMessage();
+    }
   }
 
   async registerEventListeners(): Promise<void> {
@@ -67,6 +68,39 @@ class Workspace {
 
   getData(): QuickPickItem[] | undefined {
     return this.cache.getData();
+  }
+
+  private async indexWithProgressTask(
+    progress: vscode.Progress<{
+      message?: string | undefined;
+      increment?: number | undefined;
+    }>
+  ) {
+    const subscription = this.dataService.onDidItemIndexed(
+      this.onDidItemIndexed.bind(this, progress)
+    );
+
+    await this.index();
+
+    this.resetProgress();
+    subscription.dispose();
+
+    // necessary for proper way to complete progress
+    this.utils.sleep(250);
+  }
+
+  private async index() {
+    await this.registerAction(
+      ActionType.Rebuild,
+      this.indexWorkspace.bind(this),
+      "index"
+    );
+  }
+
+  private async indexWorkspace(): Promise<void> {
+    this.cache.clear();
+    const qpData = await this.downloadData();
+    this.cache.updateData(qpData);
   }
 
   private async downloadData(uris?: vscode.Uri[]): Promise<QuickPickItem[]> {
@@ -193,6 +227,11 @@ class Workspace {
     await this.actionProcessor.register(action);
   }
 
+  private resetProgress() {
+    this.currentProgressValue = 0;
+    this.progressStep = 0;
+  }
+
   private onDidChangeConfiguration = async (
     event: vscode.ConfigurationChangeEvent
   ): Promise<void> => {
@@ -284,6 +323,29 @@ class Workspace {
       "onDidFileFolderDelete"
     );
   };
+
+  private onDidItemIndexed(
+    progress: vscode.Progress<{
+      message?: string | undefined;
+      increment?: number | undefined;
+    }>,
+    urisCount: number
+  ) {
+    if (!this.progressStep) {
+      this.progressStep = 100 / urisCount;
+    }
+
+    this.currentProgressValue += this.progressStep;
+
+    progress.report({
+      increment: this.progressStep,
+      message: ` ${
+        (progress as any).value
+          ? `${Math.round(this.currentProgressValue)}%`
+          : ""
+      }`,
+    });
+  }
 }
 
 export default Workspace;

@@ -18,6 +18,9 @@ import {
   getTextDocumentChangeEvent,
   getFileWatcherStub,
   getFileRenameEvent,
+  getSubscription,
+  getAction,
+  getProgress,
 } from "../util/mockFactory";
 import Cache from "../../cache";
 import Utils from "../../utils";
@@ -62,38 +65,26 @@ describe("Workspace", () => {
     });
   });
 
-  describe("index", () => {
-    it(`should registerAction method be invoked
-      which register rebuild action with indexWorkspace method`, async () => {
-      const registerActionStub = sinon.stub(workspaceAny, "registerAction");
-      await workspace.index();
+  describe("indexWithProgress", () => {
+    it(`should vscode.window.withProgress method be invoked
+      if workspace has opened at least one folder`, async () => {
+      sinon.stub(workspaceAny.utils, "hasWorkspaceAnyFolder").returns(true);
+      const withProgressStub = sinon.stub(vscode.window, "withProgress");
+      await workspace.indexWithProgress();
 
-      assert.equal(registerActionStub.calledOnce, true);
-      assert.equal(registerActionStub.args[0][0], ActionType.Rebuild);
-    });
-  });
-
-  describe("indexWorkspace", () => {
-    it("should reset cache to initial empty state", async () => {
-      const clearStub = sinon.stub(workspaceAny.cache, "clear");
-      await workspaceAny.indexWorkspace();
-
-      assert.equal(clearStub.calledOnce, true);
+      assert.equal(withProgressStub.calledOnce, true);
     });
 
-    it("should index all workspace files", async () => {
-      const downloadDataStub = sinon.stub(workspaceAny, "downloadData");
-      await workspaceAny.indexWorkspace();
+    it(`should printNoFolderOpenedMessage method be invoked
+      if workspace does not has opened at least one folder`, async () => {
+      sinon.stub(workspaceAny.utils, "hasWorkspaceAnyFolder").returns(false);
+      const printNoFolderOpenedMessageStub = sinon.stub(
+        workspaceAny.utils,
+        "printNoFolderOpenedMessage"
+      );
+      await workspace.indexWithProgress();
 
-      assert.equal(downloadDataStub.calledOnce, true);
-    });
-
-    it("should update cache with indexed workspace files", async () => {
-      const updateDataStub = sinon.stub(workspaceAny.cache, "updateData");
-      sinon.stub(workspaceAny, "downloadData").returns(getQpItems());
-      await workspaceAny.indexWorkspace();
-
-      assert.equal(updateDataStub.calledWith(getQpItems()), true);
+      assert.equal(printNoFolderOpenedMessageStub.calledOnce, true);
     });
   });
 
@@ -137,6 +128,59 @@ describe("Workspace", () => {
       workspace.getData();
 
       assert.equal(getDataStub.calledOnce, true);
+    });
+  });
+
+  describe("indexWithProgressTask", () => {
+    it(`should index, resetProgress and utils.sleep methods be invoked`, async () => {
+      const subscription = getSubscription();
+      const onDidItemIndexedStub = sinon
+        .stub(workspaceAny.dataService, "onDidItemIndexed")
+        .returns(subscription);
+      const indexStub = sinon.stub(workspaceAny, "index");
+      const sleepStub = sinon.stub(workspaceAny.utils, "sleep");
+
+      await workspaceAny.indexWithProgressTask();
+
+      assert.equal(onDidItemIndexedStub.calledOnce, true);
+      assert.equal(subscription.dispose.calledOnce, true);
+      assert.equal(indexStub.calledOnce, true);
+      assert.equal(sleepStub.calledOnce, true);
+    });
+  });
+
+  describe("index", () => {
+    it(`should registerAction method be invoked
+      which register rebuild action with indexWorkspace method`, async () => {
+      const registerActionStub = sinon.stub(workspaceAny, "registerAction");
+      await workspaceAny.index();
+
+      assert.equal(registerActionStub.calledOnce, true);
+      assert.equal(registerActionStub.args[0][0], ActionType.Rebuild);
+    });
+  });
+
+  describe("indexWorkspace", () => {
+    it("should reset cache to initial empty state", async () => {
+      const clearStub = sinon.stub(workspaceAny.cache, "clear");
+      await workspaceAny.indexWorkspace();
+
+      assert.equal(clearStub.calledOnce, true);
+    });
+
+    it("should index all workspace files", async () => {
+      const downloadDataStub = sinon.stub(workspaceAny, "downloadData");
+      await workspaceAny.indexWorkspace();
+
+      assert.equal(downloadDataStub.calledOnce, true);
+    });
+
+    it("should update cache with indexed workspace files", async () => {
+      const updateDataStub = sinon.stub(workspaceAny.cache, "updateData");
+      sinon.stub(workspaceAny, "downloadData").returns(getQpItems());
+      await workspaceAny.indexWorkspace();
+
+      assert.equal(updateDataStub.calledWith(getQpItems()), true);
     });
   });
 
@@ -339,6 +383,33 @@ describe("Workspace", () => {
     });
   });
 
+  describe("registerAction", () => {
+    it("should actionProcessor.register method be invoked", async () => {
+      const registerStub = sinon.stub(workspaceAny.actionProcessor, "register");
+
+      await workspaceAny.registerAction(
+        ActionType.Rebuild,
+        () => {},
+        "test comment"
+      );
+
+      assert.equal(registerStub.calledOnce, true);
+      assert.equal(registerStub.args[0][0].type, ActionType.Rebuild);
+    });
+  });
+
+  describe("resetProgress", () => {
+    it("should variables values related to indexing progress be set to 0", () => {
+      sinon.stub(workspaceAny, "progressStep").value(15);
+      sinon.stub(workspaceAny, "currentProgressValue").value(70);
+
+      workspaceAny.resetProgress();
+
+      assert.equal(workspaceAny.progressStep, 0);
+      assert.equal(workspaceAny.currentProgressValue, 0);
+    });
+  });
+
   describe("onDidChangeConfiguration", () => {
     it(`should registerAction method be invoked which register
       rebuild action with indexWorkspace method if extension configuration has changed`, async () => {
@@ -507,6 +578,60 @@ describe("Workspace", () => {
 
       assert.equal(registerActionStub.calledOnce, true);
       assert.equal(registerActionStub.args[0][0], ActionType.Remove);
+    });
+  });
+
+  describe("onDidItemIndexed", () => {
+    it("should increase progress with message", () => {
+      // sinon.stub(workspaceAny, "progressStep").value(0);
+      // sinon.stub(workspaceAny, "currentProgressValue").value(0);
+      const progress = getProgress(1);
+
+      workspaceAny.onDidItemIndexed(progress, 20);
+
+      assert.equal(
+        progress.report.calledWith({
+          increment: 5,
+          message: " 5%",
+        }),
+        true
+      );
+    });
+
+    it("should increase progress with empty message", () => {
+      // sinon.stub(workspaceAny, "progressStep").value(0);
+      // sinon.stub(workspaceAny, "currentProgressValue").value(0);
+      const progress = getProgress();
+
+      workspaceAny.onDidItemIndexed(progress, 20);
+
+      assert.equal(
+        progress.report.calledWith({
+          increment: 5,
+          message: " ",
+        }),
+        true
+      );
+    });
+
+    it("should calculate and set progress step if is empty", () => {
+      // sinon.stub(workspaceAny, "progressStep").value(0);
+      // sinon.stub(workspaceAny, "currentProgressValue").value(0);
+      const progress = getProgress();
+
+      workspaceAny.onDidItemIndexed(progress, 20);
+
+      assert.equal(workspaceAny.progressStep, 5);
+    });
+
+    it("should omit calculating progress step if is already done", () => {
+      sinon.stub(workspaceAny, "progressStep").value(1);
+      // sinon.stub(workspaceAny, "currentProgressValue").value(0);
+      const progress = getProgress();
+
+      workspaceAny.onDidItemIndexed(progress, 20);
+
+      assert.equal(workspaceAny.progressStep, 1);
     });
   });
 });
