@@ -12,6 +12,12 @@ import ActionProcessor from "./actionProcessor";
 const debounce = require("debounce");
 
 class Workspace {
+  private onDidProcessingEventEmitter: vscode.EventEmitter<
+    void
+  > = new vscode.EventEmitter();
+  readonly onDidProcessing: vscode.Event<void> = this
+    .onDidProcessingEventEmitter.event;
+
   private dataService: DataService;
   private dataConverter: DataConverter;
   private actionProcessor: ActionProcessor;
@@ -23,14 +29,10 @@ class Workspace {
   private progressStep: number = 0;
   private currentProgressValue: number = 0;
 
-  constructor(
-    private cache: Cache,
-    private utils: Utils,
-    onDidChangeRemoveCreateCallback: Function
-  ) {
+  constructor(private cache: Cache, private utils: Utils) {
     this.dataService = new DataService(this.cache, this.utils);
     this.dataConverter = new DataConverter(this.utils);
-    this.actionProcessor = new ActionProcessor(onDidChangeRemoveCreateCallback);
+    this.actionProcessor = new ActionProcessor();
   }
 
   async indexWithProgress(): Promise<void> {
@@ -64,6 +66,8 @@ class Workspace {
     // necessary to invoke updateCacheByPath after removeCacheByPath
     fileWatcher.onDidCreate(debounce(this.onDidFileFolderCreate, 260));
     fileWatcher.onDidDelete(this.onDidFileFolderDelete);
+
+    this.actionProcessor.onDidProcessing(this.onDidActionProcessorProcessing);
   }
 
   getData(): QuickPickItem[] | undefined {
@@ -346,6 +350,10 @@ class Workspace {
       }`,
     });
   }
+
+  private onDidActionProcessorProcessing = async () => {
+    this.onDidProcessingEventEmitter.fire();
+  };
 }
 
 export default Workspace;

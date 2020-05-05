@@ -2,17 +2,15 @@ import { assert } from "chai";
 import * as sinon from "sinon";
 import ActionProcessor from "../../actionProcessor";
 import Action from "../../interface/action";
-import { getAction, getActions } from "../util/mockFactory";
+import { getAction, getActions, getEventEmitter } from "../util/mockFactory";
 import ActionType from "../../enum/actionType";
 
 describe("ActionProcessor", () => {
   let actionProcessor: ActionProcessor;
   let actionProcessorAny: any;
-  let onDidProcessCallbackStub: sinon.SinonStub;
 
   before(() => {
-    onDidProcessCallbackStub = sinon.stub();
-    actionProcessor = new ActionProcessor(onDidProcessCallbackStub);
+    actionProcessor = new ActionProcessor();
   });
 
   beforeEach(() => {
@@ -21,12 +19,11 @@ describe("ActionProcessor", () => {
 
   afterEach(() => {
     sinon.restore();
-    onDidProcessCallbackStub.resetHistory();
   });
 
   describe("constructor", () => {
     it("should action processor be initialized", () => {
-      actionProcessor = new ActionProcessor(onDidProcessCallbackStub);
+      actionProcessor = new ActionProcessor();
 
       assert.exists(actionProcessor);
     });
@@ -80,11 +77,15 @@ describe("ActionProcessor", () => {
       assert.deepEqual((action.fn as sinon.SinonStub).calledTwice, true);
     });
 
-    it("should onDidProcessCallback be invoked on end processing", async () => {
+    it("should onDidProcessing be emitted on the end of processing", async () => {
+      const eventEmitter = getEventEmitter();
+      sinon
+        .stub(actionProcessorAny, "onDidProcessingEventEmitter")
+        .value(eventEmitter);
       sinon.stub(actionProcessorAny, "queue").value(getActions());
       await actionProcessorAny.process();
 
-      assert.deepEqual(onDidProcessCallbackStub.calledOnce, true);
+      assert.equal(eventEmitter.fire.calledOnce, true);
     });
   });
 });

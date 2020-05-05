@@ -13,6 +13,7 @@ class ExtensionController {
   constructor(private extensionContext: vscode.ExtensionContext) {
     this.initComponents();
     this.workspace.registerEventListeners();
+    this.registerEventListeners();
   }
 
   async search(): Promise<void> {
@@ -38,12 +39,12 @@ class ExtensionController {
   private initComponents(): void {
     this.cache = new Cache(this.extensionContext);
     this.utils = new Utils();
-    this.workspace = new Workspace(
-      this.cache,
-      this.utils,
-      this.loadQuickPickData.bind(this)
-    );
+    this.workspace = new Workspace(this.cache, this.utils);
     this.quickPick = new QuickPick();
+  }
+
+  private registerEventListeners() {
+    this.workspace.onDidProcessing(this.loadQuickPickData.bind(this));
   }
 }
 

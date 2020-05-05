@@ -21,6 +21,7 @@ import {
   getSubscription,
   getAction,
   getProgress,
+  getEventEmitter,
 } from "../util/mockFactory";
 import Cache from "../../cache";
 import Utils from "../../utils";
@@ -31,17 +32,11 @@ describe("Workspace", () => {
   let workspaceAny: any;
   let cacheStub: Cache;
   let utilsStub: Utils;
-  let onDidChangeRemoveCreateCallbackStub: sinon.SinonStub;
 
   before(() => {
     cacheStub = getCacheStub();
     utilsStub = getUtilsStub();
-    onDidChangeRemoveCreateCallbackStub = sinon.stub();
-    workspace = new Workspace(
-      cacheStub,
-      utilsStub,
-      onDidChangeRemoveCreateCallbackStub
-    );
+    workspace = new Workspace(cacheStub, utilsStub);
   });
 
   beforeEach(() => {
@@ -50,16 +45,11 @@ describe("Workspace", () => {
 
   afterEach(() => {
     sinon.restore();
-    onDidChangeRemoveCreateCallbackStub.resetHistory();
   });
 
   describe("constructor", () => {
     it("should workspace be initialized", () => {
-      workspace = new Workspace(
-        cacheStub,
-        utilsStub,
-        onDidChangeRemoveCreateCallbackStub
-      );
+      workspace = new Workspace(cacheStub, utilsStub);
 
       assert.exists(workspace);
     });
@@ -107,6 +97,11 @@ describe("Workspace", () => {
         .stub(vscode.workspace, "createFileSystemWatcher")
         .returns(fileWatcherStub);
 
+      const onDidProcessingStub = sinon.stub(
+        workspaceAny.actionProcessor,
+        "onDidProcessing"
+      );
+
       await workspace.registerEventListeners();
 
       assert.equal(onDidChangeConfigurationStub.calledOnce, true);
@@ -116,6 +111,7 @@ describe("Workspace", () => {
       assert.equal(fileWatcherStub.onDidChange.calledOnce, true);
       assert.equal(fileWatcherStub.onDidCreate.calledOnce, true);
       assert.equal(fileWatcherStub.onDidDelete.calledOnce, true);
+      assert.equal(onDidProcessingStub.calledOnce, true);
     });
   });
 
@@ -473,18 +469,6 @@ describe("Workspace", () => {
       assert.equal(registerActionStub.args[0][0], ActionType.Update);
     });
 
-    it(`should onDidChangeRemoveCreateCallback method be invoked
-      if text document has changed and exists in workspace`, async () => {
-      sinon
-        .stub(workspaceAny.dataService, "isUriExistingInWorkspace")
-        .returns(Promise.resolve(true));
-      sinon.stub(workspaceAny, "updateCacheByPath");
-      const textDocumentChangeEvent = await getTextDocumentChangeEvent(true);
-      await workspaceAny.onDidChangeTextDocument(textDocumentChangeEvent);
-
-      assert.equal(onDidChangeRemoveCreateCallbackStub.calledOnce, true);
-    });
-
     it(`should do nothing if text document does not exist in workspace`, async () => {
       sinon
         .stub(workspaceAny.dataService, "isUriExistingInWorkspace")
@@ -583,8 +567,6 @@ describe("Workspace", () => {
 
   describe("onDidItemIndexed", () => {
     it("should increase progress with message", () => {
-      // sinon.stub(workspaceAny, "progressStep").value(0);
-      // sinon.stub(workspaceAny, "currentProgressValue").value(0);
       const progress = getProgress(1);
 
       workspaceAny.onDidItemIndexed(progress, 20);
@@ -599,8 +581,6 @@ describe("Workspace", () => {
     });
 
     it("should increase progress with empty message", () => {
-      // sinon.stub(workspaceAny, "progressStep").value(0);
-      // sinon.stub(workspaceAny, "currentProgressValue").value(0);
       const progress = getProgress();
 
       workspaceAny.onDidItemIndexed(progress, 20);
@@ -615,8 +595,6 @@ describe("Workspace", () => {
     });
 
     it("should calculate and set progress step if is empty", () => {
-      // sinon.stub(workspaceAny, "progressStep").value(0);
-      // sinon.stub(workspaceAny, "currentProgressValue").value(0);
       const progress = getProgress();
 
       workspaceAny.onDidItemIndexed(progress, 20);
@@ -626,12 +604,23 @@ describe("Workspace", () => {
 
     it("should omit calculating progress step if is already done", () => {
       sinon.stub(workspaceAny, "progressStep").value(1);
-      // sinon.stub(workspaceAny, "currentProgressValue").value(0);
       const progress = getProgress();
 
       workspaceAny.onDidItemIndexed(progress, 20);
 
       assert.equal(workspaceAny.progressStep, 1);
+    });
+  });
+
+  describe("onDidActionProcessorProcessing", () => {
+    it("should onDidProcessing event be emitted", async () => {
+      const eventEmitter = getEventEmitter();
+      sinon
+        .stub(workspaceAny, "onDidProcessingEventEmitter")
+        .value(eventEmitter);
+      await workspaceAny.onDidActionProcessorProcessing();
+
+      assert.equal(eventEmitter.fire.calledOnce, true);
     });
   });
 });

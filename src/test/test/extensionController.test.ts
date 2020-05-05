@@ -101,4 +101,17 @@ describe("ExtensionController", () => {
       assert.equal(typeof extensionControllerAny.quickPick, "object");
     });
   });
+
+  describe("registerEventListeners", () => {
+    it("should register extensionController event listeners", () => {
+      const onDidProcessingStub = sinon.stub(
+        extensionControllerAny.workspace,
+        "onDidProcessing"
+      );
+
+      extensionControllerAny.registerEventListeners();
+
+      assert.equal(onDidProcessingStub.calledOnce, true);
+    });
+  });
 });

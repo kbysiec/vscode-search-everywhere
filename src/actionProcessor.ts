@@ -1,10 +1,14 @@
+import * as vscode from "vscode";
 import Action from "./interface/action";
 
 class ActionProcessor {
   private isBusy = false;
   private queue: Action[] = [];
-
-  constructor(private onDidProcessCallback: Function) {}
+  private onDidProcessingEventEmitter: vscode.EventEmitter<
+    void
+  > = new vscode.EventEmitter();
+  readonly onDidProcessing: vscode.Event<void> = this
+    .onDidProcessingEventEmitter.event;
 
   async register(action: Action): Promise<void> {
     this.add(action);
@@ -27,7 +31,7 @@ class ActionProcessor {
 
     this.isBusy = false;
 
-    await this.onDidProcessCallback();
+    this.onDidProcessingEventEmitter.fire();
   }
 }
 
