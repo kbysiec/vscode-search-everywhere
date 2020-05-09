@@ -67,6 +67,27 @@ class Utils {
     }
     return index;
   }
+
+  getLastFromArray<T>(array: T[], predicate: (item: T) => boolean): T {
+    return [...array].reverse().find(predicate) as T;
+  }
+
+  groupBy<T>(
+    array: T[],
+    keyGetter: (...args: any[]) => string
+  ): Map<string, T[]> {
+    const map = new Map<string, T[]>();
+    array.forEach((item: T) => {
+      const key = keyGetter(item);
+      const collection = map.get(key);
+      if (!collection) {
+        map.set(key, [item]);
+      } else {
+        collection.push(item);
+      }
+    });
+    return map;
+  }
 }
 
 export default Utils;

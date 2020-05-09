@@ -32,21 +32,15 @@ class Workspace {
   constructor(private cache: Cache, private utils: Utils) {
     this.dataService = new DataService(this.cache, this.utils);
     this.dataConverter = new DataConverter(this.utils);
-    this.actionProcessor = new ActionProcessor();
+    this.actionProcessor = new ActionProcessor(this.utils);
   }
 
-  async indexWithProgress(): Promise<void> {
-    if (this.utils.hasWorkspaceAnyFolder()) {
-      await vscode.window.withProgress(
-        {
-          location: vscode.ProgressLocation.Notification,
-          title: "Indexing workspace files and symbols...",
-        },
-        this.indexWithProgressTask.bind(this)
-      );
-    } else {
-      this.utils.printNoFolderOpenedMessage();
-    }
+  async index(comment: string) {
+    await this.registerAction(
+      ActionType.Rebuild,
+      this.indexWithProgress.bind(this),
+      comment
+    );
   }
 
   async registerEventListeners(): Promise<void> {
@@ -74,31 +68,37 @@ class Workspace {
     return this.cache.getData();
   }
 
+  private async indexWithProgress(): Promise<void> {
+    if (this.utils.hasWorkspaceAnyFolder()) {
+      await vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: "Indexing workspace files and symbols...",
+        },
+        this.indexWithProgressTask.bind(this)
+      );
+    } else {
+      this.utils.printNoFolderOpenedMessage();
+    }
+  }
+
   private async indexWithProgressTask(
     progress: vscode.Progress<{
       message?: string | undefined;
       increment?: number | undefined;
     }>
   ) {
-    const subscription = this.dataService.onDidItemIndexed(
+    const onDidItemIndexedSubscription = this.dataService.onDidItemIndexed(
       this.onDidItemIndexed.bind(this, progress)
     );
 
-    await this.index();
+    await this.indexWorkspace();
 
     this.resetProgress();
-    subscription.dispose();
+    onDidItemIndexedSubscription.dispose();
 
     // necessary for proper way to complete progress
     this.utils.sleep(250);
-  }
-
-  private async index() {
-    await this.registerAction(
-      ActionType.Rebuild,
-      this.indexWorkspace.bind(this),
-      "index"
-    );
   }
 
   private async indexWorkspace(): Promise<void> {
@@ -145,11 +145,7 @@ class Workspace {
       }
     } catch (error) {
       this.utils.printErrorMessage(error);
-      await this.registerAction(
-        ActionType.Rebuild,
-        this.indexWorkspace.bind(this),
-        "on error catch"
-      );
+      await this.index("on error catch");
     }
   }
 
@@ -227,6 +223,7 @@ class Workspace {
       type,
       fn,
       comment,
+      uri,
     };
     await this.actionProcessor.register(action);
   }
@@ -240,11 +237,7 @@ class Workspace {
     event: vscode.ConfigurationChangeEvent
   ): Promise<void> => {
     if (this.utils.hasConfigurationChanged(event)) {
-      await this.registerAction(
-        ActionType.Rebuild,
-        this.indexWorkspace.bind(this),
-        "onDidChangeConfiguration"
-      );
+      await this.index("onDidChangeConfiguration");
     }
   };
 
@@ -252,11 +245,7 @@ class Workspace {
     event: vscode.WorkspaceFoldersChangeEvent
   ): Promise<void> => {
     if (this.utils.hasWorkspaceChanged(event)) {
-      await this.registerAction(
-        ActionType.Rebuild,
-        this.indexWorkspace.bind(this),
-        "onDidChangeWorkspaceFolders"
-      );
+      await this.index("onDidChangeWorkspaceFolders");
     }
   };
 
@@ -272,7 +261,8 @@ class Workspace {
       await this.registerAction(
         ActionType.Update,
         this.updateCacheByPath.bind(this, uri),
-        "onDidChangeTextDocument"
+        "onDidChangeTextDocument",
+        uri
       );
     }
   };
@@ -290,7 +280,8 @@ class Workspace {
       await this.registerAction(
         ActionType.Remove,
         this.removeFromCacheByPath.bind(this, uri),
-        "onDidRenameFiles"
+        "onDidRenameFiles",
+        uri
       );
     }
   };
@@ -303,7 +294,8 @@ class Workspace {
       await this.registerAction(
         ActionType.Update,
         this.updateCacheByPath.bind(this, uri),
-        "onDidFileSave"
+        "onDidFileSave",
+        uri
       );
     }
   };
@@ -316,7 +308,8 @@ class Workspace {
     await this.registerAction(
       ActionType.Update,
       this.updateCacheByPath.bind(this, uri),
-      "onDidFileFolderCreate"
+      "onDidFileFolderCreate",
+      uri
     );
   };
 
@@ -324,7 +317,8 @@ class Workspace {
     await this.registerAction(
       ActionType.Remove,
       this.removeFromCacheByPath.bind(this, uri),
-      "onDidFileFolderDelete"
+      "onDidFileFolderDelete",
+      uri
     );
   };
 

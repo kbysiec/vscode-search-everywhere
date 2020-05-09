@@ -7,6 +7,7 @@ import QuickPickItem from "../../interface/quickPickItem";
 import Item from "../../interface/item";
 import ActionType from "../../enum/actionType";
 import Action from "../../interface/action";
+import { createStubInstance } from "./stubbedClass";
 
 export function getExtensionContext(): vscode.ExtensionContext {
   return {
@@ -34,7 +35,7 @@ export function getCacheStub(): Cache {
 }
 
 export function getUtilsStub(): Utils {
-  return sinon.createStubInstance(Utils);
+  return createStubInstance(Utils);
 }
 
 export const getWorkspaceFoldersChangeEvent = (flag: boolean) => {
@@ -360,12 +361,17 @@ const getRandomActionType = (): ActionType => {
 
 export const getAction = (
   type?: ActionType,
-  comment: string = "test comment"
+  comment: string = "test comment",
+  id: number = 0,
+  withUri: boolean = false,
+  uri: vscode.Uri = vscode.Uri.file(`./fake/fake-${id}.ts`)
 ): Action => {
   return {
     type: type || getRandomActionType(),
     fn: sinon.stub(),
     comment,
+    id,
+    uri: withUri ? uri : undefined,
   };
 };
 
@@ -373,7 +379,9 @@ export const getActions = (
   count: number = 2,
   action?: Action,
   type?: ActionType,
-  comment?: string
+  comment?: string,
+  withUri?: boolean,
+  uri?: vscode.Uri
 ): Action[] => {
   const array: Action[] = [];
 
@@ -381,7 +389,7 @@ export const getActions = (
     if (action) {
       array.push(action);
     } else {
-      array.push(getAction(type, `${comment} ${i}`));
+      array.push(getAction(type, `${comment} ${i}`, i - 1, withUri, uri));
     }
   }
   return array;
@@ -389,4 +397,7 @@ export const getActions = (
 
 export const getEventEmitter = () => ({ fire: sinon.stub() });
 export const getSubscription = () => ({ dispose: sinon.stub() });
-export const getProgress = (value: number = 0) => ({ report: sinon.stub(), value });
+export const getProgress = (value: number = 0) => ({
+  report: sinon.stub(),
+  value,
+});

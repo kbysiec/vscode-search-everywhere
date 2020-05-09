@@ -55,26 +55,14 @@ describe("Workspace", () => {
     });
   });
 
-  describe("indexWithProgress", () => {
-    it(`should vscode.window.withProgress method be invoked
-      if workspace has opened at least one folder`, async () => {
-      sinon.stub(workspaceAny.utils, "hasWorkspaceAnyFolder").returns(true);
-      const withProgressStub = sinon.stub(vscode.window, "withProgress");
-      await workspace.indexWithProgress();
+  describe("index", () => {
+    it(`should registerAction method be invoked
+      which register rebuild action`, async () => {
+      const registerActionStub = sinon.stub(workspaceAny, "registerAction");
+      await workspaceAny.index();
 
-      assert.equal(withProgressStub.calledOnce, true);
-    });
-
-    it(`should printNoFolderOpenedMessage method be invoked
-      if workspace does not has opened at least one folder`, async () => {
-      sinon.stub(workspaceAny.utils, "hasWorkspaceAnyFolder").returns(false);
-      const printNoFolderOpenedMessageStub = sinon.stub(
-        workspaceAny.utils,
-        "printNoFolderOpenedMessage"
-      );
-      await workspace.indexWithProgress();
-
-      assert.equal(printNoFolderOpenedMessageStub.calledOnce, true);
+      assert.equal(registerActionStub.calledOnce, true);
+      assert.equal(registerActionStub.args[0][0], ActionType.Rebuild);
     });
   });
 
@@ -127,32 +115,40 @@ describe("Workspace", () => {
     });
   });
 
+  describe("indexWithProgress", () => {
+    it(`should vscode.window.withProgress method be invoked
+      if workspace has opened at least one folder`, async () => {
+      sinon.stub(workspaceAny.utils, "hasWorkspaceAnyFolder").returns(true);
+      const withProgressStub = sinon.stub(vscode.window, "withProgress");
+      await workspaceAny.indexWithProgress();
+      assert.equal(withProgressStub.calledOnce, true);
+    });
+
+    it(`should printNoFolderOpenedMessage method be invoked
+      if workspace does not has opened at least one folder`, async () => {
+      sinon.stub(workspaceAny.utils, "hasWorkspaceAnyFolder").returns(false);
+      const printNoFolderOpenedMessageStub = sinon.stub(
+        workspaceAny.utils,
+        "printNoFolderOpenedMessage"
+      );
+      await workspaceAny.indexWithProgress();
+      assert.equal(printNoFolderOpenedMessageStub.calledOnce, true);
+    });
+  });
+
   describe("indexWithProgressTask", () => {
     it(`should index, resetProgress and utils.sleep methods be invoked`, async () => {
       const subscription = getSubscription();
       const onDidItemIndexedStub = sinon
         .stub(workspaceAny.dataService, "onDidItemIndexed")
         .returns(subscription);
-      const indexStub = sinon.stub(workspaceAny, "index");
+      const indexWorkspaceStub = sinon.stub(workspaceAny, "indexWorkspace");
       const sleepStub = sinon.stub(workspaceAny.utils, "sleep");
-
       await workspaceAny.indexWithProgressTask();
-
       assert.equal(onDidItemIndexedStub.calledOnce, true);
       assert.equal(subscription.dispose.calledOnce, true);
-      assert.equal(indexStub.calledOnce, true);
+      assert.equal(indexWorkspaceStub.calledOnce, true);
       assert.equal(sleepStub.calledOnce, true);
-    });
-  });
-
-  describe("index", () => {
-    it(`should registerAction method be invoked
-      which register rebuild action with indexWorkspace method`, async () => {
-      const registerActionStub = sinon.stub(workspaceAny, "registerAction");
-      await workspaceAny.index();
-
-      assert.equal(registerActionStub.calledOnce, true);
-      assert.equal(registerActionStub.args[0][0], ActionType.Rebuild);
     });
   });
 
@@ -253,18 +249,17 @@ describe("Workspace", () => {
       assert.equal(updateDataStub.called, false);
     });
 
-    it(`should registerAction method be invoked which
-      register rebuild action with indexWorkspace method if error is thrown`, async () => {
+    it(`should index method be invoked which
+      register rebuild action if error is thrown`, async () => {
       sinon
         .stub(workspaceAny.dataService, "isUriExistingInWorkspace")
         .returns(Promise.resolve(true));
       sinon.stub(workspaceAny, "removeFromCacheByPath").throws("test error");
-      const registerActionStub = sinon.stub(workspaceAny, "registerAction");
+      const indexStub = sinon.stub(workspaceAny, "index");
 
       await workspaceAny.updateCacheByPath(getItem());
 
-      assert.equal(registerActionStub.calledOnce, true);
-      assert.equal(registerActionStub.args[0][0], ActionType.Rebuild);
+      assert.equal(indexStub.calledOnce, true);
     });
   });
 
@@ -407,16 +402,15 @@ describe("Workspace", () => {
   });
 
   describe("onDidChangeConfiguration", () => {
-    it(`should registerAction method be invoked which register
-      rebuild action with indexWorkspace method if extension configuration has changed`, async () => {
+    it(`should index method be invoked which register
+      rebuild action if extension configuration has changed`, async () => {
       sinon.stub(workspaceAny.utils, "hasConfigurationChanged").returns(true);
-      const registerActionStub = sinon.stub(workspaceAny, "registerAction");
+      const indexStub = sinon.stub(workspaceAny, "index");
       await workspaceAny.onDidChangeConfiguration(
         getConfigurationChangeEvent(true)
       );
 
-      assert.equal(registerActionStub.calledOnce, true);
-      assert.equal(registerActionStub.args[0][0], ActionType.Rebuild);
+      assert.equal(indexStub.calledOnce, true);
     });
 
     it("should do nothing if extension configuration has not changed", async () => {
@@ -431,16 +425,15 @@ describe("Workspace", () => {
   });
 
   describe("onDidChangeWorkspaceFolders", () => {
-    it(`should registerAction method be invoked which register
-      rebuild action with indexWorkspace method if amount of opened folders in workspace has changed`, async () => {
+    it(`should index method be invoked which register
+      rebuild action if amount of opened folders in workspace has changed`, async () => {
       sinon.stub(workspaceAny.utils, "hasWorkspaceChanged").returns(true);
-      const registerActionStub = sinon.stub(workspaceAny, "registerAction");
+      const indexStub = sinon.stub(workspaceAny, "index");
       await workspaceAny.onDidChangeWorkspaceFolders(
         getWorkspaceFoldersChangeEvent(true)
       );
 
-      assert.equal(registerActionStub.calledOnce, true);
-      assert.equal(registerActionStub.args[0][0], ActionType.Rebuild);
+      assert.equal(indexStub.calledOnce, true);
     });
 
     it("should do nothing if extension configuration has not changed", async () => {
@@ -455,9 +448,8 @@ describe("Workspace", () => {
   });
 
   describe("onDidChangeTextDocument", () => {
-    it(`should registerAction method be invoked which register
-      remove action with removeFromCacheByUri method if text document
-      has changed and exists in workspace`, async () => {
+    it(`should registerAction method be invoked which register update
+      action if text document has changed and exists in workspace`, async () => {
       sinon
         .stub(workspaceAny.dataService, "isUriExistingInWorkspace")
         .returns(Promise.resolve(true));
@@ -493,9 +485,8 @@ describe("Workspace", () => {
   });
 
   describe("onDidRenameFiles", () => {
-    it(`should registerAction method be invoked which register
-      remove action with removeFromCacheByUri method if workspace
-      contains more than one folder`, async () => {
+    it(`should registerAction method be invoked which register remove
+      action if workspace contains more than one folder`, async () => {
       sinon
         .stub(workspaceAny.utils, "hasWorkspaceMoreThanOneFolder")
         .returns(true);
@@ -519,8 +510,8 @@ describe("Workspace", () => {
 
   describe("onDidFileSave", () => {
     it(`should registerAction method be invoked which register
-      update action with updateCacheByUri method if file or directory has
-      been renamed and exists in workspace`, async () => {
+      update action if file or directory has been renamed and
+      exists in workspace`, async () => {
       sinon
         .stub(workspaceAny.dataService, "isUriExistingInWorkspace")
         .returns(Promise.resolve(true));
@@ -544,8 +535,7 @@ describe("Workspace", () => {
   });
 
   describe("onDidFileFolderCreate", () => {
-    it(`should registerAction method be invoked which register
-      update action with updateCacheByUri method`, async () => {
+    it("should registerAction method be invoked which register update action", async () => {
       const registerActionStub = sinon.stub(workspaceAny, "registerAction");
       await workspaceAny.onDidFileFolderCreate(getItem());
 
@@ -555,8 +545,7 @@ describe("Workspace", () => {
   });
 
   describe("onDidFileFolderDelete", () => {
-    it(`should registerAction method be invoked which register
-      remove action with removeFromCacheByUri method`, async () => {
+    it("should registerAction method be invoked which register remove action", async () => {
       const registerActionStub = sinon.stub(workspaceAny, "registerAction");
       await workspaceAny.onDidFileFolderDelete(getItem());
 

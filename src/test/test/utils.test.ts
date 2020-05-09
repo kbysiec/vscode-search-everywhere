@@ -6,7 +6,10 @@ import {
   getConfigurationChangeEvent,
   getWorkspaceFoldersChangeEvent,
   getWorkspaceData,
+  getAction,
 } from "../util/mockFactory";
+import ActionType from "../../enum/actionType";
+import Action from "../../interface/action";
 
 describe("Utils", () => {
   let utils: Utils;
@@ -149,6 +152,53 @@ describe("Utils", () => {
     it("should return -1 if word does not occur in given text", () => {
       const index = utils.getNthIndex("string with value", "test", 2);
       assert.equal(index, -1);
+    });
+  });
+
+  describe("getLastFromArray", () => {
+    it("should return last element from array fulfilling given predicate", () => {
+      const lastAction = getAction(ActionType.Rebuild, "test action 3", 3);
+      const actual = utils.getLastFromArray(
+        [
+          getAction(ActionType.Rebuild, "test action 1", 1),
+          getAction(ActionType.Remove, "test action 2", 2),
+          lastAction,
+        ],
+        (action: Action) => action.type === ActionType.Rebuild
+      );
+
+      assert.deepEqual(actual, lastAction);
+    });
+
+    it("should return undefined if given predicated is not fulfilled", () => {
+      const last = utils.getLastFromArray(
+        [
+          getAction(ActionType.Rebuild, "test action 1", 1),
+          getAction(ActionType.Remove, "test action 2", 2),
+          getAction(ActionType.Rebuild, "test action 3", 3),
+        ],
+        (action: Action) => action.type === ActionType.Update
+      );
+
+      assert.equal(last, undefined);
+    });
+  });
+
+  describe("groupBy", () => {
+    it("should return map containing grouped array", () => {
+      const actions = [
+        getAction(ActionType.Rebuild, "test action 1", 1),
+        getAction(ActionType.Remove, "test action 2", 2),
+        getAction(ActionType.Rebuild, "test action 3", 3),
+      ];
+
+      const actual = utils.groupBy(actions, (action: Action) => action.type);
+
+      const expected = new Map<string, Action[]>();
+      expected.set(ActionType.Rebuild, [actions[0], actions[2]]);
+      expected.set(ActionType.Remove, [actions[1]]);
+
+      assert.deepEqual(actual, expected);
     });
   });
 });
