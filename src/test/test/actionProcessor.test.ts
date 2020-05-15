@@ -132,7 +132,20 @@ describe("ActionProcessor", () => {
       assert.equal((queue[3].fn as sinon.SinonStub).calledOnce, true);
     });
 
-    it("should onDidProcessing be emitted on the end of processing", async () => {
+    it("should onWillProcessing be emitted at the beginning of processing", async () => {
+      const eventEmitter = getEventEmitter();
+      sinon
+        .stub(actionProcessorAny, "onWillProcessingEventEmitter")
+        .value(eventEmitter);
+      sinon
+        .stub(actionProcessorAny, "queue")
+        .value(getActions(2, undefined, ActionType.Rebuild));
+      await actionProcessorAny.process();
+
+      assert.equal(eventEmitter.fire.calledOnce, true);
+    });
+
+    it("should onDidProcessing be emitted in the end of processing", async () => {
       const eventEmitter = getEventEmitter();
       sinon
         .stub(actionProcessorAny, "onDidProcessingEventEmitter")

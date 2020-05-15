@@ -12,9 +12,14 @@ import ActionProcessor from "./actionProcessor";
 const debounce = require("debounce");
 
 class Workspace {
+  private onWillProcessingEventEmitter: vscode.EventEmitter<
+    void
+  > = new vscode.EventEmitter();
   private onDidProcessingEventEmitter: vscode.EventEmitter<
     void
   > = new vscode.EventEmitter();
+  readonly onWillProcessing: vscode.Event<void> = this
+    .onWillProcessingEventEmitter.event;
   readonly onDidProcessing: vscode.Event<void> = this
     .onDidProcessingEventEmitter.event;
 
@@ -43,7 +48,7 @@ class Workspace {
     );
   }
 
-  async registerEventListeners(): Promise<void> {
+  registerEventListeners(): void {
     vscode.workspace.onDidChangeConfiguration(
       debounce(this.onDidChangeConfiguration, 250)
     );
@@ -62,6 +67,7 @@ class Workspace {
     fileWatcher.onDidDelete(this.onDidFileFolderDelete);
 
     this.actionProcessor.onDidProcessing(this.onDidActionProcessorProcessing);
+    this.actionProcessor.onWillProcessing(this.onWillActionProcessorProcessing);
   }
 
   getData(): QuickPickItem[] | undefined {
@@ -344,6 +350,10 @@ class Workspace {
       }`,
     });
   }
+
+  private onWillActionProcessorProcessing = async () => {
+    this.onWillProcessingEventEmitter.fire();
+  };
 
   private onDidActionProcessorProcessing = async () => {
     this.onDidProcessingEventEmitter.fire();

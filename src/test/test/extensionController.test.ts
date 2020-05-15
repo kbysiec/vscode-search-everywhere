@@ -91,6 +91,32 @@ describe("ExtensionController", () => {
     });
   });
 
+  describe("setBusy", () => {
+    it("should change the state of components to busy", () => {
+      const setQuickPickLoadingStub = sinon.stub(
+        extensionControllerAny,
+        "setQuickPickLoading"
+      );
+
+      extensionControllerAny.setBusy(true);
+
+      assert.equal(setQuickPickLoadingStub.calledWith(true), true);
+    });
+  });
+
+  describe("setQuickPickLoading", () => {
+    it("should change quick pick state to loading", () => {
+      const showLoadingStub = sinon.stub(
+        extensionControllerAny.quickPick,
+        "showLoading"
+      );
+
+      extensionControllerAny.setQuickPickLoading(true);
+
+      assert.equal(showLoadingStub.calledWith(true), true);
+    });
+  });
+
   describe("initComponents", () => {
     it("should init components", async () => {
       extensionControllerAny.initComponents();
@@ -104,6 +130,11 @@ describe("ExtensionController", () => {
 
   describe("registerEventListeners", () => {
     it("should register extensionController event listeners", () => {
+      const onWillProcessingStub = sinon.stub(
+        extensionControllerAny.workspace,
+        "onWillProcessing"
+      );
+
       const onDidProcessingStub = sinon.stub(
         extensionControllerAny.workspace,
         "onDidProcessing"
@@ -111,7 +142,35 @@ describe("ExtensionController", () => {
 
       extensionControllerAny.registerEventListeners();
 
+      assert.equal(onWillProcessingStub.calledOnce, true);
       assert.equal(onDidProcessingStub.calledOnce, true);
+    });
+  });
+
+  describe("onWillProcessing", () => {
+    it("should setBusy method be invoked with true as parameter", () => {
+      const setBusyStub = sinon.stub(extensionControllerAny, "setBusy");
+
+      extensionControllerAny.onWillProcessing();
+
+      assert.equal(setBusyStub.calledWith(true), true);
+    });
+  });
+
+  describe("onDidProcessing", () => {
+    it(`should setBusy method be invoked with false as parameter
+      and loadQuickPickData method be invoked`, async () => {
+      const setBusyStub = sinon.stub(extensionControllerAny, "setBusy");
+
+      const loadQuickPickDataStub = sinon.stub(
+        extensionControllerAny,
+        "loadQuickPickData"
+      );
+
+      await extensionControllerAny.onDidProcessing();
+
+      assert.equal(setBusyStub.calledWith(false), true);
+      assert.equal(loadQuickPickDataStub.calledOnce, true);
     });
   });
 });

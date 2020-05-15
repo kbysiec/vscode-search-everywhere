@@ -10,8 +10,13 @@ class ActionProcessor {
   private onDidProcessingEventEmitter: vscode.EventEmitter<
     void
   > = new vscode.EventEmitter();
+  private onWillProcessingEventEmitter: vscode.EventEmitter<
+    void
+  > = new vscode.EventEmitter();
   readonly onDidProcessing: vscode.Event<void> = this
     .onDidProcessingEventEmitter.event;
+  readonly onWillProcessing: vscode.Event<void> = this
+    .onWillProcessingEventEmitter.event;
 
   constructor(private utils: Utils) {}
 
@@ -29,6 +34,7 @@ class ActionProcessor {
   }
 
   private async process() {
+    this.onWillProcessingEventEmitter.fire();
     this.isBusy = true;
 
     while (this.queue.length) {

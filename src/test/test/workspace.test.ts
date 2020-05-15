@@ -67,7 +67,7 @@ describe("Workspace", () => {
   });
 
   describe("registerEventListeners", () => {
-    it("should register workspace event listeners", async () => {
+    it("should register workspace event listeners", () => {
       const onDidChangeConfigurationStub = sinon.stub(
         vscode.workspace,
         "onDidChangeConfiguration"
@@ -85,12 +85,17 @@ describe("Workspace", () => {
         .stub(vscode.workspace, "createFileSystemWatcher")
         .returns(fileWatcherStub);
 
+      const onWillProcessingStub = sinon.stub(
+        workspaceAny.actionProcessor,
+        "onWillProcessing"
+      );
+
       const onDidProcessingStub = sinon.stub(
         workspaceAny.actionProcessor,
         "onDidProcessing"
       );
 
-      await workspace.registerEventListeners();
+      workspace.registerEventListeners();
 
       assert.equal(onDidChangeConfigurationStub.calledOnce, true);
       assert.equal(onDidChangeWorkspaceFoldersStub.calledOnce, true);
@@ -99,6 +104,7 @@ describe("Workspace", () => {
       assert.equal(fileWatcherStub.onDidChange.calledOnce, true);
       assert.equal(fileWatcherStub.onDidCreate.calledOnce, true);
       assert.equal(fileWatcherStub.onDidDelete.calledOnce, true);
+      assert.equal(onWillProcessingStub.calledOnce, true);
       assert.equal(onDidProcessingStub.calledOnce, true);
     });
   });
@@ -598,6 +604,18 @@ describe("Workspace", () => {
       workspaceAny.onDidItemIndexed(progress, 20);
 
       assert.equal(workspaceAny.progressStep, 1);
+    });
+  });
+
+  describe("onWillActionProcessorProcessing", () => {
+    it("should onWillProcessing event be emitted", async () => {
+      const eventEmitter = getEventEmitter();
+      sinon
+        .stub(workspaceAny, "onWillProcessingEventEmitter")
+        .value(eventEmitter);
+      await workspaceAny.onWillActionProcessorProcessing();
+
+      assert.equal(eventEmitter.fire.calledOnce, true);
     });
   });
 
