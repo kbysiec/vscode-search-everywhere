@@ -67,6 +67,15 @@ describe("QuickPick", () => {
     });
   });
 
+  describe("setPlaceholder", () => {
+    it("should placeholder text be set", () => {
+      const text = "test text";
+      quickPick.setPlaceholder(text);
+
+      assert.equal(quickPickAny.quickPick.placeholder, text);
+    });
+  });
+
   describe("submit", () => {
     it("should openSelected method be invoked with selected item as argument", () => {
       const openSelectedStub = sinon.stub(quickPickAny, "openSelected");

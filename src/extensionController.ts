@@ -35,10 +35,19 @@ class ExtensionController {
 
   private setBusy(isBusy: boolean) {
     this.setQuickPickLoading(isBusy);
+    this.setQuickPickPlaceholder(isBusy);
   }
 
   private setQuickPickLoading(isBusy: boolean) {
     this.quickPick.showLoading(isBusy);
+  }
+
+  private setQuickPickPlaceholder(isBusy: boolean) {
+    const placeholder = isBusy
+      ? "Please wait, loading..."
+      : "Start typing file or symbol name...";
+
+    this.quickPick.setPlaceholder(placeholder);
   }
 
   private initComponents(): void {

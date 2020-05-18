@@ -98,9 +98,15 @@ describe("ExtensionController", () => {
         "setQuickPickLoading"
       );
 
+      const setQuickPickPlaceholderStub = sinon.stub(
+        extensionControllerAny,
+        "setQuickPickPlaceholder"
+      );
+
       extensionControllerAny.setBusy(true);
 
       assert.equal(setQuickPickLoadingStub.calledWith(true), true);
+      assert.equal(setQuickPickPlaceholderStub.calledWith(true), true);
     });
   });
 
@@ -114,6 +120,36 @@ describe("ExtensionController", () => {
       extensionControllerAny.setQuickPickLoading(true);
 
       assert.equal(showLoadingStub.calledWith(true), true);
+    });
+  });
+
+  describe("setQuickPickPlaceholder", () => {
+    it("should change quick pick placeholder to loading text", () => {
+      const setPlaceholderStub = sinon.stub(
+        extensionControllerAny.quickPick,
+        "setPlaceholder"
+      );
+
+      extensionControllerAny.setQuickPickPlaceholder(true);
+
+      assert.equal(
+        setPlaceholderStub.calledWith("Please wait, loading..."),
+        true
+      );
+    });
+
+    it("should change quick pick placeholder to searching text", () => {
+      const setPlaceholderStub = sinon.stub(
+        extensionControllerAny.quickPick,
+        "setPlaceholder"
+      );
+
+      extensionControllerAny.setQuickPickPlaceholder(false);
+
+      assert.equal(
+        setPlaceholderStub.calledWith("Start typing file or symbol name..."),
+        true
+      );
     });
   });
 

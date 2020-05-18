@@ -30,6 +30,10 @@ class QuickPick {
     this.quickPick.value = text;
   }
 
+  setPlaceholder(text: string): void {
+    this.quickPick.placeholder = text;
+  }
+
   private submit(selectedItem: QuickPickItem): void {
     selectedItem && this.openSelected(selectedItem);
   }
