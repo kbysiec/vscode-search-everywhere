@@ -3,6 +3,7 @@ import QuickPickItem from "./interface/quickPickItem";
 
 class QuickPick {
   private quickPick: vscode.QuickPick<QuickPickItem>;
+  private items: QuickPickItem[];
 
   constructor() {
     this.quickPick = vscode.window.createQuickPick();
@@ -12,14 +13,20 @@ class QuickPick {
     this.quickPick.onDidHide(this.onDidHide);
     this.quickPick.onDidAccept(this.onDidAccept);
     this.quickPick.onDidChangeValue(this.onDidChangeValue);
+
+    this.items = [];
   }
 
   show(): void {
     this.quickPick.show();
   }
 
-  loadItems(items: QuickPickItem[]): void {
-    this.quickPick.items = items;
+  loadItems(): void {
+    this.quickPick.items = this.items;
+  }
+
+  setItems(items: QuickPickItem[]): void {
+    this.items = items;
   }
 
   showLoading(value: boolean): void {

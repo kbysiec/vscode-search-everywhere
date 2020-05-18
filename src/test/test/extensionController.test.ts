@@ -76,9 +76,13 @@ describe("ExtensionController", () => {
       sinon
         .stub(extensionControllerAny.workspace, "getData")
         .returns(Promise.resolve(getQpItems()));
+      const setItemsStub = sinon.stub(
+        extensionControllerAny.quickPick,
+        "setItems"
+      );
       await extensionControllerAny.loadQuickPickData();
 
-      assert.equal(extensionControllerAny.quickPick.quickPick.items.length, 2);
+      assert.equal(setItemsStub.calledWith(getQpItems()), true);
     });
 
     it("should load empty array to quick pick if cache is empty", async () => {

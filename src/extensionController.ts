@@ -18,6 +18,7 @@ class ExtensionController {
 
   async search(): Promise<void> {
     if (this.utils.hasWorkspaceAnyFolder()) {
+      this.quickPick.loadItems();
       this.quickPick.show();
     } else {
       this.utils.printNoFolderOpenedMessage();
@@ -30,7 +31,8 @@ class ExtensionController {
 
   private async loadQuickPickData(): Promise<void> {
     const data = (await this.workspace.getData()) || [];
-    this.quickPick.loadItems(data);
+    this.quickPick.setItems(data);
+    this.quickPick.loadItems();
   }
 
   private setBusy(isBusy: boolean) {

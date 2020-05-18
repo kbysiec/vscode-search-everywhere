@@ -44,7 +44,16 @@ describe("QuickPick", () => {
 
   describe("loadItems", () => {
     it("should items be loaded", () => {
-      quickPick.loadItems(getQpItems());
+      sinon.stub(quickPickAny, "items").value(getQpItems());
+      quickPick.loadItems();
+
+      assert.equal(quickPickAny.quickPick.items.length, 2);
+    });
+  });
+
+  describe("setItems", () => {
+    it("should items be set", () => {
+      quickPick.setItems(getQpItems());
 
       assert.equal(quickPickAny.quickPick.items.length, 2);
     });
