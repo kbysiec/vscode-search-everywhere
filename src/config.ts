@@ -2,31 +2,41 @@ import * as vscode from "vscode";
 import Cache from "./cache";
 
 class Config {
+  private default = {
+    exclude: [] as string[],
+    include: [] as string[],
+  };
+  private readonly defaultSection = "searchEverywhere";
+
   constructor(private cache: Cache) {}
 
   getExclude(): string[] {
-    const key = "exclude";
-    let value = this.cache.getConfigByKey<string[]>(key);
-    if (!value) {
-      value = this.getConfigurationByKey<string[]>(key, []);
-      this.cache.updateConfigByKey(key, value);
-    }
-    return value as string[];
+    return this.get(ConfigKey.exclude, this.default.exclude);
   }
 
   getInclude(): string[] {
-    const key = "include";
-    let value = this.cache.getConfigByKey<string[]>(key);
-    if (!value) {
-      value = this.getConfigurationByKey<string[]>(key, []);
-      this.cache.updateConfigByKey(key, value);
-    }
-    return value as string[];
+    return this.get(ConfigKey.include, this.default.include);
   }
 
-  private getConfigurationByKey<T>(key: string, defaultValue: T): T {
+  private get<T>(key: string, defaultValue: T, customSection?: string): T {
+    const cacheKey = `${
+      customSection ? customSection : this.defaultSection
+    }.${key}`;
+    let value = this.cache.getConfigByKey<T>(cacheKey);
+    if (!value) {
+      value = this.getConfigurationByKey<T>(key, defaultValue, customSection);
+      this.cache.updateConfigByKey(cacheKey, value);
+    }
+    return value as T;
+  }
+
+  private getConfigurationByKey<T>(
+    key: string,
+    defaultValue: T,
+    customSection?: string
+  ): T {
     const value = this.getConfiguration<T>(
-      `searchEverywhere.${key}`,
+      `${customSection ? customSection : this.defaultSection}.${key}`,
       defaultValue
     );
     return value as T;

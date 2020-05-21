@@ -10,6 +10,7 @@ describe("Config", () => {
   let config: Config;
   let configAny: any;
   let cacheStub: Cache;
+  let getConfigurationStub: sinon.SinonStub;
 
   before(() => {
     cacheStub = getCacheStub();
@@ -17,13 +18,15 @@ describe("Config", () => {
   });
 
   beforeEach(() => {
-    sinon.stub(vscode.workspace, "getConfiguration").returns({
-      get: (section: string) =>
-        section.split(".").reduce((cfg, key) => cfg[key], mock.configuration),
-      has: () => true,
-      inspect: () => undefined,
-      update: () => Promise.resolve(),
-    });
+    getConfigurationStub = sinon
+      .stub(vscode.workspace, "getConfiguration")
+      .returns({
+        get: (section: string) =>
+          section.split(".").reduce((cfg, key) => cfg[key], mock.configuration),
+        has: () => true,
+        inspect: () => undefined,
+        update: () => Promise.resolve(),
+      });
 
     configAny = config as any;
   });
@@ -41,38 +44,54 @@ describe("Config", () => {
   });
 
   describe("getExclude", () => {
-    it("should return array of exclude patterns from configuration if it does not exist in cache", async () => {
+    it("should return array of exclude patterns from configuration", async () => {
       const section = "searchEverywhere";
       const key = "exclude";
 
       assert.equal(config.getExclude(), mock.configuration[section][key]);
     });
-
-    it("should return array of exclude patterns from cache if it exists there", async () => {
-      const section = "searchEverywhere";
-      const key = "exclude";
-      const value = mock.configuration[section][key];
-      sinon.stub(configAny.cache, "getConfigByKey").returns(value);
-
-      assert.equal(config.getExclude(), value);
-    });
   });
 
   describe("getInclude", () => {
-    it("should return array of include patterns from configuration if it does not exist in cache", async () => {
+    it("should return array of include patterns from configuration", async () => {
       const section = "searchEverywhere";
       const key = "include";
 
       assert.equal(config.getInclude(), mock.configuration[section][key]);
     });
+  });
 
-    it("should return array of exclude patterns from cache if it exists there", async () => {
+  describe("get", () => {
+    it(`should return array of exclude patterns
+      from configuration if cache is empty`, async () => {
       const section = "searchEverywhere";
-      const key = "include";
-      const value = mock.configuration[section][key];
-      sinon.stub(configAny.cache, "getConfigByKey").returns(value);
+      const key = "exclude";
 
-      assert.equal(config.getInclude(), value);
+      assert.equal(configAny.get(key, []), mock.configuration[section][key]);
+    });
+
+    it(`should return array of exclude patterns
+      from cache if it is not empty`, async () => {
+      const section = "searchEverywhere";
+      const key = "exclude";
+
+      const getConfigByKeyStub = sinon
+        .stub(configAny.cache, "getConfigByKey")
+        .returns(mock.configuration[section][key]);
+
+      assert.equal(configAny.get(key, []), mock.configuration[section][key]);
+      assert.equal(getConfigByKeyStub.calledOnce, true);
+      assert.equal(getConfigurationStub.calledOnce, false);
+    });
+
+    it("should get configuration from custom section", async () => {
+      const section = "customSection";
+      const key = "exclude";
+
+      assert.equal(
+        configAny.get(key, [], section),
+        mock.configuration[section][key]
+      );
     });
   });
 
@@ -83,6 +102,16 @@ describe("Config", () => {
 
       assert.equal(
         configAny.getConfigurationByKey(key, []),
+        mock.configuration[section][key]
+      );
+    });
+
+    it("should get configuration from custom section", async () => {
+      const section = "customSection";
+      const key = "exclude";
+
+      assert.equal(
+        configAny.getConfigurationByKey(key, [], section),
         mock.configuration[section][key]
       );
     });
