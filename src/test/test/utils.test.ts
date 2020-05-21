@@ -67,10 +67,19 @@ describe("Utils", () => {
   });
 
   describe("hasConfigurationChanged", () => {
-    it("should return true if extension configuration has changed", () => {
+    it(`should return true if extension configuration has changed
+      and is not excluded from refreshing`, () => {
       assert.equal(
         utils.hasConfigurationChanged(getConfigurationChangeEvent(true)),
         true
+      );
+    });
+
+    it(`should return false if extension configuration has changed
+      but is excluded from refreshing`, () => {
+      assert.equal(
+        utils.hasConfigurationChanged(getConfigurationChangeEvent(true, true)),
+        false
       );
     });
 

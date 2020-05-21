@@ -3,10 +3,12 @@ import QuickPick from "./quickPick";
 import Utils from "./utils";
 import Cache from "./cache";
 import Workspace from "./workspace";
+import Config from "./config";
 
 class ExtensionController {
   private utils!: Utils;
   private cache!: Cache;
+  private config!: Config;
   private workspace!: Workspace;
   private quickPick!: QuickPick;
 
@@ -54,8 +56,9 @@ class ExtensionController {
 
   private initComponents(): void {
     this.cache = new Cache(this.extensionContext);
+    this.config = new Config(this.cache);
     this.utils = new Utils();
-    this.workspace = new Workspace(this.cache, this.utils);
+    this.workspace = new Workspace(this.cache, this.utils, this.config);
     this.quickPick = new QuickPick();
   }
 

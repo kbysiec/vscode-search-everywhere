@@ -4,7 +4,6 @@ import * as sinon from "sinon";
 import DataService from "../../dataService";
 import * as mock from "../mock/dataService.mock";
 import {
-  getCacheStub,
   getUtilsStub,
   getDocumentSymbolItemSingleLine,
   getWorkspaceData,
@@ -12,20 +11,22 @@ import {
   getItems,
   getItem,
   getEventEmitter,
+  getConfigStub,
 } from "../util/mockFactory";
 import Cache from "../../cache";
 import Utils from "../../utils";
+import Config from "../../config";
 
 describe("DataService", () => {
   let dataService: DataService;
   let dataServiceAny: any;
-  let cacheStub: Cache;
   let utilsStub: Utils;
+  let configStub: Config;
 
   before(() => {
-    cacheStub = getCacheStub();
     utilsStub = getUtilsStub();
-    dataService = new DataService(cacheStub, utilsStub);
+    configStub = getConfigStub();
+    dataService = new DataService(utilsStub, configStub);
   });
 
   beforeEach(() => {
@@ -38,7 +39,7 @@ describe("DataService", () => {
 
   describe("constructor", () => {
     it("should data service be initialized", () => {
-      dataService = new DataService(cacheStub, utilsStub);
+      dataService = new DataService(utilsStub, configStub);
 
       assert.exists(dataService);
     });

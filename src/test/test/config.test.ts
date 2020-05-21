@@ -43,6 +43,18 @@ describe("Config", () => {
     });
   });
 
+  describe("shouldDisplayNotificationInStatusBar", () => {
+    it("should return boolean from configuration", async () => {
+      const section = "searchEverywhere";
+      const key = "shouldDisplayNotificationInStatusBar";
+
+      assert.equal(
+        config.shouldDisplayNotificationInStatusBar(),
+        mock.configuration[section][key]
+      );
+    });
+  });
+
   describe("getExclude", () => {
     it("should return array of exclude patterns from configuration", async () => {
       const section = "searchEverywhere";

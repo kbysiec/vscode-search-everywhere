@@ -8,6 +8,7 @@ import { appConfig } from "./appConfig";
 import ActionType from "./enum/actionType";
 import Action from "./interface/action";
 import ActionProcessor from "./actionProcessor";
+import Config from "./config";
 
 const debounce = require("debounce");
 
@@ -23,9 +24,9 @@ class Workspace {
   readonly onDidProcessing: vscode.Event<void> = this
     .onDidProcessingEventEmitter.event;
 
-  private dataService: DataService;
-  private dataConverter: DataConverter;
-  private actionProcessor: ActionProcessor;
+  private dataService!: DataService;
+  private dataConverter!: DataConverter;
+  private actionProcessor!: ActionProcessor;
 
   private urisForDirectoryPathUpdate?: vscode.Uri[];
   private directoryUriBeforePathUpdate?: vscode.Uri;
@@ -34,10 +35,12 @@ class Workspace {
   private progressStep: number = 0;
   private currentProgressValue: number = 0;
 
-  constructor(private cache: Cache, private utils: Utils) {
-    this.dataService = new DataService(this.cache, this.utils);
-    this.dataConverter = new DataConverter(this.utils);
-    this.actionProcessor = new ActionProcessor(this.utils);
+  constructor(
+    private cache: Cache,
+    private utils: Utils,
+    private config: Config
+  ) {
+    this.initComponents();
   }
 
   async index(comment: string) {
@@ -78,8 +81,8 @@ class Workspace {
     if (this.utils.hasWorkspaceAnyFolder()) {
       await vscode.window.withProgress(
         {
-          location: vscode.ProgressLocation.Notification,
-          title: "Indexing workspace files and symbols...",
+          location: this.getNotificationLocation(),
+          title: this.getNotificationTitle(),
         },
         this.indexWithProgressTask.bind(this)
       );
@@ -237,6 +240,26 @@ class Workspace {
   private resetProgress() {
     this.currentProgressValue = 0;
     this.progressStep = 0;
+  }
+
+  private getNotificationLocation(): vscode.ProgressLocation {
+    const shouldDisplayNotificationInStatusBar = this.config.shouldDisplayNotificationInStatusBar();
+    return shouldDisplayNotificationInStatusBar
+      ? vscode.ProgressLocation.Window
+      : vscode.ProgressLocation.Notification;
+  }
+
+  private getNotificationTitle(): string {
+    const shouldDisplayNotificationInStatusBar = this.config.shouldDisplayNotificationInStatusBar();
+    return shouldDisplayNotificationInStatusBar
+      ? "Indexing..."
+      : "Indexing workspace files and symbols...";
+  }
+
+  private initComponents(): void {
+    this.dataService = new DataService(this.utils, this.config);
+    this.dataConverter = new DataConverter(this.utils);
+    this.actionProcessor = new ActionProcessor(this.utils);
   }
 
   private onDidChangeConfiguration = async (

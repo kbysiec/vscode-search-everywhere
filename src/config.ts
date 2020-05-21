@@ -1,14 +1,23 @@
 import * as vscode from "vscode";
 import Cache from "./cache";
+import ConfigKey from "./enum/configKey";
 
 class Config {
   private default = {
+    shouldDisplayNotificationInStatusBar: false,
     exclude: [] as string[],
     include: [] as string[],
   };
   private readonly defaultSection = "searchEverywhere";
 
   constructor(private cache: Cache) {}
+
+  shouldDisplayNotificationInStatusBar(): boolean {
+    return this.get(
+      ConfigKey.shouldDisplayNotificationInStatusBar,
+      this.default.shouldDisplayNotificationInStatusBar
+    );
+  }
 
   getExclude(): string[] {
     return this.get(ConfigKey.exclude, this.default.exclude);

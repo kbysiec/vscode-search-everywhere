@@ -3,6 +3,8 @@ import WorkspaceData from "./interface/workspaceData";
 import Item from "./interface/item";
 
 class Utils {
+  private readonly defaultSection = "searchEverywhere";
+
   hasWorkspaceAnyFolder(): boolean {
     return !!(
       vscode.workspace.workspaceFolders &&
@@ -22,7 +24,13 @@ class Utils {
   }
 
   hasConfigurationChanged(event: vscode.ConfigurationChangeEvent): boolean {
-    return event.affectsConfiguration("searchEverywhere");
+    const excluded: string[] = [
+      `${this.defaultSection}.shouldDisplayNotificationInStatusBar`,
+    ];
+    return (
+      event.affectsConfiguration("searchEverywhere") &&
+      !excluded.some((config: string) => event.affectsConfiguration(config))
+    );
   }
 
   printNoFolderOpenedMessage(): void {

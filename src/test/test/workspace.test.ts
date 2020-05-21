@@ -19,24 +19,27 @@ import {
   getFileWatcherStub,
   getFileRenameEvent,
   getSubscription,
-  getAction,
   getProgress,
   getEventEmitter,
+  getConfigStub,
 } from "../util/mockFactory";
 import Cache from "../../cache";
 import Utils from "../../utils";
 import ActionType from "../../enum/actionType";
+import Config from "../../config";
 
 describe("Workspace", () => {
   let workspace: Workspace;
   let workspaceAny: any;
   let cacheStub: Cache;
   let utilsStub: Utils;
+  let configStub: Config;
 
   before(() => {
     cacheStub = getCacheStub();
     utilsStub = getUtilsStub();
-    workspace = new Workspace(cacheStub, utilsStub);
+    configStub = getConfigStub();
+    workspace = new Workspace(cacheStub, utilsStub, configStub);
   });
 
   beforeEach(() => {
@@ -49,7 +52,7 @@ describe("Workspace", () => {
 
   describe("constructor", () => {
     it("should workspace be initialized", () => {
-      workspace = new Workspace(cacheStub, utilsStub);
+      workspace = new Workspace(cacheStub, utilsStub, configStub);
 
       assert.exists(workspace);
     });
@@ -404,6 +407,65 @@ describe("Workspace", () => {
 
       assert.equal(workspaceAny.progressStep, 0);
       assert.equal(workspaceAny.currentProgressValue, 0);
+    });
+  });
+
+  describe("getNotificationLocation", () => {
+    it(`should return vscode.ProgressLocation.Window
+      if shouldDisplayNotificationInStatusBar is true`, () => {
+      sinon
+        .stub(workspaceAny.config, "shouldDisplayNotificationInStatusBar")
+        .returns(true);
+
+      assert.equal(
+        workspaceAny.getNotificationLocation(),
+        vscode.ProgressLocation.Window
+      );
+    });
+
+    it(`should return vscode.ProgressLocation.Window
+      if shouldDisplayNotificationInStatusBar is false`, () => {
+      sinon
+        .stub(workspaceAny.config, "shouldDisplayNotificationInStatusBar")
+        .returns(false);
+
+      assert.equal(
+        workspaceAny.getNotificationLocation(),
+        vscode.ProgressLocation.Notification
+      );
+    });
+  });
+
+  describe("getNotificationTitle", () => {
+    it(`should return string 'Indexing...'
+      if shouldDisplayNotificationInStatusBar is true`, () => {
+      sinon
+        .stub(workspaceAny.config, "shouldDisplayNotificationInStatusBar")
+        .returns(true);
+
+      assert.equal(workspaceAny.getNotificationTitle(), "Indexing...");
+    });
+
+    it(`should return string 'Indexing workspace files and symbols...'
+      if shouldDisplayNotificationInStatusBar is false`, () => {
+      sinon
+        .stub(workspaceAny.config, "shouldDisplayNotificationInStatusBar")
+        .returns(false);
+
+      assert.equal(
+        workspaceAny.getNotificationTitle(),
+        "Indexing workspace files and symbols..."
+      );
+    });
+  });
+
+  describe("initComponents", () => {
+    it("should init components", async () => {
+      workspaceAny.initComponents();
+
+      assert.equal(typeof workspaceAny.dataService, "object");
+      assert.equal(typeof workspaceAny.dataConverter, "object");
+      assert.equal(typeof workspaceAny.actionProcessor, "object");
     });
   });
 

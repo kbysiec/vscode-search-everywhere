@@ -5,16 +5,13 @@ import WorkspaceData from "./interface/workspaceData";
 import Utils from "./utils";
 
 class DataService {
-  private config: Config;
   private onDidItemIndexedEventEmitter: vscode.EventEmitter<
     number
   > = new vscode.EventEmitter();
   readonly onDidItemIndexed: vscode.Event<number> = this
     .onDidItemIndexedEventEmitter.event;
 
-  constructor(cache: Cache, private utils: Utils) {
-    this.config = new Config(cache);
-  }
+  constructor(private utils: Utils, private config: Config) {}
 
   async fetchData(uris?: vscode.Uri[]): Promise<WorkspaceData> {
     const workspaceData: WorkspaceData = this.utils.createWorkspaceData();

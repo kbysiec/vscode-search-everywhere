@@ -29,6 +29,11 @@
     "configuration": {
       "title": "Search everywhere",
       "properties": {
+        "searchEverywhere.shouldDisplayNotificationInStatusBar": {
+          "type": "boolean",
+          "default": false,
+          "description": "Should display indexing notification in toast or status bar."
+        },
         "searchEverywhere.exclude": {
           "type": "array",
           "default": [

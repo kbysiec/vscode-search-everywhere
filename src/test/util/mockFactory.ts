@@ -8,6 +8,7 @@ import Item from "../../interface/item";
 import ActionType from "../../enum/actionType";
 import Action from "../../interface/action";
 import { createStubInstance } from "./stubbedClass";
+import Config from "../../config";
 
 export function getExtensionContext(): vscode.ExtensionContext {
   return {
@@ -38,6 +39,18 @@ export function getUtilsStub(): Utils {
   return createStubInstance(Utils);
 }
 
+export function getConfigStub(): Config {
+  const configStub: any = createStubInstance(Config);
+  configStub.cache = getCacheStub();
+  configStub.default = {
+    shouldDisplayNotificationInStatusBar: false,
+    exclude: [] as string[],
+    include: [] as string[],
+  };
+
+  return configStub as Config;
+}
+
 export const getWorkspaceFoldersChangeEvent = (flag: boolean) => {
   return flag
     ? {
@@ -56,9 +69,23 @@ export const getWorkspaceFoldersChangeEvent = (flag: boolean) => {
       };
 };
 
-export const getConfigurationChangeEvent = (flag: boolean) => ({
-  affectsConfiguration: () => flag,
-});
+export const getConfigurationChangeEvent = (
+  flag: boolean,
+  isExcluded: boolean = false
+) => {
+  const defaultSection = "searchEverywhere";
+  const excludedConfigFromRefresh: string[] = [
+    `${defaultSection}.shouldDisplayNotificationInStatusBar`,
+  ];
+
+  return {
+    affectsConfiguration: (section: string) =>
+      section === defaultSection
+        ? true && flag
+        : excludedConfigFromRefresh.some((conf) => conf === section) &&
+          isExcluded,
+  };
+};
 
 export const getTextDocumentChangeEvent = async (
   shouldContentBeChanged: boolean = false
