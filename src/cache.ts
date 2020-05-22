@@ -33,7 +33,7 @@ class Cache {
 
   updateConfigByKey<T>(key: string, value: T): void {
     let cache: any = this.extensionContext.workspaceState.get(
-      appConfig.dataCacheKey
+      appConfig.configCacheKey
     );
     if (!cache) {
       cache = {};
