@@ -46,8 +46,16 @@ class Cache {
   }
 
   clear(): void {
-    this.extensionContext.workspaceState.update(appConfig.dataCacheKey, []);
+    this.clearData();
+    this.clearConfig();
+  }
+
+  clearConfig(): void {
     this.extensionContext.workspaceState.update(appConfig.configCacheKey, {});
+  }
+
+  private clearData(): void {
+    this.extensionContext.workspaceState.update(appConfig.dataCacheKey, []);
   }
 }
 

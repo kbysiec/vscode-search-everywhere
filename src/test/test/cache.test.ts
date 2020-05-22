@@ -9,6 +9,7 @@ import { getExtensionContext, getQpItems } from "../util/mockFactory";
 
 describe("Cache", () => {
   let cache: Cache;
+  let cacheAny: any;
   let updateStub: sinon.SinonStub;
   let context: vscode.ExtensionContext;
 
@@ -20,6 +21,7 @@ describe("Cache", () => {
     context.workspaceState.update = updateStub;
 
     cache = new Cache(context);
+    cacheAny = cache as any;
   });
 
   afterEach(() => {
@@ -116,10 +118,29 @@ describe("Cache", () => {
   });
 
   describe("clear", () => {
-    it("should remove all values from cache", () => {
+    it("should clearData and clearConfig methods be invoked", () => {
+      const clearDataStub = sinon.stub(cacheAny, "clearData");
+      const clearConfigStub = sinon.stub(cache, "clearConfig");
       cache.clear();
 
-      assert.equal(updateStub.calledTwice, true);
+      assert.equal(clearDataStub.calledOnce, true);
+      assert.equal(clearConfigStub.calledOnce, true);
+    });
+  });
+
+  describe("clearData", () => {
+    it("should clear data cache", () => {
+      cacheAny.clearData();
+
+      assert.equal(updateStub.calledOnce, true);
+    });
+  });
+
+  describe("clearConfig", () => {
+    it("should clear config cache", () => {
+      cache.clearConfig();
+
+      assert.equal(updateStub.calledOnce, true);
     });
   });
 });
