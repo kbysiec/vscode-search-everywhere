@@ -472,7 +472,9 @@ describe("Workspace", () => {
   describe("onDidChangeConfiguration", () => {
     it(`should index method be invoked which register
       rebuild action if extension configuration has changed`, async () => {
-      sinon.stub(workspaceAny.utils, "hasConfigurationChanged").returns(true);
+      sinon
+        .stub(workspaceAny.utils, "shouldReindexOnConfigurationChange")
+        .returns(true);
       const indexStub = sinon.stub(workspaceAny, "index");
       await workspaceAny.onDidChangeConfiguration(
         getConfigurationChangeEvent(true)
@@ -482,7 +484,9 @@ describe("Workspace", () => {
     });
 
     it("should do nothing if extension configuration has not changed", async () => {
-      sinon.stub(workspaceAny.utils, "hasConfigurationChanged").returns(false);
+      sinon
+        .stub(workspaceAny.utils, "shouldReindexOnConfigurationChange")
+        .returns(false);
       const registerActionStub = sinon.stub(workspaceAny, "registerAction");
       await workspaceAny.onDidChangeConfiguration(
         getConfigurationChangeEvent(false)

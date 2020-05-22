@@ -23,7 +23,7 @@ class Utils {
     return !!event.added.length || !!event.removed.length;
   }
 
-  hasConfigurationChanged(event: vscode.ConfigurationChangeEvent): boolean {
+  shouldReindexOnConfigurationChange(event: vscode.ConfigurationChangeEvent): boolean {
     const excluded: string[] = [
       `${this.defaultSection}.shouldDisplayNotificationInStatusBar`,
       `${this.defaultSection}.shouldInitOnStartup`,

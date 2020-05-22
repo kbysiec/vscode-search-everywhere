@@ -66,11 +66,13 @@ describe("Utils", () => {
     });
   });
 
-  describe("hasConfigurationChanged", () => {
+  describe("shouldReindexOnConfigurationChange", () => {
     it(`should return true if extension configuration has changed
       and is not excluded from refreshing`, () => {
       assert.equal(
-        utils.hasConfigurationChanged(getConfigurationChangeEvent(true)),
+        utils.shouldReindexOnConfigurationChange(
+          getConfigurationChangeEvent(true)
+        ),
         true
       );
     });
@@ -78,14 +80,18 @@ describe("Utils", () => {
     it(`should return false if extension configuration has changed
       but is excluded from refreshing`, () => {
       assert.equal(
-        utils.hasConfigurationChanged(getConfigurationChangeEvent(true, true)),
+        utils.shouldReindexOnConfigurationChange(
+          getConfigurationChangeEvent(true, true)
+        ),
         false
       );
     });
 
     it("should return false if extension configuration has not changed", () => {
       assert.equal(
-        utils.hasConfigurationChanged(getConfigurationChangeEvent(false)),
+        utils.shouldReindexOnConfigurationChange(
+          getConfigurationChangeEvent(false)
+        ),
         false
       );
     });
