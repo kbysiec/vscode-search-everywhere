@@ -34,6 +34,11 @@
           "default": false,
           "description": "Should display indexing notification in toast or status bar."
         },
+        "searchEverywhere.shouldInitOnStartup": {
+          "type": "boolean",
+          "default": false,
+          "description": "Should indexing be initialized on Visual Studio Code startup."
+        },
         "searchEverywhere.exclude": {
           "type": "array",
           "default": [

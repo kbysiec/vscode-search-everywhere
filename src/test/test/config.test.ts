@@ -55,6 +55,18 @@ describe("Config", () => {
     });
   });
 
+  describe("shouldInitOnStartup", () => {
+    it("should return boolean from configuration", async () => {
+      const section = "searchEverywhere";
+      const key = "shouldInitOnStartup";
+
+      assert.equal(
+        config.shouldInitOnStartup(),
+        mock.configuration[section][key]
+      );
+    });
+  });
+
   describe("getExclude", () => {
     it("should return array of exclude patterns from configuration", async () => {
       const section = "searchEverywhere";

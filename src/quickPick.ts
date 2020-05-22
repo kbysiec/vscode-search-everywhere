@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import QuickPickItem from "./interface/quickPickItem";
 
 class QuickPick {
+  isTouched: boolean;
   private quickPick: vscode.QuickPick<QuickPickItem>;
   private items: QuickPickItem[];
 
@@ -15,9 +16,11 @@ class QuickPick {
     this.quickPick.onDidChangeValue(this.onDidChangeValue);
 
     this.items = [];
+    this.isTouched = false;
   }
 
   show(): void {
+    this.isTouched = true;
     this.quickPick.show();
   }
 

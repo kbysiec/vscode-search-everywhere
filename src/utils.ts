@@ -26,6 +26,7 @@ class Utils {
   hasConfigurationChanged(event: vscode.ConfigurationChangeEvent): boolean {
     const excluded: string[] = [
       `${this.defaultSection}.shouldDisplayNotificationInStatusBar`,
+      `${this.defaultSection}.shouldInitOnStartup`,
     ];
     return (
       event.affectsConfiguration("searchEverywhere") &&

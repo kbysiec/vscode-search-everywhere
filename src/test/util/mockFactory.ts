@@ -44,6 +44,7 @@ export function getConfigStub(): Config {
   configStub.cache = getCacheStub();
   configStub.default = {
     shouldDisplayNotificationInStatusBar: false,
+    shouldInitOnStartup: false,
     exclude: [] as string[],
     include: [] as string[],
   };
@@ -76,6 +77,7 @@ export const getConfigurationChangeEvent = (
   const defaultSection = "searchEverywhere";
   const excludedConfigFromRefresh: string[] = [
     `${defaultSection}.shouldDisplayNotificationInStatusBar`,
+    `${defaultSection}.shouldInitOnStartup`,
   ];
 
   return {

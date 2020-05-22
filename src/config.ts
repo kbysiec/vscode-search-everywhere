@@ -5,6 +5,7 @@ import ConfigKey from "./enum/configKey";
 class Config {
   private default = {
     shouldDisplayNotificationInStatusBar: false,
+    shouldInitOnStartup: false,
     exclude: [] as string[],
     include: [] as string[],
   };
@@ -16,6 +17,13 @@ class Config {
     return this.get(
       ConfigKey.shouldDisplayNotificationInStatusBar,
       this.default.shouldDisplayNotificationInStatusBar
+    );
+  }
+
+  shouldInitOnStartup(): boolean {
+    return this.get(
+      ConfigKey.shouldInitOnStartup,
+      this.default.shouldInitOnStartup
     );
   }
 

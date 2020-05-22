@@ -57,17 +57,57 @@ describe("ExtensionController", () => {
       assert.equal(showStub.calledOnce, false);
       assert.equal(printNoFolderOpenedMessageStub.calledOnce, true);
     });
+
+    it(`should workspace.index method be invoked if initialization is delayed
+      and it is the first touch of quick pick`, async () => {
+      const indexStub = sinon.stub(extensionControllerAny.workspace, "index");
+      sinon
+        .stub(extensionControllerAny.utils, "hasWorkspaceAnyFolder")
+        .returns(true);
+      sinon
+        .stub(extensionControllerAny, "shouldIndexOnQuickPickOpen")
+        .returns(true);
+
+      await extensionController.search();
+
+      assert.equal(indexStub.calledOnce, true);
+    });
+
+    it(`should workspace.index method not be invoked if initialization is delayed
+      but quick pick is already touched`, async () => {
+      const indexStub = sinon.stub(extensionControllerAny.workspace, "index");
+      sinon
+        .stub(extensionControllerAny.utils, "hasWorkspaceAnyFolder")
+        .returns(true);
+      sinon
+        .stub(extensionControllerAny, "shouldIndexOnQuickPickOpen")
+        .returns(false);
+
+      await extensionController.search();
+
+      assert.equal(indexStub.calledOnce, false);
+    });
   });
 
   describe("startup", () => {
-    it("should indexWithProgress method be invoked", async () => {
-      const indexWithProgressStub = sinon.stub(
-        extensionControllerAny.workspace,
-        "indexWithProgress"
-      );
+    it("should workspace.index method be invoked if shouldInitOnStartup method returns true", async () => {
+      sinon
+        .stub(extensionControllerAny.config, "shouldInitOnStartup")
+        .returns(true);
+      const indexStub = sinon.stub(extensionControllerAny.workspace, "index");
       await extensionControllerAny.startup();
 
-      assert.equal(indexWithProgressStub.calledOnce, true);
+      assert.equal(indexStub.calledOnce, true);
+    });
+
+    it("should do nothing if shouldInitOnStartup method returns false", async () => {
+      sinon
+        .stub(extensionControllerAny.config, "shouldInitOnStartup")
+        .returns(false);
+      const indexStub = sinon.stub(extensionControllerAny.workspace, "index");
+      await extensionControllerAny.startup();
+
+      assert.equal(indexStub.calledOnce, false);
     });
   });
 
@@ -157,11 +197,42 @@ describe("ExtensionController", () => {
     });
   });
 
+  describe("shouldIndexOnQuickPickOpen", () => {
+    it(`should return true if initialization is delayed
+      and quick pick is being opened for the first time`, async () => {
+      sinon
+        .stub(extensionControllerAny.config, "shouldInitOnStartup")
+        .returns(false);
+      sinon.stub(extensionControllerAny.quickPick, "isTouched").value(false);
+
+      assert.equal(extensionControllerAny.shouldIndexOnQuickPickOpen(), true);
+    });
+
+    it("should return false if initialization is on startup", async () => {
+      sinon
+        .stub(extensionControllerAny.config, "shouldInitOnStartup")
+        .returns(true);
+      sinon.stub(extensionControllerAny.quickPick, "isTouched").value(false);
+
+      assert.equal(extensionControllerAny.shouldIndexOnQuickPickOpen(), false);
+    });
+
+    it("should return false if quick pick has been already touched", async () => {
+      sinon
+        .stub(extensionControllerAny.config, "shouldInitOnStartup")
+        .returns(false);
+      sinon.stub(extensionControllerAny.quickPick, "isTouched").value(true);
+
+      assert.equal(extensionControllerAny.shouldIndexOnQuickPickOpen(), false);
+    });
+  });
+
   describe("initComponents", () => {
     it("should init components", async () => {
       extensionControllerAny.initComponents();
 
       assert.equal(typeof extensionControllerAny.cache, "object");
+      assert.equal(typeof extensionControllerAny.config, "object");
       assert.equal(typeof extensionControllerAny.utils, "object");
       assert.equal(typeof extensionControllerAny.workspace, "object");
       assert.equal(typeof extensionControllerAny.quickPick, "object");

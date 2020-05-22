@@ -20,6 +20,11 @@ class ExtensionController {
 
   async search(): Promise<void> {
     if (this.utils.hasWorkspaceAnyFolder()) {
+      const shouldIndexOnQuickPickOpen = this.shouldIndexOnQuickPickOpen();
+      if (shouldIndexOnQuickPickOpen) {
+        this.workspace.index("search");
+      }
+
       this.quickPick.loadItems();
       this.quickPick.show();
     } else {
@@ -28,7 +33,10 @@ class ExtensionController {
   }
 
   async startup(): Promise<void> {
-    await this.workspace.index("startup");
+    const shouldInitOnStartup = this.config.shouldInitOnStartup();
+    if (shouldInitOnStartup) {
+      await this.workspace.index("startup");
+    }
   }
 
   private async loadQuickPickData(): Promise<void> {
@@ -52,6 +60,10 @@ class ExtensionController {
       : "Start typing file or symbol name...";
 
     this.quickPick.setPlaceholder(placeholder);
+  }
+
+  private shouldIndexOnQuickPickOpen() {
+    return !this.config.shouldInitOnStartup() && !this.quickPick.isTouched;
   }
 
   private initComponents(): void {
