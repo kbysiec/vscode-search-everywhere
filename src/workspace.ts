@@ -265,6 +265,7 @@ class Workspace {
   private onDidChangeConfiguration = async (
     event: vscode.ConfigurationChangeEvent
   ): Promise<void> => {
+    this.cache.clearConfig();
     if (this.utils.shouldReindexOnConfigurationChange(event)) {
       await this.index("onDidChangeConfiguration");
     }

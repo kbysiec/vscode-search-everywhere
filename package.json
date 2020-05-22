@@ -39,6 +39,11 @@
           "default": false,
           "description": "Should indexing be initialized on Visual Studio Code startup."
         },
+        "searchEverywhere.shouldHighlightSymbol": {
+          "type": "boolean",
+          "default": false,
+          "description": "Should selected symbol be highlighted."
+        },
         "searchEverywhere.exclude": {
           "type": "array",
           "default": [

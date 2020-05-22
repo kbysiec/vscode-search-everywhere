@@ -1,12 +1,13 @@
 import * as vscode from "vscode";
 import QuickPickItem from "./interface/quickPickItem";
+import Config from "./config";
 
 class QuickPick {
   isTouched: boolean;
   private quickPick: vscode.QuickPick<QuickPickItem>;
   private items: QuickPickItem[];
 
-  constructor() {
+  constructor(private config: Config) {
     this.quickPick = vscode.window.createQuickPick();
     this.quickPick.matchOnDetail = true;
     this.quickPick.matchOnDescription = true;
@@ -57,12 +58,18 @@ class QuickPick {
   }
 
   private selectQpItem(editor: vscode.TextEditor, qpItem: QuickPickItem): void {
+    const shouldHighlightSymbol = this.config.shouldHighlightSymbol();
+
     const { range } = qpItem;
     const start = new vscode.Position(
       range!.start.line,
       range!.start.character
     );
-    editor.selection = new vscode.Selection(start, start);
+    const end = new vscode.Position(range!.end.line, range!.end.character);
+
+    editor.selection = shouldHighlightSymbol
+      ? new vscode.Selection(start, end)
+      : new vscode.Selection(start, start);
 
     editor.revealRange(
       range as vscode.Range,

@@ -6,6 +6,7 @@ class Config {
   private default = {
     shouldDisplayNotificationInStatusBar: false,
     shouldInitOnStartup: false,
+    shouldHighlightSymbol: false,
     exclude: [] as string[],
     include: [] as string[],
   };
@@ -24,6 +25,13 @@ class Config {
     return this.get(
       ConfigKey.shouldInitOnStartup,
       this.default.shouldInitOnStartup
+    );
+  }
+
+  shouldHighlightSymbol(): boolean {
+    return this.get(
+      ConfigKey.shouldHighlightSymbol,
+      this.default.shouldHighlightSymbol
     );
   }
 

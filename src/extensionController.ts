@@ -71,7 +71,7 @@ class ExtensionController {
     this.config = new Config(this.cache);
     this.utils = new Utils();
     this.workspace = new Workspace(this.cache, this.utils, this.config);
-    this.quickPick = new QuickPick();
+    this.quickPick = new QuickPick(this.config);
   }
 
   private registerEventListeners() {

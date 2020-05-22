@@ -45,6 +45,7 @@ export function getConfigStub(): Config {
   configStub.default = {
     shouldDisplayNotificationInStatusBar: false,
     shouldInitOnStartup: false,
+    shouldHighlightSymbol: false,
     exclude: [] as string[],
     include: [] as string[],
   };
@@ -76,9 +77,9 @@ export const getConfigurationChangeEvent = (
 ) => {
   const defaultSection = "searchEverywhere";
   const excludedConfigFromRefresh: string[] = [
-    `${defaultSection}.shouldDisplayNotificationInStatusBar`,
-    `${defaultSection}.shouldInitOnStartup`,
-  ];
+    "shouldDisplayNotificationInStatusBar",
+    "shouldInitOnStartup",
+  ].map((config: string) => `${defaultSection}.${config}`);
 
   return {
     affectsConfiguration: (section: string) =>
@@ -173,7 +174,8 @@ export const getItems = (
 
 export const getQpItem = (
   path: string = "/./fake/",
-  suffix: string | number = 1
+  suffix: string | number = 1,
+  differentStartAndEnd: boolean = false
 ): QuickPickItem => {
   const qpItem = {
     label: `fake-${suffix ? `${suffix}` : ""}.ts`,
@@ -183,7 +185,9 @@ export const getQpItem = (
     symbolKind: 0,
     range: {
       start: new vscode.Position(0, 0),
-      end: new vscode.Position(0, 0),
+      end: differentStartAndEnd
+        ? new vscode.Position(0, 5)
+        : new vscode.Position(0, 0),
     },
   };
   const qpItemAny = qpItem as any;

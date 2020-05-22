@@ -494,6 +494,15 @@ describe("Workspace", () => {
 
       assert.equal(registerActionStub.calledOnce, false);
     });
+
+    it("should cache.clearConfig method be invoked", async () => {
+      const clearConfigStub = sinon.stub(workspaceAny.cache, "clearConfig");
+      await workspaceAny.onDidChangeConfiguration(
+        getConfigurationChangeEvent(true)
+      );
+
+      assert.equal(clearConfigStub.calledOnce, true);
+    });
   });
 
   describe("onDidChangeWorkspaceFolders", () => {

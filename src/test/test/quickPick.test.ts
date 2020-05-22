@@ -7,14 +7,18 @@ import {
   getQpItem,
   getUntitledQpItem,
   getUntitledItem,
+  getConfigStub,
 } from "../util/mockFactory";
+import Config from "../../config";
 
 describe("QuickPick", () => {
   let quickPick: QuickPick;
   let quickPickAny: any;
+  let configStub: Config;
 
   before(() => {
-    quickPick = new QuickPick();
+    configStub = getConfigStub();
+    quickPick = new QuickPick(configStub);
   });
 
   beforeEach(() => {
@@ -27,7 +31,7 @@ describe("QuickPick", () => {
 
   describe("constructor", () => {
     it("should quick pick be initialized", () => {
-      quickPick = new QuickPick();
+      quickPick = new QuickPick(configStub);
 
       assert.exists(quickPick);
     });
@@ -139,6 +143,45 @@ describe("QuickPick", () => {
       await quickPickAny.selectQpItem(editor, getQpItem());
 
       assert.equal(editorRevealRangeStub.calledOnce, true);
+
+      await vscode.commands.executeCommand(
+        "workbench.action.closeActiveEditor"
+      );
+    });
+
+    it("should select symbol if config.shouldHighlightSymbol returns true", async () => {
+      sinon.stub(quickPickAny.config, "shouldHighlightSymbol").returns(true);
+      const document = await vscode.workspace.openTextDocument(
+        getUntitledItem()
+      );
+      const editor = await vscode.window.showTextDocument(document);
+      await quickPickAny.selectQpItem(
+        editor,
+        getQpItem(undefined, undefined, true)
+      );
+
+      assert.equal(editor.selection.start.line, 0);
+      assert.equal(editor.selection.start.character, 0);
+      assert.equal(editor.selection.end.line, 0);
+      assert.equal(editor.selection.end.character, 5);
+
+      await vscode.commands.executeCommand(
+        "workbench.action.closeActiveEditor"
+      );
+    });
+
+    it("should select symbol if config.shouldHighlightSymbol returns false", async () => {
+      sinon.stub(quickPickAny.config, "shouldHighlightSymbol").returns(false);
+      const document = await vscode.workspace.openTextDocument(
+        getUntitledItem()
+      );
+      const editor = await vscode.window.showTextDocument(document);
+      await quickPickAny.selectQpItem(editor, getQpItem());
+
+      assert.equal(editor.selection.start.line, 0);
+      assert.equal(editor.selection.start.character, 0);
+      assert.equal(editor.selection.end.line, 0);
+      assert.equal(editor.selection.end.character, 0);
 
       await vscode.commands.executeCommand(
         "workbench.action.closeActiveEditor"

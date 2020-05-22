@@ -23,11 +23,14 @@ class Utils {
     return !!event.added.length || !!event.removed.length;
   }
 
-  shouldReindexOnConfigurationChange(event: vscode.ConfigurationChangeEvent): boolean {
+  shouldReindexOnConfigurationChange(
+    event: vscode.ConfigurationChangeEvent
+  ): boolean {
     const excluded: string[] = [
-      `${this.defaultSection}.shouldDisplayNotificationInStatusBar`,
-      `${this.defaultSection}.shouldInitOnStartup`,
-    ];
+      "shouldDisplayNotificationInStatusBar",
+      "shouldInitOnStartup",
+      "shouldHighlightSymbol",
+    ].map((config: string) => `${this.defaultSection}.${config}`);
     return (
       event.affectsConfiguration("searchEverywhere") &&
       !excluded.some((config: string) => event.affectsConfiguration(config))

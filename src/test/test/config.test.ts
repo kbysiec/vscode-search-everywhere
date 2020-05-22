@@ -67,6 +67,18 @@ describe("Config", () => {
     });
   });
 
+  describe("shouldHighlightSymbol", () => {
+    it("should return boolean from configuration", async () => {
+      const section = "searchEverywhere";
+      const key = "shouldHighlightSymbol";
+
+      assert.equal(
+        config.shouldHighlightSymbol(),
+        mock.configuration[section][key]
+      );
+    });
+  });
+
   describe("getExclude", () => {
     it("should return array of exclude patterns from configuration", async () => {
       const section = "searchEverywhere";
