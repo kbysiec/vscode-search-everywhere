@@ -21,12 +21,16 @@ class ExtensionController {
   async search(): Promise<void> {
     if (this.utils.hasWorkspaceAnyFolder()) {
       const shouldIndexOnQuickPickOpen = this.shouldIndexOnQuickPickOpen();
+      const isQuickPickInitialized = this.quickPick.isInitialized();
+
       if (shouldIndexOnQuickPickOpen) {
-        this.workspace.index("search");
+        await this.workspace.index("search");
       }
 
-      this.quickPick.loadItems();
-      this.quickPick.show();
+      if (isQuickPickInitialized) {
+        this.quickPick.loadItems();
+        this.quickPick.show();
+      }
     } else {
       this.utils.printNoFolderOpenedMessage();
     }
@@ -39,15 +43,17 @@ class ExtensionController {
     }
   }
 
-  private async loadQuickPickData(): Promise<void> {
+  private async setQuickPickData(): Promise<void> {
     const data = (await this.workspace.getData()) || [];
     this.quickPick.setItems(data);
-    this.quickPick.loadItems();
   }
 
   private setBusy(isBusy: boolean) {
-    this.setQuickPickLoading(isBusy);
-    this.setQuickPickPlaceholder(isBusy);
+    const isQuickPickInitialized = this.quickPick.isInitialized();
+    if (isQuickPickInitialized) {
+      this.setQuickPickLoading(isBusy);
+      this.setQuickPickPlaceholder(isBusy);
+    }
   }
 
   private setQuickPickLoading(isBusy: boolean) {
@@ -63,7 +69,9 @@ class ExtensionController {
   }
 
   private shouldIndexOnQuickPickOpen() {
-    return !this.config.shouldInitOnStartup() && !this.quickPick.isTouched;
+    return (
+      !this.config.shouldInitOnStartup() && !this.quickPick.isInitialized()
+    );
   }
 
   private initComponents(): void {
@@ -84,7 +92,9 @@ class ExtensionController {
   };
 
   private onDidProcessing = async () => {
-    await this.loadQuickPickData();
+    await this.setQuickPickData();
+    this.quickPick.init();
+    this.quickPick.loadItems();
     this.setBusy(false);
   };
 }

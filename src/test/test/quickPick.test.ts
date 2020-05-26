@@ -10,6 +10,7 @@ import {
   getConfigStub,
 } from "../util/mockFactory";
 import Config from "../../config";
+import QuickPickItem from "../../interface/quickPickItem";
 
 describe("QuickPick", () => {
   let quickPick: QuickPick;
@@ -37,12 +38,50 @@ describe("QuickPick", () => {
     });
   });
 
+  describe("init", () => {
+    it("should vscode quick pick be created", () => {
+      const quickPickInner = vscode.window.createQuickPick<QuickPickItem>();
+      const createQuickPickStub = sinon
+        .stub(vscode.window, "createQuickPick")
+        .returns(quickPickInner);
+
+      quickPick.init();
+
+      assert.equal(createQuickPickStub.calledOnce, true);
+    });
+  });
+
+  describe("isInitialized", () => {
+    it("should return true if vscode quick pick is initialized", () => {
+      const quickPickInner = vscode.window.createQuickPick<QuickPickItem>();
+      sinon.stub(quickPickAny, "quickPick").value(quickPickInner);
+
+      assert.equal(quickPick.isInitialized(), true);
+    });
+
+    it("should return false if vscode quick pick is initialized", () => {
+      sinon.stub(quickPickAny, "quickPick").value(undefined);
+
+      assert.equal(quickPick.isInitialized(), false);
+    });
+  });
+
   describe("show", () => {
-    it("should vscode.quickPick.show method be invoked", () => {
+    it(`should vscode.quickPick.show method be invoked
+    if quick pick is initialized`, () => {
+      sinon.stub(quickPick, "isInitialized").returns(true);
       const showStub = sinon.stub(quickPickAny.quickPick, "show");
       quickPick.show();
 
       assert.equal(showStub.calledOnce, true);
+    });
+
+    it("should init method be invoked if quick pick is not initialized", () => {
+      sinon.stub(quickPick, "isInitialized").returns(false);
+      const initStub = sinon.stub(quickPick, "init");
+      quickPick.show();
+
+      assert.equal(initStub.calledOnce, true);
     });
   });
 

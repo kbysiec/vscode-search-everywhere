@@ -3,11 +3,14 @@ import QuickPickItem from "./interface/quickPickItem";
 import Config from "./config";
 
 class QuickPick {
-  isTouched: boolean;
-  private quickPick: vscode.QuickPick<QuickPickItem>;
+  private quickPick!: vscode.QuickPick<QuickPickItem>;
   private items: QuickPickItem[];
 
   constructor(private config: Config) {
+    this.items = [];
+  }
+
+  init(): void {
     this.quickPick = vscode.window.createQuickPick();
     this.quickPick.matchOnDetail = true;
     this.quickPick.matchOnDescription = true;
@@ -15,13 +18,16 @@ class QuickPick {
     this.quickPick.onDidHide(this.onDidHide);
     this.quickPick.onDidAccept(this.onDidAccept);
     this.quickPick.onDidChangeValue(this.onDidChangeValue);
+  }
 
-    this.items = [];
-    this.isTouched = false;
+  isInitialized(): boolean {
+    return !!this.quickPick;
   }
 
   show(): void {
-    this.isTouched = true;
+    if (!this.isInitialized()) {
+      this.init();
+    }
     this.quickPick.show();
   }
 
