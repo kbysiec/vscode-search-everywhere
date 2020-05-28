@@ -7,6 +7,8 @@ class ActionProcessor {
   private actionId: number = 0;
   private isBusy = false;
   private queue: Action[] = [];
+  private previousAction: Action | undefined = undefined;
+
   private onDidProcessingEventEmitter: vscode.EventEmitter<
     void
   > = new vscode.EventEmitter();
@@ -40,10 +42,12 @@ class ActionProcessor {
     while (this.queue.length) {
       this.reduce();
       const action = this.queue.shift();
+      this.setPreviousAction(action);
       action && (await action.fn());
     }
 
     this.isBusy = false;
+    this.setPreviousAction(undefined);
 
     this.onDidProcessingEventEmitter.fire();
   }
@@ -70,7 +74,12 @@ class ActionProcessor {
     const actions = this.getActionsFromQueueByType(actionType);
 
     if (actionType === ActionType.Rebuild) {
-      if (actions.length > 0) {
+      if (
+        this.previousAction &&
+        this.previousAction.type === ActionType.Rebuild
+      ) {
+        this.queue = [];
+      } else if (actions.length > 0) {
         const last = this.utils.getLastFromArray(
           this.queue,
           (action: Action) => action.type === actionType
@@ -110,6 +119,10 @@ class ActionProcessor {
 
   private getActionsFromQueueByType(actionType: ActionType): Action[] {
     return this.queue.filter((action: Action) => action.type === actionType);
+  }
+
+  private setPreviousAction(action: Action | undefined): void {
+    this.previousAction = action;
   }
 }
 

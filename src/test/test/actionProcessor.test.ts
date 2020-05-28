@@ -217,12 +217,26 @@ describe("ActionProcessor", () => {
   });
 
   describe("reduceByActionType", () => {
-    it("should reduce rebuild actions", () => {
+    it(`should reduce rebuild actions and return array with last
+      rebuild action if previous action is different type than rebuild`, () => {
       const queue = getActions(3, undefined, ActionType.Rebuild);
       sinon.stub(actionProcessorAny, "queue").value(queue);
+      sinon.stub(actionProcessorAny, "previousAction").value(undefined);
       actionProcessorAny.reduceByActionType(ActionType.Rebuild);
 
       assert.deepEqual(actionProcessorAny.queue, [queue[2]]);
+    });
+
+    it(`should reduce rebuild actions and return empty array
+      if previous action is rebuild type`, () => {
+      const queue = getActions(3, undefined, ActionType.Rebuild);
+      sinon
+        .stub(actionProcessorAny, "previousAction")
+        .value(getAction(ActionType.Rebuild));
+      sinon.stub(actionProcessorAny, "queue").value(queue);
+      actionProcessorAny.reduceByActionType(ActionType.Rebuild);
+
+      assert.deepEqual(actionProcessorAny.queue, []);
     });
 
     it(`should do nothing for rebuild action type if
