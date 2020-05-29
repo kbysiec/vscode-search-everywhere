@@ -88,7 +88,8 @@ describe("ExtensionController", () => {
       assert.equal(indexStub.calledOnce, false);
     });
 
-    it(`should xxx`, async () => {
+    it(`should quickPick.show and quickPick.loadItems methods be invoked
+      if quickPick is initialized`, async () => {
       const loadItemsStub = sinon.stub(
         extensionControllerAny.quickPick,
         "loadItems"
@@ -98,9 +99,6 @@ describe("ExtensionController", () => {
         .stub(extensionControllerAny.utils, "hasWorkspaceAnyFolder")
         .returns(true);
       sinon
-        .stub(extensionControllerAny, "shouldIndexOnQuickPickOpen")
-        .returns(false);
-      sinon
         .stub(extensionControllerAny.quickPick, "isInitialized")
         .returns(true);
 
@@ -108,6 +106,26 @@ describe("ExtensionController", () => {
 
       assert.equal(loadItemsStub.calledOnce, true);
       assert.equal(showStub.calledOnce, true);
+    });
+
+    it(`should quickPick.show and quickPick.loadItems methods not be invoked
+      if quickPick is not initialized`, async () => {
+      const loadItemsStub = sinon.stub(
+        extensionControllerAny.quickPick,
+        "loadItems"
+      );
+      const showStub = sinon.stub(extensionControllerAny.quickPick, "show");
+      sinon
+        .stub(extensionControllerAny.utils, "hasWorkspaceAnyFolder")
+        .returns(true);
+      sinon
+        .stub(extensionControllerAny.quickPick, "isInitialized")
+        .returns(false);
+
+      await extensionController.search();
+
+      assert.equal(loadItemsStub.calledOnce, false);
+      assert.equal(showStub.calledOnce, false);
     });
   });
 
