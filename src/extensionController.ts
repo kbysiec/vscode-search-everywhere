@@ -4,6 +4,8 @@ import Utils from "./utils";
 import Cache from "./cache";
 import Workspace from "./workspace";
 import Config from "./config";
+import Action from "./interface/action";
+import ActionType from "./enum/actionType";
 
 class ExtensionController {
   private utils!: Utils;
@@ -85,6 +87,7 @@ class ExtensionController {
   private registerEventListeners() {
     this.workspace.onWillProcessing(this.onWillProcessing);
     this.workspace.onDidProcessing(this.onDidProcessing);
+    this.workspace.onWillExecuteAction(this.onWillExecuteAction);
   }
 
   private onWillProcessing = () => {
@@ -93,9 +96,18 @@ class ExtensionController {
 
   private onDidProcessing = async () => {
     await this.setQuickPickData();
-    this.quickPick.init();
+    if (!this.quickPick.isInitialized()) {
+      this.quickPick.init();
+    }
     this.quickPick.loadItems();
     this.setBusy(false);
+  };
+
+  private onWillExecuteAction = (action: Action) => {
+    if (action.type === ActionType.Rebuild) {
+      this.quickPick.setItems([]);
+      this.quickPick.loadItems();
+    }
   };
 }
 

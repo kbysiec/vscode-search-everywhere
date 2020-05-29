@@ -15,10 +15,15 @@ class ActionProcessor {
   private onWillProcessingEventEmitter: vscode.EventEmitter<
     void
   > = new vscode.EventEmitter();
+  private onWillExecuteActionEventEmitter: vscode.EventEmitter<
+    Action
+  > = new vscode.EventEmitter();
   readonly onDidProcessing: vscode.Event<void> = this
     .onDidProcessingEventEmitter.event;
   readonly onWillProcessing: vscode.Event<void> = this
     .onWillProcessingEventEmitter.event;
+  readonly onWillExecuteAction: vscode.Event<Action> = this
+    .onWillExecuteActionEventEmitter.event;
 
   constructor(private utils: Utils) {}
 
@@ -43,6 +48,7 @@ class ActionProcessor {
       this.reduce();
       const action = this.queue.shift();
       this.setPreviousAction(action);
+      this.onWillExecuteActionEventEmitter.fire(action);
       action && (await action.fn());
     }
 

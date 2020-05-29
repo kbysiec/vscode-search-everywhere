@@ -19,10 +19,15 @@ class Workspace {
   private onDidProcessingEventEmitter: vscode.EventEmitter<
     void
   > = new vscode.EventEmitter();
+  private onWillExecuteActionEventEmitter: vscode.EventEmitter<
+    Action
+  > = new vscode.EventEmitter();
   readonly onWillProcessing: vscode.Event<void> = this
     .onWillProcessingEventEmitter.event;
   readonly onDidProcessing: vscode.Event<void> = this
     .onDidProcessingEventEmitter.event;
+  readonly onWillExecuteAction: vscode.Event<Action> = this
+    .onWillExecuteActionEventEmitter.event;
 
   private dataService!: DataService;
   private dataConverter!: DataConverter;
@@ -71,6 +76,9 @@ class Workspace {
 
     this.actionProcessor.onDidProcessing(this.onDidActionProcessorProcessing);
     this.actionProcessor.onWillProcessing(this.onWillActionProcessorProcessing);
+    this.actionProcessor.onWillExecuteAction(
+      this.onWillActionProcessorExecuteAction
+    );
   }
 
   getData(): QuickPickItem[] | undefined {
@@ -375,12 +383,16 @@ class Workspace {
     });
   }
 
-  private onWillActionProcessorProcessing = async () => {
+  private onWillActionProcessorProcessing = () => {
     this.onWillProcessingEventEmitter.fire();
   };
 
-  private onDidActionProcessorProcessing = async () => {
+  private onDidActionProcessorProcessing = () => {
     this.onDidProcessingEventEmitter.fire();
+  };
+
+  private onWillActionProcessorExecuteAction = (action: Action) => {
+    this.onWillExecuteActionEventEmitter.fire(action);
   };
 }
 

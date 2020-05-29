@@ -2,7 +2,12 @@ import * as vscode from "vscode";
 import { assert } from "chai";
 import * as sinon from "sinon";
 import ExtensionController from "../../extensionController";
-import { getExtensionContext, getQpItems } from "../util/mockFactory";
+import {
+  getExtensionContext,
+  getQpItems,
+  getAction,
+} from "../util/mockFactory";
+import ActionType from "../../enum/actionType";
 
 describe("ExtensionController", () => {
   let context: vscode.ExtensionContext;
@@ -301,10 +306,16 @@ describe("ExtensionController", () => {
         "onDidProcessing"
       );
 
+      const onWillExecuteActionStub = sinon.stub(
+        extensionControllerAny.workspace,
+        "onWillExecuteAction"
+      );
+
       extensionControllerAny.registerEventListeners();
 
       assert.equal(onWillProcessingStub.calledOnce, true);
       assert.equal(onDidProcessingStub.calledOnce, true);
+      assert.equal(onWillExecuteActionStub.calledOnce, true);
     });
   });
 
@@ -319,19 +330,74 @@ describe("ExtensionController", () => {
   });
 
   describe("onDidProcessing", () => {
-    it(`should setBusy method be invoked with false as parameter
-      and setQuickPickData method be invoked`, async () => {
-      const setBusyStub = sinon.stub(extensionControllerAny, "setBusy");
-
+    it(`should setQuickPickData, loadItemsStub methods
+      be invoked and and setBusy method with false as parameter`, async () => {
+      sinon
+        .stub(extensionControllerAny.quickPick, "isInitialized")
+        .returns(true);
       const setQuickPickDataStub = sinon.stub(
         extensionControllerAny,
         "setQuickPickData"
       );
+      const initStub = sinon.stub(extensionControllerAny.quickPick, "init");
+      const loadItemsStub = sinon.stub(
+        extensionControllerAny.quickPick,
+        "loadItems"
+      );
+      const setBusyStub = sinon.stub(extensionControllerAny, "setBusy");
 
       await extensionControllerAny.onDidProcessing();
 
-      assert.equal(setBusyStub.calledWith(false), true);
       assert.equal(setQuickPickDataStub.calledOnce, true);
+      assert.equal(initStub.calledOnce, false);
+      assert.equal(loadItemsStub.calledOnce, true);
+      assert.equal(setBusyStub.calledWith(false), true);
+    });
+
+    it(`should init method be invoked if quickPick is not initialized`, async () => {
+      sinon
+        .stub(extensionControllerAny.quickPick, "isInitialized")
+        .returns(false);
+
+      const initStub = sinon.stub(extensionControllerAny.quickPick, "init");
+      sinon.stub(extensionControllerAny.quickPick, "loadItems");
+
+      await extensionControllerAny.onDidProcessing();
+
+      assert.equal(initStub.calledOnce, true);
+    });
+  });
+
+  describe("onWillExecuteAction", () => {
+    it(`should quickPick.setItems be invoked with empty array
+      if action type is rebuild`, async () => {
+      const setItemsStub = sinon.stub(
+        extensionControllerAny.quickPick,
+        "setItems"
+      );
+      const loadItemsStub = sinon.stub(
+        extensionControllerAny.quickPick,
+        "loadItems"
+      );
+      extensionControllerAny.onWillExecuteAction(getAction(ActionType.Rebuild));
+
+      assert.equal(setItemsStub.calledWith([]), true);
+      assert.equal(loadItemsStub.calledOnce, true);
+    });
+
+    it("should do nothing if action type is different than rebuild", async () => {
+      const setItemsStub = sinon.stub(
+        extensionControllerAny.quickPick,
+        "setItems"
+      );
+      const loadItemsStub = sinon.stub(
+        extensionControllerAny.quickPick,
+        "loadItems"
+      );
+      extensionControllerAny.onWillExecuteAction(getAction(ActionType.Update));
+
+      assert.equal(setItemsStub.calledOnce, false);
+      assert.equal(loadItemsStub.calledOnce, false);
     });
   });
 });

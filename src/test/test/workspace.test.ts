@@ -683,24 +683,36 @@ describe("Workspace", () => {
   });
 
   describe("onWillActionProcessorProcessing", () => {
-    it("should onWillProcessing event be emitted", async () => {
+    it("should onWillProcessing event be emitted", () => {
       const eventEmitter = getEventEmitter();
       sinon
         .stub(workspaceAny, "onWillProcessingEventEmitter")
         .value(eventEmitter);
-      await workspaceAny.onWillActionProcessorProcessing();
+      workspaceAny.onWillActionProcessorProcessing();
 
       assert.equal(eventEmitter.fire.calledOnce, true);
     });
   });
 
   describe("onDidActionProcessorProcessing", () => {
-    it("should onDidProcessing event be emitted", async () => {
+    it("should onDidProcessing event be emitted", () => {
       const eventEmitter = getEventEmitter();
       sinon
         .stub(workspaceAny, "onDidProcessingEventEmitter")
         .value(eventEmitter);
-      await workspaceAny.onDidActionProcessorProcessing();
+      workspaceAny.onDidActionProcessorProcessing();
+
+      assert.equal(eventEmitter.fire.calledOnce, true);
+    });
+  });
+
+  describe("onWillActionProcessorExecuteAction", () => {
+    it("should onWillExecuteAction event be emitted", () => {
+      const eventEmitter = getEventEmitter();
+      sinon
+        .stub(workspaceAny, "onWillExecuteActionEventEmitter")
+        .value(eventEmitter);
+      workspaceAny.onWillActionProcessorExecuteAction();
 
       assert.equal(eventEmitter.fire.calledOnce, true);
     });

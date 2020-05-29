@@ -157,6 +157,20 @@ describe("ActionProcessor", () => {
 
       assert.equal(eventEmitter.fire.calledOnce, true);
     });
+
+    it(`should onWillExecuteAction be emitted before execution
+      of each action function`, async () => {
+      const eventEmitter = getEventEmitter();
+      sinon
+        .stub(actionProcessorAny, "onWillExecuteActionEventEmitter")
+        .value(eventEmitter);
+      sinon
+        .stub(actionProcessorAny, "queue")
+        .value(getActions(2, undefined, ActionType.Update, undefined, true));
+      await actionProcessorAny.process();
+
+      assert.equal(eventEmitter.fire.calledTwice, true);
+    });
   });
 
   describe("reduce", () => {
