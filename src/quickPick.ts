@@ -25,9 +25,6 @@ class QuickPick {
   }
 
   show(): void {
-    if (!this.isInitialized()) {
-      this.init();
-    }
     this.quickPick.show();
   }
 

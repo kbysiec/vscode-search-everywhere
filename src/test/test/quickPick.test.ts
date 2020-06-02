@@ -75,14 +75,6 @@ describe("QuickPick", () => {
 
       assert.equal(showStub.calledOnce, true);
     });
-
-    it("should init method be invoked if quick pick is not initialized", () => {
-      sinon.stub(quickPick, "isInitialized").returns(false);
-      const initStub = sinon.stub(quickPick, "init");
-      quickPick.show();
-
-      assert.equal(initStub.calledOnce, true);
-    });
   });
 
   describe("loadItems", () => {
