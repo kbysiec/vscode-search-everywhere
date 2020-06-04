@@ -71,7 +71,7 @@ describe("Utils", () => {
       and is not excluded from refreshing`, () => {
       assert.equal(
         utils.shouldReindexOnConfigurationChange(
-          getConfigurationChangeEvent(true)
+          getConfigurationChangeEvent(true, true, false)
         ),
         true
       );
@@ -81,7 +81,7 @@ describe("Utils", () => {
       but is excluded from refreshing`, () => {
       assert.equal(
         utils.shouldReindexOnConfigurationChange(
-          getConfigurationChangeEvent(true, true)
+          getConfigurationChangeEvent(false)
         ),
         false
       );
@@ -90,6 +90,28 @@ describe("Utils", () => {
     it("should return false if extension configuration has not changed", () => {
       assert.equal(
         utils.shouldReindexOnConfigurationChange(
+          getConfigurationChangeEvent(false)
+        ),
+        false
+      );
+    });
+  });
+
+  describe("isDebounceConfigurationToggled", () => {
+    it(`should return true if extension configuration
+      related to debounce setting has changed`, () => {
+      assert.equal(
+        utils.isDebounceConfigurationToggled(
+          getConfigurationChangeEvent(true, false)
+        ),
+        true
+      );
+    });
+
+    it(`should return false if extension configuration
+      related to debounce setting has not changed`, () => {
+      assert.equal(
+        utils.isDebounceConfigurationToggled(
           getConfigurationChangeEvent(false)
         ),
         false

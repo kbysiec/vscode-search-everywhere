@@ -311,11 +311,17 @@ describe("ExtensionController", () => {
         "onWillExecuteAction"
       );
 
+      const onDidDebounceConfigToggleStub = sinon.stub(
+        extensionControllerAny.workspace,
+        "onDidDebounceConfigToggle"
+      );
+
       extensionControllerAny.registerEventListeners();
 
       assert.equal(onWillProcessingStub.calledOnce, true);
       assert.equal(onDidProcessingStub.calledOnce, true);
       assert.equal(onWillExecuteActionStub.calledOnce, true);
+      assert.equal(onDidDebounceConfigToggleStub.calledOnce, true);
     });
   });
 
@@ -398,6 +404,22 @@ describe("ExtensionController", () => {
 
       assert.equal(setItemsStub.calledOnce, false);
       assert.equal(loadItemsStub.calledOnce, false);
+    });
+  });
+
+  describe("onDidDebounceConfigToggle", () => {
+    it("should setBusy and reloadOnDidChangeValueEventListener methods be invoked", () => {
+      const setBusyStub = sinon.stub(extensionControllerAny, "setBusy");
+      const reloadOnDidChangeValueEventListenerStub = sinon.stub(
+        extensionControllerAny.quickPick,
+        "reloadOnDidChangeValueEventListener"
+      );
+
+      extensionControllerAny.onDidDebounceConfigToggle();
+
+      assert.equal(setBusyStub.calledWith(true), true);
+      assert.equal(reloadOnDidChangeValueEventListenerStub.calledOnce, true);
+      assert.equal(setBusyStub.calledWith(false), true);
     });
   });
 });

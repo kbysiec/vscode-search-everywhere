@@ -7,6 +7,7 @@ class Config {
     shouldDisplayNotificationInStatusBar: false,
     shouldInitOnStartup: false,
     shouldHighlightSymbol: false,
+    shouldUseDebounce: false,
     exclude: [] as string[],
     include: [] as string[],
   };
@@ -32,6 +33,13 @@ class Config {
     return this.get(
       ConfigKey.shouldHighlightSymbol,
       this.default.shouldHighlightSymbol
+    );
+  }
+
+  shouldUseDebounce(): boolean {
+    return this.get(
+      ConfigKey.shouldUseDebounce,
+      this.default.shouldUseDebounce
     );
   }
 

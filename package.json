@@ -44,6 +44,11 @@
           "default": false,
           "description": "Should selected symbol be highlighted."
         },
+        "searchEverywhere.shouldUseDebounce": {
+          "type": "boolean",
+          "default": false,
+          "description": "Should the debounce function be used while returning filter results (useful in case of large workspace)."
+        },
         "searchEverywhere.exclude": {
           "type": "array",
           "default": [

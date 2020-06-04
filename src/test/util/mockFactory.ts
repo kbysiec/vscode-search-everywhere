@@ -46,6 +46,7 @@ export function getConfigStub(): Config {
     shouldDisplayNotificationInStatusBar: false,
     shouldInitOnStartup: false,
     shouldHighlightSymbol: false,
+    shouldUseDebounce: false,
     exclude: [] as string[],
     include: [] as string[],
   };
@@ -72,21 +73,19 @@ export const getWorkspaceFoldersChangeEvent = (flag: boolean) => {
 };
 
 export const getConfigurationChangeEvent = (
-  flag: boolean,
-  isExcluded: boolean = false
+  flag: boolean = true,
+  shouldUseExcludedArray: boolean = true,
+  isExcluded: boolean = true
 ) => {
   const defaultSection = "searchEverywhere";
-  const excludedConfigFromRefresh: string[] = [
-    "shouldDisplayNotificationInStatusBar",
-    "shouldInitOnStartup",
-  ].map((config: string) => `${defaultSection}.${config}`);
 
   return {
     affectsConfiguration: (section: string) =>
-      section === defaultSection
-        ? true && flag
-        : excludedConfigFromRefresh.some((conf) => conf === section) &&
-          isExcluded,
+      defaultSection === section
+        ? flag
+        : shouldUseExcludedArray
+        ? flag && isExcluded
+        : flag,
   };
 };
 
@@ -123,6 +122,16 @@ export const getFileWatcherStub = () => {
     onDidDelete: sinon.stub(),
     dispose: () => {},
   };
+};
+
+export const getQuickPickOnDidChangeValueEventListeners = (
+  count: number = 2
+): vscode.Disposable[] => {
+  const array: vscode.Disposable[] = [];
+  for (let i = 0; i < count; i++) {
+    array.push(new vscode.Disposable(() => {}));
+  }
+  return array;
 };
 
 export const getWorkspaceData = (items: vscode.Uri[] = []): WorkspaceData => {

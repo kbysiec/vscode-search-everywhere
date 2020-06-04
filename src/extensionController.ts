@@ -88,6 +88,7 @@ class ExtensionController {
     this.workspace.onWillProcessing(this.onWillProcessing);
     this.workspace.onDidProcessing(this.onDidProcessing);
     this.workspace.onWillExecuteAction(this.onWillExecuteAction);
+    this.workspace.onDidDebounceConfigToggle(this.onDidDebounceConfigToggle);
   }
 
   private onWillProcessing = () => {
@@ -108,6 +109,12 @@ class ExtensionController {
       this.quickPick.setItems([]);
       this.quickPick.loadItems();
     }
+  };
+
+  private onDidDebounceConfigToggle = () => {
+    this.setBusy(true);
+    this.quickPick.reloadOnDidChangeValueEventListener();
+    this.setBusy(false);
   };
 }
 

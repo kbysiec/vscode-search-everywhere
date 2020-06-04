@@ -8,6 +8,7 @@ import {
   getUntitledQpItem,
   getUntitledItem,
   getConfigStub,
+  getQuickPickOnDidChangeValueEventListeners,
 } from "../util/mockFactory";
 import Config from "../../config";
 import QuickPickItem from "../../interface/quickPickItem";
@@ -48,6 +49,24 @@ describe("QuickPick", () => {
       quickPick.init();
 
       assert.equal(createQuickPickStub.calledOnce, true);
+    });
+  });
+
+  describe("reloadOnDidChangeValueEventListener", () => {
+    it(`should disposeOnDidChangeValueEventListeners
+      and registerOnDidChangeValueEventListeners methods be invoked`, () => {
+      const disposeOnDidChangeValueEventListenersStub = sinon.stub(
+        quickPickAny,
+        "disposeOnDidChangeValueEventListeners"
+      );
+      const registerOnDidChangeValueEventListenersStub = sinon.stub(
+        quickPickAny,
+        "registerOnDidChangeValueEventListeners"
+      );
+      quickPick.reloadOnDidChangeValueEventListener();
+
+      assert.equal(disposeOnDidChangeValueEventListenersStub.calledOnce, true);
+      assert.equal(registerOnDidChangeValueEventListenersStub.calledOnce, true);
     });
   });
 
@@ -117,6 +136,46 @@ describe("QuickPick", () => {
       quickPick.setPlaceholder(text);
 
       assert.equal(quickPickAny.quickPick.placeholder, text);
+    });
+  });
+
+  describe("disposeOnDidChangeValueEventListeners", () => {
+    it(`should dispose all onDidChangeValue event listeners
+      and reset the array for them`, () => {
+      sinon
+        .stub(quickPickAny, "onDidChangeValueEventListeners")
+        .value(getQuickPickOnDidChangeValueEventListeners());
+      quickPickAny.disposeOnDidChangeValueEventListeners();
+
+      assert.equal(quickPickAny.onDidChangeValueEventListeners.length, 0);
+    });
+  });
+
+  describe("registerOnDidChangeValueEventListeners", () => {
+    it(`should register one event listener if shouldUseDebounce
+      returns false`, () => {
+      const onDidChangeValueEventListeners: vscode.Disposable[] = [];
+      sinon
+        .stub(quickPickAny, "onDidChangeValueEventListeners")
+        .value(onDidChangeValueEventListeners);
+      sinon.stub(quickPickAny.config, "shouldUseDebounce").returns(false);
+
+      quickPickAny.registerOnDidChangeValueEventListeners();
+
+      assert.equal(quickPickAny.onDidChangeValueEventListeners.length, 1);
+    });
+
+    it(`should register two event listeners if shouldUseDebounce
+      returns true`, () => {
+      const onDidChangeValueEventListeners: vscode.Disposable[] = [];
+      sinon
+        .stub(quickPickAny, "onDidChangeValueEventListeners")
+        .value(onDidChangeValueEventListeners);
+      sinon.stub(quickPickAny.config, "shouldUseDebounce").returns(true);
+
+      quickPickAny.registerOnDidChangeValueEventListeners();
+
+      assert.equal(quickPickAny.onDidChangeValueEventListeners.length, 2);
     });
   });
 
@@ -220,17 +279,23 @@ describe("QuickPick", () => {
     });
   });
 
+  describe("onDidChangeValueClearing", () => {
+    it("should clear quick pick items", () => {
+      // sinon.stub(quickPickAny.quickPick, "items").value(getQpItems());
+      quickPickAny.quickPick.items = getQpItems();
+      quickPickAny.onDidChangeValueClearing();
+
+      assert.equal(quickPickAny.quickPick.items.length, 0);
+    });
+  });
+
   describe("onDidChangeValue", () => {
-    it("should invoke vscode.window.showInformationMessage be invoked with text as argument", () => {
-      const showInformationMessageStub = sinon.stub(
-        vscode.window,
-        "showInformationMessage"
-      );
+    it("should loadItems method be invoked", () => {
+      const loadItemsStub = sinon.stub(quickPickAny, "loadItems");
       const text = "test text";
       quickPickAny.onDidChangeValue(text);
 
-      const expectedText = `Current text: ${text}`;
-      assert.equal(showInformationMessageStub.calledWith(expectedText), true);
+      assert.equal(loadItemsStub.calledOnce, true);
     });
   });
 

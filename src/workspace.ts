@@ -22,12 +22,17 @@ class Workspace {
   private onWillExecuteActionEventEmitter: vscode.EventEmitter<
     Action
   > = new vscode.EventEmitter();
+  private onDidDebounceConfigToggleEventEmitter: vscode.EventEmitter<
+    void
+  > = new vscode.EventEmitter();
   readonly onWillProcessing: vscode.Event<void> = this
     .onWillProcessingEventEmitter.event;
   readonly onDidProcessing: vscode.Event<void> = this
     .onDidProcessingEventEmitter.event;
   readonly onWillExecuteAction: vscode.Event<Action> = this
     .onWillExecuteActionEventEmitter.event;
+  readonly onDidDebounceConfigToggle: vscode.Event<void> = this
+    .onDidDebounceConfigToggleEventEmitter.event;
 
   private dataService!: DataService;
   private dataConverter!: DataConverter;
@@ -276,6 +281,8 @@ class Workspace {
     this.cache.clearConfig();
     if (this.utils.shouldReindexOnConfigurationChange(event)) {
       await this.index("onDidChangeConfiguration");
+    } else if (this.utils.isDebounceConfigurationToggled(event)) {
+      this.onDidDebounceConfigToggleEventEmitter.fire();
     }
   };
 

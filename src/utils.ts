@@ -30,11 +30,18 @@ class Utils {
       "shouldDisplayNotificationInStatusBar",
       "shouldInitOnStartup",
       "shouldHighlightSymbol",
+      "shouldUseDebounce",
     ].map((config: string) => `${this.defaultSection}.${config}`);
     return (
       event.affectsConfiguration("searchEverywhere") &&
       !excluded.some((config: string) => event.affectsConfiguration(config))
     );
+  }
+
+  isDebounceConfigurationToggled(
+    event: vscode.ConfigurationChangeEvent
+  ): boolean {
+    return event.affectsConfiguration("searchEverywhere.shouldUseDebounce");
   }
 
   printNoFolderOpenedMessage(): void {

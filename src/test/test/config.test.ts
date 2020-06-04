@@ -79,6 +79,18 @@ describe("Config", () => {
     });
   });
 
+  describe("shouldUseDebounce", () => {
+    it("should return boolean from configuration", async () => {
+      const section = "searchEverywhere";
+      const key = "shouldUseDebounce";
+
+      assert.equal(
+        config.shouldUseDebounce(),
+        mock.configuration[section][key]
+      );
+    });
+  });
+
   describe("getExclude", () => {
     it("should return array of exclude patterns from configuration", async () => {
       const section = "searchEverywhere";

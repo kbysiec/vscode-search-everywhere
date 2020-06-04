@@ -1,13 +1,16 @@
 import * as vscode from "vscode";
 import QuickPickItem from "./interface/quickPickItem";
 import Config from "./config";
+const debounce = require("debounce");
 
 class QuickPick {
   private quickPick!: vscode.QuickPick<QuickPickItem>;
   private items: QuickPickItem[];
+  private onDidChangeValueEventListeners: vscode.Disposable[];
 
   constructor(private config: Config) {
     this.items = [];
+    this.onDidChangeValueEventListeners = [];
   }
 
   init(): void {
@@ -18,6 +21,12 @@ class QuickPick {
     this.quickPick.onDidHide(this.onDidHide);
     this.quickPick.onDidAccept(this.onDidAccept);
     this.quickPick.onDidChangeValue(this.onDidChangeValue);
+    this.registerOnDidChangeValueEventListeners();
+  }
+
+  reloadOnDidChangeValueEventListener(): void {
+    this.disposeOnDidChangeValueEventListeners();
+    this.registerOnDidChangeValueEventListeners();
   }
 
   isInitialized(): boolean {
@@ -46,6 +55,37 @@ class QuickPick {
 
   setPlaceholder(text: string): void {
     this.quickPick.placeholder = text;
+  }
+
+  private disposeOnDidChangeValueEventListeners(): void {
+    this.onDidChangeValueEventListeners.forEach(
+      (eventListener: vscode.Disposable) => eventListener.dispose()
+    );
+    this.onDidChangeValueEventListeners = [];
+  }
+
+  private registerOnDidChangeValueEventListeners(): void {
+    const shouldUseDebounce = this.config.shouldUseDebounce();
+
+    if (shouldUseDebounce) {
+      const onDidChangeValueClearingEventListener = this.quickPick.onDidChangeValue(
+        this.onDidChangeValueClearing
+      );
+      const onDidChangeValueEventListener = this.quickPick.onDidChangeValue(
+        debounce(this.onDidChangeValue, 400)
+      );
+
+      this.onDidChangeValueEventListeners.push(
+        onDidChangeValueClearingEventListener
+      );
+      this.onDidChangeValueEventListeners.push(onDidChangeValueEventListener);
+    } else {
+      const onDidChangeValueEventListener = this.quickPick.onDidChangeValue(
+        debounce(this.onDidChangeValue, 400)
+      );
+
+      this.onDidChangeValueEventListeners.push(onDidChangeValueEventListener);
+    }
   }
 
   private submit(selectedItem: QuickPickItem): void {
@@ -80,8 +120,12 @@ class QuickPick {
     );
   }
 
+  private onDidChangeValueClearing = () => {
+    this.quickPick.items = [];
+  };
+
   private onDidChangeValue = (text: string): void => {
-    vscode.window.showInformationMessage(`Current text: ${text}`);
+    this.loadItems();
   };
 
   private onDidAccept = (): void => {

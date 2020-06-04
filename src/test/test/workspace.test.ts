@@ -483,16 +483,36 @@ describe("Workspace", () => {
       assert.equal(indexStub.calledOnce, true);
     });
 
+    it(`should xxx`, async () => {
+      sinon
+        .stub(workspaceAny.utils, "isDebounceConfigurationToggled")
+        .returns(true);
+        const eventEmitter = getEventEmitter();
+      sinon
+        .stub(workspaceAny, "onDidDebounceConfigToggleEventEmitter")
+        .value(eventEmitter);
+      await workspaceAny.onDidChangeConfiguration(
+        getConfigurationChangeEvent(true)
+      );
+
+      assert.equal(eventEmitter.fire.calledOnce, true);
+    });
+
     it("should do nothing if extension configuration has not changed", async () => {
       sinon
         .stub(workspaceAny.utils, "shouldReindexOnConfigurationChange")
         .returns(false);
+        sinon
+        .stub(workspaceAny.utils, "isDebounceConfigurationToggled")
+        .returns(false);
       const registerActionStub = sinon.stub(workspaceAny, "registerAction");
+      const onDidDebounceConfigToggleEventEmitterStub = sinon.stub(workspaceAny, "onDidDebounceConfigToggleEventEmitter");
       await workspaceAny.onDidChangeConfiguration(
         getConfigurationChangeEvent(false)
       );
 
       assert.equal(registerActionStub.calledOnce, false);
+      assert.equal(onDidDebounceConfigToggleEventEmitterStub.calledOnce, false);
     });
 
     it("should cache.clearConfig method be invoked", async () => {
