@@ -3,9 +3,10 @@ import QuickPickItem from "./interface/quickPickItem";
 import WorkspaceData from "./interface/workspaceData";
 import Utils from "./utils";
 import Item from "./interface/item";
+import Config from "./config";
 
 class DataConverter {
-  constructor(private utils: Utils) {}
+  constructor(private utils: Utils, private config: Config) {}
 
   convertToQpData(data: WorkspaceData): QuickPickItem[] {
     return this.mapDataToQpData(data.items);
@@ -40,9 +41,12 @@ class DataConverter {
     symbol: vscode.DocumentSymbol
   ): QuickPickItem {
     const splitter = this.utils.getSplitter();
+    const icons = this.config.getIcons();
     const symbolName = symbol.name.split(splitter);
     const parent = symbolName.length === 2 ? symbolName[0] : "";
     const name = symbolName.length === 2 ? symbolName[1] : symbol.name;
+    const icon = icons[symbol.kind] ? `$(${icons[symbol.kind]})` : "";
+    const label = icon ? `${icon}  ${name}` : name;
 
     const description = `${vscode.SymbolKind[symbol.kind]} at ${
       symbol.range.isSingleLine
@@ -59,7 +63,7 @@ class DataConverter {
         start: symbol.range.start,
         end: symbol.range.end,
       },
-      label: name,
+      label,
       detail: this.normalizeUriPath(uri.fsPath),
       description,
     };
@@ -67,7 +71,11 @@ class DataConverter {
 
   private mapUriToQpItem(uri: vscode.Uri): QuickPickItem {
     const symbolKind = 0;
+    const icons = this.config.getIcons();
     const name = uri.path.split("/").pop();
+    const icon = icons[symbolKind] ? `$(${icons[symbolKind]})` : "";
+    const label = icon ? `${icon}  ${name}` : name;
+
     const start = new vscode.Position(0, 0);
     const end = new vscode.Position(0, 0);
 
@@ -80,7 +88,7 @@ class DataConverter {
         start,
         end,
       },
-      label: name,
+      label,
       detail: this.normalizeUriPath(uri.fsPath),
       description,
     } as QuickPickItem;

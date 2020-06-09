@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import Cache from "./cache";
 import ConfigKey from "./enum/configKey";
+import Icons from "./interface/icons";
 
 class Config {
   private default = {
@@ -8,6 +9,7 @@ class Config {
     shouldInitOnStartup: false,
     shouldHighlightSymbol: false,
     shouldUseDebounce: false,
+    icons: {} as Icons,
     exclude: [] as string[],
     include: [] as string[],
   };
@@ -41,6 +43,10 @@ class Config {
       ConfigKey.shouldUseDebounce,
       this.default.shouldUseDebounce
     );
+  }
+
+  getIcons(): Icons {
+    return this.get(ConfigKey.icons, this.default.icons);
   }
 
   getExclude(): string[] {

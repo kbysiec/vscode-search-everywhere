@@ -2,8 +2,7 @@ import * as vscode from "vscode";
 import { assert } from "chai";
 import * as sinon from "sinon";
 import Config from "../../config";
-import * as mock from "../mock/config.mock";
-import { getCacheStub } from "../util/mockFactory";
+import { getCacheStub, getConfiguration } from "../util/mockFactory";
 import Cache from "../../cache";
 
 describe("Config", () => {
@@ -11,10 +10,12 @@ describe("Config", () => {
   let configAny: any;
   let cacheStub: Cache;
   let getConfigurationStub: sinon.SinonStub;
+  let configuration: { [key: string]: any };
 
   before(() => {
     cacheStub = getCacheStub();
     config = new Config(cacheStub);
+    configuration = getConfiguration();
   });
 
   beforeEach(() => {
@@ -22,7 +23,7 @@ describe("Config", () => {
       .stub(vscode.workspace, "getConfiguration")
       .returns({
         get: (section: string) =>
-          section.split(".").reduce((cfg, key) => cfg[key], mock.configuration),
+          section.split(".").reduce((cfg, key) => cfg[key], configuration),
         has: () => true,
         inspect: () => undefined,
         update: () => Promise.resolve(),
@@ -50,7 +51,7 @@ describe("Config", () => {
 
       assert.equal(
         config.shouldDisplayNotificationInStatusBar(),
-        mock.configuration[section][key]
+        configuration[section][key]
       );
     });
   });
@@ -60,10 +61,7 @@ describe("Config", () => {
       const section = "searchEverywhere";
       const key = "shouldInitOnStartup";
 
-      assert.equal(
-        config.shouldInitOnStartup(),
-        mock.configuration[section][key]
-      );
+      assert.equal(config.shouldInitOnStartup(), configuration[section][key]);
     });
   });
 
@@ -72,10 +70,7 @@ describe("Config", () => {
       const section = "searchEverywhere";
       const key = "shouldHighlightSymbol";
 
-      assert.equal(
-        config.shouldHighlightSymbol(),
-        mock.configuration[section][key]
-      );
+      assert.equal(config.shouldHighlightSymbol(), configuration[section][key]);
     });
   });
 
@@ -84,10 +79,16 @@ describe("Config", () => {
       const section = "searchEverywhere";
       const key = "shouldUseDebounce";
 
-      assert.equal(
-        config.shouldUseDebounce(),
-        mock.configuration[section][key]
-      );
+      assert.equal(config.shouldUseDebounce(), configuration[section][key]);
+    });
+  });
+
+  describe("getIcons", () => {
+    it("should return object containing icons from configuration", async () => {
+      const section = "searchEverywhere";
+      const key = "icons";
+
+      assert.equal(config.getIcons(), configuration[section][key]);
     });
   });
 
@@ -96,7 +97,7 @@ describe("Config", () => {
       const section = "searchEverywhere";
       const key = "exclude";
 
-      assert.equal(config.getExclude(), mock.configuration[section][key]);
+      assert.equal(config.getExclude(), configuration[section][key]);
     });
   });
 
@@ -105,7 +106,7 @@ describe("Config", () => {
       const section = "searchEverywhere";
       const key = "include";
 
-      assert.equal(config.getInclude(), mock.configuration[section][key]);
+      assert.equal(config.getInclude(), configuration[section][key]);
     });
   });
 
@@ -115,7 +116,7 @@ describe("Config", () => {
       const section = "searchEverywhere";
       const key = "exclude";
 
-      assert.equal(configAny.get(key, []), mock.configuration[section][key]);
+      assert.equal(configAny.get(key, []), configuration[section][key]);
     });
 
     it(`should return array of exclude patterns
@@ -125,9 +126,9 @@ describe("Config", () => {
 
       const getConfigByKeyStub = sinon
         .stub(configAny.cache, "getConfigByKey")
-        .returns(mock.configuration[section][key]);
+        .returns(configuration[section][key]);
 
-      assert.equal(configAny.get(key, []), mock.configuration[section][key]);
+      assert.equal(configAny.get(key, []), configuration[section][key]);
       assert.equal(getConfigByKeyStub.calledOnce, true);
       assert.equal(getConfigurationStub.calledOnce, false);
     });
@@ -138,7 +139,7 @@ describe("Config", () => {
 
       assert.equal(
         configAny.get(key, [], section),
-        mock.configuration[section][key]
+        configuration[section][key]
       );
     });
   });
@@ -150,7 +151,7 @@ describe("Config", () => {
 
       assert.equal(
         configAny.getConfigurationByKey(key, []),
-        mock.configuration[section][key]
+        configuration[section][key]
       );
     });
 
@@ -160,7 +161,7 @@ describe("Config", () => {
 
       assert.equal(
         configAny.getConfigurationByKey(key, [], section),
-        mock.configuration[section][key]
+        configuration[section][key]
       );
     });
   });
@@ -172,7 +173,7 @@ describe("Config", () => {
 
       assert.equal(
         configAny.getConfiguration(`${section}.${key}`, []),
-        mock.configuration[section][key]
+        configuration[section][key]
       );
     });
   });

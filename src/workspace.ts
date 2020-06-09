@@ -271,7 +271,7 @@ class Workspace {
 
   private initComponents(): void {
     this.dataService = new DataService(this.utils, this.config);
-    this.dataConverter = new DataConverter(this.utils);
+    this.dataConverter = new DataConverter(this.utils, this.config);
     this.actionProcessor = new ActionProcessor(this.utils);
   }
 

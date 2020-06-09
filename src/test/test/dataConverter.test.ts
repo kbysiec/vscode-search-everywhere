@@ -14,16 +14,22 @@ import {
   getQpItems,
   getItem,
   getQpItem,
+  getConfigStub,
+  getConfiguration,
+  getQpItemDocumentSymbolSingleLine,
 } from "../util/mockFactory";
+import Config from "../../config";
 
 describe("DataConverter", () => {
   let dataConverter: DataConverter;
   let dataConverterAny: any;
   let utilsStub: Utils;
+  let configStub: Config;
 
   before(() => {
     utilsStub = getUtilsStub();
-    dataConverter = new DataConverter(utilsStub);
+    configStub = getConfigStub();
+    dataConverter = new DataConverter(utilsStub, configStub);
   });
 
   beforeEach(() => {
@@ -36,7 +42,7 @@ describe("DataConverter", () => {
 
   describe("constructor", () => {
     it("should data converter be initialized", () => {
-      dataConverter = new DataConverter(utilsStub);
+      dataConverter = new DataConverter(utilsStub, configStub);
 
       assert.exists(dataConverter);
     });
@@ -44,6 +50,7 @@ describe("DataConverter", () => {
 
   describe("convertToQpData", () => {
     it("should return quick pick data", () => {
+      sinon.stub(dataConverterAny.config, "getIcons").returns({});
       const items = getItems();
       assert.deepEqual(
         dataConverter.convertToQpData(getWorkspaceData(items)),
@@ -58,6 +65,7 @@ describe("DataConverter", () => {
 
   describe("mapDataToQpData", () => {
     it("should return quick pick data", () => {
+      sinon.stub(dataConverterAny.config, "getIcons").returns({});
       const items = getItems();
       assert.deepEqual(
         dataConverterAny.mapDataToQpData(getWorkspaceData(items).items),
@@ -75,16 +83,18 @@ describe("DataConverter", () => {
 
   describe("mapItemElementToQpItem", () => {
     it("should return quick pick item by invoking mapDocumentSymbolToQpItem method", () => {
+      sinon.stub(dataConverterAny.config, "getIcons").returns({});
       assert.deepEqual(
         dataConverterAny.mapItemElementToQpItem(
           getItem(),
           getDocumentSymbolItemSingleLine()
         ),
-        mock.qpItemDocumentSymbolSingleLine
+        getQpItemDocumentSymbolSingleLine()
       );
     });
 
     it("should return quick pick item by invoking mapUriToQpItem method", () => {
+      sinon.stub(dataConverterAny.config, "getIcons").returns({});
       assert.deepEqual(
         dataConverterAny.mapItemElementToQpItem(getItem(), getItem()),
         getQpItem()
@@ -94,16 +104,18 @@ describe("DataConverter", () => {
 
   describe("mapDocumentSymbolToQpItem", () => {
     it("should return quick pick item for single line document symbol", () => {
+      sinon.stub(dataConverterAny.config, "getIcons").returns({});
       assert.deepEqual(
         dataConverterAny.mapDocumentSymbolToQpItem(
           getItem(),
           getDocumentSymbolItemSingleLine()
         ),
-        mock.qpItemDocumentSymbolSingleLine
+        getQpItemDocumentSymbolSingleLine()
       );
     });
 
     it("should return quick pick item for multi line document symbol with parent", () => {
+      sinon.stub(dataConverterAny.config, "getIcons").returns({});
       assert.deepEqual(
         dataConverterAny.mapDocumentSymbolToQpItem(
           getItem(),
@@ -114,6 +126,7 @@ describe("DataConverter", () => {
     });
 
     it("should return quick pick item for multi line document symbol with empty parent", () => {
+      sinon.stub(dataConverterAny.config, "getIcons").returns({});
       assert.deepEqual(
         dataConverterAny.mapDocumentSymbolToQpItem(
           getItem(),
@@ -122,11 +135,38 @@ describe("DataConverter", () => {
         getDocumentSymbolQpItemMultiLine(true)
       );
     });
+
+    it("should return quick pick item for single line document symbol with appropriate icon", () => {
+      const configuration = getConfiguration().searchEverywhere;
+      sinon
+        .stub(dataConverterAny.config, "getIcons")
+        .returns(configuration.icons);
+
+      assert.deepEqual(
+        dataConverterAny.mapDocumentSymbolToQpItem(
+          getItem(),
+          getDocumentSymbolItemSingleLine()
+        ),
+        getQpItemDocumentSymbolSingleLine(true)
+      );
+    });
   });
 
   describe("mapUriToQpItem", () => {
     it("should return quick pick item", () => {
+      sinon.stub(dataConverterAny.config, "getIcons").returns({});
       assert.deepEqual(dataConverterAny.mapUriToQpItem(getItem()), getQpItem());
+    });
+
+    it("should return quick pick item with icon", () => {
+      const configuration = getConfiguration().searchEverywhere;
+      sinon
+        .stub(dataConverterAny.config, "getIcons")
+        .returns(configuration.icons);
+      assert.deepEqual(
+        dataConverterAny.mapUriToQpItem(getItem()),
+        getQpItem(undefined, undefined, undefined, true)
+      );
     });
   });
 

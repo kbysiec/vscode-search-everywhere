@@ -49,6 +49,20 @@
           "default": false,
           "description": "Should the debounce function be used while returning filter results (useful in case of large workspace)."
         },
+        "searchEverywhere.icons": {
+          "type": "object",
+          "default": {
+            "0": "file",
+            "4": "package",
+            "5": "rocket",
+            "6": "key",
+            "10": "milestone",
+            "11": "zap",
+            "12": "beaker",
+            "14": "bold"
+          },
+          "description": "Ability to define icons which should be displayed for appropriate symbol types. According to VSC API, only Octicons are allowed. Not defined symbol type will not have any icon."
+        },
         "searchEverywhere.exclude": {
           "type": "array",
           "default": [

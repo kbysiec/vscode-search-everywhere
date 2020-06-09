@@ -9,6 +9,7 @@ import ActionType from "../../enum/actionType";
 import Action from "../../interface/action";
 import { createStubInstance } from "./stubbedClass";
 import Config from "../../config";
+import Icons from "../../interface/icons";
 
 export function getExtensionContext(): vscode.ExtensionContext {
   return {
@@ -39,17 +40,26 @@ export function getUtilsStub(): Utils {
   return createStubInstance(Utils);
 }
 
+export function getConfiguration(): { [key: string]: any } {
+  return {
+    searchEverywhere: {
+      shouldDisplayNotificationInStatusBar: true,
+      shouldInitOnStartup: true,
+      shouldHighlightSymbol: true,
+      icons: { 0: "fake-icon", 1: "another-fake-icon" },
+      include: ["**/*.{js,ts}"],
+      exclude: ["**/node_modules/**"],
+    },
+    customSection: {
+      exclude: ["**/customFolder/**"],
+    },
+  };
+}
+
 export function getConfigStub(): Config {
   const configStub: any = createStubInstance(Config);
   configStub.cache = getCacheStub();
-  configStub.default = {
-    shouldDisplayNotificationInStatusBar: false,
-    shouldInitOnStartup: false,
-    shouldHighlightSymbol: false,
-    shouldUseDebounce: false,
-    exclude: [] as string[],
-    include: [] as string[],
-  };
+  configStub.default = getConfiguration().searchEverywhere;
 
   return configStub as Config;
 }
@@ -184,14 +194,19 @@ export const getItems = (
 export const getQpItem = (
   path: string = "/./fake/",
   suffix: string | number = 1,
-  differentStartAndEnd: boolean = false
+  differentStartAndEnd: boolean = false,
+  withIcon: boolean = false
 ): QuickPickItem => {
+  const icons = getConfiguration().searchEverywhere.icons;
+  const symbolKind = 0;
   const qpItem = {
-    label: `fake-${suffix ? `${suffix}` : ""}.ts`,
+    label: `${withIcon ? `$(${icons[symbolKind]})  ` : ""}fake-${
+      suffix ? `${suffix}` : ""
+    }.ts`,
     description: "File",
     detail: `${path}fake-${suffix ? `${suffix}` : ""}.ts`,
     uri: vscode.Uri.file(`${path}fake-${suffix ? `${suffix}` : ""}.ts`),
-    symbolKind: 0,
+    symbolKind,
     range: {
       start: new vscode.Position(0, 0),
       end: differentStartAndEnd
@@ -217,11 +232,12 @@ export const getUntitledQpItem = (): QuickPickItem => {
 export const getQpItems = (
   count: number = 2,
   path: string = "/./fake/",
-  suffixStartOffset: number = 0
+  suffixStartOffset: number = 0,
+  withIcon: boolean = false
 ): QuickPickItem[] => {
   const array: QuickPickItem[] = [];
   for (let i = 1; i <= count; i++) {
-    array.push(getQpItem(path, i + suffixStartOffset));
+    array.push(getQpItem(path, i + suffixStartOffset, withIcon));
   }
   return array;
 };
@@ -443,3 +459,26 @@ export const getProgress = (value: number = 0) => ({
   report: sinon.stub(),
   value,
 });
+
+export const getQpItemDocumentSymbolSingleLine = (
+  withIcon: boolean = false
+): QuickPickItem => {
+  const icons = getConfiguration().searchEverywhere.icons;
+  const symbolKind = 1;
+  const qpItem = {
+    label: `${withIcon ? `$(${icons[symbolKind]})  ` : ""}test name`,
+    description: "Module at line: 1",
+    detail: "/./fake/fake-1.ts",
+    uri: vscode.Uri.file("./fake/fake-1.ts"),
+    symbolKind,
+    range: {
+      start: new vscode.Position(0, 0),
+      end: new vscode.Position(0, 0),
+    },
+  } as QuickPickItem;
+
+  const qpItemAny = qpItem as any;
+  qpItemAny.uri._fsPath = qpItemAny.uri.fsPath;
+  qpItemAny.detail = qpItemAny.uri.fsPath;
+  return qpItem;
+};

@@ -187,6 +187,7 @@ describe("Workspace", () => {
 
   describe("downloadData", () => {
     it("should return data for quick pick", async () => {
+      sinon.stub(workspaceAny.config, "getIcons").returns({});
       const items = getItems();
       sinon
         .stub(workspaceAny.dataService, "fetchData")
@@ -487,7 +488,7 @@ describe("Workspace", () => {
       sinon
         .stub(workspaceAny.utils, "isDebounceConfigurationToggled")
         .returns(true);
-        const eventEmitter = getEventEmitter();
+      const eventEmitter = getEventEmitter();
       sinon
         .stub(workspaceAny, "onDidDebounceConfigToggleEventEmitter")
         .value(eventEmitter);
@@ -502,11 +503,14 @@ describe("Workspace", () => {
       sinon
         .stub(workspaceAny.utils, "shouldReindexOnConfigurationChange")
         .returns(false);
-        sinon
+      sinon
         .stub(workspaceAny.utils, "isDebounceConfigurationToggled")
         .returns(false);
       const registerActionStub = sinon.stub(workspaceAny, "registerAction");
-      const onDidDebounceConfigToggleEventEmitterStub = sinon.stub(workspaceAny, "onDidDebounceConfigToggleEventEmitter");
+      const onDidDebounceConfigToggleEventEmitterStub = sinon.stub(
+        workspaceAny,
+        "onDidDebounceConfigToggleEventEmitter"
+      );
       await workspaceAny.onDidChangeConfiguration(
         getConfigurationChangeEvent(false)
       );

@@ -3,6 +3,7 @@ enum ConfigKey {
   shouldInitOnStartup = "shouldInitOnStartup",
   shouldHighlightSymbol = "shouldHighlightSymbol",
   shouldUseDebounce = "shouldUseDebounce",
+  icons = "icons",
   exclude = "exclude",
   include = "include",
 }
