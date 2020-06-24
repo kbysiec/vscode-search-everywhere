@@ -12,6 +12,7 @@ class Config {
     icons: {} as Icons,
     exclude: [] as string[],
     include: [] as string[],
+    shouldUseFilesAndSearchExclude: false,
   };
   private readonly defaultSection = "searchEverywhere";
 
@@ -55,6 +56,38 @@ class Config {
 
   getInclude(): string[] {
     return this.get(ConfigKey.include, this.default.include);
+  }
+
+  shouldUseFilesAndSearchExclude(): boolean {
+    return this.get(
+      ConfigKey.shouldUseFilesAndSearchExclude,
+      this.default.shouldUseFilesAndSearchExclude
+    );
+  }
+
+  getFilesAndSearchExclude(): string[] {
+    let excludePatterns: Array<string> = [];
+    const filesExcludePatterns = this.getFilesExclude();
+    const searchExcludePatterns = this.getSearchExclude();
+
+    const allExcludePatterns = Object.assign(
+      {},
+      filesExcludePatterns,
+      searchExcludePatterns
+    );
+    for (let [key, value] of Object.entries(allExcludePatterns)) {
+      value && excludePatterns.push(key);
+    }
+
+    return excludePatterns;
+  }
+
+  private getFilesExclude(): string[] {
+    return this.get(ConfigKey.exclude, this.default.exclude, "files");
+  }
+
+  private getSearchExclude(): string[] {
+    return this.get(ConfigKey.exclude, this.default.exclude, "search");
   }
 
   private get<T>(key: string, defaultValue: T, customSection?: string): T {

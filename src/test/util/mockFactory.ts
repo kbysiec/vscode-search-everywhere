@@ -9,7 +9,6 @@ import ActionType from "../../enum/actionType";
 import Action from "../../interface/action";
 import { createStubInstance } from "./stubbedClass";
 import Config from "../../config";
-import Icons from "../../interface/icons";
 
 export function getExtensionContext(): vscode.ExtensionContext {
   return {
@@ -37,7 +36,10 @@ export function getCacheStub(): Cache {
 }
 
 export function getUtilsStub(): Utils {
-  return createStubInstance(Utils);
+  const utilsStubTemp: any = createStubInstance(Utils);
+  utilsStubTemp.config = getConfigStub();
+
+  return utilsStubTemp as Utils;
 }
 
 export function getConfiguration(): { [key: string]: any } {
@@ -49,9 +51,20 @@ export function getConfiguration(): { [key: string]: any } {
       icons: { 0: "fake-icon", 1: "another-fake-icon" },
       include: ["**/*.{js,ts}"],
       exclude: ["**/node_modules/**"],
+      shouldUseFilesAndSearchExclude: true,
     },
     customSection: {
       exclude: ["**/customFolder/**"],
+    },
+    search: {
+      exclude: {
+        "**/search_exclude/**": true,
+      },
+    },
+    files: {
+      exclude: {
+        "**/.git": true,
+      },
     },
   };
 }
@@ -85,7 +98,10 @@ export const getWorkspaceFoldersChangeEvent = (flag: boolean) => {
 export const getConfigurationChangeEvent = (
   flag: boolean = true,
   shouldUseExcludedArray: boolean = true,
-  isExcluded: boolean = true
+  isExcluded: boolean = true,
+  shouldUseFilesAndSearchExclude: boolean = false,
+  flagForFilesExclude: boolean = false,
+  flagForSearchExclude: boolean = false
 ) => {
   const defaultSection = "searchEverywhere";
 
@@ -95,6 +111,12 @@ export const getConfigurationChangeEvent = (
         ? flag
         : shouldUseExcludedArray
         ? flag && isExcluded
+        : shouldUseFilesAndSearchExclude
+        ? section === "files.exclude"
+          ? flagForFilesExclude
+          : section === "search.exclude"
+          ? flagForSearchExclude
+          : false
         : flag,
   };
 };

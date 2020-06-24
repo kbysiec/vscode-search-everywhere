@@ -1,9 +1,12 @@
 import * as vscode from "vscode";
 import WorkspaceData from "./interface/workspaceData";
 import Item from "./interface/item";
+import Config from "./config";
 
 class Utils {
   private readonly defaultSection = "searchEverywhere";
+
+  constructor(private config: Config) {}
 
   hasWorkspaceAnyFolder(): boolean {
     return !!(
@@ -26,15 +29,22 @@ class Utils {
   shouldReindexOnConfigurationChange(
     event: vscode.ConfigurationChangeEvent
   ): boolean {
+    const shouldUseFilesAndSearchExclude = this.config.shouldUseFilesAndSearchExclude();
     const excluded: string[] = [
       "shouldDisplayNotificationInStatusBar",
       "shouldInitOnStartup",
       "shouldHighlightSymbol",
       "shouldUseDebounce",
     ].map((config: string) => `${this.defaultSection}.${config}`);
+
     return (
-      event.affectsConfiguration("searchEverywhere") &&
-      !excluded.some((config: string) => event.affectsConfiguration(config))
+      (event.affectsConfiguration("searchEverywhere") &&
+        !excluded.some((config: string) =>
+          event.affectsConfiguration(config)
+        )) ||
+      (shouldUseFilesAndSearchExclude &&
+        (event.affectsConfiguration("files.exclude") ||
+          event.affectsConfiguration("search.exclude")))
     );
   }
 

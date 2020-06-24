@@ -79,7 +79,7 @@ class ExtensionController {
   private initComponents(): void {
     this.cache = new Cache(this.extensionContext);
     this.config = new Config(this.cache);
-    this.utils = new Utils();
+    this.utils = new Utils(this.config);
     this.workspace = new Workspace(this.cache, this.utils, this.config);
     this.quickPick = new QuickPick(this.config);
   }

@@ -7,19 +7,33 @@ import {
   getWorkspaceFoldersChangeEvent,
   getWorkspaceData,
   getAction,
+  getConfigStub,
 } from "../util/mockFactory";
 import ActionType from "../../enum/actionType";
 import Action from "../../interface/action";
+import Config from "../../config";
 
 describe("Utils", () => {
   let utils: Utils;
+  let utilsAny: any;
+  let configStub: Config;
 
   before(() => {
-    utils = new Utils();
+    configStub = getConfigStub();
+    utils = new Utils(configStub);
+    utilsAny = utils as any;
   });
 
   afterEach(() => {
     sinon.restore();
+  });
+
+  describe("constructor", () => {
+    it("should utils be initialized", () => {
+      utils = new Utils(configStub);
+
+      assert.exists(utils);
+    });
   });
 
   describe("hasWorkspaceAnyFolder", () => {
@@ -69,6 +83,10 @@ describe("Utils", () => {
   describe("shouldReindexOnConfigurationChange", () => {
     it(`should return true if extension configuration has changed
       and is not excluded from refreshing`, () => {
+      sinon
+        .stub(utilsAny.config, "shouldUseFilesAndSearchExclude")
+        .returns(false);
+
       assert.equal(
         utils.shouldReindexOnConfigurationChange(
           getConfigurationChangeEvent(true, true, false)
@@ -79,6 +97,10 @@ describe("Utils", () => {
 
     it(`should return false if extension configuration has changed
       but is excluded from refreshing`, () => {
+      sinon
+        .stub(utilsAny.config, "shouldUseFilesAndSearchExclude")
+        .returns(false);
+
       assert.equal(
         utils.shouldReindexOnConfigurationChange(
           getConfigurationChangeEvent(false)
@@ -88,11 +110,43 @@ describe("Utils", () => {
     });
 
     it("should return false if extension configuration has not changed", () => {
+      sinon
+        .stub(utilsAny.config, "shouldUseFilesAndSearchExclude")
+        .returns(false);
+
       assert.equal(
         utils.shouldReindexOnConfigurationChange(
           getConfigurationChangeEvent(false)
         ),
         false
+      );
+    });
+
+    it(`should return true if shouldUseFilesAndSearchExclude is true
+      configuration has changed and files.exclude has changed`, () => {
+      sinon
+        .stub(utilsAny.config, "shouldUseFilesAndSearchExclude")
+        .returns(true);
+
+      assert.equal(
+        utils.shouldReindexOnConfigurationChange(
+          getConfigurationChangeEvent(false, false, true, true, true)
+        ),
+        true
+      );
+    });
+
+    it(`should return true if shouldUseFilesAndSearchExclude is true
+      configuration has changed and search.exclude has changed`, () => {
+      sinon
+        .stub(utilsAny.config, "shouldUseFilesAndSearchExclude")
+        .returns(true);
+
+      assert.equal(
+        utils.shouldReindexOnConfigurationChange(
+          getConfigurationChangeEvent(false, false, true, true, false, true)
+        ),
+        true
       );
     });
   });

@@ -50,7 +50,15 @@ class DataService {
   }
 
   private getExcludePatterns(): string {
-    const excludePatterns = this.config.getExclude();
+    let excludePatterns: string[] = [];
+    const shouldUseFilesAndSearchExclude = this.config.shouldUseFilesAndSearchExclude();
+
+    if (shouldUseFilesAndSearchExclude) {
+      excludePatterns = this.config.getFilesAndSearchExclude();
+    } else {
+      excludePatterns = this.config.getExclude();
+    }
+
     return this.patternsAsString(excludePatterns);
   }
 

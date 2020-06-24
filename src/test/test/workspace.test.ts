@@ -484,7 +484,11 @@ describe("Workspace", () => {
       assert.equal(indexStub.calledOnce, true);
     });
 
-    it(`should xxx`, async () => {
+    it(`should index method be invoked which register
+    rebuild action if isDebounceConfigurationToggled is true`, async () => {
+      sinon
+        .stub(workspaceAny.utils, "shouldReindexOnConfigurationChange")
+        .returns(false);
       sinon
         .stub(workspaceAny.utils, "isDebounceConfigurationToggled")
         .returns(true);

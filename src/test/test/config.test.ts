@@ -110,6 +110,45 @@ describe("Config", () => {
     });
   });
 
+  describe("shouldUseFilesAndSearchExclude", () => {
+    it("should return boolean from configuration", async () => {
+      const section = "searchEverywhere";
+      const key = "shouldUseFilesAndSearchExclude";
+
+      assert.equal(
+        config.shouldUseFilesAndSearchExclude(),
+        configuration[section][key]
+      );
+    });
+  });
+
+  describe("getFilesAndSearchExclude", () => {
+    it("should return array of exclude patterns from configuration", async () => {
+      assert.deepEqual(config.getFilesAndSearchExclude(), [
+        "**/.git",
+        "**/search_exclude/**",
+      ]);
+    });
+  });
+
+  describe("getFilesExclude", () => {
+    it("should return array of exclude patterns from configuration", async () => {
+      const section = "files";
+      const key = "exclude";
+
+      assert.equal(configAny.getFilesExclude(), configuration[section][key]);
+    });
+  });
+
+  describe("getSearchExclude", () => {
+    it("should return array of exclude patterns from configuration", async () => {
+      const section = "search";
+      const key = "exclude";
+
+      assert.equal(configAny.getSearchExclude(), configuration[section][key]);
+    });
+  });
+
   describe("get", () => {
     it(`should return array of exclude patterns
       from configuration if cache is empty`, async () => {

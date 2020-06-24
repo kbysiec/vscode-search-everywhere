@@ -123,6 +123,9 @@ describe("DataService", () => {
   describe("getExcludePatterns", () => {
     it("should return string[] containing exclude patterns", () => {
       const patterns = ["**/node_modules/**"];
+      sinon
+        .stub(dataServiceAny.config, "shouldUseFilesAndSearchExclude")
+        .returns(false);
       sinon.stub(dataServiceAny.config, "getExclude").returns(patterns);
 
       assert.equal(dataServiceAny.getExcludePatterns(), patterns);

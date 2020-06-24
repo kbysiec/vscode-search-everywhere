@@ -98,6 +98,11 @@
             "type": "string"
           },
           "description": "An array of globs. Any file matching these globs will be included from searching."
+        },
+        "searchEverywhere.shouldUseFilesAndSearchExclude": {
+          "type": "boolean",
+          "default": false,
+          "description": "Should \"Files: Exclude\" and \"Search: Exclude\" be used instead of extension exclude pattern."
         }
       }
     },

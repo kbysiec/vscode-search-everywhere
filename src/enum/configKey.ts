@@ -6,6 +6,7 @@ enum ConfigKey {
   icons = "icons",
   exclude = "exclude",
   include = "include",
+  shouldUseFilesAndSearchExclude = "shouldUseFilesAndSearchExclude",
 }
 
 export default ConfigKey;
