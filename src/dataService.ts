@@ -3,6 +3,7 @@ import Config from "./config";
 import Cache from "./cache";
 import WorkspaceData from "./interface/workspaceData";
 import Utils from "./utils";
+import ItemsFilter from "./interface/itemsFilter";
 
 class DataService {
   private onDidItemIndexedEventEmitter: vscode.EventEmitter<
@@ -104,7 +105,8 @@ class DataService {
   }
 
   private includeUris(workspaceData: WorkspaceData, uris: vscode.Uri[]): void {
-    uris.forEach((uri: vscode.Uri) => {
+    const validUris = this.filterUris(uris);
+    validUris.forEach((uri: vscode.Uri) => {
       const array = workspaceData.items.get(uri.fsPath);
       if (array) {
         const exists = this.ifUriExistsInArray(array.elements, uri);
@@ -139,8 +141,11 @@ class DataService {
   private async getSymbolsForUri(
     uri: vscode.Uri
   ): Promise<vscode.DocumentSymbol[] | undefined> {
-    const symbols = await this.loadAllSymbolsForUri(uri);
-    return symbols ? this.reduceAndFlatSymbolsArrayForUri(symbols) : undefined;
+    const allSymbols = await this.loadAllSymbolsForUri(uri);
+    const symbols = allSymbols
+      ? this.reduceAndFlatSymbolsArrayForUri(allSymbols)
+      : undefined;
+    return symbols ? this.filterSymbols(symbols) : undefined;
   }
 
   private async loadAllSymbolsForUri(
@@ -179,6 +184,75 @@ class DataService {
 
   private hasSymbolChildren(symbol: vscode.DocumentSymbol): boolean {
     return symbol.children && symbol.children.length ? true : false;
+  }
+
+  private filterUris(uris: vscode.Uri[]): vscode.Uri[] {
+    return uris.filter((uri) => this.isUriValid(uri));
+  }
+
+  private filterSymbols(
+    symbols: vscode.DocumentSymbol[]
+  ): vscode.DocumentSymbol[] {
+    return symbols.filter((symbol) => this.isSymbolValid(symbol));
+  }
+
+  private isUriValid(uri: vscode.Uri): boolean {
+    return this.isItemValid(uri);
+  }
+
+  private isSymbolValid(symbol: vscode.DocumentSymbol): boolean {
+    return this.isItemValid(symbol);
+  }
+
+  private isItemValid(item: vscode.Uri | vscode.DocumentSymbol): boolean {
+    const itemsFilter = this.config.getItemsFilter();
+    let kind: number;
+    let name: string | undefined;
+    const isUri = item.hasOwnProperty("path");
+
+    if (isUri) {
+      kind = 0;
+      name = (item as vscode.Uri).path.split("/").pop();
+    } else {
+      const documentSymbol = item as vscode.DocumentSymbol;
+      kind = documentSymbol.kind;
+      name = documentSymbol.name;
+    }
+
+    return (
+      this.isInAllowedKinds(itemsFilter, kind) &&
+      this.isNotInIgnoredKinds(itemsFilter, kind) &&
+      this.isNotInIgnoredNames(itemsFilter, name)
+    );
+  }
+
+  private isInAllowedKinds(itemsFilter: ItemsFilter, kind: number): boolean {
+    return (
+      !(itemsFilter.allowedKinds && itemsFilter.allowedKinds.length) ||
+      itemsFilter.allowedKinds.includes(kind)
+    );
+  }
+
+  private isNotInIgnoredKinds(itemsFilter: ItemsFilter, kind: number): boolean {
+    return (
+      !(itemsFilter.ignoredKinds && itemsFilter.ignoredKinds.length) ||
+      !itemsFilter.ignoredKinds.includes(kind)
+    );
+  }
+
+  private isNotInIgnoredNames(
+    itemsFilter: ItemsFilter,
+    name: string | undefined
+  ): boolean {
+    return (
+      !(itemsFilter.ignoredNames && itemsFilter.ignoredNames.length) ||
+      !itemsFilter.ignoredNames.some(
+        (ignoreEl) =>
+          ignoreEl &&
+          name &&
+          name.toLowerCase().includes(ignoreEl.toLowerCase())
+      )
+    );
   }
 }
 

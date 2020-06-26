@@ -49,6 +49,11 @@ export function getConfiguration(): { [key: string]: any } {
       shouldInitOnStartup: true,
       shouldHighlightSymbol: true,
       icons: { 0: "fake-icon", 1: "another-fake-icon" },
+      itemsFilter: {
+        allowedKinds: [],
+        ignoredKinds: [],
+        ignoredNames: [],
+      },
       include: ["**/*.{js,ts}"],
       exclude: ["**/node_modules/**"],
       shouldUseFilesAndSearchExclude: true,
@@ -266,12 +271,13 @@ export const getQpItems = (
 
 export const getDocumentSymbolItemSingleLine = (
   suffix?: string | number,
-  withChild: boolean = false
+  withChild: boolean = false,
+  kind: number = 1
 ): vscode.DocumentSymbol => {
   return {
     name: `test name${suffix ? ` ${suffix}` : ""}`,
     detail: `test details${suffix ? ` ${suffix}` : ""}`,
-    kind: 1,
+    kind,
     range: new vscode.Range(
       new vscode.Position(0, 0),
       new vscode.Position(0, 0)
@@ -285,7 +291,7 @@ export const getDocumentSymbolItemSingleLine = (
           {
             name: `test child name${suffix ? ` ${suffix}` : ""}`,
             detail: `test child details${suffix ? ` ${suffix}` : ""}`,
-            kind: 1,
+            kind,
             range: new vscode.Range(
               new vscode.Position(0, 0),
               new vscode.Position(0, 0)
@@ -303,11 +309,13 @@ export const getDocumentSymbolItemSingleLine = (
 
 export const getDocumentSymbolItemSingleLineArray = (
   count: number = 0,
-  withChild: boolean = false
+  withChild: boolean = false,
+  kind: number = 1,
+  kindsFromFirstItem: number[] = []
 ): vscode.DocumentSymbol[] => {
   const array: vscode.DocumentSymbol[] = [];
-  for (let i = 1; i <= count; i++) {
-    array.push(getDocumentSymbolItemSingleLine(i, withChild));
+  for (let i = 0; i < count; i++) {
+    array.push(getDocumentSymbolItemSingleLine(i+1, withChild, kindsFromFirstItem[i] ? kindsFromFirstItem[i] : kind));
   }
   return array;
 };
@@ -503,4 +511,16 @@ export const getQpItemDocumentSymbolSingleLine = (
   qpItemAny.uri._fsPath = qpItemAny.uri.fsPath;
   qpItemAny.detail = qpItemAny.uri.fsPath;
   return qpItem;
+};
+
+export const getItemsFilter = (
+  allowedKinds: number[] = [],
+  ignoredKinds: number[] = [],
+  ignoredNames: string[] = []
+) => {
+  return {
+    allowedKinds,
+    ignoredKinds,
+    ignoredNames,
+  };
 };

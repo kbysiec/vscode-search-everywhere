@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import Cache from "./cache";
 import ConfigKey from "./enum/configKey";
 import Icons from "./interface/icons";
+import ItemsFilter from "./interface/itemsFilter";
 
 class Config {
   private default = {
@@ -10,6 +11,11 @@ class Config {
     shouldHighlightSymbol: false,
     shouldUseDebounce: false,
     icons: {} as Icons,
+    itemsFilter: {
+      allowedKinds: [],
+      ignoredKinds: [],
+      ignoredNames: [],
+    } as ItemsFilter,
     exclude: [] as string[],
     include: [] as string[],
     shouldUseFilesAndSearchExclude: false,
@@ -48,6 +54,10 @@ class Config {
 
   getIcons(): Icons {
     return this.get(ConfigKey.icons, this.default.icons);
+  }
+
+  getItemsFilter(): ItemsFilter {
+    return this.get(ConfigKey.itemsFilter, this.default.itemsFilter);
   }
 
   getExclude(): string[] {

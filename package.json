@@ -63,6 +63,15 @@
           },
           "description": "Ability to define icons which should be displayed for appropriate symbol types. According to VSC API, only Octicons are allowed. Not defined symbol type will not have any icon."
         },
+        "searchEverywhere.itemsFilter": {
+          "type": "object",
+          "default": {
+            "allowedKinds": [],
+            "ignoredKinds": [],
+            "ignoredNames": []
+          },
+          "description": "Ability to define filter which should be applied to symbols."
+        },
         "searchEverywhere.exclude": {
           "type": "array",
           "default": [

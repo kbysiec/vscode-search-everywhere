@@ -12,6 +12,7 @@ import {
   getItem,
   getEventEmitter,
   getConfigStub,
+  getItemsFilter,
 } from "../util/mockFactory";
 import Cache from "../../cache";
 import Utils from "../../utils";
@@ -309,6 +310,168 @@ describe("DataService", () => {
       assert.deepEqual(
         await dataServiceAny.hasSymbolChildren(
           getDocumentSymbolItemSingleLine()
+        ),
+        false
+      );
+    });
+  });
+
+  describe("filterUris", () => {
+    it("should return array of filtered vscode.Uri", () => {
+      sinon
+        .stub(dataServiceAny.config, "getItemsFilter")
+        .returns(getItemsFilter([], [], ["fake-1"]));
+      assert.deepEqual(dataServiceAny.filterUris(getItems(3)), [
+        getItem(undefined, 2),
+        getItem(undefined, 3),
+      ]);
+    });
+  });
+
+  describe("filterSymbols", () => {
+    it("should return array of filtered vscode.DocumentSymbol", () => {
+      sinon
+        .stub(dataServiceAny.config, "getItemsFilter")
+        .returns(getItemsFilter([], [1, 3, 4]));
+      assert.deepEqual(
+        dataServiceAny.filterSymbols(
+          getDocumentSymbolItemSingleLineArray(5, false, 3, [1, 2, 3, 4, 2])
+        ),
+        [
+          getDocumentSymbolItemSingleLine(2, false, 2),
+          getDocumentSymbolItemSingleLine(5, false, 2),
+        ]
+      );
+    });
+  });
+
+  describe("isUriValid", () => {
+    it("should return true if given vscode.Uri kind is allowed", () => {
+      sinon
+        .stub(dataServiceAny.config, "getItemsFilter")
+        .returns(getItemsFilter([0, 1]));
+      assert.equal(dataServiceAny.isUriValid(getItem()), true);
+    });
+
+    it("should return false if given vscode.Uri kind is not allowed", () => {
+      sinon
+        .stub(dataServiceAny.config, "getItemsFilter")
+        .returns(getItemsFilter([2, 3]));
+      assert.equal(dataServiceAny.isSymbolValid(getItem()), false);
+    });
+  });
+
+  describe("isSymbolValid", () => {
+    it(`should return true if given vscode.DocumentSymbol
+      is of kind which is allowed`, () => {
+      sinon
+        .stub(dataServiceAny.config, "getItemsFilter")
+        .returns(getItemsFilter([1, 2]));
+      assert.equal(
+        dataServiceAny.isSymbolValid(getDocumentSymbolItemSingleLine()),
+        true
+      );
+    });
+
+    it(`should return false if given vscode.DocumentSymbol
+      is of kind which is not allowed`, () => {
+      sinon
+        .stub(dataServiceAny.config, "getItemsFilter")
+        .returns(getItemsFilter([2, 3]));
+      assert.equal(
+        dataServiceAny.isSymbolValid(getDocumentSymbolItemSingleLine()),
+        false
+      );
+    });
+  });
+
+  describe("isItemValid", () => {
+    it("should return true if itemsFilter is empty", () => {
+      sinon
+        .stub(dataServiceAny.config, "getItemsFilter")
+        .returns(getItemsFilter([]));
+      assert.equal(dataServiceAny.isItemValid(getItem()), true);
+    });
+
+    it(`should return true if given item is of allowed kind
+      and its name is not ignored`, () => {
+      sinon
+        .stub(dataServiceAny.config, "getItemsFilter")
+        .returns(getItemsFilter([0]));
+      assert.equal(dataServiceAny.isItemValid(getItem()), true);
+    });
+
+    it(`should return false if given item is not of allowed kind
+      and its name is not ignored`, () => {
+      sinon
+        .stub(dataServiceAny.config, "getItemsFilter")
+        .returns(getItemsFilter([1]));
+      assert.equal(dataServiceAny.isItemValid(getItem()), false);
+    });
+
+    it("should return false if given item is of ignored kind", () => {
+      sinon
+        .stub(dataServiceAny.config, "getItemsFilter")
+        .returns(getItemsFilter([], [0]));
+      assert.equal(dataServiceAny.isItemValid(getItem()), false);
+    });
+
+    it("should return false if given item's name is ignored", () => {
+      sinon
+        .stub(dataServiceAny.config, "getItemsFilter")
+        .returns(getItemsFilter([], [], ["fake"]));
+      assert.equal(dataServiceAny.isItemValid(getItem()), false);
+    });
+  });
+
+  describe("isInAllowedKinds", () => {
+    it("should return true if given kind is allowed", () => {
+      assert.equal(
+        dataServiceAny.isInAllowedKinds(getItemsFilter([1, 2]), 1),
+        true
+      );
+    });
+
+    it("should return false if given kind is not allowed", () => {
+      assert.equal(
+        dataServiceAny.isInAllowedKinds(getItemsFilter([1, 2]), 3),
+        false
+      );
+    });
+  });
+
+  describe("isNotInIgnoredKinds", () => {
+    it("should return true if given kind is not ignored", () => {
+      assert.equal(
+        dataServiceAny.isNotInIgnoredKinds(getItemsFilter([], [1, 2]), 3),
+        true
+      );
+    });
+
+    it("should return false if given kind is ignored", () => {
+      assert.equal(
+        dataServiceAny.isNotInIgnoredKinds(getItemsFilter([], [1, 2]), 2),
+        false
+      );
+    });
+  });
+
+  describe("isNotInIgnoredNames", () => {
+    it("should return true if given name is not ignored", () => {
+      assert.equal(
+        dataServiceAny.isNotInIgnoredNames(
+          getItemsFilter([], [], ["test"]),
+          "counter"
+        ),
+        true
+      );
+    });
+
+    it("should return false if given name is ignored", () => {
+      assert.equal(
+        dataServiceAny.isNotInIgnoredNames(
+          getItemsFilter([], [], ["test"]),
+          "testing"
         ),
         false
       );

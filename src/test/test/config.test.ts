@@ -92,6 +92,15 @@ describe("Config", () => {
     });
   });
 
+  describe("getItemsFilter", () => {
+    it("should return object containing items filter from configuration", async () => {
+      const section = "searchEverywhere";
+      const key = "itemsFilter";
+
+      assert.equal(config.getItemsFilter(), configuration[section][key]);
+    });
+  });
+
   describe("getExclude", () => {
     it("should return array of exclude patterns from configuration", async () => {
       const section = "searchEverywhere";
