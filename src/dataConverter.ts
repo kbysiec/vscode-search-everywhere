@@ -12,6 +12,11 @@ class DataConverter {
     return this.mapDataToQpData(data.items);
   }
 
+  getItemFilterPhraseForKind(kind: number): string {
+    const itemsFilterPhrases = this.config.getItemsFilterPhrases();
+    return itemsFilterPhrases[kind] as string;
+  }
+
   private mapDataToQpData(data: Map<string, Item>): QuickPickItem[] {
     const qpData: QuickPickItem[] = [];
 
@@ -48,7 +53,11 @@ class DataConverter {
     const icon = icons[symbol.kind] ? `$(${icons[symbol.kind]})` : "";
     const label = icon ? `${icon}  ${name}` : name;
 
-    const description = `${vscode.SymbolKind[symbol.kind]} at ${
+    const itemFilterPhrase = this.getItemFilterPhraseForKind(symbol.kind);
+
+    const description = `${
+      itemFilterPhrase ? `[${itemFilterPhrase}${name}] ` : ""
+    }${vscode.SymbolKind[symbol.kind]} at ${
       symbol.range.isSingleLine
         ? `line: ${symbol.range.start.line + 1}`
         : `lines: ${symbol.range.start.line + 1} - ${symbol.range.end.line}${
@@ -79,7 +88,11 @@ class DataConverter {
     const start = new vscode.Position(0, 0);
     const end = new vscode.Position(0, 0);
 
-    const description = "File";
+    const itemFilterPhrase = this.getItemFilterPhraseForKind(symbolKind);
+
+    const description = `${
+      itemFilterPhrase ? `[${itemFilterPhrase}${name}] ` : ""
+    }File`;
 
     return {
       uri,

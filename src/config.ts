@@ -3,6 +3,7 @@ import Cache from "./cache";
 import ConfigKey from "./enum/configKey";
 import Icons from "./interface/icons";
 import ItemsFilter from "./interface/itemsFilter";
+import ItemsFilterPhrases from "./interface/itemsFilterPhrases";
 
 class Config {
   private default = {
@@ -16,6 +17,7 @@ class Config {
       ignoredKinds: [],
       ignoredNames: [],
     } as ItemsFilter,
+    itemsFilterPhrases: {} as ItemsFilterPhrases,
     exclude: [] as string[],
     include: [] as string[],
     shouldUseFilesAndSearchExclude: false,
@@ -58,6 +60,13 @@ class Config {
 
   getItemsFilter(): ItemsFilter {
     return this.get(ConfigKey.itemsFilter, this.default.itemsFilter);
+  }
+
+  getItemsFilterPhrases(): ItemsFilterPhrases {
+    return this.get(
+      ConfigKey.itemsFilterPhrases,
+      this.default.itemsFilterPhrases
+    );
   }
 
   getExclude(): string[] {

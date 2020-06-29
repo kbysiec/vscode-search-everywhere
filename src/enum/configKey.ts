@@ -5,6 +5,7 @@ enum ConfigKey {
   shouldUseDebounce = "shouldUseDebounce",
   icons = "icons",
   itemsFilter = "itemsFilter",
+  itemsFilterPhrases = "itemsFilterPhrases",
   exclude = "exclude",
   include = "include",
   shouldUseFilesAndSearchExclude = "shouldUseFilesAndSearchExclude",

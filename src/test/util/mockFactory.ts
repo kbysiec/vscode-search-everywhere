@@ -54,6 +54,11 @@ export function getConfiguration(): { [key: string]: any } {
         ignoredKinds: [],
         ignoredNames: [],
       },
+      itemsFilterPhrases: {
+        "0": "$$",
+        "1": "^^",
+        "4": "@@",
+      },
       include: ["**/*.{js,ts}"],
       exclude: ["**/node_modules/**"],
       shouldUseFilesAndSearchExclude: true,
@@ -222,15 +227,24 @@ export const getQpItem = (
   path: string = "/./fake/",
   suffix: string | number = 1,
   differentStartAndEnd: boolean = false,
-  withIcon: boolean = false
+  withIcon: boolean = false,
+  withFilterPhrase: boolean = false
 ): QuickPickItem => {
-  const icons = getConfiguration().searchEverywhere.icons;
+  const configuration = getConfiguration().searchEverywhere;
+  const icons = configuration.icons;
+  const itemsFilterPhrases = configuration.itemsFilterPhrases;
   const symbolKind = 0;
   const qpItem = {
     label: `${withIcon ? `$(${icons[symbolKind]})  ` : ""}fake-${
       suffix ? `${suffix}` : ""
     }.ts`,
-    description: "File",
+    description: `${
+      withFilterPhrase
+        ? `[${itemsFilterPhrases[symbolKind]}fake-${
+            suffix ? `${suffix}` : ""
+          }.ts] `
+        : ""
+    }File`,
     detail: `${path}fake-${suffix ? `${suffix}` : ""}.ts`,
     uri: vscode.Uri.file(`${path}fake-${suffix ? `${suffix}` : ""}.ts`),
     symbolKind,
@@ -315,7 +329,13 @@ export const getDocumentSymbolItemSingleLineArray = (
 ): vscode.DocumentSymbol[] => {
   const array: vscode.DocumentSymbol[] = [];
   for (let i = 0; i < count; i++) {
-    array.push(getDocumentSymbolItemSingleLine(i+1, withChild, kindsFromFirstItem[i] ? kindsFromFirstItem[i] : kind));
+    array.push(
+      getDocumentSymbolItemSingleLine(
+        i + 1,
+        withChild,
+        kindsFromFirstItem[i] ? kindsFromFirstItem[i] : kind
+      )
+    );
   }
   return array;
 };
@@ -491,13 +511,18 @@ export const getProgress = (value: number = 0) => ({
 });
 
 export const getQpItemDocumentSymbolSingleLine = (
-  withIcon: boolean = false
+  withIcon: boolean = false,
+  withFilterPhrase: boolean = false
 ): QuickPickItem => {
-  const icons = getConfiguration().searchEverywhere.icons;
+  const configuration = getConfiguration().searchEverywhere;
+  const icons = configuration.icons;
+  const itemsFilterPhrases = configuration.itemsFilterPhrases;
   const symbolKind = 1;
   const qpItem = {
     label: `${withIcon ? `$(${icons[symbolKind]})  ` : ""}test name`,
-    description: "Module at line: 1",
+    description: `${
+      withFilterPhrase ? `[${itemsFilterPhrases[symbolKind]}test name] ` : ""
+    }Module at line: 1`,
     detail: "/./fake/fake-1.ts",
     uri: vscode.Uri.file("./fake/fake-1.ts"),
     symbolKind,

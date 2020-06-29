@@ -188,6 +188,7 @@ describe("Workspace", () => {
   describe("downloadData", () => {
     it("should return data for quick pick", async () => {
       sinon.stub(workspaceAny.config, "getIcons").returns({});
+      sinon.stub(workspaceAny.config, "getItemsFilterPhrases").returns({});
       const items = getItems();
       sinon
         .stub(workspaceAny.dataService, "fetchData")
