@@ -275,11 +275,16 @@ class Workspace {
     this.actionProcessor = new ActionProcessor(this.utils);
   }
 
+  private reloadComponents() {
+    this.dataConverter.reload();
+  }
+
   private onDidChangeConfiguration = async (
     event: vscode.ConfigurationChangeEvent
   ): Promise<void> => {
     this.cache.clearConfig();
     if (this.utils.shouldReindexOnConfigurationChange(event)) {
+      this.reloadComponents();
       await this.index("onDidChangeConfiguration");
     } else if (this.utils.isDebounceConfigurationToggled(event)) {
       this.onDidDebounceConfigToggleEventEmitter.fire();

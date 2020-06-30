@@ -72,6 +72,11 @@
           },
           "description": "Ability to define filter which should be applied to symbols."
         },
+        "searchEverywhere.shouldUseItemsFilterPhrases": {
+          "type": "boolean",
+          "default": true,
+          "description": "Should be possibility to filter by assigned filter phrases."
+        },
         "searchEverywhere.itemsFilterPhrases": {
           "type": "object",
           "default": {

@@ -187,8 +187,8 @@ describe("Workspace", () => {
 
   describe("downloadData", () => {
     it("should return data for quick pick", async () => {
-      sinon.stub(workspaceAny.config, "getIcons").returns({});
-      sinon.stub(workspaceAny.config, "getItemsFilterPhrases").returns({});
+      sinon.stub(workspaceAny.dataConverter, "icons").value({});
+      sinon.stub(workspaceAny.dataConverter, "itemsFilterPhrases").value({});
       const items = getItems();
       sinon
         .stub(workspaceAny.dataService, "fetchData")
@@ -468,6 +468,18 @@ describe("Workspace", () => {
       assert.equal(typeof workspaceAny.dataService, "object");
       assert.equal(typeof workspaceAny.dataConverter, "object");
       assert.equal(typeof workspaceAny.actionProcessor, "object");
+    });
+  });
+
+  describe("reloadComponents", () => {
+    it("should dataConverter.reload method be invoked", async () => {
+      const dataConverterReloadStub = sinon.stub(
+        workspaceAny.dataConverter,
+        "reload"
+      );
+      workspaceAny.reloadComponents();
+
+      assert.equal(dataConverterReloadStub.calledOnce, true);
     });
   });
 

@@ -17,6 +17,7 @@ class Config {
       ignoredKinds: [],
       ignoredNames: [],
     } as ItemsFilter,
+    shouldUseItemsFilterPhrases: false,
     itemsFilterPhrases: {} as ItemsFilterPhrases,
     exclude: [] as string[],
     include: [] as string[],
@@ -60,6 +61,13 @@ class Config {
 
   getItemsFilter(): ItemsFilter {
     return this.get(ConfigKey.itemsFilter, this.default.itemsFilter);
+  }
+
+  shouldUseItemsFilterPhrases(): boolean {
+    return this.get(
+      ConfigKey.shouldUseItemsFilterPhrases,
+      this.default.shouldUseItemsFilterPhrases
+    );
   }
 
   getItemsFilterPhrases(): ItemsFilterPhrases {

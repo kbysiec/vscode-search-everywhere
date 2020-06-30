@@ -19,12 +19,28 @@ import {
   getQpItemDocumentSymbolSingleLine,
 } from "../util/mockFactory";
 import Config from "../../config";
+import Icons from "../../interface/icons";
+import ItemsFilterPhrases from "../../interface/itemsFilterPhrases";
 
 describe("DataConverter", () => {
   let dataConverter: DataConverter;
   let dataConverterAny: any;
   let utilsStub: Utils;
   let configStub: Config;
+
+  let stubConfig = (
+    icons: Icons = {},
+    shouldUseItemsFilterPhrases: boolean = false,
+    itemsFilterPhrases: ItemsFilterPhrases = {}
+  ) => {
+    sinon.stub(dataConverterAny, "icons").value(icons);
+    sinon
+      .stub(dataConverterAny, "shouldUseItemsFilterPhrases")
+      .value(shouldUseItemsFilterPhrases);
+    sinon
+      .stub(dataConverterAny, "itemsFilterPhrases")
+      .value(itemsFilterPhrases);
+  };
 
   before(() => {
     utilsStub = getUtilsStub();
@@ -48,10 +64,19 @@ describe("DataConverter", () => {
     });
   });
 
+  describe("reload", () => {
+    it("should fetchConfig method be invoked", () => {
+      const fetchConfigStub = sinon.stub(dataConverterAny, "fetchConfig");
+      dataConverter.reload();
+
+      assert.equal(fetchConfigStub.calledOnce, true);
+    });
+  });
+
   describe("convertToQpData", () => {
     it("should return quick pick data", () => {
-      sinon.stub(dataConverterAny.config, "getIcons").returns({});
-      sinon.stub(dataConverterAny.config, "getItemsFilterPhrases").returns({});
+      stubConfig();
+
       assert.deepEqual(
         dataConverter.convertToQpData(getWorkspaceData(getItems())),
         getQpItems()
@@ -66,18 +91,17 @@ describe("DataConverter", () => {
   describe("getItemFilterPhraseForKind", () => {
     it("should return item filter phrase for given kind", () => {
       const configuration = getConfiguration().searchEverywhere;
-
       sinon
-        .stub(dataConverterAny.config, "getItemsFilterPhrases")
-        .returns(configuration.itemsFilterPhrases);
+        .stub(dataConverterAny, "itemsFilterPhrases")
+        .value(configuration.itemsFilterPhrases);
       assert.equal(dataConverter.getItemFilterPhraseForKind(0), "$$");
     });
   });
 
   describe("mapDataToQpData", () => {
     it("should return quick pick data", () => {
-      sinon.stub(dataConverterAny.config, "getIcons").returns({});
-      sinon.stub(dataConverterAny.config, "getItemsFilterPhrases").returns({});
+      stubConfig();
+
       const items = getItems();
       assert.deepEqual(
         dataConverterAny.mapDataToQpData(getWorkspaceData(items).items),
@@ -95,8 +119,8 @@ describe("DataConverter", () => {
 
   describe("mapItemElementToQpItem", () => {
     it("should return quick pick item by invoking mapDocumentSymbolToQpItem method", () => {
-      sinon.stub(dataConverterAny.config, "getIcons").returns({});
-      sinon.stub(dataConverterAny.config, "getItemsFilterPhrases").returns({});
+      stubConfig();
+
       assert.deepEqual(
         dataConverterAny.mapItemElementToQpItem(
           getItem(),
@@ -107,8 +131,8 @@ describe("DataConverter", () => {
     });
 
     it("should return quick pick item by invoking mapUriToQpItem method", () => {
-      sinon.stub(dataConverterAny.config, "getIcons").returns({});
-      sinon.stub(dataConverterAny.config, "getItemsFilterPhrases").returns({});
+      stubConfig();
+
       assert.deepEqual(
         dataConverterAny.mapItemElementToQpItem(getItem(), getItem()),
         getQpItem()
@@ -118,8 +142,13 @@ describe("DataConverter", () => {
 
   describe("mapDocumentSymbolToQpItem", () => {
     it("should return quick pick item for single line document symbol", () => {
-      sinon.stub(dataConverterAny.config, "getIcons").returns({});
-      sinon.stub(dataConverterAny.config, "getItemsFilterPhrases").returns({});
+      const configuration = getConfiguration().searchEverywhere;
+      sinon.stub(dataConverterAny, "icons").value({});
+      sinon.stub(dataConverterAny, "shouldUseItemsFilterPhrases").value(false);
+      sinon
+        .stub(dataConverterAny, "itemsFilterPhrases")
+        .value(configuration.itemsFilterPhrases);
+
       assert.deepEqual(
         dataConverterAny.mapDocumentSymbolToQpItem(
           getItem(),
@@ -130,8 +159,8 @@ describe("DataConverter", () => {
     });
 
     it("should return quick pick item for multi line document symbol with parent", () => {
-      sinon.stub(dataConverterAny.config, "getIcons").returns({});
-      sinon.stub(dataConverterAny.config, "getItemsFilterPhrases").returns({});
+      stubConfig();
+
       assert.deepEqual(
         dataConverterAny.mapDocumentSymbolToQpItem(
           getItem(),
@@ -141,9 +170,10 @@ describe("DataConverter", () => {
       );
     });
 
-    it("should return quick pick item for multi line document symbol with empty parent", () => {
-      sinon.stub(dataConverterAny.config, "getIcons").returns({});
-      sinon.stub(dataConverterAny.config, "getItemsFilterPhrases").returns({});
+    it(`should return quick pick item for multi line document symbol
+      with empty parent`, () => {
+      stubConfig();
+
       assert.deepEqual(
         dataConverterAny.mapDocumentSymbolToQpItem(
           getItem(),
@@ -153,12 +183,10 @@ describe("DataConverter", () => {
       );
     });
 
-    it("should return quick pick item for single line document symbol with appropriate icon", () => {
+    it(`should return quick pick item for single line document symbol
+      with appropriate icon`, () => {
       const configuration = getConfiguration().searchEverywhere;
-      sinon
-        .stub(dataConverterAny.config, "getIcons")
-        .returns(configuration.icons);
-      sinon.stub(dataConverterAny.config, "getItemsFilterPhrases").returns({});
+      stubConfig(configuration.icons);
 
       assert.deepEqual(
         dataConverterAny.mapDocumentSymbolToQpItem(
@@ -169,12 +197,10 @@ describe("DataConverter", () => {
       );
     });
 
-    it(`should return quick pick item for single line document symbol with appropriate filter phrase`, () => {
+    it(`should return quick pick item for single line document symbol
+      with appropriate filter phrase`, () => {
       const configuration = getConfiguration().searchEverywhere;
-      sinon.stub(dataConverterAny.config, "getIcons").returns({});
-      sinon
-        .stub(dataConverterAny.config, "getItemsFilterPhrases")
-        .returns(configuration.itemsFilterPhrases);
+      stubConfig(undefined, true, configuration.itemsFilterPhrases);
 
       assert.deepEqual(
         dataConverterAny.mapDocumentSymbolToQpItem(
@@ -184,21 +210,33 @@ describe("DataConverter", () => {
         getQpItemDocumentSymbolSingleLine(false, true)
       );
     });
+
+    it(`should return quick pick item for single line document symbol
+      without appropriate filter phrase`, () => {
+      const configuration = getConfiguration().searchEverywhere;
+      stubConfig({}, false, configuration.itemsFilterPhrases);
+
+      assert.deepEqual(
+        dataConverterAny.mapDocumentSymbolToQpItem(
+          getItem(),
+          getDocumentSymbolItemSingleLine()
+        ),
+        getQpItemDocumentSymbolSingleLine(false, false)
+      );
+    });
   });
 
   describe("mapUriToQpItem", () => {
     it("should return quick pick item", () => {
-      sinon.stub(dataConverterAny.config, "getIcons").returns({});
-      sinon.stub(dataConverterAny.config, "getItemsFilterPhrases").returns({});
+      stubConfig();
+
       assert.deepEqual(dataConverterAny.mapUriToQpItem(getItem()), getQpItem());
     });
 
     it("should return quick pick item with icon", () => {
       const configuration = getConfiguration().searchEverywhere;
-      sinon
-        .stub(dataConverterAny.config, "getIcons")
-        .returns(configuration.icons);
-      sinon.stub(dataConverterAny.config, "getItemsFilterPhrases").returns({});
+      stubConfig(configuration.icons);
+
       assert.deepEqual(
         dataConverterAny.mapUriToQpItem(getItem()),
         getQpItem(undefined, undefined, undefined, true)
@@ -207,13 +245,21 @@ describe("DataConverter", () => {
 
     it("should return quick pick item with appropriate filter phrase", () => {
       const configuration = getConfiguration().searchEverywhere;
-      sinon.stub(dataConverterAny.config, "getIcons").returns({});
-      sinon
-        .stub(dataConverterAny.config, "getItemsFilterPhrases")
-        .returns(configuration.itemsFilterPhrases);
+      stubConfig(undefined, true, configuration.itemsFilterPhrases);
+
       assert.deepEqual(
         dataConverterAny.mapUriToQpItem(getItem()),
         getQpItem(undefined, undefined, undefined, false, true)
+      );
+    });
+
+    it("should return quick pick item without appropriate filter phrase", () => {
+      const configuration = getConfiguration().searchEverywhere;
+      stubConfig(undefined, false, configuration.itemsFilterPhrases);
+
+      assert.deepEqual(
+        dataConverterAny.mapUriToQpItem(getItem()),
+        getQpItem(undefined, undefined, undefined, false, false)
       );
     });
   });
@@ -243,6 +289,25 @@ describe("DataConverter", () => {
       ];
 
       assert.deepEqual(workspaceFoldersPaths, expected);
+    });
+  });
+
+  describe("fetchConfig", () => {
+    it("should fetch config", () => {
+      const getIconsStub = sinon.stub(dataConverterAny.config, "getIcons");
+      const shouldUseItemsFilterPhrasesStub = sinon.stub(
+        dataConverterAny.config,
+        "shouldUseItemsFilterPhrases"
+      );
+      const getItemsFilterPhrasesStub = sinon.stub(
+        dataConverterAny.config,
+        "getItemsFilterPhrases"
+      );
+      dataConverterAny.fetchConfig();
+
+      assert.equal(getIconsStub.calledOnce, true);
+      assert.equal(shouldUseItemsFilterPhrasesStub.calledOnce, true);
+      assert.equal(getItemsFilterPhrasesStub.calledOnce, true);
     });
   });
 });
