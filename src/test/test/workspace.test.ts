@@ -22,6 +22,7 @@ import {
   getProgress,
   getEventEmitter,
   getConfigStub,
+  getConfiguration,
 } from "../util/mockFactory";
 import Cache from "../../cache";
 import Utils from "../../utils";
@@ -34,6 +35,16 @@ describe("Workspace", () => {
   let cacheStub: Cache;
   let utilsStub: Utils;
   let configStub: Config;
+
+  let stubDataServiceConfig = () => {
+    const configuration = getConfiguration().searchEverywhere;
+    sinon
+      .stub(workspaceAny.dataService, "includePatterns")
+      .value(configuration.include);
+    sinon
+      .stub(workspaceAny.dataService, "excludePatterns")
+      .value(configuration.exclude);
+  };
 
   before(() => {
     cacheStub = getCacheStub();
@@ -163,6 +174,7 @@ describe("Workspace", () => {
 
   describe("indexWorkspace", () => {
     it("should reset cache to initial empty state", async () => {
+      stubDataServiceConfig();
       const clearStub = sinon.stub(workspaceAny.cache, "clear");
       await workspaceAny.indexWorkspace();
 
@@ -276,8 +288,9 @@ describe("Workspace", () => {
 
   describe("removeFromCacheByPath", () => {
     it("should do nothing if getData method returns undefined", async () => {
-      const updateDataStub = sinon.stub(workspaceAny.cache, "updateData");
+      stubDataServiceConfig();
       sinon.stub(workspaceAny, "getData").returns(undefined);
+      const updateDataStub = sinon.stub(workspaceAny.cache, "updateData");
 
       await workspaceAny.removeFromCacheByPath(getItem());
 
@@ -472,14 +485,19 @@ describe("Workspace", () => {
   });
 
   describe("reloadComponents", () => {
-    it("should dataConverter.reload method be invoked", async () => {
+    it("should components reload methods be invoked", async () => {
       const dataConverterReloadStub = sinon.stub(
         workspaceAny.dataConverter,
+        "reload"
+      );
+      const dataServiceReloadStub = sinon.stub(
+        workspaceAny.dataService,
         "reload"
       );
       workspaceAny.reloadComponents();
 
       assert.equal(dataConverterReloadStub.calledOnce, true);
+      assert.equal(dataServiceReloadStub.calledOnce, true);
     });
   });
 

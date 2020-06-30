@@ -277,6 +277,7 @@ class Workspace {
 
   private reloadComponents() {
     this.dataConverter.reload();
+    this.dataService.reload();
   }
 
   private onDidChangeConfiguration = async (

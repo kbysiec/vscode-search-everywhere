@@ -14,15 +14,33 @@ import {
   getConfigStub,
   getItemsFilter,
 } from "../util/mockFactory";
-import Cache from "../../cache";
 import Utils from "../../utils";
 import Config from "../../config";
+import ItemsFilter from "../../interface/itemsFilter";
 
 describe("DataService", () => {
   let dataService: DataService;
   let dataServiceAny: any;
   let utilsStub: Utils;
   let configStub: Config;
+
+  let stubConfig = (
+    includePatterns: string[] = [],
+    excludePatterns: string[] = [],
+    shouldUseFilesAndSearchExclude: boolean = false,
+    filesAndSearchExcludePatterns: string[] = [],
+    itemsFilter: ItemsFilter = {}
+  ) => {
+    sinon.stub(dataServiceAny, "includePatterns").value(includePatterns);
+    sinon.stub(dataServiceAny, "excludePatterns").value(excludePatterns);
+    sinon
+      .stub(dataServiceAny, "shouldUseFilesAndSearchExclude")
+      .value(shouldUseFilesAndSearchExclude);
+    sinon
+      .stub(dataServiceAny, "filesAndSearchExcludePatterns")
+      .value(filesAndSearchExcludePatterns);
+    sinon.stub(dataServiceAny, "itemsFilter").value(itemsFilter);
+  };
 
   before(() => {
     utilsStub = getUtilsStub();
@@ -46,8 +64,19 @@ describe("DataService", () => {
     });
   });
 
+  describe("reload", () => {
+    it("should fetchConfig method be invoked", () => {
+      const fetchConfigStub = sinon.stub(dataServiceAny, "fetchConfig");
+      dataService.reload();
+
+      assert.equal(fetchConfigStub.calledOnce, true);
+    });
+  });
+
   describe("fetchData", () => {
-    it("should return array of vscode.Uri or vscode.DocumentSymbol items with workspace data", async () => {
+    it(`should return array of vscode.Uri or vscode.DocumentSymbol
+      items with workspace data`, async () => {
+      stubConfig();
       sinon
         .stub(vscode.workspace, "findFiles")
         .returns(Promise.resolve(getItems()));
@@ -83,6 +112,7 @@ describe("DataService", () => {
 
   describe("fetchUris", () => {
     it("should return array of vscode.Uri items", async () => {
+      stubConfig();
       const items = getItems();
       sinon.stub(vscode.workspace, "findFiles").returns(Promise.resolve(items));
 
@@ -115,7 +145,7 @@ describe("DataService", () => {
   describe("getIncludePatterns", () => {
     it("should return string[] containing include patterns", () => {
       const patterns = ["**/*.{js}"];
-      sinon.stub(dataServiceAny.config, "getInclude").returns(patterns);
+      stubConfig(patterns, [], false, [], getItemsFilter([1, 2]));
 
       assert.equal(dataServiceAny.getIncludePatterns(), patterns);
     });
@@ -124,10 +154,10 @@ describe("DataService", () => {
   describe("getExcludePatterns", () => {
     it("should return string[] containing exclude patterns", () => {
       const patterns = ["**/node_modules/**"];
+      stubConfig([], patterns, false, [], getItemsFilter([1, 2]));
       sinon
         .stub(dataServiceAny.config, "shouldUseFilesAndSearchExclude")
         .returns(false);
-      sinon.stub(dataServiceAny.config, "getExclude").returns(patterns);
 
       assert.equal(dataServiceAny.getExcludePatterns(), patterns);
     });
@@ -210,6 +240,7 @@ describe("DataService", () => {
 
   describe("includeUris", () => {
     it("should include uris to empty workspaceData", () => {
+      stubConfig();
       const workspaceData = getWorkspaceData();
       dataServiceAny.includeUris(workspaceData, getItems());
 
@@ -217,6 +248,7 @@ describe("DataService", () => {
     });
 
     it("should include uris to workspaceData containing data", () => {
+      stubConfig();
       const workspaceData = getWorkspaceData([getItem()]);
       dataServiceAny.includeUris(workspaceData, getItems());
 
@@ -249,6 +281,7 @@ describe("DataService", () => {
 
   describe("getSymbolsForUri", () => {
     it("should return array of vscode.DocumentSymbol for given uri", async () => {
+      stubConfig();
       const documentSymbolItems = getDocumentSymbolItemSingleLineArray(2);
       sinon
         .stub(dataServiceAny, "loadAllSymbolsForUri")
@@ -318,9 +351,8 @@ describe("DataService", () => {
 
   describe("filterUris", () => {
     it("should return array of filtered vscode.Uri", () => {
-      sinon
-        .stub(dataServiceAny.config, "getItemsFilter")
-        .returns(getItemsFilter([], [], ["fake-1"]));
+      stubConfig([], [], false, [], getItemsFilter([], [], ["fake-1"]));
+
       assert.deepEqual(dataServiceAny.filterUris(getItems(3)), [
         getItem(undefined, 2),
         getItem(undefined, 3),
@@ -330,9 +362,8 @@ describe("DataService", () => {
 
   describe("filterSymbols", () => {
     it("should return array of filtered vscode.DocumentSymbol", () => {
-      sinon
-        .stub(dataServiceAny.config, "getItemsFilter")
-        .returns(getItemsFilter([], [1, 3, 4]));
+      stubConfig([], [], false, [], getItemsFilter([], [1, 3, 4]));
+
       assert.deepEqual(
         dataServiceAny.filterSymbols(
           getDocumentSymbolItemSingleLineArray(5, false, 3, [1, 2, 3, 4, 2])
@@ -347,16 +378,12 @@ describe("DataService", () => {
 
   describe("isUriValid", () => {
     it("should return true if given vscode.Uri kind is allowed", () => {
-      sinon
-        .stub(dataServiceAny.config, "getItemsFilter")
-        .returns(getItemsFilter([0, 1]));
+      stubConfig([], [], false, [], getItemsFilter([0, 1]));
       assert.equal(dataServiceAny.isUriValid(getItem()), true);
     });
 
     it("should return false if given vscode.Uri kind is not allowed", () => {
-      sinon
-        .stub(dataServiceAny.config, "getItemsFilter")
-        .returns(getItemsFilter([2, 3]));
+      stubConfig([], [], false, [], getItemsFilter([2, 3]));
       assert.equal(dataServiceAny.isSymbolValid(getItem()), false);
     });
   });
@@ -364,9 +391,7 @@ describe("DataService", () => {
   describe("isSymbolValid", () => {
     it(`should return true if given vscode.DocumentSymbol
       is of kind which is allowed`, () => {
-      sinon
-        .stub(dataServiceAny.config, "getItemsFilter")
-        .returns(getItemsFilter([1, 2]));
+      stubConfig([], [], false, [], getItemsFilter([1, 2]));
       assert.equal(
         dataServiceAny.isSymbolValid(getDocumentSymbolItemSingleLine()),
         true
@@ -375,9 +400,7 @@ describe("DataService", () => {
 
     it(`should return false if given vscode.DocumentSymbol
       is of kind which is not allowed`, () => {
-      sinon
-        .stub(dataServiceAny.config, "getItemsFilter")
-        .returns(getItemsFilter([2, 3]));
+      stubConfig([], [], false, [], getItemsFilter([2, 3]));
       assert.equal(
         dataServiceAny.isSymbolValid(getDocumentSymbolItemSingleLine()),
         false
@@ -387,39 +410,29 @@ describe("DataService", () => {
 
   describe("isItemValid", () => {
     it("should return true if itemsFilter is empty", () => {
-      sinon
-        .stub(dataServiceAny.config, "getItemsFilter")
-        .returns(getItemsFilter([]));
+      stubConfig();
       assert.equal(dataServiceAny.isItemValid(getItem()), true);
     });
 
     it(`should return true if given item is of allowed kind
       and its name is not ignored`, () => {
-      sinon
-        .stub(dataServiceAny.config, "getItemsFilter")
-        .returns(getItemsFilter([0]));
+      stubConfig([], [], false, [], getItemsFilter([0]));
       assert.equal(dataServiceAny.isItemValid(getItem()), true);
     });
 
     it(`should return false if given item is not of allowed kind
       and its name is not ignored`, () => {
-      sinon
-        .stub(dataServiceAny.config, "getItemsFilter")
-        .returns(getItemsFilter([1]));
+      stubConfig([], [], false, [], getItemsFilter([1]));
       assert.equal(dataServiceAny.isItemValid(getItem()), false);
     });
 
     it("should return false if given item is of ignored kind", () => {
-      sinon
-        .stub(dataServiceAny.config, "getItemsFilter")
-        .returns(getItemsFilter([], [0]));
+      stubConfig([], [], false, [], getItemsFilter([], [0]));
       assert.equal(dataServiceAny.isItemValid(getItem()), false);
     });
 
     it("should return false if given item's name is ignored", () => {
-      sinon
-        .stub(dataServiceAny.config, "getItemsFilter")
-        .returns(getItemsFilter([], [], ["fake"]));
+      stubConfig([], [], false, [], getItemsFilter([], [], ["fake"]));
       assert.equal(dataServiceAny.isItemValid(getItem()), false);
     });
   });
@@ -475,6 +488,32 @@ describe("DataService", () => {
         ),
         false
       );
+    });
+  });
+
+  describe("fetchConfig", () => {
+    it("should fetch config", () => {
+      const getIncludeStub = sinon.stub(dataServiceAny.config, "getInclude");
+      const getExcludeStub = sinon.stub(dataServiceAny.config, "getExclude");
+      const shouldUseFilesAndSearchExcludeStub = sinon.stub(
+        dataServiceAny.config,
+        "shouldUseFilesAndSearchExclude"
+      );
+      const getFilesAndSearchExcludeStub = sinon.stub(
+        dataServiceAny.config,
+        "getFilesAndSearchExclude"
+      );
+      const getItemsFilterStub = sinon.stub(
+        dataServiceAny.config,
+        "getItemsFilter"
+      );
+      dataServiceAny.fetchConfig();
+
+      assert.equal(getIncludeStub.calledOnce, true);
+      assert.equal(getExcludeStub.calledOnce, true);
+      assert.equal(shouldUseFilesAndSearchExcludeStub.calledOnce, true);
+      assert.equal(getFilesAndSearchExcludeStub.calledOnce, true);
+      assert.equal(getItemsFilterStub.calledOnce, true);
     });
   });
 });

@@ -1,18 +1,29 @@
 import * as vscode from "vscode";
 import Config from "./config";
-import Cache from "./cache";
 import WorkspaceData from "./interface/workspaceData";
 import Utils from "./utils";
 import ItemsFilter from "./interface/itemsFilter";
 
 class DataService {
+  private includePatterns!: string[];
+  private excludePatterns!: string[];
+  private filesAndSearchExcludePatterns!: string[];
+  private itemsFilter!: ItemsFilter;
+  private shouldUseFilesAndSearchExclude!: boolean;
+
   private onDidItemIndexedEventEmitter: vscode.EventEmitter<
     number
   > = new vscode.EventEmitter();
   readonly onDidItemIndexed: vscode.Event<number> = this
     .onDidItemIndexedEventEmitter.event;
 
-  constructor(private utils: Utils, private config: Config) {}
+  constructor(private utils: Utils, private config: Config) {
+    this.fetchConfig();
+  }
+
+  reload() {
+    this.fetchConfig();
+  }
 
   async fetchData(uris?: vscode.Uri[]): Promise<WorkspaceData> {
     const workspaceData: WorkspaceData = this.utils.createWorkspaceData();
@@ -46,18 +57,16 @@ class DataService {
   }
 
   private getIncludePatterns(): string {
-    const includePatterns = this.config.getInclude();
-    return this.patternsAsString(includePatterns);
+    return this.patternsAsString(this.includePatterns);
   }
 
   private getExcludePatterns(): string {
     let excludePatterns: string[] = [];
-    const shouldUseFilesAndSearchExclude = this.config.shouldUseFilesAndSearchExclude();
 
-    if (shouldUseFilesAndSearchExclude) {
-      excludePatterns = this.config.getFilesAndSearchExclude();
+    if (this.shouldUseFilesAndSearchExclude) {
+      excludePatterns = this.filesAndSearchExcludePatterns;
     } else {
-      excludePatterns = this.config.getExclude();
+      excludePatterns = this.excludePatterns;
     }
 
     return this.patternsAsString(excludePatterns);
@@ -205,7 +214,6 @@ class DataService {
   }
 
   private isItemValid(item: vscode.Uri | vscode.DocumentSymbol): boolean {
-    const itemsFilter = this.config.getItemsFilter();
     let kind: number;
     let name: string | undefined;
     const isUri = item.hasOwnProperty("path");
@@ -220,9 +228,9 @@ class DataService {
     }
 
     return (
-      this.isInAllowedKinds(itemsFilter, kind) &&
-      this.isNotInIgnoredKinds(itemsFilter, kind) &&
-      this.isNotInIgnoredNames(itemsFilter, name)
+      this.isInAllowedKinds(this.itemsFilter, kind) &&
+      this.isNotInIgnoredKinds(this.itemsFilter, kind) &&
+      this.isNotInIgnoredNames(this.itemsFilter, name)
     );
   }
 
@@ -253,6 +261,14 @@ class DataService {
           name.toLowerCase().includes(ignoreEl.toLowerCase())
       )
     );
+  }
+
+  private fetchConfig() {
+    this.includePatterns = this.config.getInclude();
+    this.excludePatterns = this.config.getExclude();
+    this.shouldUseFilesAndSearchExclude = this.config.shouldUseFilesAndSearchExclude();
+    this.filesAndSearchExcludePatterns = this.config.getFilesAndSearchExclude();
+    this.itemsFilter = this.config.getItemsFilter();
   }
 }
 
