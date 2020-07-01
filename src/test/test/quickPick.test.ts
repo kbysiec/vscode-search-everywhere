@@ -9,6 +9,8 @@ import {
   getUntitledItem,
   getConfigStub,
   getQuickPickOnDidChangeValueEventListeners,
+  getQpHelpItems,
+  getQpHelpItem,
 } from "../util/mockFactory";
 import Config from "../../config";
 import QuickPickItem from "../../interface/quickPickItem";
@@ -70,6 +72,18 @@ describe("QuickPick", () => {
     });
   });
 
+  describe("reload", () => {
+    it("should fetchConfig and fetchHelpData methods be invoked", () => {
+      const fetchConfigStub = sinon.stub(quickPickAny, "fetchConfig");
+      const fetchHelpDataStub = sinon.stub(quickPickAny, "fetchHelpData");
+
+      quickPick.reload();
+
+      assert.equal(fetchConfigStub.calledOnce, true);
+      assert.equal(fetchHelpDataStub.calledOnce, true);
+    });
+  });
+
   describe("isInitialized", () => {
     it("should return true if vscode quick pick is initialized", () => {
       const quickPickInner = vscode.window.createQuickPick<QuickPickItem>();
@@ -98,10 +112,19 @@ describe("QuickPick", () => {
 
   describe("loadItems", () => {
     it("should items be loaded", () => {
-      sinon.stub(quickPickAny, "items").value(getQpItems());
+      const items = getQpItems();
+      sinon.stub(quickPickAny, "items").value(items);
       quickPick.loadItems();
 
-      assert.equal(quickPickAny.quickPick.items.length, 2);
+      assert.deepEqual(quickPickAny.quickPick.items, items);
+    });
+
+    it("should help items be loaded", () => {
+      const helpItems = getQpHelpItems();
+      sinon.stub(quickPickAny, "helpItems").value(helpItems);
+      quickPick.loadItems(true);
+
+      assert.deepEqual(quickPickAny.quickPick.items, helpItems);
     });
   });
 
@@ -131,11 +154,48 @@ describe("QuickPick", () => {
   });
 
   describe("setPlaceholder", () => {
-    it("should placeholder text be set", () => {
-      const text = "test text";
-      quickPick.setPlaceholder(text);
+    it("should set placeholder to loading text", () => {
+      quickPick.setPlaceholder(true);
+      assert.equal(
+        quickPickAny.quickPick.placeholder,
+        "Please wait, loading..."
+      );
+    });
 
-      assert.equal(quickPickAny.quickPick.placeholder, text);
+    it("should set placeholder to searching text if shouldUseItemsFilterPhrase is false", () => {
+      sinon.stub(quickPickAny, "shouldUseItemsFilterPhrases").value(false);
+
+      quickPick.setPlaceholder(false);
+
+      assert.equal(
+        quickPickAny.quickPick.placeholder,
+        "Start typing file or symbol name..."
+      );
+    });
+
+    it("should set placeholder to help text if shouldUseItemsFilterPhrase is true", () => {
+      sinon.stub(quickPickAny, "shouldUseItemsFilterPhrases").value(true);
+      sinon.stub(quickPickAny, "helpPhrase").value("?");
+
+      quickPick.setPlaceholder(false);
+
+      assert.equal(
+        quickPickAny.quickPick.placeholder,
+        "Type ? for help or start typing file or symbol name..."
+      );
+    });
+
+    it(`should change quick pick placeholder to help text with not set help phrase
+      if shouldUseItemsFilterPhrase is true`, () => {
+      sinon.stub(quickPickAny, "shouldUseItemsFilterPhrases").value(true);
+      sinon.stub(quickPickAny, "helpPhrase").value("");
+
+      quickPick.setPlaceholder(false);
+
+      assert.equal(
+        quickPickAny.quickPick.placeholder,
+        "Help phrase not set. Start typing file or symbol name..."
+      );
     });
   });
 
@@ -221,6 +281,19 @@ describe("QuickPick", () => {
       assert.equal(showTextDocumentStub.calledOnce, true);
       assert.equal(selectQpItemStub.calledOnce, true);
     });
+
+    it(`should set text to selected items filter phrase
+       if given item is help item`, async () => {
+      sinon.stub(quickPickAny, "shouldUseItemsFilterPhrases").value(true);
+      sinon.stub(quickPickAny, "itemsFilterPhrases").value({ "0": "$$" });
+      const setTextStub = sinon.stub(quickPickAny, "setText");
+      const loadItemsStub = sinon.stub(quickPickAny, "loadItems");
+
+      await quickPickAny.openSelected(getQpHelpItem("?", "0", "$$"));
+
+      assert.equal(setTextStub.calledWith("$$"), true);
+      assert.equal(loadItemsStub.calledOnce, true);
+    });
   });
 
   describe("selectQpItem", () => {
@@ -279,6 +352,60 @@ describe("QuickPick", () => {
     });
   });
 
+  describe("getHelpItems", () => {
+    it("should return array of help items", () => {
+      sinon.stub(quickPickAny, "helpPhrase").value("?");
+      sinon
+        .stub(quickPickAny, "itemsFilterPhrases")
+        .value({ 0: "$$", 4: "@@" });
+
+      assert.deepEqual(quickPickAny.getHelpItems(), getQpHelpItems());
+    });
+  });
+
+  describe("getHelpItemForKind", () => {
+    it("should return help item for given kind and itemFilterPhrase", () => {
+      sinon.stub(quickPickAny, "helpPhrase").value("?");
+
+      assert.deepEqual(
+        quickPickAny.getHelpItemForKind("0", "$$"),
+        getQpHelpItem("?", "0", "$$")
+      );
+    });
+  });
+
+  describe("fetchConfig", () => {
+    it("should fetch config", () => {
+      const shouldUseItemsFilterPhrasesStub = sinon.stub(
+        quickPickAny.config,
+        "shouldUseItemsFilterPhrases"
+      );
+      const getHelpPhrase = sinon.stub(quickPickAny.config, "getHelpPhrase");
+      const getItemsFilterPhrasesStub = sinon.stub(
+        quickPickAny.config,
+        "getItemsFilterPhrases"
+      );
+
+      quickPickAny.fetchConfig();
+
+      assert.equal(shouldUseItemsFilterPhrasesStub.calledOnce, true);
+      assert.equal(getHelpPhrase.calledOnce, true);
+      assert.equal(getItemsFilterPhrasesStub.calledOnce, true);
+    });
+  });
+
+  describe("fetchHelpData", () => {
+    it("should fetch help data", () => {
+      const helpItemsFromConfig = getQpHelpItems();
+      sinon.stub(quickPickAny, "helpItems").value([]);
+      sinon.stub(quickPickAny, "getHelpItems").returns(helpItemsFromConfig);
+
+      quickPickAny.fetchHelpData();
+
+      assert.equal(quickPickAny.helpItems, helpItemsFromConfig);
+    });
+  });
+
   describe("onDidChangeValueClearing", () => {
     it("should clear quick pick items", () => {
       // sinon.stub(quickPickAny.quickPick, "items").value(getQpItems());
@@ -290,12 +417,21 @@ describe("QuickPick", () => {
   });
 
   describe("onDidChangeValue", () => {
-    it("should loadItems method be invoked", () => {
+    it("should load workspace items", () => {
       const loadItemsStub = sinon.stub(quickPickAny, "loadItems");
-      const text = "test text";
-      quickPickAny.onDidChangeValue(text);
+      quickPickAny.onDidChangeValue("test text");
 
       assert.equal(loadItemsStub.calledOnce, true);
+    });
+
+    it("should load help items", () => {
+      sinon.stub(quickPickAny, "shouldUseItemsFilterPhrases").value(true);
+      sinon.stub(quickPickAny, "helpPhrase").value("?");
+      const loadItemsStub = sinon.stub(quickPickAny, "loadItems");
+
+      quickPickAny.onDidChangeValue("?");
+
+      assert.equal(loadItemsStub.calledWith(true), true);
     });
   });
 

@@ -19,6 +19,7 @@ class Config {
     } as ItemsFilter,
     shouldUseItemsFilterPhrases: false,
     itemsFilterPhrases: {} as ItemsFilterPhrases,
+    helpPhrase: "?",
     exclude: [] as string[],
     include: [] as string[],
     shouldUseFilesAndSearchExclude: false,
@@ -75,6 +76,10 @@ class Config {
       ConfigKey.itemsFilterPhrases,
       this.default.itemsFilterPhrases
     );
+  }
+
+  getHelpPhrase(): string {
+    return this.get(ConfigKey.helpPhrase, this.default.helpPhrase);
   }
 
   getExclude(): string[] {

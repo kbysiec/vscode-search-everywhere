@@ -217,7 +217,7 @@ describe("ExtensionController", () => {
   });
 
   describe("setQuickPickPlaceholder", () => {
-    it("should change quick pick placeholder to loading text", () => {
+    it("should change quick pick placeholder to appropriate for loading state", () => {
       const setPlaceholderStub = sinon.stub(
         extensionControllerAny.quickPick,
         "setPlaceholder"
@@ -225,24 +225,7 @@ describe("ExtensionController", () => {
 
       extensionControllerAny.setQuickPickPlaceholder(true);
 
-      assert.equal(
-        setPlaceholderStub.calledWith("Please wait, loading..."),
-        true
-      );
-    });
-
-    it("should change quick pick placeholder to searching text", () => {
-      const setPlaceholderStub = sinon.stub(
-        extensionControllerAny.quickPick,
-        "setPlaceholder"
-      );
-
-      extensionControllerAny.setQuickPickPlaceholder(false);
-
-      assert.equal(
-        setPlaceholderStub.calledWith("Start typing file or symbol name..."),
-        true
-      );
+      assert.equal(setPlaceholderStub.calledWith(true), true);
     });
   });
 
@@ -420,6 +403,15 @@ describe("ExtensionController", () => {
       assert.equal(setBusyStub.calledWith(true), true);
       assert.equal(reloadOnDidChangeValueEventListenerStub.calledOnce, true);
       assert.equal(setBusyStub.calledWith(false), true);
+    });
+  });
+
+  describe("onWillReindexOnConfigurationChange", () => {
+    it("should quickPick.reload method be invoked", () => {
+      const reloadStub = sinon.stub(extensionControllerAny.quickPick, "reload");
+      extensionControllerAny.onWillReindexOnConfigurationChange();
+
+      assert.equal(reloadStub.calledOnce, true);
     });
   });
 });

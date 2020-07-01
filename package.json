@@ -85,6 +85,11 @@
           },
           "description": "Phrases for symbol type which could be used for narrowing the results down."
         },
+        "searchEverywhere.helpPhrase": {
+          "type": "string",
+          "default": "?",
+          "description": "Phrase which should invoke help."
+        },
         "searchEverywhere.exclude": {
           "type": "array",
           "default": [

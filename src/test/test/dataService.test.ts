@@ -154,10 +154,14 @@ describe("DataService", () => {
   describe("getExcludePatterns", () => {
     it("should return string[] containing exclude patterns", () => {
       const patterns = ["**/node_modules/**"];
-      stubConfig([], patterns, false, [], getItemsFilter([1, 2]));
-      sinon
-        .stub(dataServiceAny.config, "shouldUseFilesAndSearchExclude")
-        .returns(false);
+      stubConfig([], patterns, false, []);
+
+      assert.equal(dataServiceAny.getExcludePatterns(), patterns);
+    });
+
+    it("should return string[] containing files and search exclude patterns", () => {
+      const patterns = ["**/node_modules/**"];
+      stubConfig([], [], true, patterns);
 
       assert.equal(dataServiceAny.getExcludePatterns(), patterns);
     });

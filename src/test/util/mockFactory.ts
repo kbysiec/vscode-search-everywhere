@@ -7,6 +7,7 @@ import QuickPickItem from "../../interface/quickPickItem";
 import Item from "../../interface/item";
 import ActionType from "../../enum/actionType";
 import Action from "../../interface/action";
+import ItemsFilterPhrases from "../../interface/itemsFilterPhrases";
 import { createStubInstance } from "./stubbedClass";
 import Config from "../../config";
 
@@ -548,4 +549,32 @@ export const getItemsFilter = (
     ignoredKinds,
     ignoredNames,
   };
+};
+
+export const getQpHelpItem = (
+  helpPhrase: string = "?",
+  kind: string,
+  itemFilterPhrase: string
+): QuickPickItem => {
+  const qpItem = {
+    label: `${helpPhrase} Type ${itemFilterPhrase} for limit results to ${
+      vscode.SymbolKind[Number(kind)]
+    } only`,
+    symbolKind: Number(kind),
+    isHelp: true,
+    uri: vscode.Uri.parse("#"),
+  };
+
+  return qpItem;
+};
+
+export const getQpHelpItems = (
+  helpPhrase: string = "?",
+  itemFilterPhrases: ItemsFilterPhrases = { 0: "$$", 4: "@@" }
+): QuickPickItem[] => {
+  const array: QuickPickItem[] = [];
+  Object.keys(itemFilterPhrases).forEach((kind: string) =>
+    array.push(getQpHelpItem(helpPhrase, kind, itemFilterPhrases[Number(kind)]))
+  );
+  return array;
 };

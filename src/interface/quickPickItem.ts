@@ -4,6 +4,7 @@ interface QuickPickItem extends vscode.QuickPickItem {
   uri: vscode.Uri;
   symbolKind: number;
   range?: Range;
+  isHelp?: boolean;
 }
 
 interface Range {

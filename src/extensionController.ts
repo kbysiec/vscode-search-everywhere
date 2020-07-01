@@ -63,11 +63,7 @@ class ExtensionController {
   }
 
   private setQuickPickPlaceholder(isBusy: boolean) {
-    const placeholder = isBusy
-      ? "Please wait, loading..."
-      : "Start typing file or symbol name...";
-
-    this.quickPick.setPlaceholder(placeholder);
+    this.quickPick.setPlaceholder(isBusy);
   }
 
   private shouldIndexOnQuickPickOpen() {
@@ -89,6 +85,9 @@ class ExtensionController {
     this.workspace.onDidProcessing(this.onDidProcessing);
     this.workspace.onWillExecuteAction(this.onWillExecuteAction);
     this.workspace.onDidDebounceConfigToggle(this.onDidDebounceConfigToggle);
+    this.workspace.onWillReindexOnConfigurationChange(
+      this.onWillReindexOnConfigurationChange
+    );
   }
 
   private onWillProcessing = () => {
@@ -115,6 +114,10 @@ class ExtensionController {
     this.setBusy(true);
     this.quickPick.reloadOnDidChangeValueEventListener();
     this.setBusy(false);
+  };
+
+  private onWillReindexOnConfigurationChange = () => {
+    this.quickPick.reload();
   };
 }
 

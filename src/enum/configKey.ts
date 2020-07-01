@@ -7,6 +7,7 @@ enum ConfigKey {
   itemsFilter = "itemsFilter",
   shouldUseItemsFilterPhrases = "shouldUseItemsFilterPhrases",
   itemsFilterPhrases = "itemsFilterPhrases",
+  helpPhrase = "helpPhrase",
   exclude = "exclude",
   include = "include",
   shouldUseFilesAndSearchExclude = "shouldUseFilesAndSearchExclude",
