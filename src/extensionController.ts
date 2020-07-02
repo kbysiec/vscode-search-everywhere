@@ -81,11 +81,13 @@ class ExtensionController {
   }
 
   private registerEventListeners() {
-    this.workspace.onWillProcessing(this.onWillProcessing);
-    this.workspace.onDidProcessing(this.onDidProcessing);
-    this.workspace.onWillExecuteAction(this.onWillExecuteAction);
-    this.workspace.onDidDebounceConfigToggle(this.onDidDebounceConfigToggle);
-    this.workspace.onWillReindexOnConfigurationChange(
+    this.workspace.events.onWillProcessing(this.onWillProcessing);
+    this.workspace.events.onDidProcessing(this.onDidProcessing);
+    this.workspace.events.onWillExecuteAction(this.onWillExecuteAction);
+    this.workspace.events.onDidDebounceConfigToggle(
+      this.onDidDebounceConfigToggle
+    );
+    this.workspace.events.onWillReindexOnConfigurationChange(
       this.onWillReindexOnConfigurationChange
     );
   }

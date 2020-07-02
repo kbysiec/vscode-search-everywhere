@@ -9,36 +9,12 @@ import ActionType from "./enum/actionType";
 import Action from "./interface/action";
 import ActionProcessor from "./actionProcessor";
 import Config from "./config";
+import WorkspaceEventsEmitter from "./workspaceEventsEmitter";
 
 const debounce = require("debounce");
 
 class Workspace {
-  private onWillProcessingEventEmitter: vscode.EventEmitter<
-    void
-  > = new vscode.EventEmitter();
-  private onDidProcessingEventEmitter: vscode.EventEmitter<
-    void
-  > = new vscode.EventEmitter();
-  private onWillExecuteActionEventEmitter: vscode.EventEmitter<
-    Action
-  > = new vscode.EventEmitter();
-  private onDidDebounceConfigToggleEventEmitter: vscode.EventEmitter<
-    void
-  > = new vscode.EventEmitter();
-  private onWillReindexOnConfigurationChangeEventEmitter: vscode.EventEmitter<
-    void
-  > = new vscode.EventEmitter();
-  readonly onWillProcessing: vscode.Event<void> = this
-    .onWillProcessingEventEmitter.event;
-  readonly onDidProcessing: vscode.Event<void> = this
-    .onDidProcessingEventEmitter.event;
-  readonly onWillExecuteAction: vscode.Event<Action> = this
-    .onWillExecuteActionEventEmitter.event;
-  readonly onDidDebounceConfigToggle: vscode.Event<void> = this
-    .onDidDebounceConfigToggleEventEmitter.event;
-  readonly onWillReindexOnConfigurationChange: vscode.Event<void> = this
-    .onWillReindexOnConfigurationChangeEventEmitter.event;
-
+  events!: WorkspaceEventsEmitter;
   private dataService!: DataService;
   private dataConverter!: DataConverter;
   private actionProcessor!: ActionProcessor;
@@ -238,6 +214,7 @@ class Workspace {
     this.dataService = new DataService(this.utils, this.config);
     this.dataConverter = new DataConverter(this.utils, this.config);
     this.actionProcessor = new ActionProcessor(this.utils);
+    this.events = new WorkspaceEventsEmitter();
   }
 
   private reloadComponents() {
@@ -251,10 +228,10 @@ class Workspace {
     this.cache.clearConfig();
     if (this.utils.shouldReindexOnConfigurationChange(event)) {
       this.reloadComponents();
-      this.onWillReindexOnConfigurationChangeEventEmitter.fire();
+      this.events.onWillReindexOnConfigurationChangeEventEmitter.fire();
       await this.index("onDidChangeConfiguration");
     } else if (this.utils.isDebounceConfigurationToggled(event)) {
-      this.onDidDebounceConfigToggleEventEmitter.fire();
+      this.events.onDidDebounceConfigToggleEventEmitter.fire();
     }
   };
 
@@ -362,15 +339,15 @@ class Workspace {
   }
 
   private onWillActionProcessorProcessing = () => {
-    this.onWillProcessingEventEmitter.fire();
+    this.events.onWillProcessingEventEmitter.fire();
   };
 
   private onDidActionProcessorProcessing = () => {
-    this.onDidProcessingEventEmitter.fire();
+    this.events.onDidProcessingEventEmitter.fire();
   };
 
   private onWillActionProcessorExecuteAction = (action: Action) => {
-    this.onWillExecuteActionEventEmitter.fire(action);
+    this.events.onWillExecuteActionEventEmitter.fire(action);
   };
 }
 

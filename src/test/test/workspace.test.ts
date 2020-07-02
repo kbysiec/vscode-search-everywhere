@@ -428,7 +428,7 @@ describe("Workspace", () => {
         .returns(true);
       const eventEmitter = getEventEmitter();
       sinon
-        .stub(workspaceAny, "onDidDebounceConfigToggleEventEmitter")
+        .stub(workspaceAny.events, "onDidDebounceConfigToggleEventEmitter")
         .value(eventEmitter);
       await workspaceAny.onDidChangeConfiguration(
         getConfigurationChangeEvent(true)
@@ -446,7 +446,7 @@ describe("Workspace", () => {
         .returns(false);
       const registerActionStub = sinon.stub(workspaceAny, "registerAction");
       const onDidDebounceConfigToggleEventEmitterStub = sinon.stub(
-        workspaceAny,
+        workspaceAny.events,
         "onDidDebounceConfigToggleEventEmitter"
       );
       await workspaceAny.onDidChangeConfiguration(
@@ -648,7 +648,7 @@ describe("Workspace", () => {
     it("should onWillProcessing event be emitted", () => {
       const eventEmitter = getEventEmitter();
       sinon
-        .stub(workspaceAny, "onWillProcessingEventEmitter")
+        .stub(workspaceAny.events, "onWillProcessingEventEmitter")
         .value(eventEmitter);
       workspaceAny.onWillActionProcessorProcessing();
 
@@ -660,7 +660,7 @@ describe("Workspace", () => {
     it("should onDidProcessing event be emitted", () => {
       const eventEmitter = getEventEmitter();
       sinon
-        .stub(workspaceAny, "onDidProcessingEventEmitter")
+        .stub(workspaceAny.events, "onDidProcessingEventEmitter")
         .value(eventEmitter);
       workspaceAny.onDidActionProcessorProcessing();
 
@@ -672,7 +672,7 @@ describe("Workspace", () => {
     it("should onWillExecuteAction event be emitted", () => {
       const eventEmitter = getEventEmitter();
       sinon
-        .stub(workspaceAny, "onWillExecuteActionEventEmitter")
+        .stub(workspaceAny.events, "onWillExecuteActionEventEmitter")
         .value(eventEmitter);
       workspaceAny.onWillActionProcessorExecuteAction();
 

@@ -258,22 +258,22 @@ describe("ExtensionController", () => {
   describe("registerEventListeners", () => {
     it("should register extensionController event listeners", () => {
       const onWillProcessingStub = sinon.stub(
-        extensionControllerAny.workspace,
+        extensionControllerAny.workspace.events,
         "onWillProcessing"
       );
 
       const onDidProcessingStub = sinon.stub(
-        extensionControllerAny.workspace,
+        extensionControllerAny.workspace.events,
         "onDidProcessing"
       );
 
       const onWillExecuteActionStub = sinon.stub(
-        extensionControllerAny.workspace,
+        extensionControllerAny.workspace.events,
         "onWillExecuteAction"
       );
 
       const onDidDebounceConfigToggleStub = sinon.stub(
-        extensionControllerAny.workspace,
+        extensionControllerAny.workspace.events,
         "onDidDebounceConfigToggle"
       );
 
