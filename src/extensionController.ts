@@ -38,6 +38,14 @@ class ExtensionController {
     }
   }
 
+  async reload(): Promise<void> {
+    if (this.utils.hasWorkspaceAnyFolder()) {
+      await this.workspace.index("reload");
+    } else {
+      this.utils.printNoFolderOpenedMessage();
+    }
+  }
+
   async startup(): Promise<void> {
     const shouldInitOnStartup = this.config.shouldInitOnStartup();
     if (shouldInitOnStartup) {

@@ -6,7 +6,7 @@ export async function search(extensionController: ExtensionController) {
 }
 
 export async function reload(extensionController: ExtensionController) {
-  vscode.window.showInformationMessage("reload command invoked");
+  await extensionController.reload();
 }
 
 export function deactivate() {

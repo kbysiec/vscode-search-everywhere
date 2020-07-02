@@ -53,14 +53,11 @@ describe("extension", () => {
   });
 
   describe("reload", () => {
-    it("should vscode.window.showInformationMessage method be invoked", () => {
-      const showInformationMessageStub = sinon.stub(
-        vscode.window,
-        "showInformationMessage"
-      );
+    it("should extensionController.reload method be invoked", () => {
+      const reloadStub = sinon.stub(extensionController, "reload");
       extension.reload(extensionController);
 
-      assert.equal(showInformationMessageStub.calledOnce, true);
+      assert.equal(reloadStub.calledOnce, true);
     });
   });
 });

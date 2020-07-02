@@ -112,6 +112,33 @@ describe("ExtensionController", () => {
     });
   });
 
+  describe("reload", () => {
+    it(`should display notification if workspace contains does not contain
+      any folder opened`, async () => {
+      const printNoFolderOpenedMessageStub = sinon.stub(
+        extensionControllerAny.utils,
+        "printNoFolderOpenedMessage"
+      );
+      sinon
+        .stub(extensionControllerAny.utils, "hasWorkspaceAnyFolder")
+        .returns(false);
+      await extensionController.reload();
+
+      assert.equal(printNoFolderOpenedMessageStub.calledOnce, true);
+    });
+
+    it("should workspace.index method be invoked", async () => {
+      const indexStub = sinon.stub(extensionControllerAny.workspace, "index");
+      sinon
+        .stub(extensionControllerAny.utils, "hasWorkspaceAnyFolder")
+        .returns(true);
+
+      await extensionController.reload();
+
+      assert.equal(indexStub.calledOnce, true);
+    });
+  });
+
   describe("startup", () => {
     it("should workspace.index method be invoked if shouldInitOnStartup method returns true", async () => {
       sinon
