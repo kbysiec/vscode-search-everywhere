@@ -21,7 +21,7 @@ class Workspace {
 
   private urisForDirectoryPathUpdate?: vscode.Uri[];
   private directoryUriBeforePathUpdate?: vscode.Uri;
-  private fileSymbolKind: number = 0;
+  private fileKind: number = 0;
 
   private progressStep: number = 0;
   private currentProgressValue: number = 0;
@@ -167,7 +167,7 @@ class Workspace {
         this.urisForDirectoryPathUpdate = this.utils.getUrisForDirectoryPathUpdate(
           data,
           uri,
-          this.fileSymbolKind
+          this.fileKind
         );
         data = data.filter(
           (qpItem: QuickPickItem) => !qpItem.uri.fsPath.includes(uri.fsPath)

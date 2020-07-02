@@ -116,7 +116,7 @@ class QuickPick {
 
   private async openSelected(qpItem: QuickPickItem): Promise<void> {
     if (this.shouldUseItemsFilterPhrases && qpItem.isHelp) {
-      const text = this.itemsFilterPhrases[qpItem.symbolKind];
+      const text = this.itemsFilterPhrases[qpItem.kind];
       this.setText(text);
       this.loadItems();
     } else {
@@ -165,7 +165,7 @@ class QuickPick {
       } Type ${itemFilterPhrase} for limit results to ${
         vscode.SymbolKind[parseInt(kind)]
       } only`,
-      symbolKind: Number(kind),
+      kind: Number(kind),
       isHelp: true,
       uri: vscode.Uri.parse("#"),
     } as QuickPickItem;

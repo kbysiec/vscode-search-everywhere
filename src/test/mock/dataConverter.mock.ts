@@ -7,7 +7,7 @@ export const itemUntitledUri = vscode.Uri.file("./fake/fake-1.ts");
 export const qpItemUntitled: QuickPickItem = {
   label: "fake-1.ts",
   uri: itemUntitledUri,
-  symbolKind: 0,
+  kind: 0,
 };
 
 export const workspaceFolders: vscode.WorkspaceFolder[] = [

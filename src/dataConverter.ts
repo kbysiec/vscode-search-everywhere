@@ -79,7 +79,7 @@ class DataConverter {
 
     return {
       uri,
-      symbolKind: symbol.kind,
+      kind: symbol.kind,
       range: {
         start: symbol.range.start,
         end: symbol.range.end,
@@ -87,19 +87,19 @@ class DataConverter {
       label,
       detail: this.normalizeUriPath(uri.fsPath),
       description,
-    };
+    } as QuickPickItem;
   }
 
   private mapUriToQpItem(uri: vscode.Uri): QuickPickItem {
-    const symbolKind = 0;
+    const kind = 0;
     const name = uri.path.split("/").pop();
-    const icon = this.icons[symbolKind] ? `$(${this.icons[symbolKind]})` : "";
+    const icon = this.icons[kind] ? `$(${this.icons[kind]})` : "";
     const label = icon ? `${icon}  ${name}` : name;
 
     const start = new vscode.Position(0, 0);
     const end = new vscode.Position(0, 0);
 
-    const itemFilterPhrase = this.getItemFilterPhraseForKind(symbolKind);
+    const itemFilterPhrase = this.getItemFilterPhraseForKind(kind);
 
     const description = `${
       this.shouldUseItemsFilterPhrases && itemFilterPhrase
@@ -109,7 +109,7 @@ class DataConverter {
 
     return {
       uri,
-      symbolKind,
+      kind: kind,
       range: {
         start,
         end,

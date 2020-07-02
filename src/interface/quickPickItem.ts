@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 
 interface QuickPickItem extends vscode.QuickPickItem {
   uri: vscode.Uri;
-  symbolKind: number;
+  kind: number;
   range?: Range;
   isHelp?: boolean;
 }

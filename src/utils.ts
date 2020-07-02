@@ -81,13 +81,12 @@ class Utils {
   getUrisForDirectoryPathUpdate(
     data: QuickPickItem[],
     uri: vscode.Uri,
-    fileSymbolKind: number
+    fileKind: number
   ): vscode.Uri[] {
     return data
       .filter(
         (qpItem: QuickPickItem) =>
-          qpItem.uri.fsPath.includes(uri.fsPath) &&
-          qpItem.symbolKind === fileSymbolKind
+          qpItem.uri.fsPath.includes(uri.fsPath) && qpItem.kind === fileKind
       )
       .map((qpItem: QuickPickItem) => qpItem.uri);
   }
