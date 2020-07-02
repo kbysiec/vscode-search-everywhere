@@ -11,6 +11,8 @@ import Action from "../../interface/action";
 import ActionType from "../../enum/actionType";
 import Utils from "../../utils";
 import Config from "../../config";
+import { getQpItems, getQpItem } from "../util/qpItemMockFactory";
+import { getDirectory, getItems } from "../util/itemMockFactory";
 
 describe("Utils", () => {
   let utils: Utils;
@@ -182,6 +184,102 @@ describe("Utils", () => {
     });
   });
 
+  describe("getSplitter", () => {
+    it("should return splitter string", () => {
+      assert.equal(utils.getSplitter(), "§&§");
+    });
+  });
+
+  describe("getUrisForDirectoryPathUpdate", () => {
+    it(`should return uris containing renamed directory
+      name and file symbol kind`, async () => {
+      const qpItems = getQpItems();
+      qpItems[1] = getQpItem("./test/fake-files/", 2);
+      assert.deepEqual(
+        await utils.getUrisForDirectoryPathUpdate(
+          qpItems,
+          getDirectory("./fake/"),
+          0
+        ),
+        getItems(1, undefined, undefined, true)
+      );
+    });
+  });
+
+  describe("updateUrisWithNewDirectoryName", () => {
+    it("should return vscode.Uri[] with updated directory path", () => {
+      assert.deepEqual(
+        utils.updateUrisWithNewDirectoryName(
+          getItems(),
+          getDirectory("./fake/"),
+          getDirectory("./test/fake-files/")
+        ),
+        getItems(2, "./test/fake-files/")
+      );
+    });
+
+    it(`should return unchanged vscode.Uri[]
+      if old directory path does not exist in workspace`, () => {
+      assert.deepEqual(
+        utils.updateUrisWithNewDirectoryName(
+          getItems(),
+          getDirectory("./fake/not-exist/"),
+          getDirectory("./test/fake-files/")
+        ),
+        getItems(2, "./fake/")
+      );
+    });
+  });
+
+  describe("getNotificationLocation", () => {
+    it(`should return vscode.ProgressLocation.Window
+      if shouldDisplayNotificationInStatusBar is true`, () => {
+      sinon
+        .stub(utilsAny.config, "shouldDisplayNotificationInStatusBar")
+        .returns(true);
+
+      assert.equal(
+        utils.getNotificationLocation(),
+        vscode.ProgressLocation.Window
+      );
+    });
+
+    it(`should return vscode.ProgressLocation.Window
+      if shouldDisplayNotificationInStatusBar is false`, () => {
+      sinon
+        .stub(utilsAny.config, "shouldDisplayNotificationInStatusBar")
+        .returns(false);
+
+      assert.equal(
+        utils.getNotificationLocation(),
+        vscode.ProgressLocation.Notification
+      );
+    });
+  });
+
+  describe("getNotificationTitle", () => {
+    it(`should return string 'Indexing...'
+      if shouldDisplayNotificationInStatusBar is true`, () => {
+      sinon
+        .stub(utilsAny.config, "shouldDisplayNotificationInStatusBar")
+        .returns(true);
+
+      assert.equal(utils.getNotificationTitle(), "Indexing...");
+    });
+
+    it(`should return string 'Indexing workspace files and symbols...'
+      if shouldDisplayNotificationInStatusBar is false`, () => {
+      sinon
+        .stub(utilsAny.config, "shouldDisplayNotificationInStatusBar")
+        .returns(false);
+
+      assert.equal(
+        utils.getNotificationTitle(),
+        "Indexing workspace files and symbols..."
+      );
+    });
+  });
+
   describe("sleep", () => {
     it("should be fulfilled", async () => {
       const clock = sinon.useFakeTimers();
@@ -201,12 +299,6 @@ describe("Utils", () => {
       expect(fulfilled).to.be.true;
 
       clock.restore();
-    });
-  });
-
-  describe("getSplitter", () => {
-    it("should return splitter string", () => {
-      assert.equal(utils.getSplitter(), "§&§");
     });
   });
 

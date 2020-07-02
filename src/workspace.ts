@@ -99,8 +99,8 @@ class Workspace {
     if (this.utils.hasWorkspaceAnyFolder()) {
       await vscode.window.withProgress(
         {
-          location: this.getNotificationLocation(),
-          title: this.getNotificationTitle(),
+          location: this.utils.getNotificationLocation(),
+          title: this.utils.getNotificationTitle(),
         },
         this.indexWithProgressTask.bind(this)
       );
@@ -159,7 +159,7 @@ class Workspace {
           this.urisForDirectoryPathUpdate &&
           this.urisForDirectoryPathUpdate.length
         ) {
-          const urisWithNewDirectoryName = this.updateUrisWithNewDirectoryName(
+          const urisWithNewDirectoryName = this.utils.updateUrisWithNewDirectoryName(
             this.urisForDirectoryPathUpdate,
             this.directoryUriBeforePathUpdate!,
             uri
@@ -188,9 +188,10 @@ class Workspace {
         );
       } else {
         this.directoryUriBeforePathUpdate = uri;
-        this.urisForDirectoryPathUpdate = this.getUrisForDirectoryPathUpdate(
+        this.urisForDirectoryPathUpdate = this.utils.getUrisForDirectoryPathUpdate(
           data,
-          uri
+          uri,
+          this.fileSymbolKind
         );
         data = data.filter(
           (qpItem: QuickPickItem) => !qpItem.uri.fsPath.includes(uri.fsPath)
@@ -200,39 +201,12 @@ class Workspace {
     }
   }
 
-  private getUrisForDirectoryPathUpdate(
-    data: QuickPickItem[],
-    uri: vscode.Uri
-  ): vscode.Uri[] {
-    return data
-      .filter(
-        (qpItem: QuickPickItem) =>
-          qpItem.uri.fsPath.includes(uri.fsPath) &&
-          qpItem.symbolKind === this.fileSymbolKind
-      )
-      .map((qpItem: QuickPickItem) => qpItem.uri);
-  }
-
   private mergeWithDataFromCache(data: QuickPickItem[]): QuickPickItem[] {
     const dataFromCache = this.getData();
     if (dataFromCache) {
       return dataFromCache.concat(data);
     }
     return data;
-  }
-
-  private updateUrisWithNewDirectoryName(
-    uris: vscode.Uri[],
-    oldDirectoryUri: vscode.Uri,
-    newDirectoryUri: vscode.Uri
-  ): vscode.Uri[] {
-    return uris.map((oldUri: vscode.Uri) => {
-      const path = oldUri.fsPath.replace(
-        oldDirectoryUri.fsPath,
-        newDirectoryUri.fsPath
-      );
-      return vscode.Uri.file(path);
-    });
   }
 
   private cleanDirectoryRenamingData() {
@@ -258,20 +232,6 @@ class Workspace {
   private resetProgress() {
     this.currentProgressValue = 0;
     this.progressStep = 0;
-  }
-
-  private getNotificationLocation(): vscode.ProgressLocation {
-    const shouldDisplayNotificationInStatusBar = this.config.shouldDisplayNotificationInStatusBar();
-    return shouldDisplayNotificationInStatusBar
-      ? vscode.ProgressLocation.Window
-      : vscode.ProgressLocation.Notification;
-  }
-
-  private getNotificationTitle(): string {
-    const shouldDisplayNotificationInStatusBar = this.config.shouldDisplayNotificationInStatusBar();
-    return shouldDisplayNotificationInStatusBar
-      ? "Indexing..."
-      : "Indexing workspace files and symbols...";
   }
 
   private initComponents(): void {

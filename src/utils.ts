@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import WorkspaceData from "./interface/workspaceData";
 import Item from "./interface/item";
 import Config from "./config";
+import QuickPickItem from "./interface/quickPickItem";
 
 class Utils {
   private readonly defaultSection = "searchEverywhere";
@@ -73,12 +74,54 @@ class Utils {
     };
   }
 
-  sleep(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
   getSplitter(): string {
     return "§&§";
+  }
+
+  getUrisForDirectoryPathUpdate(
+    data: QuickPickItem[],
+    uri: vscode.Uri,
+    fileSymbolKind: number
+  ): vscode.Uri[] {
+    return data
+      .filter(
+        (qpItem: QuickPickItem) =>
+          qpItem.uri.fsPath.includes(uri.fsPath) &&
+          qpItem.symbolKind === fileSymbolKind
+      )
+      .map((qpItem: QuickPickItem) => qpItem.uri);
+  }
+
+  updateUrisWithNewDirectoryName(
+    uris: vscode.Uri[],
+    oldDirectoryUri: vscode.Uri,
+    newDirectoryUri: vscode.Uri
+  ): vscode.Uri[] {
+    return uris.map((oldUri: vscode.Uri) => {
+      const path = oldUri.fsPath.replace(
+        oldDirectoryUri.fsPath,
+        newDirectoryUri.fsPath
+      );
+      return vscode.Uri.file(path);
+    });
+  }
+
+  getNotificationLocation(): vscode.ProgressLocation {
+    const shouldDisplayNotificationInStatusBar = this.config.shouldDisplayNotificationInStatusBar();
+    return shouldDisplayNotificationInStatusBar
+      ? vscode.ProgressLocation.Window
+      : vscode.ProgressLocation.Notification;
+  }
+
+  getNotificationTitle(): string {
+    const shouldDisplayNotificationInStatusBar = this.config.shouldDisplayNotificationInStatusBar();
+    return shouldDisplayNotificationInStatusBar
+      ? "Indexing..."
+      : "Indexing workspace files and symbols...";
+  }
+
+  sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   countWordInstances(text: string, word: string): number {

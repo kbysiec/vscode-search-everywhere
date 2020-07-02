@@ -318,21 +318,6 @@ describe("Workspace", () => {
     });
   });
 
-  describe("getUrisForDirectoryPathUpdate", () => {
-    it(`should return uris containing renamed directory
-      name and file symbol kind`, async () => {
-      const qpItems = getQpItems();
-      qpItems[1] = getQpItem("./test/fake-files/", 2);
-      assert.deepEqual(
-        await workspaceAny.getUrisForDirectoryPathUpdate(
-          qpItems,
-          getDirectory("./fake/")
-        ),
-        getItems(1, undefined, undefined, true)
-      );
-    });
-  });
-
   describe("mergeWithDataFromCache", () => {
     it("should return QuickPickItem[] containing merged cached and given data", () => {
       sinon.stub(workspaceAny, "getData").returns(getQpItems());
@@ -347,31 +332,6 @@ describe("Workspace", () => {
       assert.deepEqual(
         workspaceAny.mergeWithDataFromCache(getQpItems(1)),
         getQpItems(1)
-      );
-    });
-  });
-
-  describe("updateUrisWithNewDirectoryName", () => {
-    it("should return vscode.Uri[] with updated directory path", () => {
-      assert.deepEqual(
-        workspaceAny.updateUrisWithNewDirectoryName(
-          getItems(),
-          getDirectory("./fake/"),
-          getDirectory("./test/fake-files/")
-        ),
-        getItems(2, "./test/fake-files/")
-      );
-    });
-
-    it(`should return unchanged vscode.Uri[]
-      if old directory path does not exist in workspace`, () => {
-      assert.deepEqual(
-        workspaceAny.updateUrisWithNewDirectoryName(
-          getItems(),
-          getDirectory("./fake/not-exist/"),
-          getDirectory("./test/fake-files/")
-        ),
-        getItems(2, "./fake/")
       );
     });
   });
@@ -414,55 +374,6 @@ describe("Workspace", () => {
 
       assert.equal(workspaceAny.progressStep, 0);
       assert.equal(workspaceAny.currentProgressValue, 0);
-    });
-  });
-
-  describe("getNotificationLocation", () => {
-    it(`should return vscode.ProgressLocation.Window
-      if shouldDisplayNotificationInStatusBar is true`, () => {
-      sinon
-        .stub(workspaceAny.config, "shouldDisplayNotificationInStatusBar")
-        .returns(true);
-
-      assert.equal(
-        workspaceAny.getNotificationLocation(),
-        vscode.ProgressLocation.Window
-      );
-    });
-
-    it(`should return vscode.ProgressLocation.Window
-      if shouldDisplayNotificationInStatusBar is false`, () => {
-      sinon
-        .stub(workspaceAny.config, "shouldDisplayNotificationInStatusBar")
-        .returns(false);
-
-      assert.equal(
-        workspaceAny.getNotificationLocation(),
-        vscode.ProgressLocation.Notification
-      );
-    });
-  });
-
-  describe("getNotificationTitle", () => {
-    it(`should return string 'Indexing...'
-      if shouldDisplayNotificationInStatusBar is true`, () => {
-      sinon
-        .stub(workspaceAny.config, "shouldDisplayNotificationInStatusBar")
-        .returns(true);
-
-      assert.equal(workspaceAny.getNotificationTitle(), "Indexing...");
-    });
-
-    it(`should return string 'Indexing workspace files and symbols...'
-      if shouldDisplayNotificationInStatusBar is false`, () => {
-      sinon
-        .stub(workspaceAny.config, "shouldDisplayNotificationInStatusBar")
-        .returns(false);
-
-      assert.equal(
-        workspaceAny.getNotificationTitle(),
-        "Indexing workspace files and symbols..."
-      );
     });
   });
 
