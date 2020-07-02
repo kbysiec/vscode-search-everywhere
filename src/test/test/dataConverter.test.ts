@@ -1,26 +1,26 @@
 import * as vscode from "vscode";
-import { assert } from "chai";
 import * as sinon from "sinon";
-import DataConverter from "../../dataConverter";
-import * as mock from "../mock/dataConverter.mock";
-import Utils from "../../utils";
+import { assert } from "chai";
+import { getWorkspaceData, getConfiguration } from "../util/mockFactory";
 import {
-  getUtilsStub,
-  getWorkspaceData,
+  getQpItems,
+  getQpItemDocumentSymbolSingleLine,
+  getQpItem,
+  getDocumentSymbolQpItemMultiLine,
+} from "../util/qpItemMockFactory";
+import {
+  getItems,
+  getItem,
   getDocumentSymbolItemSingleLine,
   getDocumentSymbolItemMultiLine,
-  getDocumentSymbolQpItemMultiLine,
-  getItems,
-  getQpItems,
-  getItem,
-  getQpItem,
-  getConfigStub,
-  getConfiguration,
-  getQpItemDocumentSymbolSingleLine,
-} from "../util/mockFactory";
-import Config from "../../config";
+} from "../util/itemMockFactory";
+import { getUtilsStub, getConfigStub } from "../util/stubFactory";
+import * as mock from "../mock/dataConverter.mock";
 import Icons from "../../interface/icons";
 import ItemsFilterPhrases from "../../interface/itemsFilterPhrases";
+import DataConverter from "../../dataConverter";
+import Utils from "../../utils";
+import Config from "../../config";
 
 describe("DataConverter", () => {
   let dataConverter: DataConverter;
@@ -54,14 +54,6 @@ describe("DataConverter", () => {
 
   afterEach(() => {
     sinon.restore();
-  });
-
-  describe("constructor", () => {
-    it("should data converter be initialized", () => {
-      dataConverter = new DataConverter(utilsStub, configStub);
-
-      assert.exists(dataConverter);
-    });
   });
 
   describe("reload", () => {

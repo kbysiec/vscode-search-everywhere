@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
-import { assert } from "chai";
 import * as sinon from "sinon";
+import { assert } from "chai";
+import { getExtensionContext } from "../util/mockFactory";
 import * as extension from "../../extension";
 import ExtensionController from "../../extensionController";
-import { getExtensionContext } from "../util/mockFactory";
 
 describe("extension", () => {
   let context: vscode.ExtensionContext;
@@ -13,10 +13,6 @@ describe("extension", () => {
     context = getExtensionContext();
     extensionController = new ExtensionController(context);
   });
-
-  // beforeEach(() => {
-  //   extensionController = new ExtensionController(context);
-  // });
 
   afterEach(() => {
     sinon.restore();

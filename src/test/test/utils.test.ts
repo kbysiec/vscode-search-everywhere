@@ -1,16 +1,15 @@
 import * as vscode from "vscode";
-import { assert, expect } from "chai";
 import * as sinon from "sinon";
-import Utils from "../../utils";
+import { assert, expect } from "chai";
+import { getWorkspaceData, getAction } from "../util/mockFactory";
 import {
-  getConfigurationChangeEvent,
   getWorkspaceFoldersChangeEvent,
-  getWorkspaceData,
-  getAction,
-  getConfigStub,
-} from "../util/mockFactory";
-import ActionType from "../../enum/actionType";
+  getConfigurationChangeEvent,
+} from "../util/eventMockFactory";
+import { getConfigStub } from "../util/stubFactory";
 import Action from "../../interface/action";
+import ActionType from "../../enum/actionType";
+import Utils from "../../utils";
 import Config from "../../config";
 
 describe("Utils", () => {
@@ -26,14 +25,6 @@ describe("Utils", () => {
 
   afterEach(() => {
     sinon.restore();
-  });
-
-  describe("constructor", () => {
-    it("should utils be initialized", () => {
-      utils = new Utils(configStub);
-
-      assert.exists(utils);
-    });
   });
 
   describe("hasWorkspaceAnyFolder", () => {
@@ -201,7 +192,6 @@ describe("Utils", () => {
         fulfilled = true;
       });
 
-      // let event loop cycle
       // https://stackoverflow.com/questions/51526312/testing-setinterval-with-sinon-faketimers-not-working
       await Promise.resolve();
       clock.tick(999);

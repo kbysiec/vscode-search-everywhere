@@ -1,11 +1,11 @@
 import * as vscode from "vscode";
-import { assert } from "chai";
 import * as sinon from "sinon";
-import Cache from "../../cache";
-import QuickPick from "../../interface/quickPickItem";
-import { appConfig } from "../../appConfig";
+import { assert } from "chai";
+import { getExtensionContext } from "../util/mockFactory";
+import { getQpItems } from "../util/qpItemMockFactory";
 import * as mock from "../mock/cache.mock";
-import { getExtensionContext, getQpItems } from "../util/mockFactory";
+import { appConfig } from "../../appConfig";
+import Cache from "../../cache";
 
 describe("Cache", () => {
   let cache: Cache;

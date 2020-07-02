@@ -1,33 +1,33 @@
 import * as vscode from "vscode";
-import { assert } from "chai";
 import * as sinon from "sinon";
-import Workspace from "../../workspace";
+import { assert } from "chai";
 import {
-  getCacheStub,
-  getUtilsStub,
-  getConfigurationChangeEvent,
-  getWorkspaceFoldersChangeEvent,
   getWorkspaceData,
-  getItems,
-  getQpItems,
-  getQpItem,
-  getItem,
-  getDirectory,
-  getQpItemsSymbolAndUri,
-  getQpItemsSymbolAndUriExt,
-  getTextDocumentChangeEvent,
-  getFileWatcherStub,
-  getFileRenameEvent,
   getSubscription,
   getProgress,
   getEventEmitter,
-  getConfigStub,
   getConfiguration,
 } from "../util/mockFactory";
+import {
+  getFileWatcherStub,
+  getConfigurationChangeEvent,
+  getWorkspaceFoldersChangeEvent,
+  getTextDocumentChangeEvent,
+  getFileRenameEvent,
+} from "../util/eventMockFactory";
+import {
+  getQpItems,
+  getQpItemsSymbolAndUri,
+  getQpItemsSymbolAndUriExt,
+  getQpItem,
+} from "../util/qpItemMockFactory";
+import { getItems, getItem, getDirectory } from "../util/itemMockFactory";
+import { getCacheStub, getUtilsStub, getConfigStub } from "../util/stubFactory";
+import ActionType from "../../enum/actionType";
 import Cache from "../../cache";
 import Utils from "../../utils";
-import ActionType from "../../enum/actionType";
 import Config from "../../config";
+import Workspace from "../../workspace";
 
 describe("Workspace", () => {
   let workspace: Workspace;
@@ -59,14 +59,6 @@ describe("Workspace", () => {
 
   afterEach(() => {
     sinon.restore();
-  });
-
-  describe("constructor", () => {
-    it("should workspace be initialized", () => {
-      workspace = new Workspace(cacheStub, utilsStub, configStub);
-
-      assert.exists(workspace);
-    });
   });
 
   describe("index", () => {

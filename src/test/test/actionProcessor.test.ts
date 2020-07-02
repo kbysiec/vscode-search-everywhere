@@ -1,14 +1,10 @@
 import * as vscode from "vscode";
-import { assert } from "chai";
 import * as sinon from "sinon";
+import { assert } from "chai";
+import { getAction, getActions, getEventEmitter } from "../util/mockFactory";
+import { getUtilsStub } from "../util/stubFactory";
 import ActionProcessor from "../../actionProcessor";
 import Action from "../../interface/action";
-import {
-  getAction,
-  getActions,
-  getEventEmitter,
-  getUtilsStub,
-} from "../util/mockFactory";
 import ActionType from "../../enum/actionType";
 import Utils from "../../utils";
 
@@ -28,14 +24,6 @@ describe("ActionProcessor", () => {
 
   afterEach(() => {
     sinon.restore();
-  });
-
-  describe("constructor", () => {
-    it("should action processor be initialized", () => {
-      actionProcessor = new ActionProcessor(utilsStub);
-
-      assert.exists(actionProcessor);
-    });
   });
 
   describe("register", () => {

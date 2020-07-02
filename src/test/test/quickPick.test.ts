@@ -1,19 +1,19 @@
 import * as vscode from "vscode";
-import { assert } from "chai";
 import * as sinon from "sinon";
-import QuickPick from "../../quickPick";
+import { assert } from "chai";
+import { getUntitledItem } from "../util/itemMockFactory";
+import { getQuickPickOnDidChangeValueEventListeners } from "../util/eventMockFactory";
 import {
   getQpItems,
+  getQpHelpItems,
   getQpItem,
   getUntitledQpItem,
-  getUntitledItem,
-  getConfigStub,
-  getQuickPickOnDidChangeValueEventListeners,
-  getQpHelpItems,
   getQpHelpItem,
-} from "../util/mockFactory";
-import Config from "../../config";
+} from "../util/qpItemMockFactory";
+import { getConfigStub } from "../util/stubFactory";
 import QuickPickItem from "../../interface/quickPickItem";
+import QuickPick from "../../quickPick";
+import Config from "../../config";
 
 describe("QuickPick", () => {
   let quickPick: QuickPick;
@@ -31,14 +31,6 @@ describe("QuickPick", () => {
 
   afterEach(() => {
     sinon.restore();
-  });
-
-  describe("constructor", () => {
-    it("should quick pick be initialized", () => {
-      quickPick = new QuickPick(configStub);
-
-      assert.exists(quickPick);
-    });
   });
 
   describe("init", () => {
@@ -408,7 +400,6 @@ describe("QuickPick", () => {
 
   describe("onDidChangeValueClearing", () => {
     it("should clear quick pick items", () => {
-      // sinon.stub(quickPickAny.quickPick, "items").value(getQpItems());
       quickPickAny.quickPick.items = getQpItems();
       quickPickAny.onDidChangeValueClearing();
 

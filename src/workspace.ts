@@ -359,7 +359,6 @@ class Workspace {
 
   private onDidFileFolderCreate = async (uri: vscode.Uri) => {
     // necessary to invoke updateCacheByPath after removeCacheByPath
-    // TODO: check if necessary
     await this.utils.sleep(1);
 
     await this.registerAction(

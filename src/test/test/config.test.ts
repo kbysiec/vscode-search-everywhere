@@ -1,8 +1,9 @@
 import * as vscode from "vscode";
-import { assert } from "chai";
 import * as sinon from "sinon";
+import { assert } from "chai";
+import { getConfiguration } from "../util/mockFactory";
+import { getCacheStub } from "../util/stubFactory";
 import Config from "../../config";
-import { getCacheStub, getConfiguration } from "../util/mockFactory";
 import Cache from "../../cache";
 
 describe("Config", () => {
@@ -34,14 +35,6 @@ describe("Config", () => {
 
   afterEach(() => {
     sinon.restore();
-  });
-
-  describe("constructor", () => {
-    it("should config be initialized", () => {
-      config = new Config(cacheStub);
-
-      assert.exists(config);
-    });
   });
 
   describe("shouldDisplayNotificationInStatusBar", () => {

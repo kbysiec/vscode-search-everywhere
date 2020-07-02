@@ -1,13 +1,10 @@
 import * as vscode from "vscode";
-import { assert } from "chai";
 import * as sinon from "sinon";
-import ExtensionController from "../../extensionController";
-import {
-  getExtensionContext,
-  getQpItems,
-  getAction,
-} from "../util/mockFactory";
+import { assert } from "chai";
+import { getExtensionContext, getAction } from "../util/mockFactory";
+import { getQpItems } from "../util/qpItemMockFactory";
 import ActionType from "../../enum/actionType";
+import ExtensionController from "../../extensionController";
 
 describe("ExtensionController", () => {
   let context: vscode.ExtensionContext;
@@ -27,26 +24,7 @@ describe("ExtensionController", () => {
     sinon.restore();
   });
 
-  describe("constructor", () => {
-    it("should extension controller be initialized", () => {
-      extensionController = new ExtensionController(context);
-
-      assert.exists(extensionController);
-    });
-  });
-
   describe("search", () => {
-    // it(`should quickPick.show method be invoked if workspace contains
-    //   at least one folder opened`, async () => {
-    //   const showStub = sinon.stub(extensionControllerAny.quickPick, "show");
-    //   sinon
-    //     .stub(extensionControllerAny.utils, "hasWorkspaceAnyFolder")
-    //     .returns(true);
-    //   await extensionController.search();
-
-    //   assert.equal(showStub.calledOnce, true);
-    // });
-
     it(`should display notification if workspace contains does not contain
       any folder opened`, async () => {
       const showStub = sinon.stub(extensionControllerAny.quickPick, "show");

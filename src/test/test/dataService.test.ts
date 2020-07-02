@@ -1,22 +1,23 @@
 import * as vscode from "vscode";
-import { assert } from "chai";
 import * as sinon from "sinon";
-import DataService from "../../dataService";
-import * as mock from "../mock/dataService.mock";
+import { assert } from "chai";
 import {
-  getUtilsStub,
-  getDocumentSymbolItemSingleLine,
   getWorkspaceData,
-  getDocumentSymbolItemSingleLineArray,
-  getItems,
-  getItem,
   getEventEmitter,
-  getConfigStub,
   getItemsFilter,
 } from "../util/mockFactory";
+import {
+  getItems,
+  getDocumentSymbolItemSingleLineArray,
+  getItem,
+  getDocumentSymbolItemSingleLine,
+} from "../util/itemMockFactory";
+import { getUtilsStub, getConfigStub } from "../util/stubFactory";
+import * as mock from "../mock/dataService.mock";
+import ItemsFilter from "../../interface/itemsFilter";
+import DataService from "../../dataService";
 import Utils from "../../utils";
 import Config from "../../config";
-import ItemsFilter from "../../interface/itemsFilter";
 
 describe("DataService", () => {
   let dataService: DataService;
@@ -54,14 +55,6 @@ describe("DataService", () => {
 
   afterEach(() => {
     sinon.restore();
-  });
-
-  describe("constructor", () => {
-    it("should data service be initialized", () => {
-      dataService = new DataService(utilsStub, configStub);
-
-      assert.exists(dataService);
-    });
   });
 
   describe("reload", () => {
