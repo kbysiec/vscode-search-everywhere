@@ -66,6 +66,15 @@ describe("DataService", () => {
     });
   });
 
+  describe("cancel", () => {
+    it("should setCancelled method be invoked with true parameter", () => {
+      const setCancelledStub = sinon.stub(dataServiceAny, "setCancelled");
+      dataService.cancel();
+
+      assert.equal(setCancelledStub.calledOnce, true);
+    });
+  });
+
   describe("fetchData", () => {
     it(`should return array of vscode.Uri or vscode.DocumentSymbol
       items with workspace data`, async () => {
@@ -233,6 +242,20 @@ describe("DataService", () => {
 
       assert.equal(eventEmitter.fire.calledOnce, true);
     });
+
+    it(`should utils.clearWorkspaceData method be invoked
+      if isCancelled equals to true`, async () => {
+      sinon.stub(dataServiceAny, "isCancelled").value(true);
+      const clearWorkspaceDataStub = sinon.stub(
+        dataServiceAny.utils,
+        "clearWorkspaceData"
+      );
+      const workspaceData = getWorkspaceData();
+
+      await dataServiceAny.includeSymbols(workspaceData, [getItem()]);
+
+      assert.equal(clearWorkspaceDataStub.calledOnce, true);
+    });
   });
 
   describe("includeUris", () => {
@@ -250,6 +273,20 @@ describe("DataService", () => {
       dataServiceAny.includeUris(workspaceData, getItems());
 
       assert.equal(workspaceData.count, 2);
+    });
+
+    it(`should utils.clearWorkspaceData method be invoked
+      if isCancelled equals to true`, async () => {
+      stubConfig();
+      sinon.stub(dataServiceAny, "isCancelled").value(true);
+      const clearWorkspaceDataStub = sinon.stub(
+        dataServiceAny.utils,
+        "clearWorkspaceData"
+      );
+      const workspaceData = getWorkspaceData([getItem()]);
+      dataServiceAny.includeUris(workspaceData, getItems());
+
+      assert.equal(clearWorkspaceDataStub.calledOnce, true);
     });
   });
 
@@ -511,6 +548,14 @@ describe("DataService", () => {
       assert.equal(shouldUseFilesAndSearchExcludeStub.calledOnce, true);
       assert.equal(getFilesAndSearchExcludeStub.calledOnce, true);
       assert.equal(getItemsFilterStub.calledOnce, true);
+    });
+  });
+
+  describe("setCancelled", () => {
+    it("should set state of isCancelled to the given parameter value", () => {
+      dataServiceAny.setCancelled(true);
+
+      assert.equal(dataServiceAny.isCancelled, true);
     });
   });
 });

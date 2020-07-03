@@ -184,6 +184,17 @@ describe("Utils", () => {
     });
   });
 
+  describe("clearWorkspaceData", () => {
+    it("should clear workspaceData object", () => {
+      const items = getItems();
+      const workspaceData = getWorkspaceData(items);
+
+      utils.clearWorkspaceData(workspaceData);
+      assert.equal(workspaceData.count, 0);
+      assert.equal(workspaceData.items.size, 0);
+    });
+  });
+
   describe("getSplitter", () => {
     it("should return splitter string", () => {
       assert.equal(utils.getSplitter(), "§&§");

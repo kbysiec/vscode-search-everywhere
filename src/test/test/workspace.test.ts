@@ -156,7 +156,12 @@ describe("Workspace", () => {
         .returns(subscription);
       const indexWorkspaceStub = sinon.stub(workspaceAny, "indexWorkspace");
       const sleepStub = sinon.stub(workspaceAny.utils, "sleep");
-      await workspaceAny.indexWithProgressTask();
+      const cancellationTokenSource = new vscode.CancellationTokenSource();
+      await workspaceAny.indexWithProgressTask(
+        undefined,
+        cancellationTokenSource.token
+      );
+
       assert.equal(onDidItemIndexedStub.calledOnce, true);
       assert.equal(subscription.dispose.calledOnce, true);
       assert.equal(indexWorkspaceStub.calledOnce, true);
@@ -594,6 +599,23 @@ describe("Workspace", () => {
 
       assert.equal(registerActionStub.calledOnce, true);
       assert.equal(registerActionStub.args[0][0], ActionType.Remove);
+    });
+  });
+
+  describe("onCancellationRequested", () => {
+    it(`should dataService.cancel, dataConverter.cancel methods be invoked`, async () => {
+      const dataServiceCancelStub = sinon.stub(
+        workspaceAny.dataService,
+        "cancel"
+      );
+      const dataConverterCancelStub = sinon.stub(
+        workspaceAny.dataConverter,
+        "cancel"
+      );
+      await workspaceAny.onCancellationRequested();
+
+      assert.equal(dataServiceCancelStub.calledOnce, true);
+      assert.equal(dataConverterCancelStub.calledOnce, true);
     });
   });
 

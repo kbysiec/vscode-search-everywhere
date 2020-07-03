@@ -65,6 +65,15 @@ describe("DataConverter", () => {
     });
   });
 
+  describe("cancel", () => {
+    it("should setCancelled method be invoked with true parameter", () => {
+      const setCancelledStub = sinon.stub(dataConverterAny, "setCancelled");
+      dataConverter.cancel();
+
+      assert.equal(setCancelledStub.calledOnce, true);
+    });
+  });
+
   describe("convertToQpData", () => {
     it("should return quick pick data", () => {
       stubConfig();
@@ -104,6 +113,15 @@ describe("DataConverter", () => {
     it("should return empty array", () => {
       assert.deepEqual(
         dataConverterAny.mapDataToQpData(getWorkspaceData().items),
+        []
+      );
+    });
+
+    it("should return empty array if isCancelled equal to true", () => {
+      const items = getItems();
+      sinon.stub(dataConverterAny, "isCancelled").value(true);
+      assert.deepEqual(
+        dataConverterAny.mapDataToQpData(getWorkspaceData(items).items),
         []
       );
     });
@@ -300,6 +318,14 @@ describe("DataConverter", () => {
       assert.equal(getIconsStub.calledOnce, true);
       assert.equal(shouldUseItemsFilterPhrasesStub.calledOnce, true);
       assert.equal(getItemsFilterPhrasesStub.calledOnce, true);
+    });
+  });
+
+  describe("setCancelled", () => {
+    it("should set state of isCancelled to the given parameter value", () => {
+      dataConverterAny.setCancelled(true);
+
+      assert.equal(dataConverterAny.isCancelled, true);
     });
   });
 });

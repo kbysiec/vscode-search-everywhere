@@ -8,11 +8,14 @@ import Icons from "./interface/icons";
 import ItemsFilterPhrases from "./interface/itemsFilterPhrases";
 
 class DataConverter {
+  isCancelled!: boolean;
+
   private icons!: Icons;
   private shouldUseItemsFilterPhrases!: boolean;
   private itemsFilterPhrases!: ItemsFilterPhrases;
 
   constructor(private utils: Utils, private config: Config) {
+    this.setCancelled(false);
     this.fetchConfig();
   }
 
@@ -20,8 +23,14 @@ class DataConverter {
     this.fetchConfig();
   }
 
+  cancel() {
+    this.setCancelled(true);
+  }
+
   convertToQpData(data: WorkspaceData): QuickPickItem[] {
-    return this.mapDataToQpData(data.items);
+    const qpData = this.mapDataToQpData(data.items);
+    this.setCancelled(false);
+    return qpData;
   }
 
   getItemFilterPhraseForKind(kind: number): string {
@@ -29,13 +38,18 @@ class DataConverter {
   }
 
   private mapDataToQpData(data: Map<string, Item>): QuickPickItem[] {
-    const qpData: QuickPickItem[] = [];
+    let qpData: QuickPickItem[] = [];
 
-    data.forEach((item: Item) => {
-      item.elements.forEach((element: vscode.Uri | vscode.DocumentSymbol) => {
-        qpData.push(this.mapItemElementToQpItem(item.uri, element));
-      });
-    });
+    for (let item of data.values()) {
+      if (!this.isCancelled) {
+        item.elements.forEach((element: vscode.Uri | vscode.DocumentSymbol) => {
+          qpData.push(this.mapItemElementToQpItem(item.uri, element));
+        });
+      } else {
+        qpData = [];
+        break;
+      }
+    }
     return qpData;
   }
 
@@ -144,6 +158,10 @@ class DataConverter {
     this.icons = this.config.getIcons();
     this.shouldUseItemsFilterPhrases = this.config.shouldUseItemsFilterPhrases();
     this.itemsFilterPhrases = this.config.getItemsFilterPhrases();
+  }
+
+  private setCancelled(value: boolean) {
+    this.isCancelled = value;
   }
 }
 

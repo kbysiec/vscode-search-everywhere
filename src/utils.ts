@@ -74,6 +74,11 @@ class Utils {
     };
   }
 
+  clearWorkspaceData(workspaceData: WorkspaceData) {
+    workspaceData.items.clear();
+    workspaceData.count = 0;
+  }
+
   getSplitter(): string {
     return "§&§";
   }

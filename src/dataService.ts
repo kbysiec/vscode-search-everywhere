@@ -5,6 +5,8 @@ import Utils from "./utils";
 import ItemsFilter from "./interface/itemsFilter";
 
 class DataService {
+  isCancelled!: boolean;
+
   private includePatterns!: string[];
   private excludePatterns!: string[];
   private filesAndSearchExcludePatterns!: string[];
@@ -18,11 +20,16 @@ class DataService {
     .onDidItemIndexedEventEmitter.event;
 
   constructor(private utils: Utils, private config: Config) {
+    this.setCancelled(false);
     this.fetchConfig();
   }
 
   reload() {
     this.fetchConfig();
+  }
+
+  cancel() {
+    this.setCancelled(true);
   }
 
   async fetchData(uris?: vscode.Uri[]): Promise<WorkspaceData> {
@@ -31,6 +38,8 @@ class DataService {
 
     await this.includeSymbols(workspaceData, uriItems);
     this.includeUris(workspaceData, uriItems);
+
+    this.setCancelled(false);
 
     return workspaceData;
   }
@@ -88,50 +97,61 @@ class DataService {
   ): Promise<void> {
     const maxCounter = 10;
     for (let i = 0; i < uris.length; i++) {
-      const uri = uris[i];
-      let counter = 0;
-      let symbolsForUri: vscode.DocumentSymbol[] | undefined;
+      if (!this.isCancelled) {
+        const uri = uris[i];
+        let counter = 0;
+        let symbolsForUri: vscode.DocumentSymbol[] | undefined;
 
-      do {
-        symbolsForUri = await this.getSymbolsForUri(uri);
-        if (counter) {
-          await this.utils.sleep(120);
-        }
-        counter++;
-      } while (symbolsForUri === undefined && counter < maxCounter);
+        do {
+          symbolsForUri = await this.getSymbolsForUri(uri);
+          if (counter) {
+            await this.utils.sleep(120);
+          }
+          counter++;
+        } while (symbolsForUri === undefined && counter < maxCounter);
 
-      symbolsForUri &&
-        symbolsForUri.length &&
-        workspaceData.items.set(uri.fsPath, {
-          uri,
-          elements: symbolsForUri,
-        });
+        symbolsForUri &&
+          symbolsForUri.length &&
+          workspaceData.items.set(uri.fsPath, {
+            uri,
+            elements: symbolsForUri,
+          });
 
-      workspaceData.count += symbolsForUri ? symbolsForUri.length : 0;
+        workspaceData.count += symbolsForUri ? symbolsForUri.length : 0;
 
-      this.onDidItemIndexedEventEmitter.fire(uris.length);
+        this.onDidItemIndexedEventEmitter.fire(uris.length);
+      } else {
+        this.utils.clearWorkspaceData(workspaceData);
+        break;
+      }
     }
   }
 
   private includeUris(workspaceData: WorkspaceData, uris: vscode.Uri[]): void {
     const validUris = this.filterUris(uris);
-    validUris.forEach((uri: vscode.Uri) => {
-      const array = workspaceData.items.get(uri.fsPath);
-      if (array) {
-        const exists = this.ifUriExistsInArray(array.elements, uri);
+    for (let i = 0; i < validUris.length; i++) {
+      const uri = validUris[i];
+      if (!this.isCancelled) {
+        const array = workspaceData.items.get(uri.fsPath);
+        if (array) {
+          const exists = this.ifUriExistsInArray(array.elements, uri);
 
-        if (!exists) {
-          array.elements.push(uri);
+          if (!exists) {
+            array.elements.push(uri);
+            workspaceData.count++;
+          }
+        } else {
+          workspaceData.items.set(uri.fsPath, {
+            uri,
+            elements: [uri],
+          });
           workspaceData.count++;
         }
       } else {
-        workspaceData.items.set(uri.fsPath, {
-          uri,
-          elements: [uri],
-        });
-        workspaceData.count++;
+        this.utils.clearWorkspaceData(workspaceData);
+        break;
       }
-    });
+    }
   }
 
   private ifUriExistsInArray(
@@ -269,6 +289,10 @@ class DataService {
     this.shouldUseFilesAndSearchExclude = this.config.shouldUseFilesAndSearchExclude();
     this.filesAndSearchExcludePatterns = this.config.getFilesAndSearchExclude();
     this.itemsFilter = this.config.getItemsFilter();
+  }
+
+  private setCancelled(value: boolean) {
+    this.isCancelled = value;
   }
 }
 

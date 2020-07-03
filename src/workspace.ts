@@ -77,6 +77,7 @@ class Workspace {
         {
           location: this.utils.getNotificationLocation(),
           title: this.utils.getNotificationTitle(),
+          cancellable: true,
         },
         this.indexWithProgressTask.bind(this)
       );
@@ -89,8 +90,13 @@ class Workspace {
     progress: vscode.Progress<{
       message?: string | undefined;
       increment?: number | undefined;
-    }>
+    }>,
+    token: vscode.CancellationToken
   ) {
+    const onCancellationRequestedSubscription = token.onCancellationRequested(
+      this.onCancellationRequested.bind(this)
+    );
+
     const onDidItemIndexedSubscription = this.dataService.onDidItemIndexed(
       this.onDidItemIndexed.bind(this, progress)
     );
@@ -98,6 +104,7 @@ class Workspace {
     await this.indexWorkspace();
 
     this.resetProgress();
+    onCancellationRequestedSubscription.dispose();
     onDidItemIndexedSubscription.dispose();
 
     // necessary for proper way to complete progress
@@ -313,6 +320,11 @@ class Workspace {
       "onDidFileFolderDelete",
       uri
     );
+  };
+
+  private onCancellationRequested = () => {
+    this.dataService.cancel();
+    this.dataConverter.cancel();
   };
 
   private onDidItemIndexed(
