@@ -119,7 +119,6 @@ class CoverageRunner {
       cov = global[self.coverageVar];
     }
 
-    // TODO consider putting this under a conditional flag
     // Files that are not touched by code ran by the test runner is manually instrumented, to
     // illustrate the missing coverage.
     self.matchFn.files.forEach((file: any) => {
