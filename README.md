@@ -29,44 +29,60 @@ Worth mentioning is the optimization of scanning algorithm. It queues every chan
 
 ## Features
 
-* init on startup or first call
-* notification placeholder
-  * toast
+Init on startup or first call
+
+Notification placeholder
+
+toast
     <br/>
 ![Notification in toast](img/notification-toast.gif)
     <br/>
-  * status bar
+
+status bar
     <br/>
 ![Notification in status bar](img/notification-status-bar.gif)
     <br/>
     <br/>
-* debounce of search results while filtering
-  * enabled
+
+Debounce of search results while filtering
+
+enabled
     <br/>
 ![Debounce enabled](img/debounce-on.gif)
     <br/>
-  * disabled
+
+disabled
     <br/>
 ![Debounce disabled](img/debounce-off.gif)
     <br/>
-* highlight of selected symbol
-  * enabled
+
+Highlight of selected symbol
+
+enabled
     <br/>
 ![Highlight enabled](img/highlight-on.gif)
     <br/>
-  * disabled
+
+disabled
     <br/>
 ![Highlight disabled](img/highlight-off.gif)
     <br/>
-* customizable icon for each item type
-* customizable filter phrase for each item type
+
+Customizable icon for each item type
+
+Customizable filter phrase for each item type
 ![Filter phrase](img/filter-phrases.gif)
   <br/>
-* customizable items filter to reduce items set
-* customizable help phrase
-* customizable exclude patterns
-* customizable include patterns
-* ability to decide whether use extension exclude patterns or "Files: Exclude" and "Search: Exclude" patterns
+
+Customizable items filter to reduce items set
+
+Customizable help phrase
+
+Customizable exclude patterns
+
+Customizable include patterns
+
+Ability to decide whether use extension exclude patterns or "Files: Exclude" and "Search: Exclude" patterns
 
 ## Commands
 
