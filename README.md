@@ -1,65 +1,244 @@
-# vscode-search-everywhere README
+# Search everywhere
 
-This is the README for your extension "vscode-search-everywhere". After writing up a brief description, we recommend including the following sections.
+The extension is inspired by JetBrains IDEs feature "Search Everywhere".
+It allows user to easily navigate through files and symbols in the whole workspace.
+
+It is the alternative for "Go to Symbol in Workspace..." - fully customizable.
+
+<br/>
+Brand new version - rewritten from scratch to be more flexible and smoother.
+
+## How it works
+
+After initialization the extension indexes the whole workspace. It scans both files and all symbols for each file according to set up patterns in settings.
+
+After that, it listens for any change in the workplace, e.g.
+
+* add, rename, delete function, variable or anything other in file
+* add, rename, delete, move a file between directories or even between projects in the opened workspace
+
+The above guarantees that the data is always up to date.
+
+<br/>
+Worth mentioning is the optimization of scanning algorithm. It queues every change and reduces not necessary actions to assure the scan is smooth and very quick.
+
+<br/>
+<br/>
+
+![How it works](img/how-it-works.gif)
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+* init on startup or first call
+* notification placeholder
+  * toast
+    <br/>
+![Notification in toast](img/notification-toast.gif)
+    <br/>
+  * status bar
+    <br/>
+![Notification in status bar](img/notification-status-bar.gif)
+    <br/>
+    <br/>
+* debounce of search results while filtering
+  * enabled
+    <br/>
+![Debounce enabled](img/debounce-on.gif)
+    <br/>
+  * disabled
+    <br/>
+![Debounce disabled](img/debounce-off.gif)
+    <br/>
+* highlight of selected symbol
+  * enabled
+    <br/>
+![Highlight enabled](img/highlight-on.gif)
+    <br/>
+  * disabled
+    <br/>
+![Highlight disabled](img/highlight-off.gif)
+    <br/>
+* customizable icon for each item type
+* customizable filter phrase for each item type
+![Filter phrase](img/filter-phrases.gif)
+  <br/>
+* customizable items filter to reduce items set
+* customizable help phrase
+* customizable exclude patterns
+* customizable include patterns
+* ability to decide whether use extension exclude patterns or "Files: Exclude" and "Search: Exclude" patterns
 
-For example if there is an image subfolder under your extension project workspace:
+## Commands
 
-\!\[feature X\]\(images/feature-x.png\)
+* `searchEverywhere.search`
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+  Search any symbol/file in the currently opened workspace.
 
-## Requirements
+* `searchEverywhere.reload`
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+  Re-index the whole workspace.
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+* `searchEverywhere.shouldInitOnStartup`
 
-For example:
+Should indexing be initialized on Visual Studio Code startup.
+Default value: `false`.
 
-This extension contributes the following settings:
+* `searchEverywhere.shouldDisplayNotificationInStatusBar`
 
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
+Should display indexing notification in toast or status bar.
+Default value: `false`.
 
-## Known Issues
+* `searchEverywhere.mo`
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+Should the selected symbol be highlighted.
+Default value: `false`.
+
+* `searchEverywhere.shouldUseDebounce`
+
+Should the debounce function be used while returning filter results (useful in case of the large workspace).
+Default value: `true`.
+
+* `searchEverywhere.icons`
+
+Ability to define icons that should be displayed for appropriate item types. According to VSC API, only Octicons are allowed. Not defined item type will not have any icon.
+
+Default value:
+
+```
+{
+  "0": "file-code",
+  "1": "file-submodule",
+  "2": "archive",
+  "3": "package",
+  "4": "checklist",
+  "5": "list-unordered",
+  "6": "tag",
+  "7": "location",
+  "8": "plus-circle",
+  "9": "list-ordered",
+  "10": "milestone",
+  "11": "zap",
+  "12": "beaker",
+  "13": "shield-lock",
+  "14": "typography",
+  "15": "file-binary",
+  "16": "file-diff",
+  "17": "server",
+  "18": "code",
+  "19": "key",
+  "20": "dot",
+  "21": "kebab-horizontal",
+  "22": "filter",
+  "23": "fire",
+  "24": "cpu",
+  "25": "north-star"
+}
+```
+
+* `searchEverywhere.itemsFilter`
+
+Ability to define a filter that should be applied to items.
+
+Default value:
+
+```
+{
+  "allowedKinds": [],
+  "ignoredKinds": [],
+  "ignoredNames": []
+}
+```
+
+* `searchEverywhere.shouldUseItemsFilterPhrases`
+
+Should be a possibility to filter by assigned filter phrases.
+Default value: `true`.
+
+
+* `searchEverywhere.itemsFilterPhrases`
+
+Phrases for item type which could be used for narrowing the results down.
+
+Default value:
+
+```
+{
+  "0": "$$",
+  "4": "@@",
+  "11": "!!",
+  "14": "##",
+  "17": "%%"
+}
+```
+
+* `searchEverywhere.helpPhrase`
+
+A phrase which should invoke help.
+Default value: `?`
+
+* `searchEverywhere.exclude`
+
+An array of globs. Any file matching these globs will be excluded from searching.
+
+Default value:
+
+```
+[
+  "**/.git",
+  "**/.svn",
+  "**/.hg",
+  "**/.CVS",
+  "**/.DS_Store",
+  "**/package-lock.json",
+  "**/yarn.lock",
+  "**/node_modules/**",
+  "**/bower_components/**",
+  "**/coverage/**",
+  "**/.vscode/**",
+  "**/.vscode-test/**",
+  "**/.history/**",
+  "**/.cache/**",
+  "**/.cache-loader/**",
+  "**/out/**",
+  "**/dist/**"
+]
+```
+
+* `searchEverywhere.include`
+
+An array of globs. Any file matching these globs will be included in searching.
+
+Default value:
+
+```
+[
+  "**/*.{js,jsx,ts,tsx}"
+]
+```
+
+* `searchEverywhere.shouldUseFilesAndSearchExclude`
+
+Should "Files: Exclude" and "Search: Exclude" be used instead of extension exclude pattern.
+Default value: `false`.
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
-
 ### 1.0.0
 
-Initial release of ...
+Initial stable release
 
-### 1.0.1
+### 0.0.1
 
-Fixed issue #.
+Preview release
 
-### 1.1.0
+## Author
 
-Added features X, Y, and Z.
+[Kamil Bysiec](https://github.com/kbysiec)
 
------------------------------------------------------------------------------------------------------------
+## Acknowledgment
 
-## Working with Markdown
+If you found it useful somehow, I would be grateful if you could leave a "Rating & Review" in Marketplace or/and leave a star in the project's GitHub repository.
 
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+Thank you.
