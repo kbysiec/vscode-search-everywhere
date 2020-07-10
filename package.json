@@ -2,7 +2,7 @@
   "name": "vscode-search-everywhere",
   "displayName": "Search everywhere",
   "description": "Alternative for Go to symbol in workspace. Fast and fully customizable files, symbols search engine",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "preview": false,
   "publisher": "kbysiec",
   "author": {
@@ -207,7 +207,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/AgilePlayers/vscode-search-everywhere"
+    "url": "https://github.com/kbysiec/vscode-search-everywhere"
   },
   "bugs": {
     "url": "https://github.com/kbysiec/vscode-search-everywhere/issues"
