@@ -241,13 +241,7 @@ Default value: `false`.
 
 ## Release Notes
 
-### 1.0.0
-
-Initial stable release
-
-### 0.0.1
-
-Preview release
+Please check changelog for release details.
 
 ## Author
 
