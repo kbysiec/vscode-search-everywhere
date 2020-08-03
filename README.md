@@ -106,7 +106,7 @@ Default value: `false`.
 Should display indexing notification in toast or status bar.
 Default value: `false`.
 
-* `searchEverywhere.mo`
+* `searchEverywhere.shouldHighlightSymbol`
 
 Should the selected symbol be highlighted.
 Default value: `false`.
@@ -156,6 +156,7 @@ Default value:
 * `searchEverywhere.itemsFilter`
 
 Ability to define a filter that should be applied to items.
+All kinds can be find here: https://code.visualstudio.com/api/references/vscode-api#SymbolKind
 
 Default value:
 
@@ -164,6 +165,16 @@ Default value:
   "allowedKinds": [],
   "ignoredKinds": [],
   "ignoredNames": []
+}
+```
+
+Below is an example which will remove from items all arrays (17), booleans (16) and the ones containing "foo" string in the name:
+
+```
+{
+  "allowedKinds": [],
+  "ignoredKinds": [16, 17],
+  "ignoredNames": ["foo"]
 }
 ```
 
