@@ -178,6 +178,18 @@ describe("Utils", () => {
     });
   });
 
+  describe("printErrorMessage", () => {
+    it("should display notification", async () => {
+      const showInformationMessageStub = sinon.stub(
+        vscode.window,
+        "showInformationMessage"
+      );
+      utils.printErrorMessage(new Error("test error message"));
+
+      assert.equal(showInformationMessageStub.calledOnce, true);
+    });
+  });
+
   describe("createWorkspaceData", () => {
     it("should create workspaceData object", () => {
       assert.deepEqual(utils.createWorkspaceData(), getWorkspaceData());
