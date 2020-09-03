@@ -207,7 +207,7 @@ Default value: `?`
 
 * `searchEverywhere.exclude`
 
-An array of globs. Any file matching these globs will be excluded from searching.
+An array of globs. Any file matching these globs will be excluded from indexing.
 
 Default value:
 
@@ -235,14 +235,12 @@ Default value:
 
 * `searchEverywhere.include`
 
-An array of globs. Any file matching these globs will be included in searching.
+String with include pattern. Any file matching this glob will be included in indexing.
 
 Default value:
 
 ```
-[
-  "**/*.{js,jsx,ts,tsx}"
-]
+"**/*.{js,jsx,ts,tsx}"
 ```
 
 * `searchEverywhere.shouldUseFilesAndSearchExclude`
