@@ -80,7 +80,7 @@ Customizable help phrase
 
 Customizable exclude patterns
 
-Customizable include patterns
+Customizable include pattern
 
 Ability to decide whether use extension exclude patterns or "Files: Exclude" and "Search: Exclude" patterns
 

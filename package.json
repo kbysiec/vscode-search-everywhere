@@ -137,17 +137,12 @@
           "items": {
             "type": "string"
           },
-          "description": "An array of globs. Any file matching these globs will be excluded from searching."
+          "description": "An array of globs. Any file matching these globs will be excluded from indexing."
         },
         "searchEverywhere.include": {
-          "type": "array",
-          "default": [
-            "**/*.{js,jsx,ts,tsx}"
-          ],
-          "items": {
-            "type": "string"
-          },
-          "description": "An array of globs. Any file matching these globs will be included in searching."
+          "type": "string",
+          "default": "**/*.{js,jsx,ts,tsx}",
+          "description": "String with include pattern. Any file matching this glob will be included in indexing."
         },
         "searchEverywhere.shouldUseFilesAndSearchExclude": {
           "type": "boolean",

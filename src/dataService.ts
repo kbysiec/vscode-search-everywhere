@@ -7,7 +7,7 @@ import ItemsFilter from "./interface/itemsFilter";
 class DataService {
   isCancelled!: boolean;
 
-  private includePatterns!: string[];
+  private includePatterns!: string;
   private excludePatterns!: string[];
   private filesAndSearchExcludePatterns!: string[];
   private itemsFilter!: ItemsFilter;
@@ -52,9 +52,14 @@ class DataService {
   }
 
   private async fetchUris(): Promise<vscode.Uri[]> {
-    const includePatterns = this.getIncludePatterns();
+    const includePatterns = this.getIncludePattern();
     const excludePatterns = this.getExcludePatterns();
-    return await vscode.workspace.findFiles(includePatterns, excludePatterns);
+    try {
+      return await vscode.workspace.findFiles(includePatterns, excludePatterns);
+    } catch (error) {
+      this.utils.printErrorMessage(error);
+      return Promise.resolve([]);
+    }
   }
 
   private async getUris(uris?: vscode.Uri[]): Promise<vscode.Uri[]> {
@@ -65,8 +70,9 @@ class DataService {
     }
   }
 
-  private getIncludePatterns(): string {
-    return this.patternsAsString(this.includePatterns);
+  private getIncludePattern(): string {
+    // const x = ["**/{package.json,src/**/*.js}"];
+    return this.includePatterns;
   }
 
   private getExcludePatterns(): string {
@@ -78,10 +84,10 @@ class DataService {
       excludePatterns = this.excludePatterns;
     }
 
-    return this.patternsAsString(excludePatterns);
+    return this.getExcludePatternsAsString(excludePatterns);
   }
 
-  private patternsAsString(patterns: string[]): string {
+  private getExcludePatternsAsString(patterns: string[]): string {
     if (patterns.length === 0) {
       return "";
     } else if (patterns.length === 1) {

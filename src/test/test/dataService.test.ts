@@ -26,7 +26,7 @@ describe("DataService", () => {
   let configStub: Config;
 
   let stubConfig = (
-    includePatterns: string[] = [],
+    includePatterns: string = "",
     excludePatterns: string[] = [],
     shouldUseFilesAndSearchExclude: boolean = false,
     filesAndSearchExcludePatterns: string[] = [],
@@ -120,6 +120,18 @@ describe("DataService", () => {
 
       assert.equal(await dataServiceAny.fetchUris(), items);
     });
+
+    it("should utils.printErrorMessage method be invoked if error is thrown", async () => {
+      stubConfig();
+      sinon.stub(vscode.workspace, "findFiles").throws("test error");
+      const printErrorMessageStub = sinon.stub(
+        dataServiceAny.utils,
+        "printErrorMessage"
+      );
+      await dataServiceAny.fetchUris();
+
+      assert.equal(printErrorMessageStub.calledOnce, true);
+    });
   });
 
   describe("getUris", () => {
@@ -144,37 +156,37 @@ describe("DataService", () => {
     });
   });
 
-  describe("getIncludePatterns", () => {
-    it("should return string[] containing include patterns", () => {
-      const patterns = ["**/*.{js}"];
-      stubConfig(patterns, [], false, [], getItemsFilter([1, 2]));
+  describe("getIncludePattern", () => {
+    it("should return string containing include pattern", () => {
+      const pattern = "**/*.{js}";
+      stubConfig(pattern, [], false, [], getItemsFilter([1, 2]));
 
-      assert.equal(dataServiceAny.getIncludePatterns(), patterns);
+      assert.equal(dataServiceAny.getIncludePattern(), pattern);
     });
   });
 
   describe("getExcludePatterns", () => {
     it("should return string[] containing exclude patterns", () => {
       const patterns = ["**/node_modules/**"];
-      stubConfig([], patterns, false, []);
+      stubConfig("", patterns, false, []);
 
       assert.equal(dataServiceAny.getExcludePatterns(), patterns);
     });
 
     it("should return string[] containing files and search exclude patterns", () => {
       const patterns = ["**/node_modules/**"];
-      stubConfig([], [], true, patterns);
+      stubConfig("", [], true, patterns);
 
       assert.equal(dataServiceAny.getExcludePatterns(), patterns);
     });
   });
 
-  describe("patternsAsString", () => {
+  describe("getExcludePatternsAsString", () => {
     it("should return empty string if given array is empty", () => {
       const patterns: string[] = [];
 
       assert.equal(
-        dataServiceAny.patternsAsString(patterns),
+        dataServiceAny.getExcludePatternsAsString(patterns),
         patterns.join(",")
       );
     });
@@ -184,7 +196,7 @@ describe("DataService", () => {
       const patterns = ["**/node_modules/**"];
 
       assert.equal(
-        dataServiceAny.patternsAsString(patterns),
+        dataServiceAny.getExcludePatternsAsString(patterns),
         patterns.join(",")
       );
     });
@@ -198,7 +210,7 @@ describe("DataService", () => {
       ];
 
       assert.equal(
-        dataServiceAny.patternsAsString(patterns),
+        dataServiceAny.getExcludePatternsAsString(patterns),
         `{${patterns.join(",")}}`
       );
     });
@@ -385,7 +397,7 @@ describe("DataService", () => {
 
   describe("filterUris", () => {
     it("should return array of filtered vscode.Uri", () => {
-      stubConfig([], [], false, [], getItemsFilter([], [], ["fake-1"]));
+      stubConfig("", [], false, [], getItemsFilter([], [], ["fake-1"]));
 
       assert.deepEqual(dataServiceAny.filterUris(getItems(3)), [
         getItem(undefined, 2),
@@ -396,7 +408,7 @@ describe("DataService", () => {
 
   describe("filterSymbols", () => {
     it("should return array of filtered vscode.DocumentSymbol", () => {
-      stubConfig([], [], false, [], getItemsFilter([], [1, 3, 4]));
+      stubConfig("", [], false, [], getItemsFilter([], [1, 3, 4]));
 
       assert.deepEqual(
         dataServiceAny.filterSymbols(
@@ -412,12 +424,12 @@ describe("DataService", () => {
 
   describe("isUriValid", () => {
     it("should return true if given vscode.Uri kind is allowed", () => {
-      stubConfig([], [], false, [], getItemsFilter([0, 1]));
+      stubConfig("", [], false, [], getItemsFilter([0, 1]));
       assert.equal(dataServiceAny.isUriValid(getItem()), true);
     });
 
     it("should return false if given vscode.Uri kind is not allowed", () => {
-      stubConfig([], [], false, [], getItemsFilter([2, 3]));
+      stubConfig("", [], false, [], getItemsFilter([2, 3]));
       assert.equal(dataServiceAny.isSymbolValid(getItem()), false);
     });
   });
@@ -425,7 +437,7 @@ describe("DataService", () => {
   describe("isSymbolValid", () => {
     it(`should return true if given vscode.DocumentSymbol
       is of kind which is allowed`, () => {
-      stubConfig([], [], false, [], getItemsFilter([1, 2]));
+      stubConfig("", [], false, [], getItemsFilter([1, 2]));
       assert.equal(
         dataServiceAny.isSymbolValid(getDocumentSymbolItemSingleLine()),
         true
@@ -434,7 +446,7 @@ describe("DataService", () => {
 
     it(`should return false if given vscode.DocumentSymbol
       is of kind which is not allowed`, () => {
-      stubConfig([], [], false, [], getItemsFilter([2, 3]));
+      stubConfig("", [], false, [], getItemsFilter([2, 3]));
       assert.equal(
         dataServiceAny.isSymbolValid(getDocumentSymbolItemSingleLine()),
         false
@@ -450,23 +462,23 @@ describe("DataService", () => {
 
     it(`should return true if given item is of allowed kind
       and its name is not ignored`, () => {
-      stubConfig([], [], false, [], getItemsFilter([0]));
+      stubConfig("", [], false, [], getItemsFilter([0]));
       assert.equal(dataServiceAny.isItemValid(getItem()), true);
     });
 
     it(`should return false if given item is not of allowed kind
       and its name is not ignored`, () => {
-      stubConfig([], [], false, [], getItemsFilter([1]));
+      stubConfig("", [], false, [], getItemsFilter([1]));
       assert.equal(dataServiceAny.isItemValid(getItem()), false);
     });
 
     it("should return false if given item is of ignored kind", () => {
-      stubConfig([], [], false, [], getItemsFilter([], [0]));
+      stubConfig("", [], false, [], getItemsFilter([], [0]));
       assert.equal(dataServiceAny.isItemValid(getItem()), false);
     });
 
     it("should return false if given item's name is ignored", () => {
-      stubConfig([], [], false, [], getItemsFilter([], [], ["fake"]));
+      stubConfig("", [], false, [], getItemsFilter([], [], ["fake"]));
       assert.equal(dataServiceAny.isItemValid(getItem()), false);
     });
   });

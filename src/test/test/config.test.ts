@@ -125,7 +125,7 @@ describe("Config", () => {
   });
 
   describe("getInclude", () => {
-    it("should return array of include patterns from configuration", () => {
+    it("should return array of include pattern from configuration", () => {
       const section = "searchEverywhere";
       const key = "include";
 

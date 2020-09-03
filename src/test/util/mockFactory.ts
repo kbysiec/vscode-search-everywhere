@@ -41,7 +41,7 @@ export const getConfiguration = (): { [key: string]: any } => {
         "1": "^^",
         "4": "@@",
       },
-      include: ["**/*.{js,ts}"],
+      include: "**/*.{js,ts}",
       exclude: ["**/node_modules/**"],
       shouldUseFilesAndSearchExclude: true,
     },

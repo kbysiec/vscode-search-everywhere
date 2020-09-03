@@ -21,7 +21,7 @@ class Config {
     itemsFilterPhrases: {} as ItemsFilterPhrases,
     helpPhrase: "?",
     exclude: [] as string[],
-    include: [] as string[],
+    include: "",
     shouldUseFilesAndSearchExclude: false,
   };
   private readonly defaultSection = "searchEverywhere";
@@ -86,7 +86,7 @@ class Config {
     return this.get(ConfigKey.exclude, this.default.exclude);
   }
 
-  getInclude(): string[] {
+  getInclude(): string {
     return this.get(ConfigKey.include, this.default.include);
   }
 
