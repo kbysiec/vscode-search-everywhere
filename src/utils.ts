@@ -63,7 +63,8 @@ class Utils {
 
   printErrorMessage(error: Error): void {
     vscode.window.showInformationMessage(
-      `Something went wrong... Extension encountered the following error: ${error.message}`
+      `Something went wrong...
+      Extension encountered the following error: ${error.stack}`
     );
   }
 
