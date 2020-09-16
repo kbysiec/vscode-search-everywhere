@@ -6,45 +6,39 @@ import { getQpItems } from "../util/qpItemMockFactory";
 import * as mock from "../mock/cache.mock";
 import { appConfig } from "../../appConfig";
 import Cache from "../../cache";
+import { getTestSetups } from "../testSetup/cache.testSetup";
 
 describe("Cache", () => {
-  let cache: Cache;
+  let context: vscode.ExtensionContext = getExtensionContext();
+  let cache: Cache = new Cache(context);
   let cacheAny: any;
   let updateStub: sinon.SinonStub;
-  let context: vscode.ExtensionContext;
+  let setups = getTestSetups(cache, context);
 
-  before(() => {
-    sinon.stub(appConfig, "dataCacheKey").value("cache");
-    sinon.stub(appConfig, "configCacheKey").value("config");
+  beforeEach(() => {
     context = getExtensionContext();
-    updateStub = sinon.stub();
-    context.workspaceState.update = updateStub;
-
     cache = new Cache(context);
-    cacheAny = cache as any;
-  });
 
-  afterEach(() => {
-    sinon.restore();
-    updateStub.resetHistory();
+    setups = getTestSetups(cache, context);
+    ({ cacheAny, updateStub } = setups.beforeEach());
   });
 
   describe("getData", () => {
-    it("should return array of indexed symbols and files from cache", () => {
-      sinon.stub(context.workspaceState, "get").returns(getQpItems());
+    it("1: should return array of indexed symbols and files from cache", () => {
+      setups.getData1();
 
       assert.deepEqual(cache.getData(), getQpItems());
     });
 
-    it("should return empty array if cache is undefined", () => {
-      sinon.stub(context.workspaceState, "get").returns(undefined);
+    it("2: should return empty array if cache is undefined", () => {
+      setups.getData2();
 
       assert.deepEqual(cache.getData(), []);
     });
   });
 
   describe("updateData", () => {
-    it("should update cache with new array", () => {
+    it("1: should update cache with new array", () => {
       cache.updateData(getQpItems());
 
       assert.equal(
@@ -55,11 +49,8 @@ describe("Cache", () => {
   });
 
   describe("getConfigByKey", () => {
-    it("should return config value from cache", () => {
-      const key = "searchEverywhere.exclude";
-      sinon
-        .stub(context.workspaceState, "get")
-        .returns({ [key]: mock.configuration[key] });
+    it("1: should return config value from cache", () => {
+      const key = setups.getConfigByKey1();
 
       assert.deepEqual(
         cache.getConfigByKey<string[]>(key),
@@ -67,47 +58,26 @@ describe("Cache", () => {
       );
     });
 
-    it("should return undefined if cache does not contain value for given key", () => {
-      const key = "searchEverywhere.exclude";
-      sinon.stub(context.workspaceState, "get").returns(undefined);
+    it("2: should return undefined if cache does not contain value for given key", () => {
+      const key = setups.getConfigByKey2();
 
       assert.equal(cache.getConfigByKey<string[]>(key), undefined);
     });
   });
 
   describe("updateConfigByKey", () => {
-    it("should update config value in cache if cache object exists", () => {
-      const key = "searchEverywhere.exclude";
-      const newExcludePatterns = ["**/node_modules/**", ".gitignore"];
-      sinon.stub(context.workspaceState, "get").returns(mock.configuration);
-      const newConfig = {
-        ...mock.configuration,
-        ...{ [key]: newExcludePatterns },
-      };
-      cache.updateConfigByKey(key, newExcludePatterns);
+    it("1: should update config value in cache if cache object exists", () => {
+      const { key, newConfig } = setups.updateConfigByKey1();
+      cache.updateConfigByKey(key, mock.newExcludePatterns);
 
       assert.equal(
         updateStub.calledWith(appConfig.configCacheKey, newConfig),
         true
       );
     });
-  });
 
-  describe("updateConfigByKey", () => {
-    it("should update config value in cache if cache object exists", () => {
-      const key = "searchEverywhere.exclude";
-      sinon.stub(context.workspaceState, "get").returns(mock.configuration);
-      cache.updateConfigByKey(key, mock.newExcludePatterns);
-
-      assert.equal(
-        updateStub.calledWith(appConfig.configCacheKey, mock.newConfiguration),
-        true
-      );
-    });
-
-    it("should create cache object if it does not exist and set config value", () => {
-      const key = "searchEverywhere.exclude";
-      sinon.stub(context.workspaceState, "get").returns(undefined);
+    it("2: should create cache object if it does not exist and set config value", () => {
+      const key = setups.updateConfigByKey2();
       cache.updateConfigByKey(key, mock.newExcludePatterns);
 
       assert.equal(
@@ -118,9 +88,8 @@ describe("Cache", () => {
   });
 
   describe("clear", () => {
-    it("should clearData and clearConfig methods be invoked", () => {
-      const clearDataStub = sinon.stub(cacheAny, "clearData");
-      const clearConfigStub = sinon.stub(cache, "clearConfig");
+    it("1: should clearData and clearConfig methods be invoked", () => {
+      const [clearDataStub, clearConfigStub] = setups.clear();
       cache.clear();
 
       assert.equal(clearDataStub.calledOnce, true);
@@ -129,7 +98,7 @@ describe("Cache", () => {
   });
 
   describe("clearData", () => {
-    it("should clear data cache", () => {
+    it("1: should clear data cache", () => {
       cacheAny.clearData();
 
       assert.equal(updateStub.calledOnce, true);
@@ -137,7 +106,7 @@ describe("Cache", () => {
   });
 
   describe("clearConfig", () => {
-    it("should clear config cache", () => {
+    it("1: should clear config cache", () => {
       cache.clearConfig();
 
       assert.equal(updateStub.calledOnce, true);
