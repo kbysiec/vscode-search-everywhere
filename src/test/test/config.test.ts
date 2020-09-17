@@ -5,6 +5,7 @@ import { getConfiguration } from "../util/mockFactory";
 import { getCacheStub } from "../util/stubFactory";
 import Config from "../../config";
 import Cache from "../../cache";
+import { restoreStubbedMultiple } from "../util/stubHelpers";
 
 describe("Config", () => {
   let config: Config;
@@ -14,12 +15,6 @@ describe("Config", () => {
   let configuration: { [key: string]: any };
 
   before(() => {
-    cacheStub = getCacheStub();
-    config = new Config(cacheStub);
-    configuration = getConfiguration();
-  });
-
-  beforeEach(() => {
     getConfigurationStub = sinon
       .stub(vscode.workspace, "getConfiguration")
       .returns({
@@ -29,16 +24,18 @@ describe("Config", () => {
         inspect: () => undefined,
         update: () => Promise.resolve(),
       });
+  });
+
+  beforeEach(() => {
+    cacheStub = getCacheStub();
+    config = new Config(cacheStub);
+    configuration = getConfiguration();
 
     configAny = config as any;
   });
 
-  afterEach(() => {
-    sinon.restore();
-  });
-
   describe("shouldDisplayNotificationInStatusBar", () => {
-    it("should return boolean from configuration", () => {
+    it("1: should return boolean from configuration", () => {
       const section = "searchEverywhere";
       const key = "shouldDisplayNotificationInStatusBar";
 
@@ -50,7 +47,7 @@ describe("Config", () => {
   });
 
   describe("shouldInitOnStartup", () => {
-    it("should return boolean from configuration", () => {
+    it("1: should return boolean from configuration", () => {
       const section = "searchEverywhere";
       const key = "shouldInitOnStartup";
 
@@ -59,7 +56,7 @@ describe("Config", () => {
   });
 
   describe("shouldHighlightSymbol", () => {
-    it("should return boolean from configuration", () => {
+    it("1: should return boolean from configuration", () => {
       const section = "searchEverywhere";
       const key = "shouldHighlightSymbol";
 
@@ -68,7 +65,7 @@ describe("Config", () => {
   });
 
   describe("shouldUseDebounce", () => {
-    it("should return boolean from configuration", () => {
+    it("1: should return boolean from configuration", () => {
       const section = "searchEverywhere";
       const key = "shouldUseDebounce";
 
@@ -77,7 +74,7 @@ describe("Config", () => {
   });
 
   describe("getIcons", () => {
-    it("should return object containing icons from configuration", () => {
+    it("1: should return object containing icons from configuration", () => {
       const section = "searchEverywhere";
       const key = "icons";
 
@@ -86,7 +83,7 @@ describe("Config", () => {
   });
 
   describe("getItemsFilter", () => {
-    it("should return object containing items filter from configuration", () => {
+    it("1: should return object containing items filter from configuration", () => {
       const section = "searchEverywhere";
       const key = "itemsFilter";
 
@@ -95,7 +92,7 @@ describe("Config", () => {
   });
 
   describe("shouldUseItemsFilterPhrases", () => {
-    it("should return boolean from configuration", () => {
+    it("1: should return boolean from configuration", () => {
       const section = "searchEverywhere";
       const key = "shouldUseItemsFilterPhrases";
 
@@ -107,7 +104,7 @@ describe("Config", () => {
   });
 
   describe("getItemsFilterPhrases", () => {
-    it("should return object containing items filter phrases from configuration", () => {
+    it("1: should return object containing items filter phrases from configuration", () => {
       const section = "searchEverywhere";
       const key = "itemsFilterPhrases";
 
@@ -116,7 +113,7 @@ describe("Config", () => {
   });
 
   describe("getExclude", () => {
-    it("should return array of exclude patterns from configuration", () => {
+    it("1: should return array of exclude patterns from configuration", () => {
       const section = "searchEverywhere";
       const key = "exclude";
 
@@ -125,7 +122,7 @@ describe("Config", () => {
   });
 
   describe("getInclude", () => {
-    it("should return array of include pattern from configuration", () => {
+    it("1: should return array of include pattern from configuration", () => {
       const section = "searchEverywhere";
       const key = "include";
 
@@ -134,7 +131,7 @@ describe("Config", () => {
   });
 
   describe("shouldUseFilesAndSearchExclude", () => {
-    it("should return boolean from configuration", () => {
+    it("1: should return boolean from configuration", () => {
       const section = "searchEverywhere";
       const key = "shouldUseFilesAndSearchExclude";
 
@@ -146,7 +143,7 @@ describe("Config", () => {
   });
 
   describe("getFilesAndSearchExclude", () => {
-    it("should return array of exclude patterns from configuration", () => {
+    it("1: should return array of exclude patterns from configuration", () => {
       assert.deepEqual(config.getFilesAndSearchExclude(), [
         "**/.git",
         "**/search_exclude/**",
@@ -155,7 +152,7 @@ describe("Config", () => {
   });
 
   describe("getFilesExclude", () => {
-    it("should return array of exclude patterns from configuration", () => {
+    it("1: should return array of exclude patterns from configuration", () => {
       const section = "files";
       const key = "exclude";
 
@@ -164,7 +161,7 @@ describe("Config", () => {
   });
 
   describe("getSearchExclude", () => {
-    it("should return array of exclude patterns from configuration", () => {
+    it("1: should return array of exclude patterns from configuration", () => {
       const section = "search";
       const key = "exclude";
 
@@ -173,7 +170,7 @@ describe("Config", () => {
   });
 
   describe("get", () => {
-    it(`should return array of exclude patterns
+    it(`1: should return array of exclude patterns
       from configuration if cache is empty`, () => {
       const section = "searchEverywhere";
       const key = "exclude";
@@ -181,8 +178,11 @@ describe("Config", () => {
       assert.equal(configAny.get(key, []), configuration[section][key]);
     });
 
-    it(`should return array of exclude patterns
+    it(`2: should return array of exclude patterns
       from cache if it is not empty`, () => {
+      restoreStubbedMultiple([
+        { object: configAny.cache, method: "getConfigByKey" },
+      ]);
       const section = "searchEverywhere";
       const key = "exclude";
 
@@ -195,7 +195,7 @@ describe("Config", () => {
       assert.equal(getConfigurationStub.calledOnce, false);
     });
 
-    it("should get configuration from custom section", () => {
+    it("3: should get configuration from custom section", () => {
       const section = "customSection";
       const key = "exclude";
 
@@ -207,7 +207,7 @@ describe("Config", () => {
   });
 
   describe("getConfigurationByKey", () => {
-    it("should return array of exclude patterns", () => {
+    it("1: should return array of exclude patterns", () => {
       const section = "searchEverywhere";
       const key = "exclude";
 
@@ -217,7 +217,7 @@ describe("Config", () => {
       );
     });
 
-    it("should get configuration from custom section", () => {
+    it("2: should get configuration from custom section", () => {
       const section = "customSection";
       const key = "exclude";
 
@@ -229,7 +229,7 @@ describe("Config", () => {
   });
 
   describe("getConfiguration", () => {
-    it("should return array of exclude patterns", () => {
+    it("1: should return array of exclude patterns", () => {
       const section = "searchEverywhere";
       const key = "exclude";
 
