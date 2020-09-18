@@ -174,13 +174,11 @@ export const getQpItemDocumentSymbolSingleLine = (
 };
 
 export const getDocumentSymbolQpItemMultiLine = (
-  withEmptyParent: boolean = false
+  withParent: boolean = false
 ): QuickPickItem => {
   const qpItem = {
     label: "test name",
-    description: `Module at lines: 1 - 3${
-      withEmptyParent ? "" : " in test parent"
-    }`,
+    description: `Module at lines: 1 - 3${withParent ? " in test parent" : ""}`,
     detail: "/./fake/fake-1.ts",
     uri: vscode.Uri.file("./fake/fake-1.ts"),
     kind: 1,

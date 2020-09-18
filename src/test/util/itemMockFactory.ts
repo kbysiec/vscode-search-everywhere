@@ -91,10 +91,10 @@ export const getDocumentSymbolItemSingleLineArray = (
 };
 
 export const getDocumentSymbolItemMultiLine = (
-  withEmptyParent: boolean = false
+  withParent: boolean = false
 ): vscode.DocumentSymbol => {
   return {
-    name: `${withEmptyParent ? "" : "test parent"}§&§test name`,
+    name: `${withParent ? "test parent§&§" : ""}test name`,
     detail: "test details",
     kind: 1,
     range: new vscode.Range(
