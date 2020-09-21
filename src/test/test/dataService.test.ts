@@ -1,11 +1,5 @@
-import * as vscode from "vscode";
-import * as sinon from "sinon";
 import { assert } from "chai";
-import {
-  getWorkspaceData,
-  getEventEmitter,
-  getItemsFilter,
-} from "../util/mockFactory";
+import { getWorkspaceData, getItemsFilter } from "../util/mockFactory";
 import {
   getItems,
   getDocumentSymbolItemSingleLineArray,
@@ -14,52 +8,29 @@ import {
 } from "../util/itemMockFactory";
 import { getUtilsStub, getConfigStub } from "../util/stubFactory";
 import * as mock from "../mock/dataService.mock";
-import ItemsFilter from "../../interface/itemsFilter";
 import DataService from "../../dataService";
 import Utils from "../../utils";
 import Config from "../../config";
+import { getTestSetups } from "../testSetup/dataService.testSetup";
 
 describe("DataService", () => {
-  let dataService: DataService;
+  let utilsStub: Utils = getUtilsStub();
+  let configStub: Config = getConfigStub();
+  let dataService: DataService = new DataService(utilsStub, configStub);
   let dataServiceAny: any;
-  let utilsStub: Utils;
-  let configStub: Config;
+  let setups = getTestSetups(dataService);
 
-  let stubConfig = (
-    includePatterns: string = "",
-    excludePatterns: string[] = [],
-    shouldUseFilesAndSearchExclude: boolean = false,
-    filesAndSearchExcludePatterns: string[] = [],
-    itemsFilter: ItemsFilter = {}
-  ) => {
-    sinon.stub(dataServiceAny, "includePatterns").value(includePatterns);
-    sinon.stub(dataServiceAny, "excludePatterns").value(excludePatterns);
-    sinon
-      .stub(dataServiceAny, "shouldUseFilesAndSearchExclude")
-      .value(shouldUseFilesAndSearchExclude);
-    sinon
-      .stub(dataServiceAny, "filesAndSearchExcludePatterns")
-      .value(filesAndSearchExcludePatterns);
-    sinon.stub(dataServiceAny, "itemsFilter").value(itemsFilter);
-  };
-
-  before(() => {
+  beforeEach(() => {
     utilsStub = getUtilsStub();
     configStub = getConfigStub();
     dataService = new DataService(utilsStub, configStub);
-  });
-
-  beforeEach(() => {
     dataServiceAny = dataService as any;
-  });
-
-  afterEach(() => {
-    sinon.restore();
+    setups = getTestSetups(dataService);
   });
 
   describe("reload", () => {
-    it("should fetchConfig method be invoked", () => {
-      const fetchConfigStub = sinon.stub(dataServiceAny, "fetchConfig");
+    it("1: should fetchConfig method be invoked", () => {
+      const [fetchConfigStub] = setups.reload1();
       dataService.reload();
 
       assert.equal(fetchConfigStub.calledOnce, true);
@@ -67,8 +38,8 @@ describe("DataService", () => {
   });
 
   describe("cancel", () => {
-    it("should setCancelled method be invoked with true parameter", () => {
-      const setCancelledStub = sinon.stub(dataServiceAny, "setCancelled");
+    it("1: should setCancelled method be invoked with true parameter", () => {
+      const [setCancelledStub] = setups.cancel1();
       dataService.cancel();
 
       assert.equal(setCancelledStub.calledOnce, true);
@@ -76,16 +47,9 @@ describe("DataService", () => {
   });
 
   describe("fetchData", () => {
-    it(`should return array of vscode.Uri or vscode.DocumentSymbol
+    it(`1: should return array of vscode.Uri or vscode.DocumentSymbol
       items with workspace data`, async () => {
-      stubConfig();
-      sinon
-        .stub(vscode.workspace, "findFiles")
-        .returns(Promise.resolve(getItems()));
-      sinon
-        .stub(dataServiceAny, "loadAllSymbolsForUri")
-        .returns(Promise.resolve(getDocumentSymbolItemSingleLineArray(1)));
-
+      setups.fetchData1();
       const items = await dataService.fetchData();
 
       assert.equal(items.count, 4);
@@ -93,19 +57,15 @@ describe("DataService", () => {
   });
 
   describe("isUriExistingInWorkspace", () => {
-    it("should return true if uri exists in workspace", async () => {
-      sinon
-        .stub(dataServiceAny, "fetchUris")
-        .returns(Promise.resolve(getItems()));
+    it("1: should return true if uri exists in workspace", async () => {
+      setups.isUriExistingInWorkspace1();
 
       const item = getItem();
       assert.equal(await dataService.isUriExistingInWorkspace(item), true);
     });
 
-    it("should return false if uri does not exist in workspace", async () => {
-      sinon
-        .stub(dataServiceAny, "fetchUris")
-        .returns(Promise.resolve(getItems()));
+    it("2: should return false if uri does not exist in workspace", async () => {
+      setups.isUriExistingInWorkspace2();
 
       const item = getItem("./test/path/to/workspace");
       assert.equal(await dataService.isUriExistingInWorkspace(item), false);
@@ -113,21 +73,14 @@ describe("DataService", () => {
   });
 
   describe("fetchUris", () => {
-    it("should return array of vscode.Uri items", async () => {
-      stubConfig();
-      const items = getItems();
-      sinon.stub(vscode.workspace, "findFiles").returns(Promise.resolve(items));
+    it("1: should return array of vscode.Uri items", async () => {
+      const items = setups.fetchUris1();
 
       assert.equal(await dataServiceAny.fetchUris(), items);
     });
 
-    it("should utils.printErrorMessage method be invoked if error is thrown", async () => {
-      stubConfig();
-      sinon.stub(vscode.workspace, "findFiles").throws("test error");
-      const printErrorMessageStub = sinon.stub(
-        dataServiceAny.utils,
-        "printErrorMessage"
-      );
+    it("2: should utils.printErrorMessage method be invoked if error is thrown", async () => {
+      const [printErrorMessageStub] = setups.fetchUris2();
       await dataServiceAny.fetchUris();
 
       assert.equal(printErrorMessageStub.calledOnce, true);
@@ -135,54 +88,43 @@ describe("DataService", () => {
   });
 
   describe("getUris", () => {
-    it("should return array of vscode.Uri items by invoking fetchUris method (uris param not given)", async () => {
-      const items = getItems();
-      sinon.stub(dataServiceAny, "fetchUris").returns(Promise.resolve(items));
-
+    it("1: should return array of vscode.Uri items by invoking fetchUris method (uris param not given)", async () => {
+      const items = setups.getUris1();
       assert.equal(await dataServiceAny.getUris(), items);
     });
 
-    it("should return array of vscode.Uri items by invoking fetchUris method (given uris param is an empty array)", async () => {
-      const items = getItems();
-      sinon.stub(dataServiceAny, "fetchUris").returns(Promise.resolve(items));
-
+    it("2: should return array of vscode.Uri items by invoking fetchUris method (given uris param is an empty array)", async () => {
+      const items = setups.getUris2();
       assert.equal(await dataServiceAny.getUris([]), items);
     });
 
-    it("should return array of vscode.Uri items (given uris param is an array with items)", async () => {
+    it("3: should return array of vscode.Uri items (given uris param is an array with items)", async () => {
       const items = getItems();
-
       assert.equal(await dataServiceAny.getUris(items), items);
     });
   });
 
   describe("getIncludePattern", () => {
-    it("should return string containing include pattern", () => {
-      const pattern = "**/*.{js}";
-      stubConfig(pattern, [], false, [], getItemsFilter([1, 2]));
-
+    it("1: should return string containing include pattern", () => {
+      const pattern = setups.getIncludePattern1();
       assert.equal(dataServiceAny.getIncludePattern(), pattern);
     });
   });
 
   describe("getExcludePatterns", () => {
-    it("should return string[] containing exclude patterns", () => {
-      const patterns = ["**/node_modules/**"];
-      stubConfig("", patterns, false, []);
-
+    it("1: should return string[] containing exclude patterns", () => {
+      const patterns = setups.getExcludePatterns1();
       assert.equal(dataServiceAny.getExcludePatterns(), patterns);
     });
 
-    it("should return string[] containing files and search exclude patterns", () => {
-      const patterns = ["**/node_modules/**"];
-      stubConfig("", [], true, patterns);
-
+    it("2: should return string[] containing files and search exclude patterns", () => {
+      const patterns = setups.getExcludePatterns2();
       assert.equal(dataServiceAny.getExcludePatterns(), patterns);
     });
   });
 
   describe("getExcludePatternsAsString", () => {
-    it("should return empty string if given array is empty", () => {
+    it("1: should return empty string if given array is empty", () => {
       const patterns: string[] = [];
 
       assert.equal(
@@ -191,7 +133,7 @@ describe("DataService", () => {
       );
     });
 
-    it(`should return string with one pattern if given array
+    it(`2: should return string with one pattern if given array
       contains one element`, () => {
       const patterns = ["**/node_modules/**"];
 
@@ -201,7 +143,7 @@ describe("DataService", () => {
       );
     });
 
-    it(`should return string with patterns separated by comma surrounded
+    it(`3: should return string with patterns separated by comma surrounded
       with curly braces if given array contains more than one element`, () => {
       const patterns = [
         "**/node_modules/**",
@@ -217,23 +159,16 @@ describe("DataService", () => {
   });
 
   describe("includeSymbols", () => {
-    it("should include symbols to workspaceData", async () => {
-      sinon
-        .stub(dataServiceAny, "getSymbolsForUri")
-        .returns(Promise.resolve(getDocumentSymbolItemSingleLineArray(3)));
+    it("1: should include symbols to workspaceData", async () => {
+      setups.includeSymbols1();
       const workspaceData = getWorkspaceData();
       await dataServiceAny.includeSymbols(workspaceData, [getItem()]);
 
       assert.equal(workspaceData.count, 3);
     });
 
-    it("should repeat trial to get symbols for file if returned undefined", async () => {
-      const sleepStub = sinon
-        .stub(dataServiceAny.utils, "sleep")
-        .returns(Promise.resolve());
-      sinon
-        .stub(dataServiceAny, "getSymbolsForUri")
-        .returns(Promise.resolve(undefined));
+    it("2: should repeat trial to get symbols for file if returned undefined", async () => {
+      const [sleepStub] = setups.includeSymbol2();
       const workspaceData = getWorkspaceData();
       await dataServiceAny.includeSymbols(workspaceData, [getItem()]);
 
@@ -241,29 +176,19 @@ describe("DataService", () => {
       assert.equal(sleepStub.callCount, 9);
     });
 
-    it("should emit onDidItemIndexed event after item indexing", async () => {
-      const eventEmitter = getEventEmitter();
-      sinon
-        .stub(dataServiceAny, "onDidItemIndexedEventEmitter")
-        .value(eventEmitter);
-      sinon
-        .stub(dataServiceAny, "getSymbolsForUri")
-        .returns(Promise.resolve(getDocumentSymbolItemSingleLineArray(3)));
+    it("3: should emit onDidItemIndexed event after item indexing", async () => {
+      const eventEmitter = setups.includeSymbol3();
       const workspaceData = getWorkspaceData();
       await dataServiceAny.includeSymbols(workspaceData, [getItem()]);
 
       assert.equal(eventEmitter.fire.calledOnce, true);
     });
 
-    it(`should utils.clearWorkspaceData method be invoked
+    it(`4: should utils.clearWorkspaceData method be invoked
       if isCancelled equals to true`, async () => {
-      sinon.stub(dataServiceAny, "isCancelled").value(true);
-      const clearWorkspaceDataStub = sinon.stub(
-        dataServiceAny.utils,
-        "clearWorkspaceData"
-      );
-      const workspaceData = getWorkspaceData();
+      const [clearWorkspaceDataStub] = setups.includeSymbol4();
 
+      const workspaceData = getWorkspaceData();
       await dataServiceAny.includeSymbols(workspaceData, [getItem()]);
 
       assert.equal(clearWorkspaceDataStub.calledOnce, true);
@@ -271,30 +196,25 @@ describe("DataService", () => {
   });
 
   describe("includeUris", () => {
-    it("should include uris to empty workspaceData", () => {
-      stubConfig();
+    it("1: should include uris to empty workspaceData", () => {
+      setups.includeUris1();
       const workspaceData = getWorkspaceData();
       dataServiceAny.includeUris(workspaceData, getItems());
 
       assert.equal(workspaceData.count, 2);
     });
 
-    it("should include uris to workspaceData containing data", () => {
-      stubConfig();
+    it("2: should include uris to workspaceData containing data", () => {
+      setups.includeUris2();
       const workspaceData = getWorkspaceData([getItem()]);
       dataServiceAny.includeUris(workspaceData, getItems());
 
       assert.equal(workspaceData.count, 2);
     });
 
-    it(`should utils.clearWorkspaceData method be invoked
+    it(`3: should utils.clearWorkspaceData method be invoked
       if isCancelled equals to true`, async () => {
-      stubConfig();
-      sinon.stub(dataServiceAny, "isCancelled").value(true);
-      const clearWorkspaceDataStub = sinon.stub(
-        dataServiceAny.utils,
-        "clearWorkspaceData"
-      );
+      const [clearWorkspaceDataStub] = setups.includeUris3();
       const workspaceData = getWorkspaceData([getItem()]);
       dataServiceAny.includeUris(workspaceData, getItems());
 
@@ -303,18 +223,18 @@ describe("DataService", () => {
   });
 
   describe("ifUriExistsInArray", () => {
-    it("should return true if uri already is included in array", () => {
+    it("1: should return true if uri already is included in array", () => {
       assert.equal(
         dataServiceAny.ifUriExistsInArray(getItems(), getItem()),
         true
       );
     });
 
-    it("should return false if uri already is not included in array", () => {
+    it("2: should return false if uri already is not included in array", () => {
       assert.equal(dataServiceAny.ifUriExistsInArray([], getItem()), false);
     });
 
-    it("should return false if given item is vscode.DocumentSymbol not vscode.Uri type", () => {
+    it("3: should return false if given item is vscode.DocumentSymbol not vscode.Uri type", () => {
       assert.equal(
         dataServiceAny.ifUriExistsInArray(
           getItems(),
@@ -326,12 +246,8 @@ describe("DataService", () => {
   });
 
   describe("getSymbolsForUri", () => {
-    it("should return array of vscode.DocumentSymbol for given uri", async () => {
-      stubConfig();
-      const documentSymbolItems = getDocumentSymbolItemSingleLineArray(2);
-      sinon
-        .stub(dataServiceAny, "loadAllSymbolsForUri")
-        .returns(Promise.resolve(documentSymbolItems));
+    it("1: should return array of vscode.DocumentSymbol for given uri", async () => {
+      const documentSymbolItems = setups.getSymbolsForUri1();
 
       assert.deepEqual(
         await dataServiceAny.getSymbolsForUri(getItem()),
@@ -339,10 +255,8 @@ describe("DataService", () => {
       );
     });
 
-    it("should return undefined", async () => {
-      sinon
-        .stub(dataServiceAny, "loadAllSymbolsForUri")
-        .returns(Promise.resolve(undefined));
+    it("2: should return undefined", async () => {
+      setups.getSymbolsForUri2();
 
       assert.deepEqual(
         await dataServiceAny.getSymbolsForUri(getItem()),
@@ -352,9 +266,9 @@ describe("DataService", () => {
   });
 
   describe("loadAllSymbolsForUri", () => {
-    it(`should vscode.commands.executeCommand be method invoked
+    it(`1: should vscode.commands.executeCommand be method invoked
       with vscode.executeDocumentSymbolProvider given as first parameter`, async () => {
-      const executeCommandStub = sinon.stub(vscode.commands, "executeCommand");
+      const [executeCommandStub] = setups.loadAllSymbolsForUri1();
       await dataServiceAny.loadAllSymbolsForUri(getItem());
 
       assert.equal(
@@ -365,7 +279,8 @@ describe("DataService", () => {
   });
 
   describe("reduceAndFlatSymbolsArrayForUri", () => {
-    it("should return flat array of vscode.DocumentSymbol", async () => {
+    it("1: should return flat array of vscode.DocumentSymbol", async () => {
+      setups.reduceAndFlatSymbolsArrayForUri1();
       assert.deepEqual(
         await dataServiceAny.reduceAndFlatSymbolsArrayForUri(
           getDocumentSymbolItemSingleLineArray(2, true)
@@ -376,7 +291,7 @@ describe("DataService", () => {
   });
 
   describe("hasSymbolChildren", () => {
-    it("should return true if symbol has children", async () => {
+    it("1: should return true if symbol has children", async () => {
       assert.deepEqual(
         await dataServiceAny.hasSymbolChildren(
           getDocumentSymbolItemSingleLine("", true)
@@ -385,7 +300,7 @@ describe("DataService", () => {
       );
     });
 
-    it("should return false if symbol has not children", async () => {
+    it("2: should return false if symbol has not children", async () => {
       assert.deepEqual(
         await dataServiceAny.hasSymbolChildren(
           getDocumentSymbolItemSingleLine()
@@ -396,8 +311,8 @@ describe("DataService", () => {
   });
 
   describe("filterUris", () => {
-    it("should return array of filtered vscode.Uri", () => {
-      stubConfig("", [], false, [], getItemsFilter([], [], ["fake-1"]));
+    it("1: should return array of filtered vscode.Uri", () => {
+      setups.filterUris1();
 
       assert.deepEqual(dataServiceAny.filterUris(getItems(3)), [
         getItem(undefined, 2),
@@ -407,8 +322,8 @@ describe("DataService", () => {
   });
 
   describe("filterSymbols", () => {
-    it("should return array of filtered vscode.DocumentSymbol", () => {
-      stubConfig("", [], false, [], getItemsFilter([], [1, 3, 4]));
+    it("1: should return array of filtered vscode.DocumentSymbol", () => {
+      setups.filterSymbols1();
 
       assert.deepEqual(
         dataServiceAny.filterSymbols(
@@ -423,30 +338,30 @@ describe("DataService", () => {
   });
 
   describe("isUriValid", () => {
-    it("should return true if given vscode.Uri kind is allowed", () => {
-      stubConfig("", [], false, [], getItemsFilter([0, 1]));
+    it("1: should return true if given vscode.Uri kind is allowed", () => {
+      setups.isUriValid1();
       assert.equal(dataServiceAny.isUriValid(getItem()), true);
     });
 
-    it("should return false if given vscode.Uri kind is not allowed", () => {
-      stubConfig("", [], false, [], getItemsFilter([2, 3]));
+    it("2: should return false if given vscode.Uri kind is not allowed", () => {
+      setups.isUriValid2();
       assert.equal(dataServiceAny.isSymbolValid(getItem()), false);
     });
   });
 
   describe("isSymbolValid", () => {
-    it(`should return true if given vscode.DocumentSymbol
+    it(`1: should return true if given vscode.DocumentSymbol
       is of kind which is allowed`, () => {
-      stubConfig("", [], false, [], getItemsFilter([1, 2]));
+      setups.isSymbolValid1();
       assert.equal(
         dataServiceAny.isSymbolValid(getDocumentSymbolItemSingleLine()),
         true
       );
     });
 
-    it(`should return false if given vscode.DocumentSymbol
+    it(`2: should return false if given vscode.DocumentSymbol
       is of kind which is not allowed`, () => {
-      stubConfig("", [], false, [], getItemsFilter([2, 3]));
+      setups.isSymbolValid2();
       assert.equal(
         dataServiceAny.isSymbolValid(getDocumentSymbolItemSingleLine()),
         false
@@ -455,43 +370,43 @@ describe("DataService", () => {
   });
 
   describe("isItemValid", () => {
-    it("should return true if itemsFilter is empty", () => {
-      stubConfig();
+    it("1: should return true if itemsFilter is empty", () => {
+      setups.isItemValid1();
       assert.equal(dataServiceAny.isItemValid(getItem()), true);
     });
 
-    it(`should return true if given item is of allowed kind
+    it(`2: should return true if given item is of allowed kind
       and its name is not ignored`, () => {
-      stubConfig("", [], false, [], getItemsFilter([0]));
+      setups.isItemValid2();
       assert.equal(dataServiceAny.isItemValid(getItem()), true);
     });
 
-    it(`should return false if given item is not of allowed kind
+    it(`3: should return false if given item is not of allowed kind
       and its name is not ignored`, () => {
-      stubConfig("", [], false, [], getItemsFilter([1]));
+      setups.isItemValid3();
       assert.equal(dataServiceAny.isItemValid(getItem()), false);
     });
 
-    it("should return false if given item is of ignored kind", () => {
-      stubConfig("", [], false, [], getItemsFilter([], [0]));
+    it("4: should return false if given item is of ignored kind", () => {
+      setups.isItemValid4();
       assert.equal(dataServiceAny.isItemValid(getItem()), false);
     });
 
-    it("should return false if given item's name is ignored", () => {
-      stubConfig("", [], false, [], getItemsFilter([], [], ["fake"]));
+    it("5: should return false if given item's name is ignored", () => {
+      setups.isItemValid5();
       assert.equal(dataServiceAny.isItemValid(getItem()), false);
     });
   });
 
   describe("isInAllowedKinds", () => {
-    it("should return true if given kind is allowed", () => {
+    it("1: should return true if given kind is allowed", () => {
       assert.equal(
         dataServiceAny.isInAllowedKinds(getItemsFilter([1, 2]), 1),
         true
       );
     });
 
-    it("should return false if given kind is not allowed", () => {
+    it("2: should return false if given kind is not allowed", () => {
       assert.equal(
         dataServiceAny.isInAllowedKinds(getItemsFilter([1, 2]), 3),
         false
@@ -500,14 +415,14 @@ describe("DataService", () => {
   });
 
   describe("isNotInIgnoredKinds", () => {
-    it("should return true if given kind is not ignored", () => {
+    it("1: should return true if given kind is not ignored", () => {
       assert.equal(
         dataServiceAny.isNotInIgnoredKinds(getItemsFilter([], [1, 2]), 3),
         true
       );
     });
 
-    it("should return false if given kind is ignored", () => {
+    it("2: should return false if given kind is ignored", () => {
       assert.equal(
         dataServiceAny.isNotInIgnoredKinds(getItemsFilter([], [1, 2]), 2),
         false
@@ -516,7 +431,7 @@ describe("DataService", () => {
   });
 
   describe("isNotInIgnoredNames", () => {
-    it("should return true if given name is not ignored", () => {
+    it("1: should return true if given name is not ignored", () => {
       assert.equal(
         dataServiceAny.isNotInIgnoredNames(
           getItemsFilter([], [], ["test"]),
@@ -526,7 +441,7 @@ describe("DataService", () => {
       );
     });
 
-    it("should return false if given name is ignored", () => {
+    it("2: should return false if given name is ignored", () => {
       assert.equal(
         dataServiceAny.isNotInIgnoredNames(
           getItemsFilter([], [], ["test"]),
@@ -538,21 +453,14 @@ describe("DataService", () => {
   });
 
   describe("fetchConfig", () => {
-    it("should fetch config", () => {
-      const getIncludeStub = sinon.stub(dataServiceAny.config, "getInclude");
-      const getExcludeStub = sinon.stub(dataServiceAny.config, "getExclude");
-      const shouldUseFilesAndSearchExcludeStub = sinon.stub(
-        dataServiceAny.config,
-        "shouldUseFilesAndSearchExclude"
-      );
-      const getFilesAndSearchExcludeStub = sinon.stub(
-        dataServiceAny.config,
-        "getFilesAndSearchExclude"
-      );
-      const getItemsFilterStub = sinon.stub(
-        dataServiceAny.config,
-        "getItemsFilter"
-      );
+    it("1: should fetch config", () => {
+      const [
+        getIncludeStub,
+        getExcludeStub,
+        shouldUseFilesAndSearchExcludeStub,
+        getFilesAndSearchExcludeStub,
+        getItemsFilterStub,
+      ] = setups.fetchConfig1();
       dataServiceAny.fetchConfig();
 
       assert.equal(getIncludeStub.calledOnce, true);
@@ -564,7 +472,7 @@ describe("DataService", () => {
   });
 
   describe("setCancelled", () => {
-    it("should set state of isCancelled to the given parameter value", () => {
+    it("1: should set state of isCancelled to the given parameter value", () => {
       dataServiceAny.setCancelled(true);
 
       assert.equal(dataServiceAny.isCancelled, true);
