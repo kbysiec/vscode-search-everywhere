@@ -61,6 +61,18 @@ export const getConfiguration = (): { [key: string]: any } => {
   };
 };
 
+export const getVscodeConfiguration = (configuration: {
+  [key: string]: any;
+}) => {
+  return {
+    get: (section: string) =>
+      section.split(".").reduce((cfg, key) => cfg[key], configuration),
+    has: () => true,
+    inspect: () => undefined,
+    update: () => Promise.resolve(),
+  };
+};
+
 export const getWorkspaceData = (items: vscode.Uri[] = []): WorkspaceData => {
   const itemsMap = new Map<string, Item>();
   items.forEach((item: vscode.Uri) =>

@@ -1,37 +1,32 @@
 import * as vscode from "vscode";
 import * as sinon from "sinon";
 import { assert } from "chai";
-import { getConfiguration } from "../util/mockFactory";
 import { getCacheStub } from "../util/stubFactory";
 import Config from "../../config";
 import Cache from "../../cache";
-import { restoreStubbedMultiple } from "../util/stubHelpers";
+import { getTestSetups } from "../testSetup/config.testSetup";
 
 describe("Config", () => {
-  let config: Config;
-  let configAny: any;
-  let cacheStub: Cache;
-  let getConfigurationStub: sinon.SinonStub;
   let configuration: { [key: string]: any };
-
-  before(() => {
-    getConfigurationStub = sinon
-      .stub(vscode.workspace, "getConfiguration")
-      .returns({
-        get: (section: string) =>
-          section.split(".").reduce((cfg, key) => cfg[key], configuration),
-        has: () => true,
-        inspect: () => undefined,
-        update: () => Promise.resolve(),
-      });
-  });
+  let getConfigurationStub: sinon.SinonStub;
+  let cacheStub: Cache = getCacheStub();
+  let config: Config = new Config(cacheStub);
+  let configAny: any;
+  let setups = getTestSetups(config);
 
   beforeEach(() => {
+    ({
+      configuration,
+      stubs: [getConfigurationStub],
+    } = setups.beforeEach());
     cacheStub = getCacheStub();
     config = new Config(cacheStub);
-    configuration = getConfiguration();
-
     configAny = config as any;
+    setups = getTestSetups(config);
+  });
+
+  afterEach(() => {
+    (vscode.workspace.getConfiguration as sinon.SinonStub).restore();
   });
 
   describe("shouldDisplayNotificationInStatusBar", () => {
@@ -180,17 +175,11 @@ describe("Config", () => {
 
     it(`2: should return array of exclude patterns
       from cache if it is not empty`, () => {
-      restoreStubbedMultiple([
-        { object: configAny.cache, method: "getConfigByKey" },
-      ]);
       const section = "searchEverywhere";
       const key = "exclude";
+      const [getConfigByKeyStub] = setups.get2(section, key);
 
-      const getConfigByKeyStub = sinon
-        .stub(configAny.cache, "getConfigByKey")
-        .returns(configuration[section][key]);
-
-      assert.equal(configAny.get(key, []), configuration[section][key]);
+      assert.deepEqual(configAny.get(key, []), configuration[section][key]);
       assert.equal(getConfigByKeyStub.calledOnce, true);
       assert.equal(getConfigurationStub.calledOnce, false);
     });

@@ -58,8 +58,8 @@ export const getTestSetups = (actionProcessor: ActionProcessor) => {
       ]);
 
       return {
-        action: action,
-        queue: queue,
+        action,
+        queue,
       };
 
       // return {
