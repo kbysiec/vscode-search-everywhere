@@ -13,59 +13,54 @@ import Utils from "../../utils";
 import Config from "../../config";
 import { getQpItems, getQpItem } from "../util/qpItemMockFactory";
 import { getDirectory, getItems } from "../util/itemMockFactory";
+import { getTestSetups } from "../testSetup/utils.testSetup";
 
 describe("Utils", () => {
-  let utils: Utils;
+  let configStub: Config = getConfigStub();
+  let utils: Utils = new Utils(configStub);
   let utilsAny: any;
-  let configStub: Config;
+  let setups = getTestSetups(utils);
 
-  before(() => {
+  beforeEach(() => {
     configStub = getConfigStub();
     utils = new Utils(configStub);
     utilsAny = utils as any;
-  });
-
-  afterEach(() => {
-    sinon.restore();
+    setups = getTestSetups(utils);
   });
 
   describe("hasWorkspaceAnyFolder", () => {
-    it("should return true if workspace contains at least one folder", () => {
-      sinon.stub(vscode.workspace, "workspaceFolders").value(["/#"]);
-
+    it("1: should return true if workspace contains at least one folder", () => {
+      setups.hasWorkspaceAnyFolder1();
       assert.equal(utils.hasWorkspaceAnyFolder(), true);
     });
 
-    it("should return false if workspace does not contain any folder", () => {
-      sinon.stub(vscode.workspace, "workspaceFolders").value([]);
-
+    it("2: should return false if workspace does not contain any folder", () => {
+      setups.hasWorkspaceAnyFolder2();
       assert.equal(utils.hasWorkspaceAnyFolder(), false);
     });
   });
 
   describe("hasWorkspaceMoreThanOneFolder", () => {
-    it("should return true if workspace contains more than one folder", () => {
-      sinon.stub(vscode.workspace, "workspaceFolders").value(["/#", "/test/#"]);
-
+    it("1: should return true if workspace contains more than one folder", () => {
+      setups.hasWorkspaceMoreThanOneFolder1();
       assert.equal(utils.hasWorkspaceMoreThanOneFolder(), true);
     });
 
-    it("should return false if workspace contains either one folder or any", () => {
-      sinon.stub(vscode.workspace, "workspaceFolders").value(["/#"]);
-
+    it("2: should return false if workspace contains either one folder or any", () => {
+      setups.hasWorkspaceMoreThanOneFolder2();
       assert.equal(utils.hasWorkspaceMoreThanOneFolder(), false);
     });
   });
 
   describe("hasWorkspaceChanged", () => {
-    it("should return true if amount of opened folders in workspace has changed", () => {
+    it("1: should return true if amount of opened folders in workspace has changed", () => {
       assert.equal(
         utils.hasWorkspaceChanged(getWorkspaceFoldersChangeEvent(true)),
         true
       );
     });
 
-    it("should return false if amount of opened folders in workspace has not changed", () => {
+    it("2: should return false if amount of opened folders in workspace has not changed", () => {
       assert.equal(
         utils.hasWorkspaceChanged(getWorkspaceFoldersChangeEvent(false)),
         false
@@ -74,11 +69,9 @@ describe("Utils", () => {
   });
 
   describe("shouldReindexOnConfigurationChange", () => {
-    it(`should return true if extension configuration has changed
+    it(`1: should return true if extension configuration has changed
       and is not excluded from refreshing`, () => {
-      sinon
-        .stub(utilsAny.config, "shouldUseFilesAndSearchExclude")
-        .returns(false);
+      setups.shouldReindexOnConfigurationChange1();
 
       assert.equal(
         utils.shouldReindexOnConfigurationChange(
@@ -88,11 +81,9 @@ describe("Utils", () => {
       );
     });
 
-    it(`should return false if extension configuration has changed
+    it(`2: should return false if extension configuration has changed
       but is excluded from refreshing`, () => {
-      sinon
-        .stub(utilsAny.config, "shouldUseFilesAndSearchExclude")
-        .returns(false);
+      setups.shouldReindexOnConfigurationChange2();
 
       assert.equal(
         utils.shouldReindexOnConfigurationChange(
@@ -102,10 +93,8 @@ describe("Utils", () => {
       );
     });
 
-    it("should return false if extension configuration has not changed", () => {
-      sinon
-        .stub(utilsAny.config, "shouldUseFilesAndSearchExclude")
-        .returns(false);
+    it("3: should return false if extension configuration has not changed", () => {
+      setups.shouldReindexOnConfigurationChange3();
 
       assert.equal(
         utils.shouldReindexOnConfigurationChange(
@@ -115,11 +104,9 @@ describe("Utils", () => {
       );
     });
 
-    it(`should return true if shouldUseFilesAndSearchExclude is true
+    it(`4: should return true if shouldUseFilesAndSearchExclude is true
       configuration has changed and files.exclude has changed`, () => {
-      sinon
-        .stub(utilsAny.config, "shouldUseFilesAndSearchExclude")
-        .returns(true);
+      setups.shouldReindexOnConfigurationChange4();
 
       assert.equal(
         utils.shouldReindexOnConfigurationChange(
@@ -129,11 +116,9 @@ describe("Utils", () => {
       );
     });
 
-    it(`should return true if shouldUseFilesAndSearchExclude is true
+    it(`5: should return true if shouldUseFilesAndSearchExclude is true
       configuration has changed and search.exclude has changed`, () => {
-      sinon
-        .stub(utilsAny.config, "shouldUseFilesAndSearchExclude")
-        .returns(true);
+      setups.shouldReindexOnConfigurationChange5();
 
       assert.equal(
         utils.shouldReindexOnConfigurationChange(
@@ -145,7 +130,7 @@ describe("Utils", () => {
   });
 
   describe("isDebounceConfigurationToggled", () => {
-    it(`should return true if extension configuration
+    it(`1: should return true if extension configuration
       related to debounce setting has changed`, () => {
       assert.equal(
         utils.isDebounceConfigurationToggled(
@@ -155,7 +140,7 @@ describe("Utils", () => {
       );
     });
 
-    it(`should return false if extension configuration
+    it(`2: should return false if extension configuration
       related to debounce setting has not changed`, () => {
       assert.equal(
         utils.isDebounceConfigurationToggled(
@@ -167,11 +152,8 @@ describe("Utils", () => {
   });
 
   describe("printNoFolderOpenedMessage", () => {
-    it("should display notification", async () => {
-      const showInformationMessageStub = sinon.stub(
-        vscode.window,
-        "showInformationMessage"
-      );
+    it("1: should display notification", async () => {
+      const [showInformationMessageStub] = setups.printNoFolderOpenedMessage1();
       utils.printNoFolderOpenedMessage();
 
       assert.equal(showInformationMessageStub.calledOnce, true);
@@ -179,11 +161,8 @@ describe("Utils", () => {
   });
 
   describe("printErrorMessage", () => {
-    it("should display notification", async () => {
-      const showInformationMessageStub = sinon.stub(
-        vscode.window,
-        "showInformationMessage"
-      );
+    it("1: should display notification", async () => {
+      const [showInformationMessageStub] = setups.printNoFolderOpenedMessage2();
       utils.printErrorMessage(new Error("test error message"));
 
       assert.equal(showInformationMessageStub.calledOnce, true);
@@ -191,13 +170,13 @@ describe("Utils", () => {
   });
 
   describe("createWorkspaceData", () => {
-    it("should create workspaceData object", () => {
+    it("1: should create workspaceData object", () => {
       assert.deepEqual(utils.createWorkspaceData(), getWorkspaceData());
     });
   });
 
   describe("clearWorkspaceData", () => {
-    it("should clear workspaceData object", () => {
+    it("1: should clear workspaceData object", () => {
       const items = getItems();
       const workspaceData = getWorkspaceData(items);
 
@@ -208,13 +187,13 @@ describe("Utils", () => {
   });
 
   describe("getSplitter", () => {
-    it("should return splitter string", () => {
+    it("1: should return splitter string", () => {
       assert.equal(utils.getSplitter(), "§&§");
     });
   });
 
   describe("getUrisForDirectoryPathUpdate", () => {
-    it(`should return uris containing renamed directory
+    it(`1: should return uris containing renamed directory
       name and file symbol kind`, async () => {
       const qpItems = getQpItems();
       qpItems[1] = getQpItem("./test/fake-files/", 2);
@@ -230,7 +209,7 @@ describe("Utils", () => {
   });
 
   describe("updateUrisWithNewDirectoryName", () => {
-    it("should return vscode.Uri[] with updated directory path", () => {
+    it("1: should return vscode.Uri[] with updated directory path", () => {
       assert.deepEqual(
         utils.updateUrisWithNewDirectoryName(
           getItems(),
@@ -241,7 +220,7 @@ describe("Utils", () => {
       );
     });
 
-    it(`should return unchanged vscode.Uri[]
+    it(`2: should return unchanged vscode.Uri[]
       if old directory path does not exist in workspace`, () => {
       assert.deepEqual(
         utils.updateUrisWithNewDirectoryName(
@@ -255,11 +234,9 @@ describe("Utils", () => {
   });
 
   describe("getNotificationLocation", () => {
-    it(`should return vscode.ProgressLocation.Window
+    it(`1: should return vscode.ProgressLocation.Window
       if shouldDisplayNotificationInStatusBar is true`, () => {
-      sinon
-        .stub(utilsAny.config, "shouldDisplayNotificationInStatusBar")
-        .returns(true);
+      setups.getNotificationLocation1();
 
       assert.equal(
         utils.getNotificationLocation(),
@@ -267,11 +244,9 @@ describe("Utils", () => {
       );
     });
 
-    it(`should return vscode.ProgressLocation.Window
+    it(`2: should return vscode.ProgressLocation.Window
       if shouldDisplayNotificationInStatusBar is false`, () => {
-      sinon
-        .stub(utilsAny.config, "shouldDisplayNotificationInStatusBar")
-        .returns(false);
+      setups.getNotificationLocation2();
 
       assert.equal(
         utils.getNotificationLocation(),
@@ -281,20 +256,15 @@ describe("Utils", () => {
   });
 
   describe("getNotificationTitle", () => {
-    it(`should return string 'Indexing...'
+    it(`1: should return string 'Indexing...'
       if shouldDisplayNotificationInStatusBar is true`, () => {
-      sinon
-        .stub(utilsAny.config, "shouldDisplayNotificationInStatusBar")
-        .returns(true);
-
+      setups.getNotificationTitle1();
       assert.equal(utils.getNotificationTitle(), "Indexing...");
     });
 
-    it(`should return string 'Indexing workspace files and symbols...'
+    it(`2: should return string 'Indexing workspace files and symbols...'
       if shouldDisplayNotificationInStatusBar is false`, () => {
-      sinon
-        .stub(utilsAny.config, "shouldDisplayNotificationInStatusBar")
-        .returns(false);
+      setups.getNotificationTitle2();
 
       assert.equal(
         utils.getNotificationTitle(),
@@ -304,7 +274,7 @@ describe("Utils", () => {
   });
 
   describe("sleep", () => {
-    it("should be fulfilled", async () => {
+    it("1: should be fulfilled", async () => {
       const clock = sinon.useFakeTimers();
       let fulfilled = false;
       const sleepPromise = utils.sleep(1000);
@@ -326,7 +296,7 @@ describe("Utils", () => {
   });
 
   describe("countWordInstances", () => {
-    it("should count word instances in given text", () => {
+    it("1: should count word instances in given text", () => {
       const instances = utils.countWordInstances(
         "test string with xxxtestxxx value",
         "test"
@@ -336,7 +306,7 @@ describe("Utils", () => {
   });
 
   describe("getNthIndex", () => {
-    it("should return index of second occurrence of word in given text", () => {
+    it("1: should return index of second occurrence of word in given text", () => {
       const index = utils.getNthIndex(
         "test string with xxxtestxxx value",
         "test",
@@ -345,14 +315,14 @@ describe("Utils", () => {
       assert.equal(index, 20);
     });
 
-    it("should return -1 if word does not occur in given text", () => {
+    it("2: should return -1 if word does not occur in given text", () => {
       const index = utils.getNthIndex("string with value", "test", 2);
       assert.equal(index, -1);
     });
   });
 
   describe("getLastFromArray", () => {
-    it("should return last element from array fulfilling given predicate", () => {
+    it("1: should return last element from array fulfilling given predicate", () => {
       const lastAction = getAction(ActionType.Rebuild, "test action 3", 3);
       const actual = utils.getLastFromArray(
         [
@@ -366,7 +336,7 @@ describe("Utils", () => {
       assert.deepEqual(actual, lastAction);
     });
 
-    it("should return undefined if given predicated is not fulfilled", () => {
+    it("2: should return undefined if given predicated is not fulfilled", () => {
       const last = utils.getLastFromArray(
         [
           getAction(ActionType.Rebuild, "test action 1", 1),
@@ -381,7 +351,7 @@ describe("Utils", () => {
   });
 
   describe("groupBy", () => {
-    it("should return map containing grouped array", () => {
+    it("1: should return map containing grouped array", () => {
       const actions = [
         getAction(ActionType.Rebuild, "test action 1", 1),
         getAction(ActionType.Remove, "test action 2", 2),
