@@ -28,6 +28,7 @@ import Cache from "../../cache";
 import Utils from "../../utils";
 import Config from "../../config";
 import Workspace from "../../workspace";
+import { restoreStubbedMultiple } from "../util/stubHelpers";
 
 describe("Workspace", () => {
   let workspace: Workspace;
@@ -46,14 +47,13 @@ describe("Workspace", () => {
       .value(configuration.exclude);
   };
 
-  before(() => {
+  before(() => {});
+
+  beforeEach(() => {
     cacheStub = getCacheStub();
     utilsStub = getUtilsStub();
     configStub = getConfigStub();
     workspace = new Workspace(cacheStub, utilsStub, configStub);
-  });
-
-  beforeEach(() => {
     workspaceAny = workspace as any;
   });
 
@@ -117,6 +117,12 @@ describe("Workspace", () => {
 
   describe("getData", () => {
     it("should cache.getData method be invoked", () => {
+      restoreStubbedMultiple([
+        {
+          object: workspaceAny.cache,
+          method: "getData",
+        },
+      ]);
       const getDataStub = sinon
         .stub(workspaceAny.cache, "getData")
         .returns(Promise.resolve(getItems()));
@@ -130,6 +136,12 @@ describe("Workspace", () => {
   describe("indexWithProgress", () => {
     it(`should vscode.window.withProgress method be invoked
       if workspace has opened at least one folder`, async () => {
+      restoreStubbedMultiple([
+        {
+          object: workspaceAny.utils,
+          method: "hasWorkspaceAnyFolder",
+        },
+      ]);
       sinon.stub(workspaceAny.utils, "hasWorkspaceAnyFolder").returns(true);
       const withProgressStub = sinon.stub(vscode.window, "withProgress");
       await workspaceAny.indexWithProgress();
@@ -138,6 +150,16 @@ describe("Workspace", () => {
 
     it(`should printNoFolderOpenedMessage method be invoked
       if workspace does not has opened at least one folder`, async () => {
+      restoreStubbedMultiple([
+        {
+          object: workspaceAny.utils,
+          method: "hasWorkspaceAnyFolder",
+        },
+        {
+          object: workspaceAny.utils,
+          method: "printNoFolderOpenedMessage",
+        },
+      ]);
       sinon.stub(workspaceAny.utils, "hasWorkspaceAnyFolder").returns(false);
       const printNoFolderOpenedMessageStub = sinon.stub(
         workspaceAny.utils,
@@ -150,6 +172,12 @@ describe("Workspace", () => {
 
   describe("indexWithProgressTask", () => {
     it(`should index, resetProgress and utils.sleep methods be invoked`, async () => {
+      restoreStubbedMultiple([
+        {
+          object: workspaceAny.utils,
+          method: "sleep",
+        },
+      ]);
       const subscription = getSubscription();
       const onDidItemIndexedStub = sinon
         .stub(workspaceAny.dataService, "onDidItemIndexed")
@@ -171,8 +199,17 @@ describe("Workspace", () => {
 
   describe("indexWorkspace", () => {
     it("should reset cache to initial empty state", async () => {
+      restoreStubbedMultiple([
+        {
+          object: workspaceAny.cache,
+          method: "clear",
+        },
+      ]);
       stubDataServiceConfig();
       const clearStub = sinon.stub(workspaceAny.cache, "clear");
+      sinon
+        .stub(workspaceAny.dataService, "fetchData")
+        .returns(getWorkspaceData());
       await workspaceAny.indexWorkspace();
 
       assert.equal(clearStub.calledOnce, true);
@@ -186,6 +223,12 @@ describe("Workspace", () => {
     });
 
     it("should update cache with indexed workspace files", async () => {
+      restoreStubbedMultiple([
+        {
+          object: workspaceAny.cache,
+          method: "updateData",
+        },
+      ]);
       const updateDataStub = sinon.stub(workspaceAny.cache, "updateData");
       sinon.stub(workspaceAny, "downloadData").returns(getQpItems());
       await workspaceAny.indexWorkspace();
@@ -210,6 +253,12 @@ describe("Workspace", () => {
   describe("updateCacheByPath", () => {
     it(`should remove old data for given uri and get
       new data if exists in workspace`, async () => {
+      restoreStubbedMultiple([
+        {
+          object: workspaceAny.cache,
+          method: "updateData",
+        },
+      ]);
       sinon
         .stub(workspaceAny.dataService, "isUriExistingInWorkspace")
         .returns(Promise.resolve(true));
@@ -229,12 +278,26 @@ describe("Workspace", () => {
 
     it(`should find items with old uris, replace the path
       with new uri after directory renaming`, async () => {
+      restoreStubbedMultiple([
+        {
+          object: workspaceAny.cache,
+          method: "updateData",
+        },
+        {
+          object: workspaceAny.utils,
+          method: "updateUrisWithNewDirectoryName",
+        },
+      ]);
       sinon
         .stub(workspaceAny.dataService, "isUriExistingInWorkspace")
         .returns(Promise.resolve(false));
-
-      workspaceAny.urisForDirectoryPathUpdate = getItems(1);
-      workspaceAny.directoryUriBeforePathUpdate = getDirectory("./fake/");
+      sinon
+        .stub(workspaceAny, "directoryUriBeforePathUpdate")
+        .value(getDirectory("./fake/"));
+      sinon.stub(workspaceAny, "urisForDirectoryPathUpdate").value(getItems(1));
+      sinon
+        .stub(workspaceAny.utils, "updateUrisWithNewDirectoryName")
+        .returns(getItems(1, "./test/fake-files/"));
 
       const downloadDataStub = sinon
         .stub(workspaceAny, "downloadData")
@@ -259,6 +322,12 @@ describe("Workspace", () => {
 
     it(`should do nothing if for given directory uri
       there is not any item for replace the path`, async () => {
+      restoreStubbedMultiple([
+        {
+          object: workspaceAny.cache,
+          method: "updateData",
+        },
+      ]);
       sinon
         .stub(workspaceAny.dataService, "isUriExistingInWorkspace")
         .returns(Promise.resolve(false));
@@ -285,6 +354,12 @@ describe("Workspace", () => {
 
   describe("removeFromCacheByPath", () => {
     it("should do nothing if getData method returns undefined", async () => {
+      restoreStubbedMultiple([
+        {
+          object: workspaceAny.cache,
+          method: "updateData",
+        },
+      ]);
       stubDataServiceConfig();
       sinon.stub(workspaceAny, "getData").returns(undefined);
       const updateDataStub = sinon.stub(workspaceAny.cache, "updateData");
@@ -295,6 +370,12 @@ describe("Workspace", () => {
     });
 
     it("should remove given item from stored data", async () => {
+      restoreStubbedMultiple([
+        {
+          object: workspaceAny.cache,
+          method: "updateData",
+        },
+      ]);
       const updateDataStub = sinon.stub(workspaceAny.cache, "updateData");
       sinon.stub(workspaceAny, "getData").returns(getQpItems());
       sinon
@@ -311,6 +392,12 @@ describe("Workspace", () => {
 
     it(`should remove items from stored data for
       given renamed directory uri`, async () => {
+      restoreStubbedMultiple([
+        {
+          object: workspaceAny.cache,
+          method: "updateData",
+        },
+      ]);
       const updateDataStub = sinon.stub(workspaceAny.cache, "updateData");
       sinon.stub(workspaceAny, "getData").returns(getQpItems());
       sinon
@@ -412,6 +499,12 @@ describe("Workspace", () => {
   describe("onDidChangeConfiguration", () => {
     it(`should index method be invoked which register
       rebuild action if extension configuration has changed`, async () => {
+      restoreStubbedMultiple([
+        {
+          object: workspaceAny.utils,
+          method: "shouldReindexOnConfigurationChange",
+        },
+      ]);
       sinon
         .stub(workspaceAny.utils, "shouldReindexOnConfigurationChange")
         .returns(true);
@@ -425,6 +518,16 @@ describe("Workspace", () => {
 
     it(`should index method be invoked which register
     rebuild action if isDebounceConfigurationToggled is true`, async () => {
+      restoreStubbedMultiple([
+        {
+          object: workspaceAny.utils,
+          method: "shouldReindexOnConfigurationChange",
+        },
+        {
+          object: workspaceAny.utils,
+          method: "isDebounceConfigurationToggled",
+        },
+      ]);
       sinon
         .stub(workspaceAny.utils, "shouldReindexOnConfigurationChange")
         .returns(false);
@@ -443,6 +546,16 @@ describe("Workspace", () => {
     });
 
     it("should do nothing if extension configuration has not changed", async () => {
+      restoreStubbedMultiple([
+        {
+          object: workspaceAny.utils,
+          method: "shouldReindexOnConfigurationChange",
+        },
+        {
+          object: workspaceAny.utils,
+          method: "isDebounceConfigurationToggled",
+        },
+      ]);
       sinon
         .stub(workspaceAny.utils, "shouldReindexOnConfigurationChange")
         .returns(false);
@@ -463,6 +576,9 @@ describe("Workspace", () => {
     });
 
     it("should cache.clearConfig method be invoked", async () => {
+      restoreStubbedMultiple([
+        { object: workspaceAny.cache, method: "clearConfig" },
+      ]);
       const clearConfigStub = sinon.stub(workspaceAny.cache, "clearConfig");
       await workspaceAny.onDidChangeConfiguration(
         getConfigurationChangeEvent(true)
@@ -475,6 +591,9 @@ describe("Workspace", () => {
   describe("onDidChangeWorkspaceFolders", () => {
     it(`should index method be invoked which register
       rebuild action if amount of opened folders in workspace has changed`, async () => {
+      restoreStubbedMultiple([
+        { object: workspaceAny.utils, method: "hasWorkspaceChanged" },
+      ]);
       sinon.stub(workspaceAny.utils, "hasWorkspaceChanged").returns(true);
       const indexStub = sinon.stub(workspaceAny, "index");
       await workspaceAny.onDidChangeWorkspaceFolders(
@@ -485,6 +604,9 @@ describe("Workspace", () => {
     });
 
     it("should do nothing if extension configuration has not changed", async () => {
+      restoreStubbedMultiple([
+        { object: workspaceAny.utils, method: "hasWorkspaceChanged" },
+      ]);
       sinon.stub(workspaceAny.utils, "hasWorkspaceChanged").returns(false);
       const registerActionStub = sinon.stub(workspaceAny, "registerAction");
       await workspaceAny.onDidChangeWorkspaceFolders(
@@ -535,6 +657,9 @@ describe("Workspace", () => {
   describe("onDidRenameFiles", () => {
     it(`should registerAction method be invoked which register remove
       action if workspace contains more than one folder`, async () => {
+      restoreStubbedMultiple([
+        { object: workspaceAny.utils, method: "hasWorkspaceMoreThanOneFolder" },
+      ]);
       sinon
         .stub(workspaceAny.utils, "hasWorkspaceMoreThanOneFolder")
         .returns(true);
@@ -546,6 +671,9 @@ describe("Workspace", () => {
     });
 
     it("should do nothing if workspace contains either one folder or any", async () => {
+      restoreStubbedMultiple([
+        { object: workspaceAny.utils, method: "hasWorkspaceMoreThanOneFolder" },
+      ]);
       sinon
         .stub(workspaceAny.utils, "hasWorkspaceMoreThanOneFolder")
         .returns(false);

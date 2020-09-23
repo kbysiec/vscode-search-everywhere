@@ -19,8 +19,8 @@ class Workspace {
   private dataConverter!: DataConverter;
   private actionProcessor!: ActionProcessor;
 
-  private urisForDirectoryPathUpdate?: vscode.Uri[];
-  private directoryUriBeforePathUpdate?: vscode.Uri;
+  private urisForDirectoryPathUpdate: vscode.Uri[] | null = null;
+  private directoryUriBeforePathUpdate?: vscode.Uri | null = null;
   private fileKind: number = 0;
 
   private progressStep: number = 0;
@@ -147,6 +147,7 @@ class Workspace {
             this.directoryUriBeforePathUpdate!,
             uri
           );
+
           data = await this.downloadData(urisWithNewDirectoryName);
           data = this.mergeWithDataFromCache(data);
           this.cache.updateData(data);
@@ -193,8 +194,8 @@ class Workspace {
   }
 
   private cleanDirectoryRenamingData() {
-    this.directoryUriBeforePathUpdate = undefined;
-    this.urisForDirectoryPathUpdate = undefined;
+    this.directoryUriBeforePathUpdate = null;
+    this.urisForDirectoryPathUpdate = null;
   }
 
   private async registerAction(
