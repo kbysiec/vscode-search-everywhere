@@ -9,7 +9,7 @@ import * as mock from "../mock/dataConverter.mock";
 export const getTestSetups = (dataConverter: DataConverter) => {
   const dataConverterAny = dataConverter as any;
 
-  let stubConfig = (
+  const stubConfig = (
     icons: Icons = {},
     shouldUseItemsFilterPhrases: boolean = false,
     itemsFilterPhrases: ItemsFilterPhrases = {}

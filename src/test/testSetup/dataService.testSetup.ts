@@ -15,7 +15,7 @@ import { restoreStubbedMultiple, stubMultiple } from "../util/stubHelpers";
 export const getTestSetups = (dataService: DataService) => {
   const dataServiceAny = dataService as any;
 
-  let stubConfig = (
+  const stubConfig = (
     includePatterns: string = "",
     excludePatterns: string[] = [],
     shouldUseFilesAndSearchExclude: boolean = false,
