@@ -2,7 +2,6 @@ import * as vscode from "vscode";
 import * as sinon from "sinon";
 import { assert } from "chai";
 import { getUntitledItem } from "../util/itemMockFactory";
-import { getQuickPickOnDidChangeValueEventListeners } from "../util/eventMockFactory";
 import {
   getQpItems,
   getQpHelpItems,
@@ -11,35 +10,27 @@ import {
   getQpHelpItem,
 } from "../util/qpItemMockFactory";
 import { getConfigStub } from "../util/stubFactory";
-import QuickPickItem from "../../interface/quickPickItem";
 import QuickPick from "../../quickPick";
 import Config from "../../config";
+import { getTestSetups } from "../testSetup/quickPick.testSetup";
 
 describe("QuickPick", () => {
-  let quickPick: QuickPick;
+  let configStub: Config = getConfigStub();
+  let quickPick: QuickPick = new QuickPick(configStub);
   let quickPickAny: any;
-  let configStub: Config;
-
-  before(() => {
-    configStub = getConfigStub();
-    quickPick = new QuickPick(configStub);
-  });
+  let setups = getTestSetups(quickPick);
 
   beforeEach(() => {
+    configStub = getConfigStub();
+    quickPick = new QuickPick(configStub);
     quickPickAny = quickPick as any;
-  });
-
-  afterEach(() => {
-    sinon.restore();
+    quickPick.init();
+    setups = getTestSetups(quickPick);
   });
 
   describe("init", () => {
-    it("should vscode quick pick be created", () => {
-      const quickPickInner = vscode.window.createQuickPick<QuickPickItem>();
-      const createQuickPickStub = sinon
-        .stub(vscode.window, "createQuickPick")
-        .returns(quickPickInner);
-
+    it("1: should vscode quick pick be created", () => {
+      const [createQuickPickStub] = setups.init1();
       quickPick.init();
 
       assert.equal(createQuickPickStub.calledOnce, true);
@@ -47,16 +38,12 @@ describe("QuickPick", () => {
   });
 
   describe("reloadOnDidChangeValueEventListener", () => {
-    it(`should disposeOnDidChangeValueEventListeners
+    it(`1: should disposeOnDidChangeValueEventListeners
       and registerOnDidChangeValueEventListeners methods be invoked`, () => {
-      const disposeOnDidChangeValueEventListenersStub = sinon.stub(
-        quickPickAny,
-        "disposeOnDidChangeValueEventListeners"
-      );
-      const registerOnDidChangeValueEventListenersStub = sinon.stub(
-        quickPickAny,
-        "registerOnDidChangeValueEventListeners"
-      );
+      const [
+        disposeOnDidChangeValueEventListenersStub,
+        registerOnDidChangeValueEventListenersStub,
+      ] = setups.reloadOnDidChangeValueEventListener1();
       quickPick.reloadOnDidChangeValueEventListener();
 
       assert.equal(disposeOnDidChangeValueEventListenersStub.calledOnce, true);
@@ -65,10 +52,8 @@ describe("QuickPick", () => {
   });
 
   describe("reload", () => {
-    it("should fetchConfig and fetchHelpData methods be invoked", () => {
-      const fetchConfigStub = sinon.stub(quickPickAny, "fetchConfig");
-      const fetchHelpDataStub = sinon.stub(quickPickAny, "fetchHelpData");
-
+    it("1: should fetchConfig and fetchHelpData methods be invoked", () => {
+      const [fetchConfigStub, fetchHelpDataStub] = setups.reload1();
       quickPick.reload();
 
       assert.equal(fetchConfigStub.calledOnce, true);
@@ -77,25 +62,21 @@ describe("QuickPick", () => {
   });
 
   describe("isInitialized", () => {
-    it("should return true if vscode quick pick is initialized", () => {
-      const quickPickInner = vscode.window.createQuickPick<QuickPickItem>();
-      sinon.stub(quickPickAny, "quickPick").value(quickPickInner);
-
+    it("1: should return true if vscode quick pick is initialized", () => {
+      setups.isInitialized1();
       assert.equal(quickPick.isInitialized(), true);
     });
 
-    it("should return false if vscode quick pick is initialized", () => {
-      sinon.stub(quickPickAny, "quickPick").value(undefined);
-
+    it("2: should return false if vscode quick pick is not initialized", () => {
+      setups.isInitialized2();
       assert.equal(quickPick.isInitialized(), false);
     });
   });
 
   describe("show", () => {
-    it(`should vscode.quickPick.show method be invoked
+    it(`1: should vscode.quickPick.show method be invoked
     if quick pick is initialized`, () => {
-      sinon.stub(quickPick, "isInitialized").returns(true);
-      const showStub = sinon.stub(quickPickAny.quickPick, "show");
+      const [showStub] = setups.show1();
       quickPick.show();
 
       assert.equal(showStub.calledOnce, true);
@@ -103,17 +84,15 @@ describe("QuickPick", () => {
   });
 
   describe("loadItems", () => {
-    it("should items be loaded", () => {
-      const items = getQpItems();
-      sinon.stub(quickPickAny, "items").value(items);
+    it("1: should items be loaded", () => {
+      const items = setups.loadItems1();
       quickPick.loadItems();
 
       assert.deepEqual(quickPickAny.quickPick.items, items);
     });
 
-    it("should help items be loaded", () => {
-      const helpItems = getQpHelpItems();
-      sinon.stub(quickPickAny, "helpItems").value(helpItems);
+    it("2: should help items be loaded", () => {
+      const helpItems = setups.loadItems2();
       quickPick.loadItems(true);
 
       assert.deepEqual(quickPickAny.quickPick.items, helpItems);
@@ -121,15 +100,15 @@ describe("QuickPick", () => {
   });
 
   describe("setItems", () => {
-    it("should items be set", () => {
+    it("1: should items be set", () => {
       quickPick.setItems(getQpItems());
 
-      assert.equal(quickPickAny.quickPick.items.length, 2);
+      assert.equal(quickPickAny.items.length, 2);
     });
   });
 
   describe("showLoading", () => {
-    it("should vscode.quickPick.busy property be set", () => {
+    it("1: should vscode.quickPick.busy property be set", () => {
       quickPick.showLoading(true);
 
       assert.equal(quickPickAny.quickPick.busy, true);
@@ -137,7 +116,7 @@ describe("QuickPick", () => {
   });
 
   describe("setText", () => {
-    it("should text be set", () => {
+    it("1: should text be set", () => {
       const text = "test text";
       quickPick.setText(text);
 
@@ -146,7 +125,7 @@ describe("QuickPick", () => {
   });
 
   describe("setPlaceholder", () => {
-    it("should set placeholder to loading text", () => {
+    it("1: should set placeholder to loading text", () => {
       quickPick.setPlaceholder(true);
       assert.equal(
         quickPickAny.quickPick.placeholder,
@@ -154,9 +133,8 @@ describe("QuickPick", () => {
       );
     });
 
-    it("should set placeholder to searching text if shouldUseItemsFilterPhrase is false", () => {
-      sinon.stub(quickPickAny, "shouldUseItemsFilterPhrases").value(false);
-
+    it("2: should set placeholder to searching text if shouldUseItemsFilterPhrase is false", () => {
+      setups.setPlaceholder2();
       quickPick.setPlaceholder(false);
 
       assert.equal(
@@ -165,10 +143,8 @@ describe("QuickPick", () => {
       );
     });
 
-    it("should set placeholder to help text if shouldUseItemsFilterPhrase is true", () => {
-      sinon.stub(quickPickAny, "shouldUseItemsFilterPhrases").value(true);
-      sinon.stub(quickPickAny, "helpPhrase").value("?");
-
+    it("3: should set placeholder to help text if shouldUseItemsFilterPhrase is true", () => {
+      setups.setPlaceholder3();
       quickPick.setPlaceholder(false);
 
       assert.equal(
@@ -177,11 +153,9 @@ describe("QuickPick", () => {
       );
     });
 
-    it(`should change quick pick placeholder to help text with not set help phrase
+    it(`4: should change quick pick placeholder to help text with not set help phrase
       if shouldUseItemsFilterPhrase is true`, () => {
-      sinon.stub(quickPickAny, "shouldUseItemsFilterPhrases").value(true);
-      sinon.stub(quickPickAny, "helpPhrase").value("");
-
+      setups.setPlaceholder4();
       quickPick.setPlaceholder(false);
 
       assert.equal(
@@ -192,11 +166,9 @@ describe("QuickPick", () => {
   });
 
   describe("disposeOnDidChangeValueEventListeners", () => {
-    it(`should dispose all onDidChangeValue event listeners
+    it(`1: should dispose all onDidChangeValue event listeners
       and reset the array for them`, () => {
-      sinon
-        .stub(quickPickAny, "onDidChangeValueEventListeners")
-        .value(getQuickPickOnDidChangeValueEventListeners());
+      setups.disposeOnDidChangeValueEventListeners1();
       quickPickAny.disposeOnDidChangeValueEventListeners();
 
       assert.equal(quickPickAny.onDidChangeValueEventListeners.length, 0);
@@ -204,27 +176,17 @@ describe("QuickPick", () => {
   });
 
   describe("registerOnDidChangeValueEventListeners", () => {
-    it(`should register one event listener if shouldUseDebounce
+    it(`1: should register one event listener if shouldUseDebounce
       returns false`, () => {
-      const onDidChangeValueEventListeners: vscode.Disposable[] = [];
-      sinon
-        .stub(quickPickAny, "onDidChangeValueEventListeners")
-        .value(onDidChangeValueEventListeners);
-      sinon.stub(quickPickAny.config, "shouldUseDebounce").returns(false);
-
+      setups.registerOnDidChangeValueEventListeners1();
       quickPickAny.registerOnDidChangeValueEventListeners();
 
       assert.equal(quickPickAny.onDidChangeValueEventListeners.length, 1);
     });
 
-    it(`should register two event listeners if shouldUseDebounce
+    it(`2: should register two event listeners if shouldUseDebounce
       returns true`, () => {
-      const onDidChangeValueEventListeners: vscode.Disposable[] = [];
-      sinon
-        .stub(quickPickAny, "onDidChangeValueEventListeners")
-        .value(onDidChangeValueEventListeners);
-      sinon.stub(quickPickAny.config, "shouldUseDebounce").returns(true);
-
+      setups.registerOnDidChangeValueEventListeners2();
       quickPickAny.registerOnDidChangeValueEventListeners();
 
       assert.equal(quickPickAny.onDidChangeValueEventListeners.length, 2);
@@ -232,15 +194,15 @@ describe("QuickPick", () => {
   });
 
   describe("submit", () => {
-    it("should openSelected method be invoked with selected item as argument", () => {
-      const openSelectedStub = sinon.stub(quickPickAny, "openSelected");
+    it("1: should openSelected method be invoked with selected item as argument", () => {
+      const [openSelectedStub] = setups.submit1();
       quickPickAny.submit(getQpItem());
 
       assert.equal(openSelectedStub.calledWith(getQpItem()), true);
     });
 
-    it("should openSelected method not be invoked without selected item as argument", () => {
-      const openSelectedStub = sinon.stub(quickPickAny, "openSelected");
+    it("2: should openSelected method not be invoked without selected item as argument", () => {
+      const [openSelectedStub] = setups.submit2();
       quickPickAny.submit(undefined);
 
       assert.equal(openSelectedStub.calledOnce, false);
@@ -253,12 +215,18 @@ describe("QuickPick", () => {
     let selectQpItemStub: sinon.SinonStub;
 
     beforeEach(() => {
-      openTextDocumentStub = sinon.stub(vscode.workspace, "openTextDocument");
-      showTextDocumentStub = sinon.stub(vscode.window, "showTextDocument");
-      selectQpItemStub = sinon.stub(quickPickAny, "selectQpItem");
+      [
+        openTextDocumentStub,
+        showTextDocumentStub,
+        selectQpItemStub,
+      ] = setups.openSelectedBeforeEach();
     });
 
-    it("should open selected qpItem with uri scheme equals to 'file'", async () => {
+    afterEach(() => {
+      setups.openSelectedAfterEach();
+    });
+
+    it("1: should open selected qpItem with uri scheme equals to 'file'", async () => {
       await quickPickAny.openSelected(getQpItem());
 
       assert.equal(openTextDocumentStub.calledOnce, true);
@@ -266,7 +234,7 @@ describe("QuickPick", () => {
       assert.equal(selectQpItemStub.calledOnce, true);
     });
 
-    it("should open selected qpItem with uri scheme equals to 'untitled'", async () => {
+    it("2: should open selected qpItem with uri scheme equals to 'untitled'", async () => {
       await quickPickAny.openSelected(getUntitledQpItem());
 
       assert.equal(openTextDocumentStub.calledOnce, true);
@@ -274,13 +242,9 @@ describe("QuickPick", () => {
       assert.equal(selectQpItemStub.calledOnce, true);
     });
 
-    it(`should set text to selected items filter phrase
+    it(`3: should set text to selected items filter phrase
        if given item is help item`, async () => {
-      sinon.stub(quickPickAny, "shouldUseItemsFilterPhrases").value(true);
-      sinon.stub(quickPickAny, "itemsFilterPhrases").value({ "0": "$$" });
-      const setTextStub = sinon.stub(quickPickAny, "setText");
-      const loadItemsStub = sinon.stub(quickPickAny, "loadItems");
-
+      const [setTextStub, loadItemsStub] = setups.openSelected3();
       await quickPickAny.openSelected(getQpHelpItem("?", "0", "$$"));
 
       assert.equal(setTextStub.calledWith("$$"), true);
@@ -289,12 +253,8 @@ describe("QuickPick", () => {
   });
 
   describe("selectQpItem", () => {
-    it("should editor.revealRange method be called", async () => {
-      const document = await vscode.workspace.openTextDocument(
-        getUntitledItem()
-      );
-      const editor = await vscode.window.showTextDocument(document);
-      const editorRevealRangeStub = sinon.stub(editor, "revealRange");
+    it("1: should editor.revealRange method be called", async () => {
+      const { editor, editorRevealRangeStub } = await setups.selectQpItem1();
       await quickPickAny.selectQpItem(editor, getQpItem());
 
       assert.equal(editorRevealRangeStub.calledOnce, true);
@@ -304,8 +264,8 @@ describe("QuickPick", () => {
       );
     });
 
-    it("should select symbol if config.shouldHighlightSymbol returns true", async () => {
-      sinon.stub(quickPickAny.config, "shouldHighlightSymbol").returns(true);
+    it("2: should select symbol if config.shouldHighlightSymbol returns true", async () => {
+      setups.selectQpItem2();
       const document = await vscode.workspace.openTextDocument(
         getUntitledItem()
       );
@@ -325,8 +285,8 @@ describe("QuickPick", () => {
       );
     });
 
-    it("should select symbol if config.shouldHighlightSymbol returns false", async () => {
-      sinon.stub(quickPickAny.config, "shouldHighlightSymbol").returns(false);
+    it("3: should select symbol if config.shouldHighlightSymbol returns false", async () => {
+      setups.selectQpItem3();
       const document = await vscode.workspace.openTextDocument(
         getUntitledItem()
       );
@@ -345,19 +305,15 @@ describe("QuickPick", () => {
   });
 
   describe("getHelpItems", () => {
-    it("should return array of help items", () => {
-      sinon.stub(quickPickAny, "helpPhrase").value("?");
-      sinon
-        .stub(quickPickAny, "itemsFilterPhrases")
-        .value({ 0: "$$", 4: "@@" });
-
+    it("1: should return array of help items", () => {
+      setups.getHelpItems1();
       assert.deepEqual(quickPickAny.getHelpItems(), getQpHelpItems());
     });
   });
 
   describe("getHelpItemForKind", () => {
-    it("should return help item for given kind and itemFilterPhrase", () => {
-      sinon.stub(quickPickAny, "helpPhrase").value("?");
+    it("1: should return help item for given kind and itemFilterPhrase", () => {
+      setups.getHelpItemForKind1();
 
       assert.deepEqual(
         quickPickAny.getHelpItemForKind("0", "$$"),
@@ -367,16 +323,12 @@ describe("QuickPick", () => {
   });
 
   describe("fetchConfig", () => {
-    it("should fetch config", () => {
-      const shouldUseItemsFilterPhrasesStub = sinon.stub(
-        quickPickAny.config,
-        "shouldUseItemsFilterPhrases"
-      );
-      const getHelpPhrase = sinon.stub(quickPickAny.config, "getHelpPhrase");
-      const getItemsFilterPhrasesStub = sinon.stub(
-        quickPickAny.config,
-        "getItemsFilterPhrases"
-      );
+    it("1: should fetch config", () => {
+      const [
+        shouldUseItemsFilterPhrasesStub,
+        getHelpPhrase,
+        getItemsFilterPhrasesStub,
+      ] = setups.fetchConfig1();
 
       quickPickAny.fetchConfig();
 
@@ -387,11 +339,8 @@ describe("QuickPick", () => {
   });
 
   describe("fetchHelpData", () => {
-    it("should fetch help data", () => {
-      const helpItemsFromConfig = getQpHelpItems();
-      sinon.stub(quickPickAny, "helpItems").value([]);
-      sinon.stub(quickPickAny, "getHelpItems").returns(helpItemsFromConfig);
-
+    it("1: should fetch help data", () => {
+      const helpItemsFromConfig = setups.fetchHelpData1();
       quickPickAny.fetchHelpData();
 
       assert.equal(quickPickAny.helpItems, helpItemsFromConfig);
@@ -399,7 +348,7 @@ describe("QuickPick", () => {
   });
 
   describe("onDidChangeValueClearing", () => {
-    it("should clear quick pick items", () => {
+    it("1: should clear quick pick items", () => {
       quickPickAny.quickPick.items = getQpItems();
       quickPickAny.onDidChangeValueClearing();
 
@@ -408,18 +357,15 @@ describe("QuickPick", () => {
   });
 
   describe("onDidChangeValue", () => {
-    it("should load workspace items", () => {
-      const loadItemsStub = sinon.stub(quickPickAny, "loadItems");
+    it("1: should load workspace items", () => {
+      const [loadItemsStub] = setups.onDidChangeValue1();
       quickPickAny.onDidChangeValue("test text");
 
       assert.equal(loadItemsStub.calledOnce, true);
     });
 
-    it("should load help items", () => {
-      sinon.stub(quickPickAny, "shouldUseItemsFilterPhrases").value(true);
-      sinon.stub(quickPickAny, "helpPhrase").value("?");
-      const loadItemsStub = sinon.stub(quickPickAny, "loadItems");
-
+    it("2: should load help items", () => {
+      const [loadItemsStub] = setups.onDidChangeValue2();
       quickPickAny.onDidChangeValue("?");
 
       assert.equal(loadItemsStub.calledWith(true), true);
@@ -427,8 +373,8 @@ describe("QuickPick", () => {
   });
 
   describe("onDidAccept", () => {
-    it("should submit method be invoked with selected item as argument", () => {
-      const submitStub = sinon.stub(quickPickAny, "submit");
+    it("1: should submit method be invoked with selected item as argument", () => {
+      const [submitStub] = setups.onDidAccept1();
       quickPickAny.quickPick.selectedItems[0] = getQpItem();
       quickPickAny.onDidAccept();
 
@@ -437,8 +383,8 @@ describe("QuickPick", () => {
   });
 
   describe("onDidHide", () => {
-    it("should setText method be invoked with empty string as argument", () => {
-      const setTextStub = sinon.stub(quickPickAny, "setText");
+    it("1: should setText method be invoked with empty string as argument", () => {
+      const [setTextStub] = setups.onDidHide1();
       quickPickAny.onDidHide();
 
       assert.equal(setTextStub.calledWith(""), true);

@@ -13,6 +13,7 @@ interface StubMultipleConfig {
   isNotMethod?: boolean;
   throws?: any;
   customReturns?: boolean;
+  returnsIsUndefined?: boolean;
 }
 
 interface RestoreStubbedMultipleConfig {
@@ -43,6 +44,8 @@ export const stubMultiple = (
             ? stub.value(customReturn.returns)
             : stub.returns(customReturn.returns);
         });
+    } else if (config.returnsIsUndefined) {
+      config.isNotMethod ? stub.value(undefined) : stub.returns(undefined);
     } else {
       config.returns && config.isNotMethod
         ? stub.value(config.returns)
