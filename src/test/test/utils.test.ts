@@ -18,13 +18,11 @@ import { getTestSetups } from "../testSetup/utils.testSetup";
 describe("Utils", () => {
   let configStub: Config = getConfigStub();
   let utils: Utils = new Utils(configStub);
-  let utilsAny: any;
   let setups = getTestSetups(utils);
 
   beforeEach(() => {
     configStub = getConfigStub();
     utils = new Utils(configStub);
-    utilsAny = utils as any;
     setups = getTestSetups(utils);
   });
 
