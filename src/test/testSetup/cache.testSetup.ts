@@ -1,17 +1,11 @@
 import * as vscode from "vscode";
 import * as sinon from "sinon";
 import { appConfig } from "../../appConfig";
-import Cache from "../../cache";
-import { getExtensionContext } from "../util/mockFactory";
 import { getQpItems } from "../util/qpItemMockFactory";
 import { stubMultiple } from "../util/stubHelpers";
 import * as mock from "../mock/cache.mock";
 
-export const getTestSetups = (
-  cache: Cache,
-  context: vscode.ExtensionContext
-) => {
-  const cacheAny: any = cache as any;
+export const getTestSetups = (context: vscode.ExtensionContext) => {
   let updateStub: sinon.SinonStub;
 
   return {
@@ -34,16 +28,19 @@ export const getTestSetups = (
       updateStub = sinon.stub();
       context.workspaceState.update = updateStub;
 
-      return { cacheAny, updateStub };
+      return updateStub;
     },
     getData1: () => {
+      const qpItems = getQpItems();
       stubMultiple([
         {
           object: context.workspaceState,
           method: "get",
-          returns: getQpItems(),
+          returns: qpItems,
         },
       ]);
+
+      return qpItems;
     },
     getData2: () => {
       stubMultiple([
@@ -53,6 +50,11 @@ export const getTestSetups = (
           returns: undefined,
         },
       ]);
+
+      return [];
+    },
+    updateData1: () => {
+      return getQpItems();
     },
     getConfigByKey1: () => {
       const key = "searchEverywhere.exclude";
@@ -107,18 +109,6 @@ export const getTestSetups = (
       ]);
 
       return key;
-    },
-    clear: () => {
-      return stubMultiple([
-        {
-          object: cacheAny,
-          method: "clearData",
-        },
-        {
-          object: cache,
-          method: "clearConfig",
-        },
-      ]);
     },
   };
 };
