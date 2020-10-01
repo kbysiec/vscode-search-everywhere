@@ -20,7 +20,7 @@ export const getTestSetups = (config: Config) => {
         ]),
       };
     },
-    get2: (section: string, key: string) => {
+    getExclude2: (section: string, key: string) => {
       restoreStubbedMultiple([
         { object: configAny.cache, method: "getConfigByKey" },
       ]);

@@ -11,7 +11,6 @@ describe("Config", () => {
   let getConfigurationStub: sinon.SinonStub;
   let cacheStub: Cache = getCacheStub();
   let config: Config = new Config(cacheStub);
-  let configAny: any;
   let setups = getTestSetups(config);
 
   beforeEach(() => {
@@ -21,7 +20,6 @@ describe("Config", () => {
     } = setups.beforeEach());
     cacheStub = getCacheStub();
     config = new Config(cacheStub);
-    configAny = config as any;
     setups = getTestSetups(config);
   });
 
@@ -98,6 +96,15 @@ describe("Config", () => {
     });
   });
 
+  describe("getHelpPhrase", () => {
+    it("1: should return help phrase from configuration", () => {
+      const section = "searchEverywhere";
+      const key = "helpPhrase";
+
+      assert.equal(config.getHelpPhrase(), configuration[section][key]);
+    });
+  });
+
   describe("getItemsFilterPhrases", () => {
     it("1: should return object containing items filter phrases from configuration", () => {
       const section = "searchEverywhere";
@@ -113,6 +120,16 @@ describe("Config", () => {
       const key = "exclude";
 
       assert.equal(config.getExclude(), configuration[section][key]);
+    });
+
+    it(`2: should return array of exclude patterns
+        from cache if it is not empty`, () => {
+      const section = "searchEverywhere";
+      const key = "exclude";
+      setups.getExclude2(section, key);
+
+      assert.deepEqual(config.getExclude(), configuration[section][key]);
+      assert.equal(getConfigurationStub.calledOnce, false);
     });
   });
 
@@ -143,89 +160,6 @@ describe("Config", () => {
         "**/.git",
         "**/search_exclude/**",
       ]);
-    });
-  });
-
-  describe("getFilesExclude", () => {
-    it("1: should return array of exclude patterns from configuration", () => {
-      const section = "files";
-      const key = "exclude";
-
-      assert.equal(configAny.getFilesExclude(), configuration[section][key]);
-    });
-  });
-
-  describe("getSearchExclude", () => {
-    it("1: should return array of exclude patterns from configuration", () => {
-      const section = "search";
-      const key = "exclude";
-
-      assert.equal(configAny.getSearchExclude(), configuration[section][key]);
-    });
-  });
-
-  describe("get", () => {
-    it(`1: should return array of exclude patterns
-      from configuration if cache is empty`, () => {
-      const section = "searchEverywhere";
-      const key = "exclude";
-
-      assert.equal(configAny.get(key, []), configuration[section][key]);
-    });
-
-    it(`2: should return array of exclude patterns
-      from cache if it is not empty`, () => {
-      const section = "searchEverywhere";
-      const key = "exclude";
-      const [getConfigByKeyStub] = setups.get2(section, key);
-
-      assert.deepEqual(configAny.get(key, []), configuration[section][key]);
-      assert.equal(getConfigByKeyStub.calledOnce, true);
-      assert.equal(getConfigurationStub.calledOnce, false);
-    });
-
-    it("3: should get configuration from custom section", () => {
-      const section = "customSection";
-      const key = "exclude";
-
-      assert.equal(
-        configAny.get(key, [], section),
-        configuration[section][key]
-      );
-    });
-  });
-
-  describe("getConfigurationByKey", () => {
-    it("1: should return array of exclude patterns", () => {
-      const section = "searchEverywhere";
-      const key = "exclude";
-
-      assert.equal(
-        configAny.getConfigurationByKey(key, []),
-        configuration[section][key]
-      );
-    });
-
-    it("2: should get configuration from custom section", () => {
-      const section = "customSection";
-      const key = "exclude";
-
-      assert.equal(
-        configAny.getConfigurationByKey(key, [], section),
-        configuration[section][key]
-      );
-    });
-  });
-
-  describe("getConfiguration", () => {
-    it("1: should return array of exclude patterns", () => {
-      const section = "searchEverywhere";
-      const key = "exclude";
-
-      assert.equal(
-        configAny.getConfiguration(`${section}.${key}`, []),
-        configuration[section][key]
-      );
     });
   });
 });
