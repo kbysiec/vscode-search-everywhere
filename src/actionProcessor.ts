@@ -78,7 +78,6 @@ class ActionProcessor {
 
   private reduceByActionType(actionType: ActionType) {
     const actions = this.getActionsFromQueueByType(actionType);
-
     if (actionType === ActionType.Rebuild) {
       if (
         this.previousAction &&
@@ -107,7 +106,6 @@ class ActionProcessor {
     actionsByFsPath: Action[],
     fsPath: string
   ) {
-    if (actionsByFsPath.length > 0) {
       const last: Action = this.utils.getLastFromArray(
         this.queue,
         (action: Action) =>
@@ -120,7 +118,6 @@ class ActionProcessor {
           action.uri!.fsPath !== fsPath ||
           action.id === last.id
       );
-    }
   }
 
   private getActionsFromQueueByType(actionType: ActionType): Action[] {
