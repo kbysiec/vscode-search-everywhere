@@ -73,12 +73,12 @@ export const getVscodeConfiguration = (configuration: {
   };
 };
 
-export const getWorkspaceData = (items: vscode.Uri[] = []): WorkspaceData => {
+export const getWorkspaceData = (items: Item[] = []): WorkspaceData => {
   const itemsMap = new Map<string, Item>();
-  items.forEach((item: vscode.Uri) =>
-    itemsMap.set(item.fsPath, {
-      uri: item,
-      elements: [item],
+  items.forEach((item: Item) =>
+    itemsMap.set(item.uri.fsPath, {
+      uri: item.uri,
+      elements: item.elements,
     })
   );
   return {

@@ -86,9 +86,9 @@ class DataConverter {
     }${vscode.SymbolKind[symbol.kind]} at ${
       symbol.range.isSingleLine
         ? `line: ${symbol.range.start.line + 1}`
-        : `lines: ${symbol.range.start.line + 1} - ${symbol.range.end.line}${
-            parent ? ` in ${parent}` : ""
-          }`
+        : `lines: ${symbol.range.start.line + 1} - ${
+            symbol.range.end.line + 1
+          }${parent ? ` in ${parent}` : ""}`
     }`;
 
     return {
