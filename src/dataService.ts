@@ -71,7 +71,6 @@ class DataService {
   }
 
   private getIncludePattern(): string {
-    // const x = ["**/{package.json,src/**/*.js}"];
     return this.includePatterns;
   }
 
@@ -141,7 +140,6 @@ class DataService {
         const array = workspaceData.items.get(uri.fsPath);
         if (array) {
           const exists = this.ifUriExistsInArray(array.elements, uri);
-
           if (!exists) {
             array.elements.push(uri);
             workspaceData.count++;
@@ -165,7 +163,7 @@ class DataService {
     uri: vscode.Uri
   ) {
     return array.some((uriInArray: vscode.Uri | vscode.DocumentSymbol) => {
-      if (!uri.hasOwnProperty("range")) {
+      if (!uriInArray.hasOwnProperty("range")) {
         uriInArray = uriInArray as vscode.Uri;
         return uriInArray.fsPath === uri.fsPath;
       }

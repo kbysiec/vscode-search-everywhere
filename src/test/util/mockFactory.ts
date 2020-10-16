@@ -74,16 +74,18 @@ export const getVscodeConfiguration = (configuration: {
 };
 
 export const getWorkspaceData = (items: Item[] = []): WorkspaceData => {
+  let count = 0;
   const itemsMap = new Map<string, Item>();
-  items.forEach((item: Item) =>
+  items.forEach((item: Item) => {
     itemsMap.set(item.uri.fsPath, {
       uri: item.uri,
       elements: item.elements,
-    })
-  );
+    });
+    count += item.elements.length;
+  });
   return {
     items: itemsMap,
-    count: items.length,
+    count,
   };
 };
 
