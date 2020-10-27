@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import QuickPick from "../../quickPick";
 import { getQuickPickOnDidChangeValueEventListeners } from "../util/eventMockFactory";
-import { getUntitledItem } from "../util/itemMockFactory";
+import { getItem, getUntitledItem } from "../util/itemMockFactory";
 import { getQpItems, getQpHelpItems } from "../util/qpItemMockFactory";
 import { stubMultiple, restoreStubbedMultiple } from "../util/stubHelpers";
 
@@ -20,29 +20,149 @@ export const getTestSetups = (quickPick: QuickPick) => {
         },
       ]);
     },
-    reloadOnDidChangeValueEventListener1: () => {
-      return stubMultiple([
+    init2: () => {
+      restoreStubbedMultiple([
         {
-          object: quickPickAny,
-          method: "disposeOnDidChangeValueEventListeners",
+          object: vscode.window,
+          method: "createQuickPick",
+        },
+        {
+          object: quickPickAny.config,
+          method: "shouldUseDebounce",
+        },
+      ]);
+      const quickPickInner = vscode.window.createQuickPick<
+        vscode.QuickPickItem
+      >();
+      stubMultiple([
+        {
+          object: vscode.window,
+          method: "createQuickPick",
+          returns: quickPickInner,
+        },
+        {
+          object: quickPickAny.config,
+          method: "shouldUseDebounce",
+          returns: true,
         },
         {
           object: quickPickAny,
-          method: "registerOnDidChangeValueEventListeners",
+          method: "onDidChangeValueEventListeners",
+          returns: [],
+          isNotMethod: true,
         },
       ]);
     },
+    init3: () => {
+      restoreStubbedMultiple([
+        {
+          object: vscode.window,
+          method: "createQuickPick",
+        },
+        {
+          object: quickPickAny.config,
+          method: "shouldUseDebounce",
+        },
+      ]);
+      const quickPickInner = vscode.window.createQuickPick<
+        vscode.QuickPickItem
+      >();
+      stubMultiple([
+        {
+          object: vscode.window,
+          method: "createQuickPick",
+          returns: quickPickInner,
+        },
+        {
+          object: quickPickAny.config,
+          method: "shouldUseDebounce",
+          returns: false,
+        },
+        {
+          object: quickPickAny,
+          method: "onDidChangeValueEventListeners",
+          returns: [],
+          isNotMethod: true,
+        },
+      ]);
+    },
+    // reloadOnDidChangeValueEventListener1: () => {
+    //   restoreStubbedMultiple([
+    //     { object: quickPickAny.config, method: "shouldUseDebounce" },
+    //   ]);
+    //   return stubMultiple([
+    //     {
+    //       object: quickPickAny,
+    //       method: "onDidChangeValueEventListeners",
+    //       returns: getQuickPickOnDidChangeValueEventListeners(),
+    //       isNotMethod: true,
+    //     },
+    //     {
+    //       object: quickPickAny.config,
+    //       method: "shouldUseDebounce",
+    //       returns: false,
+    //     },
+    //     // {
+    //     //   object: quickPickAny,
+    //     //   method: "disposeOnDidChangeValueEventListeners",
+    //     // },
+    //     // {
+    //     //   object: quickPickAny,
+    //     //   method: "registerOnDidChangeValueEventListeners",
+    //     // },
+    //   ]);
+    // },
     reload1: () => {
+      restoreStubbedMultiple([
+        { object: quickPickAny.config, method: "shouldUseItemsFilterPhrases" },
+        { object: quickPickAny.config, method: "getHelpPhrase" },
+        { object: quickPickAny.config, method: "getItemsFilterPhrases" },
+      ]);
+
       return stubMultiple([
+        {
+          object: quickPickAny.config,
+          method: "shouldUseItemsFilterPhrases",
+        },
+        {
+          object: quickPickAny.config,
+          method: "getHelpPhrase",
+        },
+        {
+          object: quickPickAny.config,
+          method: "getItemsFilterPhrases",
+        },
+      ]);
+    },
+    reload2: () => {
+      stubMultiple([
         {
           object: quickPickAny,
           method: "fetchConfig",
         },
         {
           object: quickPickAny,
-          method: "fetchHelpData",
+          method: "helpPhrase",
+          returns: "?",
+          isNotMethod: true,
+        },
+        {
+          object: quickPickAny,
+          method: "itemsFilterPhrases",
+          returns: {
+            "0": "$$",
+            "1": "^^",
+            "4": "@@",
+          },
+          isNotMethod: true,
         },
       ]);
+
+      return getQpHelpItems("?", {
+        "0": "$$",
+        "1": "^^",
+        "4": "@@",
+      });
     },
     isInitialized1: () => {
       const quickPickInner = vscode.window.createQuickPick<
@@ -159,17 +279,15 @@ export const getTestSetups = (quickPick: QuickPick) => {
         },
       ]);
     },
-    registerOnDidChangeValueEventListeners1: () => {
+    reloadOnDidChangeValueEventListener1: () => {
       restoreStubbedMultiple([
         { object: quickPickAny.config, method: "shouldUseDebounce" },
       ]);
-      const onDidChangeValueEventListeners: vscode.Disposable[] = [];
-
       stubMultiple([
         {
           object: quickPickAny,
           method: "onDidChangeValueEventListeners",
-          returns: onDidChangeValueEventListeners,
+          returns: getQuickPickOnDidChangeValueEventListeners(),
           isNotMethod: true,
         },
         {
@@ -179,17 +297,15 @@ export const getTestSetups = (quickPick: QuickPick) => {
         },
       ]);
     },
-    registerOnDidChangeValueEventListeners2: () => {
+    reloadOnDidChangeValueEventListener2: () => {
       restoreStubbedMultiple([
         { object: quickPickAny.config, method: "shouldUseDebounce" },
       ]);
-      const onDidChangeValueEventListeners: vscode.Disposable[] = [];
-
       stubMultiple([
         {
           object: quickPickAny,
           method: "onDidChangeValueEventListeners",
-          returns: onDidChangeValueEventListeners,
+          returns: getQuickPickOnDidChangeValueEventListeners(1),
           isNotMethod: true,
         },
         {
@@ -225,10 +341,10 @@ export const getTestSetups = (quickPick: QuickPick) => {
           object: vscode.window,
           method: "showTextDocument",
         },
-        {
-          object: quickPickAny,
-          method: "selectQpItem",
-        },
+        // {
+        //   object: quickPickAny,
+        //   method: "selectQpItem",
+        // },
       ]);
     },
     openSelectedAfterEach: () => {
@@ -241,10 +357,10 @@ export const getTestSetups = (quickPick: QuickPick) => {
           object: vscode.window,
           method: "showTextDocument",
         },
-        {
-          object: quickPickAny,
-          method: "selectQpItem",
-        },
+        // {
+        //   object: quickPickAny,
+        //   method: "selectQpItem",
+        // },
       ]);
     },
     openSelected3: () => {
@@ -378,6 +494,15 @@ export const getTestSetups = (quickPick: QuickPick) => {
 
       return helpItemsFromConfig;
     },
+    onDidChangeValueClearing1: () => {
+      stubMultiple([
+        {
+          object: quickPickAny.quickPick,
+          method: "items",
+          returns: getQpItems(),
+        },
+      ]);
+    },
     onDidChangeValue1: () => {
       return stubMultiple([
         {
@@ -406,21 +531,97 @@ export const getTestSetups = (quickPick: QuickPick) => {
         },
       ]);
     },
-    onDidAccept1: () => {
+    onDidAccept1: async () => {
+      const document = await vscode.workspace.openTextDocument(
+        getUntitledItem()
+      );
+      const editor = await vscode.window.showTextDocument(document);
+
       return stubMultiple([
         {
-          object: quickPickAny,
-          method: "submit",
+          object: editor,
+          method: "revealRange",
+        },
+        {
+          object: vscode.window,
+          method: "showTextDocument",
+          returns: editor,
+        },
+        {
+          object: vscode.workspace,
+          method: "openTextDocument",
         },
       ]);
     },
-    onDidHide1: () => {
+    onDidAccept2: async () => {
+      const document = await vscode.workspace.openTextDocument(
+        getUntitledItem()
+      );
+      const editor = await vscode.window.showTextDocument(document);
+
+      restoreStubbedMultiple([
+        {
+          object: vscode.window,
+          method: "showTextDocument",
+        },
+        {
+          object: vscode.workspace,
+          method: "openTextDocument",
+        },
+        {
+          object: quickPickAny.config,
+          method: "shouldHighlightSymbol",
+        },
+      ]);
+
       return stubMultiple([
         {
-          object: quickPickAny,
-          method: "setText",
+          object: editor,
+          method: "revealRange",
+        },
+        {
+          object: vscode.window,
+          method: "showTextDocument",
+          returns: editor,
+        },
+        {
+          object: vscode.workspace,
+          method: "openTextDocument",
+        },
+        {
+          object: quickPickAny.config,
+          method: "shouldHighlightSymbol",
+          returns: true,
         },
       ]);
     },
+    onDidAccept3: () => {
+      return stubMultiple([
+        {
+          object: quickPickAny,
+          method: "loadItems",
+        },
+        {
+          object: quickPickAny,
+          method: "shouldUseItemsFilterPhrases",
+          returns: true,
+          isNotMethod: true,
+        },
+        {
+          object: quickPickAny,
+          method: "itemsFilterPhrases",
+          returns: { 0: "$$", 1: "@@" },
+          isNotMethod: true,
+        },
+      ]);
+    },
+    // onDidHide1: () => {
+    //   return stubMultiple([
+    //     // {
+    //     //   object: quickPickAny,
+    //     //   method: "setText",
+    //     // },
+    //   ]);
+    // },
   };
 };

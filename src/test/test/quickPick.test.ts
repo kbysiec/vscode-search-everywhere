@@ -35,29 +35,61 @@ describe("QuickPick", () => {
 
       assert.equal(createQuickPickStub.calledOnce, true);
     });
+
+    it(`2: should register two event listeners
+      if shouldUseDebounce returns true`, () => {
+      setups.init2();
+      quickPick.init();
+
+      assert.equal(quickPickAny.onDidChangeValueEventListeners.length, 2);
+    });
+
+    it(`3: should register two event listeners
+      if shouldUseDebounce returns false`, () => {
+      setups.init3();
+      quickPick.init();
+
+      assert.equal(quickPickAny.onDidChangeValueEventListeners.length, 1);
+    });
   });
 
   describe("reloadOnDidChangeValueEventListener", () => {
-    it(`1: should disposeOnDidChangeValueEventListeners
-      and registerOnDidChangeValueEventListeners methods be invoked`, () => {
-      const [
-        disposeOnDidChangeValueEventListenersStub,
-        registerOnDidChangeValueEventListenersStub,
-      ] = setups.reloadOnDidChangeValueEventListener1();
+    it(`1: should dispose existing event listeners and
+      register one event listener if shouldUseDebounce returns false`, () => {
+      setups.reloadOnDidChangeValueEventListener1();
       quickPick.reloadOnDidChangeValueEventListener();
 
-      assert.equal(disposeOnDidChangeValueEventListenersStub.calledOnce, true);
-      assert.equal(registerOnDidChangeValueEventListenersStub.calledOnce, true);
+      assert.equal(quickPickAny.onDidChangeValueEventListeners.length, 1);
+    });
+
+    it(`2: should dispose existing event listeners and
+      register two event listeners if shouldUseDebounce returns true`, () => {
+      setups.reloadOnDidChangeValueEventListener2();
+      quickPick.reloadOnDidChangeValueEventListener();
+
+      assert.equal(quickPickAny.onDidChangeValueEventListeners.length, 2);
     });
   });
 
   describe("reload", () => {
-    it("1: should fetchConfig and fetchHelpData methods be invoked", () => {
-      const [fetchConfigStub, fetchHelpDataStub] = setups.reload1();
+    it("1: should fetch configuration from config component", () => {
+      const [
+        shouldUseItemsFilterPhrasesStub,
+        getHelpPhraseStub,
+        getItemsFilterPhrasesStub,
+      ] = setups.reload1();
       quickPick.reload();
 
-      assert.equal(fetchConfigStub.calledOnce, true);
-      assert.equal(fetchHelpDataStub.calledOnce, true);
+      assert.equal(shouldUseItemsFilterPhrasesStub.calledOnce, true);
+      assert.equal(getHelpPhraseStub.calledOnce, true);
+      assert.equal(getItemsFilterPhrasesStub.calledOnce, true);
+    });
+
+    it("2: should fetch help data", () => {
+      const qpHelpItems = setups.reload2();
+      quickPick.reload();
+
+      assert.deepEqual(quickPickAny.helpItems, qpHelpItems);
     });
   });
 
@@ -165,191 +197,191 @@ describe("QuickPick", () => {
     });
   });
 
-  describe("disposeOnDidChangeValueEventListeners", () => {
-    it(`1: should dispose all onDidChangeValue event listeners
-      and reset the array for them`, () => {
-      setups.disposeOnDidChangeValueEventListeners1();
-      quickPickAny.disposeOnDidChangeValueEventListeners();
+  // describe("disposeOnDidChangeValueEventListeners", () => {
+  //   it(`1: should dispose all onDidChangeValue event listeners
+  //     and reset the array for them`, () => {
+  //     setups.disposeOnDidChangeValueEventListeners1();
+  //     quickPickAny.disposeOnDidChangeValueEventListeners();
 
-      assert.equal(quickPickAny.onDidChangeValueEventListeners.length, 0);
-    });
-  });
+  //     assert.equal(quickPickAny.onDidChangeValueEventListeners.length, 0);
+  //   });
+  // });
 
-  describe("registerOnDidChangeValueEventListeners", () => {
-    it(`1: should register one event listener if shouldUseDebounce
-      returns false`, () => {
-      setups.registerOnDidChangeValueEventListeners1();
-      quickPickAny.registerOnDidChangeValueEventListeners();
+  // describe("registerOnDidChangeValueEventListeners", () => {
+  //   it(`1: should register one event listener if shouldUseDebounce
+  //     returns false`, () => {
+  //     setups.registerOnDidChangeValueEventListeners1();
+  //     quickPickAny.registerOnDidChangeValueEventListeners();
 
-      assert.equal(quickPickAny.onDidChangeValueEventListeners.length, 1);
-    });
+  //     assert.equal(quickPickAny.onDidChangeValueEventListeners.length, 1);
+  //   });
 
-    it(`2: should register two event listeners if shouldUseDebounce
-      returns true`, () => {
-      setups.registerOnDidChangeValueEventListeners2();
-      quickPickAny.registerOnDidChangeValueEventListeners();
+  //   it(`2: should register two event listeners if shouldUseDebounce
+  //     returns true`, () => {
+  //     setups.registerOnDidChangeValueEventListeners2();
+  //     quickPickAny.registerOnDidChangeValueEventListeners();
 
-      assert.equal(quickPickAny.onDidChangeValueEventListeners.length, 2);
-    });
-  });
+  //     assert.equal(quickPickAny.onDidChangeValueEventListeners.length, 2);
+  //   });
+  // });
 
-  describe("submit", () => {
-    it("1: should openSelected method be invoked with selected item as argument", () => {
-      const [openSelectedStub] = setups.submit1();
-      quickPickAny.submit(getQpItem());
+  // describe("submit", () => {
+  //   it("1: should openSelected method be invoked with selected item as argument", () => {
+  //     const [openSelectedStub] = setups.submit1();
+  //     quickPickAny.submit(getQpItem());
 
-      assert.equal(openSelectedStub.calledWith(getQpItem()), true);
-    });
+  //     assert.equal(openSelectedStub.calledWith(getQpItem()), true);
+  //   });
 
-    it("2: should openSelected method not be invoked without selected item as argument", () => {
-      const [openSelectedStub] = setups.submit2();
-      quickPickAny.submit(undefined);
+  //   it("2: should openSelected method not be invoked without selected item as argument", () => {
+  //     const [openSelectedStub] = setups.submit2();
+  //     quickPickAny.submit(undefined);
 
-      assert.equal(openSelectedStub.calledOnce, false);
-    });
-  });
+  //     assert.equal(openSelectedStub.calledOnce, false);
+  //   });
+  // });
 
-  describe("openSelected", () => {
-    let openTextDocumentStub: sinon.SinonStub;
-    let showTextDocumentStub: sinon.SinonStub;
-    let selectQpItemStub: sinon.SinonStub;
+  // describe("openSelected", () => {
+  //   let openTextDocumentStub: sinon.SinonStub;
+  //   let showTextDocumentStub: sinon.SinonStub;
+  //   let selectQpItemStub: sinon.SinonStub;
 
-    beforeEach(() => {
-      [
-        openTextDocumentStub,
-        showTextDocumentStub,
-        selectQpItemStub,
-      ] = setups.openSelectedBeforeEach();
-    });
+  //   beforeEach(() => {
+  //     [
+  //       openTextDocumentStub,
+  //       showTextDocumentStub,
+  //       selectQpItemStub,
+  //     ] = setups.openSelectedBeforeEach();
+  //   });
 
-    afterEach(() => {
-      setups.openSelectedAfterEach();
-    });
+  //   afterEach(() => {
+  //     setups.openSelectedAfterEach();
+  //   });
 
-    it("1: should open selected qpItem with uri scheme equals to 'file'", async () => {
-      await quickPickAny.openSelected(getQpItem());
+  //   it("1: should open selected qpItem with uri scheme equals to 'file'", async () => {
+  //     await quickPickAny.openSelected(getQpItem());
 
-      assert.equal(openTextDocumentStub.calledOnce, true);
-      assert.equal(showTextDocumentStub.calledOnce, true);
-      assert.equal(selectQpItemStub.calledOnce, true);
-    });
+  //     assert.equal(openTextDocumentStub.calledOnce, true);
+  //     assert.equal(showTextDocumentStub.calledOnce, true);
+  //     assert.equal(selectQpItemStub.calledOnce, true);
+  //   });
 
-    it("2: should open selected qpItem with uri scheme equals to 'untitled'", async () => {
-      await quickPickAny.openSelected(getUntitledQpItem());
+  //   it("2: should open selected qpItem with uri scheme equals to 'untitled'", async () => {
+  //     await quickPickAny.openSelected(getUntitledQpItem());
 
-      assert.equal(openTextDocumentStub.calledOnce, true);
-      assert.equal(showTextDocumentStub.calledOnce, true);
-      assert.equal(selectQpItemStub.calledOnce, true);
-    });
+  //     assert.equal(openTextDocumentStub.calledOnce, true);
+  //     assert.equal(showTextDocumentStub.calledOnce, true);
+  //     assert.equal(selectQpItemStub.calledOnce, true);
+  //   });
 
-    it(`3: should set text to selected items filter phrase
-       if given item is help item`, async () => {
-      const [setTextStub, loadItemsStub] = setups.openSelected3();
-      await quickPickAny.openSelected(getQpHelpItem("?", "0", "$$"));
+  //   it(`3: should set text to selected items filter phrase
+  //      if given item is help item`, async () => {
+  //     const [setTextStub, loadItemsStub] = setups.openSelected3();
+  //     await quickPickAny.openSelected(getQpHelpItem("?", "0", "$$"));
 
-      assert.equal(setTextStub.calledWith("$$"), true);
-      assert.equal(loadItemsStub.calledOnce, true);
-    });
-  });
+  //     assert.equal(setTextStub.calledWith("$$"), true);
+  //     assert.equal(loadItemsStub.calledOnce, true);
+  //   });
+  // });
 
-  describe("selectQpItem", () => {
-    it("1: should editor.revealRange method be called", async () => {
-      const { editor, editorRevealRangeStub } = await setups.selectQpItem1();
-      await quickPickAny.selectQpItem(editor, getQpItem());
+  // describe("selectQpItem", () => {
+  //   it("1: should editor.revealRange method be called", async () => {
+  //     const { editor, editorRevealRangeStub } = await setups.selectQpItem1();
+  //     await quickPickAny.selectQpItem(editor, getQpItem());
 
-      assert.equal(editorRevealRangeStub.calledOnce, true);
+  //     assert.equal(editorRevealRangeStub.calledOnce, true);
 
-      await vscode.commands.executeCommand(
-        "workbench.action.closeActiveEditor"
-      );
-    });
+  //     await vscode.commands.executeCommand(
+  //       "workbench.action.closeActiveEditor"
+  //     );
+  //   });
 
-    it("2: should select symbol if config.shouldHighlightSymbol returns true", async () => {
-      setups.selectQpItem2();
-      const document = await vscode.workspace.openTextDocument(
-        getUntitledItem()
-      );
-      const editor = await vscode.window.showTextDocument(document);
-      await quickPickAny.selectQpItem(
-        editor,
-        getQpItem(undefined, undefined, true)
-      );
+  //   it("2: should select symbol if config.shouldHighlightSymbol returns true", async () => {
+  //     setups.selectQpItem2();
+  //     const document = await vscode.workspace.openTextDocument(
+  //       getUntitledItem()
+  //     );
+  //     const editor = await vscode.window.showTextDocument(document);
+  //     await quickPickAny.selectQpItem(
+  //       editor,
+  //       getQpItem(undefined, undefined, true)
+  //     );
 
-      assert.equal(editor.selection.start.line, 0);
-      assert.equal(editor.selection.start.character, 0);
-      assert.equal(editor.selection.end.line, 0);
-      assert.equal(editor.selection.end.character, 5);
+  //     assert.equal(editor.selection.start.line, 0);
+  //     assert.equal(editor.selection.start.character, 0);
+  //     assert.equal(editor.selection.end.line, 0);
+  //     assert.equal(editor.selection.end.character, 5);
 
-      await vscode.commands.executeCommand(
-        "workbench.action.closeActiveEditor"
-      );
-    });
+  //     await vscode.commands.executeCommand(
+  //       "workbench.action.closeActiveEditor"
+  //     );
+  //   });
 
-    it("3: should select symbol if config.shouldHighlightSymbol returns false", async () => {
-      setups.selectQpItem3();
-      const document = await vscode.workspace.openTextDocument(
-        getUntitledItem()
-      );
-      const editor = await vscode.window.showTextDocument(document);
-      await quickPickAny.selectQpItem(editor, getQpItem());
+  //   it("3: should select symbol if config.shouldHighlightSymbol returns false", async () => {
+  //     setups.selectQpItem3();
+  //     const document = await vscode.workspace.openTextDocument(
+  //       getUntitledItem()
+  //     );
+  //     const editor = await vscode.window.showTextDocument(document);
+  //     await quickPickAny.selectQpItem(editor, getQpItem());
 
-      assert.equal(editor.selection.start.line, 0);
-      assert.equal(editor.selection.start.character, 0);
-      assert.equal(editor.selection.end.line, 0);
-      assert.equal(editor.selection.end.character, 0);
+  //     assert.equal(editor.selection.start.line, 0);
+  //     assert.equal(editor.selection.start.character, 0);
+  //     assert.equal(editor.selection.end.line, 0);
+  //     assert.equal(editor.selection.end.character, 0);
 
-      await vscode.commands.executeCommand(
-        "workbench.action.closeActiveEditor"
-      );
-    });
-  });
+  //     await vscode.commands.executeCommand(
+  //       "workbench.action.closeActiveEditor"
+  //     );
+  //   });
+  // });
 
-  describe("getHelpItems", () => {
-    it("1: should return array of help items", () => {
-      setups.getHelpItems1();
-      assert.deepEqual(quickPickAny.getHelpItems(), getQpHelpItems());
-    });
-  });
+  // describe("getHelpItems", () => {
+  //   it("1: should return array of help items", () => {
+  //     setups.getHelpItems1();
+  //     assert.deepEqual(quickPickAny.getHelpItems(), getQpHelpItems());
+  //   });
+  // });
 
-  describe("getHelpItemForKind", () => {
-    it("1: should return help item for given kind and itemFilterPhrase", () => {
-      setups.getHelpItemForKind1();
+  // describe("getHelpItemForKind", () => {
+  //   it("1: should return help item for given kind and itemFilterPhrase", () => {
+  //     setups.getHelpItemForKind1();
 
-      assert.deepEqual(
-        quickPickAny.getHelpItemForKind("0", "$$"),
-        getQpHelpItem("?", "0", "$$")
-      );
-    });
-  });
+  //     assert.deepEqual(
+  //       quickPickAny.getHelpItemForKind("0", "$$"),
+  //       getQpHelpItem("?", "0", "$$")
+  //     );
+  //   });
+  // });
 
-  describe("fetchConfig", () => {
-    it("1: should fetch config", () => {
-      const [
-        shouldUseItemsFilterPhrasesStub,
-        getHelpPhrase,
-        getItemsFilterPhrasesStub,
-      ] = setups.fetchConfig1();
+  // describe("fetchConfig", () => {
+  //   it("1: should fetch config", () => {
+  //     const [
+  //       shouldUseItemsFilterPhrasesStub,
+  //       getHelpPhrase,
+  //       getItemsFilterPhrasesStub,
+  //     ] = setups.fetchConfig1();
 
-      quickPickAny.fetchConfig();
+  //     quickPickAny.fetchConfig();
 
-      assert.equal(shouldUseItemsFilterPhrasesStub.calledOnce, true);
-      assert.equal(getHelpPhrase.calledOnce, true);
-      assert.equal(getItemsFilterPhrasesStub.calledOnce, true);
-    });
-  });
+  //     assert.equal(shouldUseItemsFilterPhrasesStub.calledOnce, true);
+  //     assert.equal(getHelpPhrase.calledOnce, true);
+  //     assert.equal(getItemsFilterPhrasesStub.calledOnce, true);
+  //   });
+  // });
 
-  describe("fetchHelpData", () => {
-    it("1: should fetch help data", () => {
-      const helpItemsFromConfig = setups.fetchHelpData1();
-      quickPickAny.fetchHelpData();
+  // describe("fetchHelpData", () => {
+  //   it("1: should fetch help data", () => {
+  //     const helpItemsFromConfig = setups.fetchHelpData1();
+  //     quickPickAny.fetchHelpData();
 
-      assert.equal(quickPickAny.helpItems, helpItemsFromConfig);
-    });
-  });
+  //     assert.equal(quickPickAny.helpItems, helpItemsFromConfig);
+  //   });
+  // });
 
   describe("onDidChangeValueClearing", () => {
     it("1: should clear quick pick items", () => {
-      quickPickAny.quickPick.items = getQpItems();
+      setups.onDidChangeValueClearing1();
       quickPickAny.onDidChangeValueClearing();
 
       assert.equal(quickPickAny.quickPick.items.length, 0);
@@ -357,37 +389,102 @@ describe("QuickPick", () => {
   });
 
   describe("onDidChangeValue", () => {
-    it("1: should load workspace items", () => {
+    it("1: should load workspace items", async () => {
       const [loadItemsStub] = setups.onDidChangeValue1();
-      quickPickAny.onDidChangeValue("test text");
+      await quickPickAny.onDidChangeValue("test text");
 
       assert.equal(loadItemsStub.calledOnce, true);
     });
 
-    it("2: should load help items", () => {
+    it("2: should load help items", async () => {
       const [loadItemsStub] = setups.onDidChangeValue2();
-      quickPickAny.onDidChangeValue("?");
+      await quickPickAny.onDidChangeValue("?");
 
-      assert.equal(loadItemsStub.calledWith(true), true);
+      assert.equal(loadItemsStub.calledOnce, true);
     });
   });
 
   describe("onDidAccept", () => {
-    it("1: should submit method be invoked with selected item as argument", () => {
-      const [submitStub] = setups.onDidAccept1();
-      quickPickAny.quickPick.selectedItems[0] = getQpItem();
-      quickPickAny.onDidAccept();
+    // it("1: should submit method be invoked with selected item as argument", () => {
+    //   const [submitStub] = setups.onDidAccept1();
+    //   quickPickAny.quickPick.selectedItems[0] = getQpItem();
+    //   quickPickAny.onDidAccept();
 
-      assert.equal(submitStub.calledWith(getQpItem()), true);
+    //   // assert.equal(submitStub.calledWith(getQpItem()), true);
+    //   assert.equal(true, true);
+    // });
+
+    // let openTextDocumentStub: sinon.SinonStub;
+    // let showTextDocumentStub: sinon.SinonStub;
+    // let selectQpItemStub: sinon.SinonStub;
+
+    // beforeEach(() => {
+    //   [
+    //     openTextDocumentStub,
+    //     showTextDocumentStub,
+    //     selectQpItemStub,
+    //   ] = setups.openSelectedBeforeEach();
+    // });
+
+    // afterEach(() => {
+    //   setups.openSelectedAfterEach();
+    // });
+
+    it("1: should open selected qpItem with uri scheme equals to 'file'", async () => {
+      const [revealRangeStub] = await setups.onDidAccept1();
+      quickPickAny.quickPick.selectedItems[0] = getQpItem();
+      await quickPickAny.onDidAccept();
+
+      assert.equal(revealRangeStub.calledOnce, true);
+
+      revealRangeStub.restore();
     });
+
+    it("2: should open selected qpItem with uri scheme equals to 'untitled'", async () => {
+      const [revealRangeStub] = await setups.onDidAccept2();
+      quickPickAny.quickPick.selectedItems[0] = getUntitledQpItem();
+      await quickPickAny.onDidAccept();
+
+      assert.equal(revealRangeStub.calledOnce, true);
+
+      revealRangeStub.restore();
+    });
+
+    it("3: should open selected qpItem which is help item", async () => {
+      const [loadItemsStub] = setups.onDidAccept3();
+      quickPickAny.quickPick.selectedItems[0] = getQpHelpItem("?", "0", "$$");
+      await quickPickAny.onDidAccept();
+
+      assert.equal(loadItemsStub.calledOnce, true);
+    });
+
+    // it("2: should open selected qpItem with uri scheme equals to 'untitled'", async () => {
+    //   quickPickAny.quickPick.selectedItems[0] = getUntitledQpItem();
+    //   await quickPickAny.onDidAccept();
+    //   // await quickPickAny.openSelected(getUntitledQpItem());
+
+    //   assert.equal(openTextDocumentStub.calledOnce, true);
+    //   assert.equal(showTextDocumentStub.calledOnce, true);
+    //   assert.equal(selectQpItemStub.calledOnce, true);
+    // });
+
+    // it(`3: should set text to selected items filter phrase
+    //    if given item is help item`, async () => {
+    //   const [setTextStub, loadItemsStub] = setups.openSelected3();
+    //   quickPickAny.quickPick.selectedItems[0] = getUntitledQpItem();
+    //   // await quickPickAny.openSelected(getQpHelpItem("?", "0", "$$"));
+    //   await quickPickAny.onDidAccept(getQpHelpItem("?", "0", "$$"));
+
+    //   assert.equal(setTextStub.calledWith("$$"), true);
+    //   assert.equal(loadItemsStub.calledOnce, true);
+    // });
   });
 
   describe("onDidHide", () => {
     it("1: should setText method be invoked with empty string as argument", () => {
-      const [setTextStub] = setups.onDidHide1();
       quickPickAny.onDidHide();
 
-      assert.equal(setTextStub.calledWith(""), true);
+      assert.equal(quickPickAny.quickPick.value, "");
     });
   });
 });

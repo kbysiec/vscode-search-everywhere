@@ -110,10 +110,6 @@ class QuickPick {
     }
   }
 
-  private submit(selectedItem: QuickPickItem): void {
-    selectedItem && this.openSelected(selectedItem);
-  }
-
   private async openSelected(qpItem: QuickPickItem): Promise<void> {
     if (this.shouldUseItemsFilterPhrases && qpItem.isHelp) {
       const text = this.itemsFilterPhrases[qpItem.kind];
@@ -197,9 +193,9 @@ class QuickPick {
     }
   };
 
-  private onDidAccept = (): void => {
+  private onDidAccept = async (): Promise<void> => {
     const selectedItem = this.quickPick.selectedItems[0];
-    this.submit(selectedItem);
+    selectedItem && (await this.openSelected(selectedItem));
   };
 
   private onDidHide = (): void => {

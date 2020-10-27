@@ -46,6 +46,10 @@ export const getUntitledQpItem = (): QuickPickItem => {
     label: "fake-1.ts",
     uri: getUntitledItem(),
     kind: 0,
+    range: {
+      start: new vscode.Position(0, 0),
+      end: new vscode.Position(0, 5),
+    },
   };
 };
 
