@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import Utils from "../../utils";
+import { getWorkspaceData } from "../util/mockFactory";
 import { stubMultiple, restoreStubbedMultiple } from "../util/stubHelpers";
 
 export const getTestSetups = (utils: Utils) => {
@@ -125,6 +126,34 @@ export const getTestSetups = (utils: Utils) => {
           method: "showInformationMessage",
         },
       ]);
+    },
+    clearWorkspaceData1: () => {
+      const workspaceDataItems = [
+        {
+          uri: vscode.Uri.file("/./fake/fake-1.ts"),
+          get elements() {
+            return [
+              this.uri,
+              {
+                name: "fake-1.ts§&§test name",
+                detail: "test details",
+                kind: 1,
+                range: new vscode.Range(
+                  new vscode.Position(0, 0),
+                  new vscode.Position(3, 0)
+                ),
+                selectionRange: new vscode.Range(
+                  new vscode.Position(0, 0),
+                  new vscode.Position(3, 0)
+                ),
+                children: [],
+              },
+            ];
+          },
+        },
+      ];
+
+      return getWorkspaceData(workspaceDataItems);
     },
     getNotificationLocation1: () => {
       restoreStubbedMultiple([

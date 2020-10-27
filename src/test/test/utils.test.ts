@@ -175,8 +175,7 @@ describe("Utils", () => {
 
   describe("clearWorkspaceData", () => {
     it("1: should clear workspaceData object", () => {
-      const items = getItems();
-      const workspaceData = getWorkspaceData(items);
+      const workspaceData = setups.clearWorkspaceData1();
 
       utils.clearWorkspaceData(workspaceData);
       assert.equal(workspaceData.count, 0);
