@@ -40,11 +40,11 @@ describe("Workspace", () => {
   describe("index", () => {
     it(`1: should registerAction method be invoked
       which register rebuild action`, async () => {
-      const [registerActionStub] = setups.index1();
+      const [registerStub] = setups.index1();
       await workspaceAny.index();
 
-      assert.equal(registerActionStub.calledOnce, true);
-      assert.equal(registerActionStub.args[0][0], ActionType.Rebuild);
+      assert.equal(registerStub.calledOnce, true);
+      assert.equal(registerStub.args[0][0].type, ActionType.Rebuild);
     });
   });
 
@@ -102,9 +102,12 @@ describe("Workspace", () => {
   });
 
   describe("indexWithProgressTask", () => {
-    it(`1: should index, resetProgress and utils.sleep methods be invoked`, async () => {
-      const { subscription, stubs } = setups.indexWithProgressTask1();
-      const [onDidItemIndexedStub, indexWorkspaceStub, sleepStub] = stubs;
+    it(`1: should existing onDidItemIndexed subscription be disposed`, async () => {
+      const {
+        onDidItemIndexedSubscription,
+        stubs,
+      } = setups.indexWithProgressTask1();
+      const [onDidItemIndexedStub] = stubs;
       const cancellationTokenSource = new vscode.CancellationTokenSource();
 
       await workspaceAny.indexWithProgressTask(
@@ -113,8 +116,18 @@ describe("Workspace", () => {
       );
 
       assert.equal(onDidItemIndexedStub.calledOnce, true);
-      assert.equal(subscription.dispose.calledOnce, true);
-      assert.equal(indexWorkspaceStub.calledOnce, true);
+      assert.equal(onDidItemIndexedSubscription.dispose.calledOnce, true);
+    });
+
+    it(`2: should utils.sleep method be invoked`, async () => {
+      const [sleepStub] = setups.indexWithProgressTask2();
+      const cancellationTokenSource = new vscode.CancellationTokenSource();
+
+      await workspaceAny.indexWithProgressTask(
+        undefined,
+        cancellationTokenSource.token
+      );
+
       assert.equal(sleepStub.calledOnce, true);
     });
   });

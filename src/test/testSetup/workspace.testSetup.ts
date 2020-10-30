@@ -36,8 +36,8 @@ export const getTestSetups = (workspace: Workspace) => {
     index1: () => {
       return stubMultiple([
         {
-          object: workspaceAny,
-          method: "registerAction",
+          object: workspaceAny.actionProcessor,
+          method: "register",
         },
       ]);
     },
@@ -137,7 +137,28 @@ export const getTestSetups = (workspace: Workspace) => {
       ]);
     },
     indexWithProgressTask1: () => {
-      const subscription = getSubscription();
+      const onDidItemIndexedSubscription = getSubscription();
+
+      const stubs = stubMultiple([
+        {
+          object: workspaceAny.dataService,
+          method: "onDidItemIndexed",
+          returns: onDidItemIndexedSubscription,
+        },
+        {
+          object: workspaceAny.dataService,
+          method: "fetchData",
+          returns: getWorkspaceData(),
+        },
+      ]);
+
+      return {
+        onDidItemIndexedSubscription,
+        stubs,
+      };
+    },
+    indexWithProgressTask2: () => {
+      const onDidItemIndexedSubscription = getSubscription();
 
       restoreStubbedMultiple([
         {
@@ -146,26 +167,22 @@ export const getTestSetups = (workspace: Workspace) => {
         },
       ]);
 
-      const stubs = stubMultiple([
-        {
-          object: workspaceAny.dataService,
-          method: "onDidItemIndexed",
-          returns: subscription,
-        },
-        {
-          object: workspaceAny,
-          method: "indexWorkspace",
-        },
+      return stubMultiple([
         {
           object: workspaceAny.utils,
           method: "sleep",
         },
+        {
+          object: workspaceAny.dataService,
+          method: "onDidItemIndexed",
+          returns: onDidItemIndexedSubscription,
+        },
+        {
+          object: workspaceAny.dataService,
+          method: "fetchData",
+          returns: getWorkspaceData(),
+        },
       ]);
-
-      return {
-        subscription,
-        stubs,
-      };
     },
     indexWorkspace1: () => {
       restoreStubbedMultiple([
@@ -233,7 +250,7 @@ export const getTestSetups = (workspace: Workspace) => {
         {
           object: workspaceAny.dataService,
           method: "fetchData",
-          returns: getWorkspaceData(getItems()),
+          // returns: getWorkspaceData(getWorkspaceDataItems()),
         },
         {
           object: workspaceAny.dataConverter,
@@ -648,6 +665,13 @@ export const getTestSetups = (workspace: Workspace) => {
       ]);
     },
     onDidChangeTextDocument1: () => {
+      restoreStubbedMultiple([
+        {
+          object: vscode.workspace,
+          method: "openTextDocument",
+        },
+      ]);
+
       return stubMultiple([
         {
           object: workspaceAny,
