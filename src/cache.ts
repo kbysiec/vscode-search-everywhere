@@ -6,14 +6,11 @@ class Cache {
   constructor(private extensionContext: vscode.ExtensionContext) {}
 
   getData(): QuickPickItem[] | undefined {
-    const cache: any = this.extensionContext.workspaceState.get(
+    const data: any = this.extensionContext.workspaceState.get(
       appConfig.dataCacheKey
     );
-    let data: QuickPickItem[] | undefined = [];
-    if (cache && cache.length) {
-      data = cache;
-    }
-    return data;
+
+    return data && data.length ? data : [];
   }
 
   updateData(data: QuickPickItem[]): void {
@@ -24,21 +21,15 @@ class Cache {
     const cache: any = this.extensionContext.workspaceState.get(
       appConfig.configCacheKey
     );
-    let config: T | undefined;
-    if (cache) {
-      config = cache[key];
-    }
-    return config;
+
+    return cache ? cache[key] : undefined;
   }
 
   updateConfigByKey<T>(key: string, value: T): void {
-    let cache: any = this.extensionContext.workspaceState.get(
-      appConfig.configCacheKey
-    );
-    if (!cache) {
-      cache = {};
-    }
+    let cache: any =
+      this.extensionContext.workspaceState.get(appConfig.configCacheKey) || {};
     cache[key] = value;
+
     this.extensionContext.workspaceState.update(
       appConfig.configCacheKey,
       cache
