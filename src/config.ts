@@ -139,11 +139,10 @@ class Config {
     defaultValue: T,
     customSection?: string
   ): T {
-    const value = this.getConfiguration<T>(
+    return this.getConfiguration<T>(
       `${customSection ? customSection : this.defaultSection}.${key}`,
       defaultValue
     );
-    return value as T;
   }
 
   private getConfiguration<T>(section: string, defaultValue: T): T {
