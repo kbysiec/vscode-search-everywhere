@@ -30,32 +30,53 @@ class ActionProcessor {
   async register(action: Action): Promise<void> {
     this.add(action);
     // this.reduce(); // here is slower - executed every time
-    if (!this.isBusy) {
-      await this.process();
-    }
+    await this.processIfIsNotBusy();
   }
 
   private add(action: Action): void {
+    this.assignId(action);
+    this.addToQueue(action);
+  }
+
+  private assignId(action: Action): void {
     action.id = this.actionId++;
+  }
+
+  private addToQueue(action: Action): void {
     this.queue.push(action);
+  }
+
+  private async processIfIsNotBusy(): Promise<void> {
+    !this.isBusy && (await this.process());
   }
 
   private async process() {
     this.onWillProcessingEventEmitter.fire();
-    this.isBusy = true;
+    this.setBusy(true);
 
+    await this.processEachAction();
+
+    this.setBusy(false);
+    this.setPreviousAction(undefined);
+    this.onDidProcessingEventEmitter.fire();
+  }
+
+  private async processEachAction() {
     while (this.queue.length) {
       this.reduce();
-      const action = this.queue.shift();
+      const action = this.getNextActionFromQueue();
       this.setPreviousAction(action);
       this.onWillExecuteActionEventEmitter.fire(action);
       action && (await action.fn());
     }
+  }
 
-    this.isBusy = false;
-    this.setPreviousAction(undefined);
+  private setBusy(value: boolean): void {
+    this.isBusy = value;
+  }
 
-    this.onDidProcessingEventEmitter.fire();
+  private getNextActionFromQueue(): Action | undefined {
+    return this.queue.shift();
   }
 
   private reduce(): void {
@@ -78,27 +99,40 @@ class ActionProcessor {
 
   private reduceByActionType(actionType: ActionType) {
     const actions = this.getActionsFromQueueByType(actionType);
-    if (actionType === ActionType.Rebuild) {
-      if (
-        this.previousAction &&
-        this.previousAction.type === ActionType.Rebuild
-      ) {
-        this.queue = [];
-      } else if (actions.length > 0) {
-        const last = this.utils.getLastFromArray(
-          this.queue,
-          (action: Action) => action.type === actionType
-        );
-        this.queue = [last];
-      }
-    } else {
-      const groupedActions = this.utils.groupBy(
-        actions,
-        (action: Action) => action.uri!.fsPath
-      );
+    actionType === ActionType.Rebuild
+      ? this.reduceRebuildAction(actionType, actions)
+      : this.reduceUpdateRemoveAction(actionType, actions);
+  }
 
-      groupedActions.forEach(this.reduceByFsPath.bind(this, actionType));
+  private reduceRebuildAction(actionType: ActionType, actions: Action[]) {
+    if (this.isPreviousActionRebuildType()) {
+      this.queue = [];
+    } else if (this.isActionArrayNotEmpty(actions)) {
+      const last = this.utils.getLastFromArray(
+        this.queue,
+        (action: Action) => action.type === actionType
+      );
+      this.queue = [last];
     }
+  }
+
+  private isPreviousActionRebuildType(): boolean {
+    return (
+      !!this.previousAction && this.previousAction.type === ActionType.Rebuild
+    );
+  }
+
+  private isActionArrayNotEmpty(actions: Action[]): boolean {
+    return actions.length > 0;
+  }
+
+  private reduceUpdateRemoveAction(actionType: ActionType, actions: Action[]) {
+    const groupedActions = this.utils.groupBy(
+      actions,
+      (action: Action) => action.uri!.fsPath
+    );
+
+    groupedActions.forEach(this.reduceByFsPath.bind(this, actionType));
   }
 
   private reduceByFsPath(
@@ -106,18 +140,28 @@ class ActionProcessor {
     actionsByFsPath: Action[],
     fsPath: string
   ) {
-      const last: Action = this.utils.getLastFromArray(
-        this.queue,
-        (action: Action) =>
-          action.type === actionType && action.uri!.fsPath === fsPath
-      );
+    const lastAction: Action = this.utils.getLastFromArray(
+      this.queue,
+      (action: Action) =>
+        action.type === actionType && action.uri!.fsPath === fsPath
+    );
 
-      this.queue = this.queue.filter(
-        (action: Action) =>
-          action.type !== actionType ||
-          action.uri!.fsPath !== fsPath ||
-          action.id === last.id
-      );
+    this.queue = this.queue.filter(
+      this.shouldActionRemainInQueue.bind(this, actionType, fsPath, lastAction)
+    );
+  }
+
+  private shouldActionRemainInQueue(
+    actionType: ActionType,
+    fsPath: string,
+    lastAction: Action,
+    action: Action
+  ) {
+    return (
+      action.type !== actionType ||
+      action.uri!.fsPath !== fsPath ||
+      action.id === lastAction.id
+    );
   }
 
   private getActionsFromQueueByType(actionType: ActionType): Action[] {
