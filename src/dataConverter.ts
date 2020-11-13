@@ -41,14 +41,14 @@ class DataConverter {
     let qpData: QuickPickItem[] = [];
 
     for (let item of data.values()) {
-      if (!this.isCancelled) {
-        item.elements.forEach((element: vscode.Uri | vscode.DocumentSymbol) => {
-          qpData.push(this.mapItemElementToQpItem(item.uri, element));
-        });
-      } else {
+      if (this.isCancelled) {
         qpData = [];
         break;
       }
+
+      item.elements.forEach((element: vscode.Uri | vscode.DocumentSymbol) => {
+        qpData.push(this.mapItemElementToQpItem(item.uri, element));
+      });
     }
     return qpData;
   }
@@ -57,13 +57,9 @@ class DataConverter {
     uri: vscode.Uri,
     item: vscode.DocumentSymbol | vscode.Uri
   ): QuickPickItem {
-    if (item.hasOwnProperty("range")) {
-      item = item as vscode.DocumentSymbol;
-      return this.mapDocumentSymbolToQpItem(uri, item);
-    } else {
-      item = item as vscode.Uri;
-      return this.mapUriToQpItem(item);
-    }
+    return item.hasOwnProperty("range")
+      ? this.mapDocumentSymbolToQpItem(uri, item as vscode.DocumentSymbol)
+      : this.mapUriToQpItem(item as vscode.Uri);
   }
 
   private mapDocumentSymbolToQpItem(
@@ -76,10 +72,31 @@ class DataConverter {
     const name = symbolName.length === 2 ? symbolName[1] : symbol.name;
     const icon = this.icons[symbol.kind] ? `$(${this.icons[symbol.kind]})` : "";
     const label = icon ? `${icon}  ${name}` : name;
-
     const itemFilterPhrase = this.getItemFilterPhraseForKind(symbol.kind);
+    const description = this.getDocumentSymbolToQpItemDescription(
+      itemFilterPhrase,
+      name,
+      symbol,
+      parent
+    );
 
-    const description = `${
+    return this.createQuickPickItem(
+      uri,
+      symbol.kind,
+      symbol.range.start,
+      symbol.range.end,
+      label,
+      description
+    );
+  }
+
+  private getDocumentSymbolToQpItemDescription(
+    itemFilterPhrase: string,
+    name: string,
+    symbol: vscode.DocumentSymbol,
+    parent: string
+  ) {
+    return `${
       this.shouldUseItemsFilterPhrases && itemFilterPhrase
         ? `[${itemFilterPhrase}${name}] `
         : ""
@@ -90,40 +107,40 @@ class DataConverter {
             symbol.range.end.line + 1
           }${parent ? ` in ${parent}` : ""}`
     }`;
-
-    return {
-      uri,
-      kind: symbol.kind,
-      range: {
-        start: symbol.range.start,
-        end: symbol.range.end,
-      },
-      label,
-      detail: this.normalizeUriPath(uri.fsPath),
-      description,
-    } as QuickPickItem;
   }
 
   private mapUriToQpItem(uri: vscode.Uri): QuickPickItem {
     const kind = 0;
-    const name = uri.path.split("/").pop();
+    const name = uri.path.split("/").pop() as string;
     const icon = this.icons[kind] ? `$(${this.icons[kind]})` : "";
     const label = icon ? `${icon}  ${name}` : name;
-
     const start = new vscode.Position(0, 0);
     const end = new vscode.Position(0, 0);
-
     const itemFilterPhrase = this.getItemFilterPhraseForKind(kind);
+    const description = this.getUriToQpItemDescription(itemFilterPhrase, name);
 
-    const description = `${
+    return this.createQuickPickItem(uri, kind, start, end, label, description);
+  }
+
+  private getUriToQpItemDescription(itemFilterPhrase: string, name: string) {
+    return `${
       this.shouldUseItemsFilterPhrases && itemFilterPhrase
         ? `[${itemFilterPhrase}${name}] `
         : ""
     }File`;
+  }
 
+  private createQuickPickItem(
+    uri: vscode.Uri,
+    kind: number,
+    start: vscode.Position,
+    end: vscode.Position,
+    label: string,
+    description: string
+  ): QuickPickItem {
     return {
       uri,
-      kind: kind,
+      kind,
       range: {
         start,
         end,
