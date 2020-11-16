@@ -22,35 +22,29 @@ class ExtensionController {
 
   async search(): Promise<void> {
     if (this.utils.hasWorkspaceAnyFolder()) {
-      const shouldIndexOnQuickPickOpen = this.shouldIndexOnQuickPickOpen();
-      const isQuickPickInitialized = this.quickPick.isInitialized();
+      this.shouldIndexOnQuickPickOpen() &&
+        (await this.workspace.index("search"));
 
-      if (shouldIndexOnQuickPickOpen) {
-        await this.workspace.index("search");
-      }
-
-      if (isQuickPickInitialized) {
-        this.quickPick.loadItems();
-        this.quickPick.show();
-      }
+      this.quickPick.isInitialized() && this.loadItemsAndShowQuickPick();
     } else {
       this.utils.printNoFolderOpenedMessage();
     }
   }
 
   async reload(): Promise<void> {
-    if (this.utils.hasWorkspaceAnyFolder()) {
-      await this.workspace.index("reload");
-    } else {
-      this.utils.printNoFolderOpenedMessage();
-    }
+    this.utils.hasWorkspaceAnyFolder()
+      ? await this.workspace.index("reload")
+      : this.utils.printNoFolderOpenedMessage();
   }
 
   async startup(): Promise<void> {
-    const shouldInitOnStartup = this.config.shouldInitOnStartup();
-    if (shouldInitOnStartup) {
-      await this.workspace.index("startup");
-    }
+    this.config.shouldInitOnStartup() &&
+      (await this.workspace.index("startup"));
+  }
+
+  private loadItemsAndShowQuickPick() {
+    this.quickPick.loadItems();
+    this.quickPick.show();
   }
 
   private async setQuickPickData(): Promise<void> {
@@ -59,8 +53,7 @@ class ExtensionController {
   }
 
   private setBusy(isBusy: boolean) {
-    const isQuickPickInitialized = this.quickPick.isInitialized();
-    if (isQuickPickInitialized) {
+    if (this.quickPick.isInitialized()) {
       this.setQuickPickLoading(isBusy);
       this.setQuickPickPlaceholder(isBusy);
     }
@@ -106,9 +99,9 @@ class ExtensionController {
 
   private onDidProcessing = async () => {
     await this.setQuickPickData();
-    if (!this.quickPick.isInitialized()) {
-      this.quickPick.init();
-    }
+
+    !this.quickPick.isInitialized() && this.quickPick.init();
+
     this.quickPick.loadItems();
     this.setBusy(false);
   };
