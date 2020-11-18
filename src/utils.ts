@@ -112,15 +112,13 @@ class Utils {
   }
 
   getNotificationLocation(): vscode.ProgressLocation {
-    const shouldDisplayNotificationInStatusBar = this.config.shouldDisplayNotificationInStatusBar();
-    return shouldDisplayNotificationInStatusBar
+    return this.config.shouldDisplayNotificationInStatusBar()
       ? vscode.ProgressLocation.Window
       : vscode.ProgressLocation.Notification;
   }
 
   getNotificationTitle(): string {
-    const shouldDisplayNotificationInStatusBar = this.config.shouldDisplayNotificationInStatusBar();
-    return shouldDisplayNotificationInStatusBar
+    return this.config.shouldDisplayNotificationInStatusBar()
       ? "Indexing..."
       : "Indexing workspace files and symbols...";
   }
@@ -134,9 +132,8 @@ class Utils {
   }
 
   getNthIndex(text: string, word: string, occurrenceNumber: number): number {
-    const length = text.length;
     let index = -1;
-    while (occurrenceNumber-- && index++ < length) {
+    while (occurrenceNumber-- && index++ < text.length) {
       index = text.indexOf(word, index);
       if (index < 0) {
         break;
@@ -157,11 +154,7 @@ class Utils {
     array.forEach((item: T) => {
       const key = keyGetter(item);
       const collection = map.get(key);
-      if (!collection) {
-        map.set(key, [item]);
-      } else {
-        collection.push(item);
-      }
+      !collection ? map.set(key, [item]) : collection.push(item);
     });
     return map;
   }
