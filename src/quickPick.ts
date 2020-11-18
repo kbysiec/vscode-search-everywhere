@@ -38,7 +38,7 @@ class QuickPick {
     this.registerOnDidChangeValueEventListeners();
   }
 
-  reload() {
+  reload(): void {
     this.fetchConfig();
     this.fetchHelpData();
   }
@@ -87,46 +87,73 @@ class QuickPick {
   }
 
   private registerOnDidChangeValueEventListeners(): void {
-    const shouldUseDebounce = this.config.shouldUseDebounce();
+    this.config.shouldUseDebounce()
+      ? this.registerOnDidChangeValueWithDebounceEventListeners()
+      : this.registerOnDidChangeValueWithoutDebounceEventListeners();
+  }
 
-    if (shouldUseDebounce) {
-      const onDidChangeValueClearingEventListener = this.quickPick.onDidChangeValue(
-        this.onDidChangeValueClearing
-      );
-      const onDidChangeValueEventListener = this.quickPick.onDidChangeValue(
-        debounce(this.onDidChangeValue, 400)
-      );
+  private registerOnDidChangeValueWithDebounceEventListeners(): void {
+    const onDidChangeValueClearingEventListener = this.quickPick.onDidChangeValue(
+      this.onDidChangeValueClearing
+    );
+    const onDidChangeValueEventListener = this.quickPick.onDidChangeValue(
+      debounce(this.onDidChangeValue, 400)
+    );
 
-      this.onDidChangeValueEventListeners.push(
-        onDidChangeValueClearingEventListener
-      );
-      this.onDidChangeValueEventListeners.push(onDidChangeValueEventListener);
-    } else {
-      const onDidChangeValueEventListener = this.quickPick.onDidChangeValue(
-        debounce(this.onDidChangeValue, 400)
-      );
+    this.onDidChangeValueEventListeners.push(
+      onDidChangeValueClearingEventListener
+    );
+    this.onDidChangeValueEventListeners.push(onDidChangeValueEventListener);
+  }
 
-      this.onDidChangeValueEventListeners.push(onDidChangeValueEventListener);
-    }
+  private registerOnDidChangeValueWithoutDebounceEventListeners(): void {
+    const onDidChangeValueEventListener = this.quickPick.onDidChangeValue(
+      debounce(this.onDidChangeValue, 400)
+    );
+
+    this.onDidChangeValueEventListeners.push(onDidChangeValueEventListener);
   }
 
   private async openSelected(qpItem: QuickPickItem): Promise<void> {
-    if (this.shouldUseItemsFilterPhrases && qpItem.isHelp) {
-      const text = this.itemsFilterPhrases[qpItem.kind];
-      this.setText(text);
-      this.loadItems();
-    } else {
-      const document = await vscode.workspace.openTextDocument(
-        qpItem.uri!.scheme === "file" ? (qpItem.uri!.fsPath as any) : qpItem.uri
-      );
-      const editor = await vscode.window.showTextDocument(document);
-      this.selectQpItem(editor, qpItem);
-    }
+    this.shouldLoadItemsForFilterPhrase(qpItem)
+      ? this.loadItemsForFilterPhrase(qpItem)
+      : await this.openItem(qpItem);
+  }
+
+  private shouldLoadItemsForFilterPhrase(qpItem: QuickPickItem): boolean {
+    return this.shouldUseItemsFilterPhrases && !!qpItem.isHelp;
+  }
+
+  private loadItemsForFilterPhrase(qpItem: QuickPickItem): void {
+    const filterPhrase = this.itemsFilterPhrases[qpItem.kind];
+    this.setText(filterPhrase);
+    this.loadItems();
+  }
+
+  private async openItem(qpItem: QuickPickItem): Promise<void> {
+    const document = await vscode.workspace.openTextDocument(
+      qpItem.uri!.scheme === "file" ? (qpItem.uri!.fsPath as any) : qpItem.uri
+    );
+    const editor = await vscode.window.showTextDocument(document);
+    this.selectQpItem(editor, qpItem);
   }
 
   private selectQpItem(editor: vscode.TextEditor, qpItem: QuickPickItem): void {
-    const shouldHighlightSymbol = this.config.shouldHighlightSymbol();
+    editor.selection = this.getSelectionForQpItem(
+      qpItem,
+      this.config.shouldHighlightSymbol()
+    );
 
+    editor.revealRange(
+      qpItem.range as vscode.Range,
+      vscode.TextEditorRevealType.Default
+    );
+  }
+
+  private getSelectionForQpItem(
+    qpItem: QuickPickItem,
+    shouldHighlightSymbol: boolean
+  ): vscode.Selection {
     const { range } = qpItem;
     const start = new vscode.Position(
       range!.start.line,
@@ -134,14 +161,9 @@ class QuickPick {
     );
     const end = new vscode.Position(range!.end.line, range!.end.character);
 
-    editor.selection = shouldHighlightSymbol
+    return shouldHighlightSymbol
       ? new vscode.Selection(start, end)
       : new vscode.Selection(start, start);
-
-    editor.revealRange(
-      range as vscode.Range,
-      vscode.TextEditorRevealType.Default
-    );
   }
 
   private getHelpItems(): QuickPickItem[] {
@@ -154,7 +176,10 @@ class QuickPick {
     return items;
   }
 
-  private getHelpItemForKind(kind: string, itemFilterPhrase: string) {
+  private getHelpItemForKind(
+    kind: string,
+    itemFilterPhrase: string
+  ): QuickPickItem {
     return {
       label: `${
         this.helpPhrase
@@ -177,21 +202,21 @@ class QuickPick {
     this.helpItems = this.getHelpItems();
   }
 
-  private onDidChangeValueClearing = () => {
+  private onDidChangeValueClearing = (): void => {
     this.quickPick.items = [];
   };
 
   private onDidChangeValue = (text: string): void => {
-    if (
-      this.shouldUseItemsFilterPhrases &&
-      this.helpPhrase &&
-      text === this.helpPhrase
-    ) {
-      this.loadItems(true);
-    } else {
-      this.loadItems();
-    }
+    this.shouldLoadHelpItems(text) ? this.loadItems(true) : this.loadItems();
   };
+
+  private shouldLoadHelpItems(text: string): boolean {
+    return (
+      this.shouldUseItemsFilterPhrases &&
+      !!this.helpPhrase &&
+      text === this.helpPhrase
+    );
+  }
 
   private onDidAccept = async (): Promise<void> => {
     const selectedItem = this.quickPick.selectedItems[0];
