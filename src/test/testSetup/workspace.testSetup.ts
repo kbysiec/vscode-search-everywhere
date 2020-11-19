@@ -307,7 +307,7 @@ export const getTestSetups = (workspace: Workspace) => {
         },
         {
           object: workspaceAny.utils,
-          method: "updateUrisWithNewDirectoryName",
+          method: "getUrisWithNewDirectoryName",
         },
       ]);
 
@@ -342,7 +342,7 @@ export const getTestSetups = (workspace: Workspace) => {
         },
         {
           object: workspaceAny.utils,
-          method: "updateUrisWithNewDirectoryName",
+          method: "getUrisWithNewDirectoryName",
           returns: getItems(1, "./test/fake-files/"),
         },
         {

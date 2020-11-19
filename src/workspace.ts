@@ -34,7 +34,7 @@ class Workspace {
     this.initComponents();
   }
 
-  async index(comment: string) {
+  async index(comment: string): Promise<void> {
     await this.registerAction(
       ActionType.Rebuild,
       this.indexWithProgress.bind(this),
@@ -72,18 +72,16 @@ class Workspace {
   }
 
   private async indexWithProgress(): Promise<void> {
-    if (this.utils.hasWorkspaceAnyFolder()) {
-      await vscode.window.withProgress(
-        {
-          location: this.utils.getNotificationLocation(),
-          title: this.utils.getNotificationTitle(),
-          cancellable: true,
-        },
-        this.indexWithProgressTask.bind(this)
-      );
-    } else {
-      this.utils.printNoFolderOpenedMessage();
-    }
+    this.utils.hasWorkspaceAnyFolder()
+      ? await vscode.window.withProgress(
+          {
+            location: this.utils.getNotificationLocation(),
+            title: this.utils.getNotificationTitle(),
+            cancellable: true,
+          },
+          this.indexWithProgressTask.bind(this)
+        )
+      : this.utils.printNoFolderOpenedMessage();
   }
 
   private async indexWithProgressTask(
@@ -92,7 +90,7 @@ class Workspace {
       increment?: number | undefined;
     }>,
     token: vscode.CancellationToken
-  ) {
+  ): Promise<void> {
     const onCancellationRequestedSubscription = token.onCancellationRequested(
       this.onCancellationRequested.bind(this)
     );
@@ -119,8 +117,7 @@ class Workspace {
 
   private async downloadData(uris?: vscode.Uri[]): Promise<QuickPickItem[]> {
     const data = await this.dataService.fetchData(uris);
-    const qpData = this.dataConverter.convertToQpData(data);
-    return qpData;
+    return this.dataConverter.convertToQpData(data);
   }
 
   private async updateCacheByPath(uri: vscode.Uri): Promise<void> {
@@ -128,29 +125,15 @@ class Workspace {
       const isUriExistingInWorkspace = await this.dataService.isUriExistingInWorkspace(
         uri
       );
-      let data: QuickPickItem[];
 
       if (isUriExistingInWorkspace) {
         this.cleanDirectoryRenamingData();
-
-        await this.removeFromCacheByPath(uri);
-        data = await this.downloadData([uri]);
-        data = this.mergeWithDataFromCache(data);
-        this.cache.updateData(data);
+        await this.updateDataForExistingUriInWorkspace(uri);
       } else {
-        if (
-          this.urisForDirectoryPathUpdate &&
-          this.urisForDirectoryPathUpdate.length
-        ) {
-          const urisWithNewDirectoryName = this.utils.updateUrisWithNewDirectoryName(
-            this.urisForDirectoryPathUpdate,
-            this.directoryUriBeforePathUpdate!,
+        if (this.wasItemsMovedToAnotherDirectoryOrDirectoryWasRenamed()) {
+          await this.updateDataAfterItemsWereMovedToAnotherDirectoryOrDirectoryWasRenamed(
             uri
           );
-
-          data = await this.downloadData(urisWithNewDirectoryName);
-          data = this.mergeWithDataFromCache(data);
-          this.cache.updateData(data);
         }
         this.cleanDirectoryRenamingData();
       }
@@ -160,37 +143,80 @@ class Workspace {
     }
   }
 
+  private wasItemsMovedToAnotherDirectoryOrDirectoryWasRenamed(): boolean {
+    return (
+      !!this.urisForDirectoryPathUpdate &&
+      !!this.urisForDirectoryPathUpdate.length
+    );
+  }
+
+  private async updateDataForExistingUriInWorkspace(
+    uri: vscode.Uri
+  ): Promise<void> {
+    await this.removeFromCacheByPath(uri);
+    let data = await this.downloadData([uri]);
+    data = this.mergeWithDataFromCache(data);
+    this.cache.updateData(data);
+  }
+
+  private async updateDataAfterItemsWereMovedToAnotherDirectoryOrDirectoryWasRenamed(
+    uri: vscode.Uri
+  ): Promise<void> {
+    const urisWithNewDirectoryName = this.utils.getUrisWithNewDirectoryName(
+      this.urisForDirectoryPathUpdate!,
+      this.directoryUriBeforePathUpdate!,
+      uri
+    );
+
+    let data = await this.downloadData(urisWithNewDirectoryName);
+    data = this.mergeWithDataFromCache(data);
+    this.cache.updateData(data);
+  }
+
   private async removeFromCacheByPath(uri: vscode.Uri): Promise<void> {
     let data = this.getData();
     const isUriExistingInWorkspace = await this.dataService.isUriExistingInWorkspace(
       uri
     );
     if (data) {
-      if (isUriExistingInWorkspace) {
-        data = data.filter(
-          (qpItem: QuickPickItem) => qpItem.uri.fsPath !== uri.fsPath
-        );
-      } else {
-        this.directoryUriBeforePathUpdate = uri;
-        this.urisForDirectoryPathUpdate = this.utils.getUrisForDirectoryPathUpdate(
-          data,
-          uri,
-          this.fileKind
-        );
-        data = data.filter(
-          (qpItem: QuickPickItem) => !qpItem.uri.fsPath.includes(uri.fsPath)
-        );
-      }
+      data = isUriExistingInWorkspace
+        ? this.removeFromDataForExistingUriInWorkspace(data, uri)
+        : this.removeFromDataAfterItemsWereMovedToAnotherDirectoryOrDirectoryWasRenamed(
+            data,
+            uri
+          );
+
       this.cache.updateData(data);
     }
   }
 
+  private removeFromDataForExistingUriInWorkspace(
+    data: QuickPickItem[],
+    uri: vscode.Uri
+  ): QuickPickItem[] {
+    return data.filter(
+      (qpItem: QuickPickItem) => qpItem.uri.fsPath !== uri.fsPath
+    );
+  }
+
+  private removeFromDataAfterItemsWereMovedToAnotherDirectoryOrDirectoryWasRenamed(
+    data: QuickPickItem[],
+    uri: vscode.Uri
+  ): QuickPickItem[] {
+    this.directoryUriBeforePathUpdate = uri;
+    this.urisForDirectoryPathUpdate = this.utils.getUrisForDirectoryPathUpdate(
+      data,
+      uri,
+      this.fileKind
+    );
+    return data.filter(
+      (qpItem: QuickPickItem) => !qpItem.uri.fsPath.includes(uri.fsPath)
+    );
+  }
+
   private mergeWithDataFromCache(data: QuickPickItem[]): QuickPickItem[] {
     const dataFromCache = this.getData();
-    if (dataFromCache) {
-      return dataFromCache.concat(data);
-    }
-    return data;
+    return dataFromCache ? dataFromCache.concat(data) : data;
   }
 
   private cleanDirectoryRenamingData() {
@@ -258,8 +284,9 @@ class Workspace {
     const isUriExistingInWorkspace = await this.dataService.isUriExistingInWorkspace(
       uri
     );
+    const didContentChanged = event.contentChanges.length;
 
-    if (isUriExistingInWorkspace && event.contentChanges.length) {
+    if (isUriExistingInWorkspace && didContentChanged) {
       await this.registerAction(
         ActionType.Update,
         this.updateCacheByPath.bind(this, uri),
@@ -335,12 +362,29 @@ class Workspace {
     }>,
     urisCount: number
   ) {
-    if (!this.progressStep) {
-      this.progressStep = 100 / urisCount;
-    }
+    !this.isProgressStepCalculated() && this.calculateProgressStep(urisCount);
+    this.increaseCurrentProgressValue();
+    this.reportCurrentProgress(progress);
+  }
 
+  private isProgressStepCalculated(): boolean {
+    return !!this.progressStep;
+  }
+
+  private calculateProgressStep(urisCount: number): void {
+    this.progressStep = 100 / urisCount;
+  }
+
+  private increaseCurrentProgressValue(): void {
     this.currentProgressValue += this.progressStep;
+  }
 
+  private reportCurrentProgress(
+    progress: vscode.Progress<{
+      message?: string | undefined;
+      increment?: number | undefined;
+    }>
+  ): void {
     progress.report({
       increment: this.progressStep,
       message: ` ${

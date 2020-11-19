@@ -205,10 +205,10 @@ describe("Utils", () => {
     });
   });
 
-  describe("updateUrisWithNewDirectoryName", () => {
+  describe("getUrisWithNewDirectoryName", () => {
     it("1: should return vscode.Uri[] with updated directory path", () => {
       assert.deepEqual(
-        utils.updateUrisWithNewDirectoryName(
+        utils.getUrisWithNewDirectoryName(
           getItems(),
           getDirectory("./fake/"),
           getDirectory("./test/fake-files/")
@@ -220,7 +220,7 @@ describe("Utils", () => {
     it(`2: should return unchanged vscode.Uri[]
       if old directory path does not exist in workspace`, () => {
       assert.deepEqual(
-        utils.updateUrisWithNewDirectoryName(
+        utils.getUrisWithNewDirectoryName(
           getItems(),
           getDirectory("./fake/not-exist/"),
           getDirectory("./test/fake-files/")

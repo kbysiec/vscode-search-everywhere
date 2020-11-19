@@ -97,7 +97,7 @@ class Utils {
       .map((qpItem: QuickPickItem) => qpItem.uri);
   }
 
-  updateUrisWithNewDirectoryName(
+  getUrisWithNewDirectoryName(
     uris: vscode.Uri[],
     oldDirectoryUri: vscode.Uri,
     newDirectoryUri: vscode.Uri
