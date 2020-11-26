@@ -111,7 +111,7 @@ class DataConverter {
 
   private mapUriToQpItem(uri: vscode.Uri): QuickPickItem {
     const kind = 0;
-    const name = uri.path.split("/").pop() as string;
+    const name = this.utils.getNameFromUri(uri);
     const icon = this.icons[kind] ? `$(${this.icons[kind]})` : "";
     const label = icon ? `${icon}  ${name}` : name;
     const start = new vscode.Position(0, 0);
@@ -146,30 +146,30 @@ class DataConverter {
         end,
       },
       label,
-      detail: this.normalizeUriPath(uri.fsPath),
+      detail: this.utils.normalizeUriPath(uri.fsPath),
       description,
     } as QuickPickItem;
   }
 
-  private normalizeUriPath(path: string): string {
-    const workspaceFoldersPaths = this.getWorkspaceFoldersPaths();
-    let normalizedPath = path;
-    workspaceFoldersPaths.forEach((wfPath: string) => {
-      normalizedPath = normalizedPath.replace(wfPath, "");
-    });
+  // private normalizeUriPath(path: string): string {
+  //   const workspaceFoldersPaths = this.getWorkspaceFoldersPaths();
+  //   let normalizedPath = path;
+  //   workspaceFoldersPaths.forEach((wfPath: string) => {
+  //     normalizedPath = normalizedPath.replace(wfPath, "");
+  //   });
 
-    return normalizedPath;
-  }
+  //   return normalizedPath;
+  // }
 
-  private getWorkspaceFoldersPaths(): string[] {
-    return (
-      (vscode.workspace.workspaceFolders &&
-        vscode.workspace.workspaceFolders.map(
-          (wf: vscode.WorkspaceFolder) => wf.uri.fsPath
-        )) ||
-      []
-    );
-  }
+  // private getWorkspaceFoldersPaths(): string[] {
+  //   return (
+  //     (vscode.workspace.workspaceFolders &&
+  //       vscode.workspace.workspaceFolders.map(
+  //         (wf: vscode.WorkspaceFolder) => wf.uri.fsPath
+  //       )) ||
+  //     []
+  //   );
+  // }
 
   private fetchConfig() {
     this.icons = this.config.getIcons();

@@ -21,10 +21,15 @@ class Workspace {
 
   private urisForDirectoryPathUpdate: vscode.Uri[] | null = null;
   private directoryUriBeforePathUpdate?: vscode.Uri | null = null;
+  private directoryUriAfterPathUpdate?: vscode.Uri | null = null;
   private fileKind: number = 0;
 
   private progressStep: number = 0;
   private currentProgressValue: number = 0;
+  test1!: QuickPickItem[];
+  test2!: vscode.Uri;
+  test3!: QuickPickItem[];
+  test4!: boolean;
 
   constructor(
     private cache: Cache,
@@ -122,21 +127,15 @@ class Workspace {
 
   private async updateCacheByPath(uri: vscode.Uri): Promise<void> {
     try {
-      const isUriExistingInWorkspace = await this.dataService.isUriExistingInWorkspace(
-        uri
-      );
-
-      if (isUriExistingInWorkspace) {
-        this.cleanDirectoryRenamingData();
-        await this.updateDataForExistingUriInWorkspace(uri);
+      if (this.wasItemsMovedToAnotherDirectoryOrDirectoryWasRenamed()) {
+        this.wasDirectoryRenamed()
+          ? this.updateDataAfterDirectoryRenaming()
+          : await this.updateDataAfterMovingToAnotherDirectory(uri);
       } else {
-        if (this.wasItemsMovedToAnotherDirectoryOrDirectoryWasRenamed()) {
-          await this.updateDataAfterItemsWereMovedToAnotherDirectoryOrDirectoryWasRenamed(
-            uri
-          );
-        }
-        this.cleanDirectoryRenamingData();
+        (await this.dataService.isUriExistingInWorkspace(uri)) &&
+          (await this.updateDataAfterChangesInExistingFile(uri));
       }
+      this.cleanDirectoryRenamingData();
     } catch (error) {
       this.utils.printErrorMessage(error);
       await this.index("on error catch");
@@ -150,6 +149,15 @@ class Workspace {
     );
   }
 
+  private wasDirectoryRenamed(): boolean {
+    return this.isDirectory(this.directoryUriBeforePathUpdate!);
+  }
+
+  isDirectory(uri: vscode.Uri): boolean {
+    const name = this.utils.getNameFromUri(uri);
+    return !name.includes(".");
+  }
+
   private async updateDataForExistingUriInWorkspace(
     uri: vscode.Uri
   ): Promise<void> {
@@ -159,33 +167,42 @@ class Workspace {
     this.cache.updateData(data);
   }
 
-  private async updateDataAfterItemsWereMovedToAnotherDirectoryOrDirectoryWasRenamed(
+  private updateDataAfterDirectoryRenaming(): void {
+    let data = this.getData();
+    if (data) {
+      data = this.utils.updateQpItemsWithNewDirectoryPath(
+        data,
+        this.directoryUriBeforePathUpdate!,
+        this.directoryUriAfterPathUpdate!
+      );
+      this.cache.updateData(data);
+    }
+  }
+
+  private async updateDataAfterMovingToAnotherDirectory(
     uri: vscode.Uri
   ): Promise<void> {
-    const urisWithNewDirectoryName = this.utils.getUrisWithNewDirectoryName(
-      this.urisForDirectoryPathUpdate!,
-      this.directoryUriBeforePathUpdate!,
-      uri
-    );
+    await this.updateDataForExistingUriInWorkspace(uri);
+  }
 
-    let data = await this.downloadData(urisWithNewDirectoryName);
-    data = this.mergeWithDataFromCache(data);
-    this.cache.updateData(data);
+  private async updateDataAfterChangesInExistingFile(
+    uri: vscode.Uri
+  ): Promise<void> {
+    await this.updateDataForExistingUriInWorkspace(uri);
   }
 
   private async removeFromCacheByPath(uri: vscode.Uri): Promise<void> {
     let data = this.getData();
-    const isUriExistingInWorkspace = await this.dataService.isUriExistingInWorkspace(
-      uri
-    );
     if (data) {
+      const isUriExistingInWorkspace = await this.dataService.isUriExistingInWorkspace(
+        uri
+      );
       data = isUriExistingInWorkspace
         ? this.removeFromDataForExistingUriInWorkspace(data, uri)
         : this.removeFromDataAfterItemsWereMovedToAnotherDirectoryOrDirectoryWasRenamed(
             data,
             uri
           );
-
       this.cache.updateData(data);
     }
   }
@@ -203,14 +220,24 @@ class Workspace {
     data: QuickPickItem[],
     uri: vscode.Uri
   ): QuickPickItem[] {
+    this.fetchUrisForDirectoryPathUpdate(data, uri); // check if necessary
     this.directoryUriBeforePathUpdate = uri;
+
+    return this.wasDirectoryRenamed()
+      ? data
+      : data.filter((qpItem: QuickPickItem) => {
+          return !qpItem.uri.fsPath.includes(uri.fsPath);
+        });
+  }
+
+  private fetchUrisForDirectoryPathUpdate(
+    data: QuickPickItem[],
+    uri: vscode.Uri
+  ): void {
     this.urisForDirectoryPathUpdate = this.utils.getUrisForDirectoryPathUpdate(
       data,
       uri,
       this.fileKind
-    );
-    return data.filter(
-      (qpItem: QuickPickItem) => !qpItem.uri.fsPath.includes(uri.fsPath)
     );
   }
 
@@ -221,6 +248,7 @@ class Workspace {
 
   private cleanDirectoryRenamingData() {
     this.directoryUriBeforePathUpdate = null;
+    this.directoryUriAfterPathUpdate = null;
     this.urisForDirectoryPathUpdate = null;
   }
 
@@ -304,7 +332,8 @@ class Workspace {
   private onDidRenameFiles = async (event: vscode.FileRenameEvent) => {
     const uri = event.files[0].oldUri;
     const hasWorkspaceMoreThanOneFolder = this.utils.hasWorkspaceMoreThanOneFolder();
-
+    this.directoryUriBeforePathUpdate = event.files[0].oldUri;
+    this.directoryUriAfterPathUpdate = event.files[0].newUri;
     if (hasWorkspaceMoreThanOneFolder) {
       await this.registerAction(
         ActionType.Remove,

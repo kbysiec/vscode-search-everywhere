@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import Workspace from "../../workspace";
 import { getFileWatcherStub } from "../util/eventMockFactory";
-import { getItems, getDirectory } from "../util/itemMockFactory";
+import { getItems, getDirectory, getItem } from "../util/itemMockFactory";
 import {
   getSubscription,
   getWorkspaceData,
@@ -274,6 +274,11 @@ export const getTestSetups = (workspace: Workspace) => {
         },
         {
           object: workspaceAny,
+          method: "downloadData",
+          returns: Promise.resolve(getQpItemsSymbolAndUri()),
+        },
+        {
+          object: workspaceAny,
           method: "getData",
           customReturns: true,
           returns: [
@@ -293,9 +298,14 @@ export const getTestSetups = (workspace: Workspace) => {
           returns: Promise.resolve(true),
         },
         {
+          object: workspaceAny.actionProcessor,
+          method: "register",
+        },
+        {
           object: workspaceAny,
-          method: "downloadData",
-          returns: Promise.resolve(getQpItemsSymbolAndUri()),
+          method: "urisForDirectoryPathUpdate",
+          returns: [],
+          isNotMethod: true,
         },
       ]);
     },
@@ -309,29 +319,47 @@ export const getTestSetups = (workspace: Workspace) => {
           object: workspaceAny.utils,
           method: "getUrisWithNewDirectoryName",
         },
+        {
+          object: workspaceAny.utils,
+          method: "getNameFromUri",
+        },
+        {
+          object: workspaceAny.utils,
+          method: "updateQpItemsWithNewDirectoryPath",
+        },
+        {
+          object: workspaceAny.utils,
+          method: "normalizeUriPath",
+        },
+        {
+          object: workspaceAny.utils,
+          method: "getWorkspaceFoldersPaths",
+        },
       ]);
 
-      return stubMultiple([
+      const workspaceFolders = [
         {
-          object: workspaceAny,
-          method: "downloadData",
-          returns: Promise.resolve(
-            getQpItemsSymbolAndUri("./test/fake-files/")
-          ),
+          index: 0,
+          name: "/test/path/to/workspace",
+          uri: vscode.Uri.file("/test/path/to/workspace"),
         },
+      ];
+
+      return stubMultiple([
         {
           object: workspaceAny.cache,
           method: "updateData",
         },
         {
-          object: workspaceAny.dataService,
-          method: "isUriExistingInWorkspace",
-          returns: Promise.resolve(false),
-        },
-        {
           object: workspaceAny,
           method: "directoryUriBeforePathUpdate",
           returns: getDirectory("./fake/"),
+          isNotMethod: true,
+        },
+        {
+          object: workspaceAny,
+          method: "directoryUriAfterPathUpdate",
+          returns: getDirectory("./fake-new/"),
           isNotMethod: true,
         },
         {
@@ -350,6 +378,12 @@ export const getTestSetups = (workspace: Workspace) => {
           method: "getData",
           returns: getQpItems(1),
         },
+        {
+          object: vscode.workspace,
+          method: "workspaceFolders",
+          returns: workspaceFolders,
+          isNotMethod: true,
+        },
       ]);
     },
     updateCacheByPath3: () => {
@@ -357,6 +391,10 @@ export const getTestSetups = (workspace: Workspace) => {
         {
           object: workspaceAny.cache,
           method: "updateData",
+        },
+        {
+          object: workspaceAny.utils,
+          method: "getNameFromUri",
         },
       ]);
 
@@ -366,9 +404,27 @@ export const getTestSetups = (workspace: Workspace) => {
           method: "updateData",
         },
         {
-          object: workspaceAny.dataService,
-          method: "isUriExistingInWorkspace",
-          returns: Promise.resolve(false),
+          object: workspaceAny,
+          method: "directoryUriBeforePathUpdate",
+          returns: getDirectory("./fake/"),
+          isNotMethod: true,
+        },
+        {
+          object: workspaceAny,
+          method: "directoryUriAfterPathUpdate",
+          returns: getDirectory("./fake-new/"),
+          isNotMethod: true,
+        },
+        {
+          object: workspaceAny,
+          method: "urisForDirectoryPathUpdate",
+          returns: getItems(1),
+          isNotMethod: true,
+        },
+        {
+          object: workspaceAny,
+          method: "getData",
+          returns: undefined,
         },
       ]);
     },
@@ -384,9 +440,73 @@ export const getTestSetups = (workspace: Workspace) => {
           returns: Promise.resolve(true),
         },
         {
+          object: workspaceAny.actionProcessor,
+          method: "register",
+        },
+        {
           object: workspaceAny,
           method: "removeFromCacheByPath",
           throws: new Error("test error"),
+        },
+      ]);
+    },
+    updateCacheByPath5: () => {
+      restoreStubbedMultiple([
+        {
+          object: workspaceAny.cache,
+          method: "updateData",
+        },
+        {
+          object: workspaceAny.utils,
+          method: "getNameFromUri",
+        },
+      ]);
+
+      return stubMultiple([
+        {
+          object: workspaceAny.cache,
+          method: "updateData",
+        },
+        {
+          object: workspaceAny,
+          method: "downloadData",
+          returns: Promise.resolve(getQpItemsSymbolAndUri("./fake-new/")),
+        },
+        {
+          object: workspaceAny,
+          method: "getData",
+          customReturns: true,
+          returns: [
+            {
+              onCall: 0,
+              returns: getQpItems(),
+            },
+            {
+              onCall: 1,
+              returns: getQpItems(1),
+            },
+          ],
+        },
+        {
+          object: workspaceAny.dataService,
+          method: "isUriExistingInWorkspace",
+          returns: Promise.resolve(true),
+        },
+        {
+          object: workspaceAny.actionProcessor,
+          method: "register",
+        },
+        {
+          object: workspaceAny,
+          method: "urisForDirectoryPathUpdate",
+          returns: getItems(1),
+          isNotMethod: true,
+        },
+        {
+          object: workspaceAny,
+          method: "directoryUriBeforePathUpdate",
+          returns: getItem("./old-fake/"),
+          isNotMethod: true,
         },
       ]);
     },
@@ -442,6 +562,51 @@ export const getTestSetups = (workspace: Workspace) => {
           object: workspaceAny.cache,
           method: "updateData",
         },
+        {
+          object: workspaceAny.utils,
+          method: "getNameFromUri",
+        },
+      ]);
+
+      const qpItems = getQpItems();
+      const stubs = stubMultiple([
+        {
+          object: workspaceAny.cache,
+          method: "updateData",
+        },
+        {
+          object: workspaceAny,
+          method: "getData",
+          returns: qpItems,
+        },
+        {
+          object: workspaceAny.dataService,
+          method: "isUriExistingInWorkspace",
+          returns: Promise.resolve(false),
+        },
+        {
+          object: workspaceAny,
+          method: "directoryUriBeforePathUpdate",
+          returns: getDirectory("./old-fake"),
+          isNotMethod: true,
+        },
+      ]);
+
+      return {
+        qpItems,
+        stubs,
+      };
+    },
+    removeFromCacheByPath4: () => {
+      restoreStubbedMultiple([
+        {
+          object: workspaceAny.cache,
+          method: "updateData",
+        },
+        {
+          object: workspaceAny.utils,
+          method: "getNameFromUri",
+        },
       ]);
 
       return stubMultiple([
@@ -459,6 +624,12 @@ export const getTestSetups = (workspace: Workspace) => {
           method: "isUriExistingInWorkspace",
           returns: Promise.resolve(false),
         },
+        // {
+        //   object: workspaceAny,
+        //   method: "directoryUriBeforePathUpdate",
+        //   returns: getItem(),
+        //   isNotMethod: true,
+        // },
       ]);
     },
     mergeWithDataFromCache1: () => {

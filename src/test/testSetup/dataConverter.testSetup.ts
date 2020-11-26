@@ -61,6 +61,18 @@ export const getTestSetups = (dataConverter: DataConverter) => {
           object: dataConverterAny.utils,
           method: "getSplitter",
         },
+        {
+          object: dataConverterAny.utils,
+          method: "getNameFromUri",
+        },
+        {
+          object: dataConverterAny.utils,
+          method: "normalizeUriPath",
+        },
+        {
+          object: dataConverterAny.utils,
+          method: "getWorkspaceFoldersPaths",
+        },
       ]);
       stubConfig();
 
@@ -76,6 +88,18 @@ export const getTestSetups = (dataConverter: DataConverter) => {
         {
           object: dataConverterAny.utils,
           method: "getSplitter",
+        },
+        {
+          object: dataConverterAny.utils,
+          method: "getNameFromUri",
+        },
+        {
+          object: dataConverterAny.utils,
+          method: "normalizeUriPath",
+        },
+        {
+          object: dataConverterAny.utils,
+          method: "getWorkspaceFoldersPaths",
         },
       ]);
       const configuration = getConfiguration().searchEverywhere;

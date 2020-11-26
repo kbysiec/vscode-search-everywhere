@@ -164,49 +164,73 @@ describe("Workspace", () => {
   });
 
   describe("updateCacheByPath", () => {
+    // it(`1: should remove old data for given uri and get
+    //   new data if exists in workspace`, async () => {
+    //   const [updateDataStub] = setups.updateCacheByPath1();
+    // await workspaceAny.updateCacheByPath(getItem());
+    // assert.equal(updateDataStub.calledTwice, true);
+    // assert.deepEqual(updateDataStub.args[1][0], getQpItemsSymbolAndUriExt());
+    // });
+    // it(`2: should find items with old uris, replace the path
+    //   with new uri after directory renaming`, async () => {
+    //   const [downloadDataStub, updateDataStub] = setups.updateCacheByPath2();
+    //   await workspaceAny.updateCacheByPath(getDirectory("./test/fake-files/"));
+    //   assert.equal(
+    //     downloadDataStub.calledWith(getItems(1, "./test/fake-files/")),
+    //     true
+    //   );
+    //   assert.equal(updateDataStub.calledOnce, true);
+    //   assert.equal(
+    //     updateDataStub.calledWith(
+    //       getQpItemsSymbolAndUriExt("./test/fake-files/")
+    //     ),
+    //     true
+    //   );
+    // });
+    // it(`3: should do nothing if for given directory uri
+    //   there is not any item for replace the path`, async () => {
+    //   const [updateDataStub] = setups.updateCacheByPath3();
+    //   await workspaceAny.updateCacheByPath(getDirectory("./test/fake-files/"));
+    //   assert.equal(updateDataStub.called, false);
+    // });
     it(`1: should remove old data for given uri and get
       new data if exists in workspace`, async () => {
       const [updateDataStub] = setups.updateCacheByPath1();
-
       await workspaceAny.updateCacheByPath(getItem());
-
       assert.equal(updateDataStub.calledTwice, true);
       assert.deepEqual(updateDataStub.args[1][0], getQpItemsSymbolAndUriExt());
     });
-
     it(`2: should find items with old uris, replace the path
       with new uri after directory renaming`, async () => {
-      const [downloadDataStub, updateDataStub] = setups.updateCacheByPath2();
-
+      const [updateDataStub] = setups.updateCacheByPath2();
       await workspaceAny.updateCacheByPath(getDirectory("./test/fake-files/"));
-
-      assert.equal(
-        downloadDataStub.calledWith(getItems(1, "./test/fake-files/")),
-        true
-      );
       assert.equal(updateDataStub.calledOnce, true);
       assert.equal(
-        updateDataStub.calledWith(
-          getQpItemsSymbolAndUriExt("./test/fake-files/")
-        ),
+        updateDataStub.calledWith(getQpItems(1, "/./fake-new/")),
         true
       );
     });
-
-    it(`3: should do nothing if for given directory uri
-      there is not any item for replace the path`, async () => {
+    it(`3: should do nothing if the data is empty
+      after directory renaming`, async () => {
       const [updateDataStub] = setups.updateCacheByPath3();
-
       await workspaceAny.updateCacheByPath(getDirectory("./test/fake-files/"));
-      assert.equal(updateDataStub.called, false);
+      assert.equal(updateDataStub.calledOnce, false);
     });
-
     it(`4: should index method be invoked which
       register rebuild action if error is thrown`, async () => {
       const [indexStub] = setups.updateCacheByPath4();
-
       await workspaceAny.updateCacheByPath(getItem());
       assert.equal(indexStub.calledOnce, true);
+    });
+    it(`5: should remove old data for given uri and get
+      new data if file was moved to another directory`, async () => {
+      const [updateDataStub] = setups.updateCacheByPath5();
+      await workspaceAny.updateCacheByPath(getItem());
+      assert.equal(updateDataStub.calledTwice, true);
+      assert.deepEqual(
+        updateDataStub.args[1][0],
+        getQpItemsSymbolAndUriExt("./fake-new/")
+      );
     });
   });
 
@@ -228,12 +252,23 @@ describe("Workspace", () => {
       );
     });
 
-    it(`3: should remove items from stored data for
+    it(`3: should not remove items from stored data for
       given renamed directory uri`, async () => {
-      const [updateDataStub] = setups.removeFromCacheByPath3();
+      const { qpItems, stubs } = setups.removeFromCacheByPath3();
+      const [updateDataStub] = stubs;
 
-      await workspaceAny.removeFromCacheByPath(getDirectory("./fake/"));
-      assert.equal(updateDataStub.calledWith([]), true);
+      await workspaceAny.removeFromCacheByPath(getDirectory("./fake"));
+      assert.equal(updateDataStub.calledWith(qpItems), true);
+    });
+
+    it(`4: should remove items from stored data
+      if file was moved to another directory`, async () => {
+      const [updateDataStub] = setups.removeFromCacheByPath4();
+      await workspaceAny.removeFromCacheByPath(getItem());
+      assert.equal(
+        updateDataStub.calledWith(getQpItems(1, undefined, 1)),
+        true
+      );
     });
   });
 

@@ -12,7 +12,7 @@ import ActionType from "../../enum/actionType";
 import Utils from "../../utils";
 import Config from "../../config";
 import { getQpItems, getQpItem } from "../util/qpItemMockFactory";
-import { getDirectory, getItems } from "../util/itemMockFactory";
+import { getDirectory, getItem, getItems } from "../util/itemMockFactory";
 import { getTestSetups } from "../testSetup/utils.testSetup";
 
 describe("Utils", () => {
@@ -362,6 +362,44 @@ describe("Utils", () => {
       expected.set(ActionType.Remove, [actions[1]]);
 
       assert.deepEqual(actual, expected);
+    });
+  });
+
+  describe("updateQpItemsWithNewDirectoryPath", () => {
+    it("1: should update qpItems with new directory path", () => {
+      setups.updateQpItemsWithNewDirectoryPath1();
+      assert.deepEqual(
+        utils.updateQpItemsWithNewDirectoryPath(
+          getQpItems(),
+          getDirectory("./fake/"),
+          getDirectory("./fake-new/")
+        ),
+        getQpItems(undefined, "./fake-new/")
+      );
+    });
+
+    it(`2: should return unchanged qpItems if item
+      does not contain old directory path`, () => {
+      setups.updateQpItemsWithNewDirectoryPath2();
+      assert.deepEqual(
+        utils.updateQpItemsWithNewDirectoryPath(
+          getQpItems(),
+          getDirectory("./fake-not-existing/"),
+          getDirectory("./fake-new/")
+        ),
+        getQpItems()
+      );
+    });
+  });
+
+  describe("normalizeUriPath", () => {
+    it("1: should return uri path without workspace part", () => {
+      setups.normalizeUriPath1();
+
+      assert.equal(
+        utils.normalizeUriPath(getItem().fsPath),
+        getQpItem().uri!.fsPath
+      );
     });
   });
 });

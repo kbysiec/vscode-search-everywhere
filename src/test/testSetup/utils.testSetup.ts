@@ -6,46 +6,37 @@ import { stubMultiple, restoreStubbedMultiple } from "../util/stubHelpers";
 export const getTestSetups = (utils: Utils) => {
   const utilsAny = utils as any;
 
+  const stubWorkspaceFolders = (paths: string[]) => {
+    let index = 0;
+
+    const workspaceFolders = paths.map((path) => ({
+      index: index++,
+      name: path,
+      uri: vscode.Uri.file(path),
+    }));
+
+    stubMultiple([
+      {
+        object: vscode.workspace,
+        method: "workspaceFolders",
+        returns: workspaceFolders,
+        isNotMethod: true,
+      },
+    ]);
+  };
+
   return {
     hasWorkspaceAnyFolder1: () => {
-      stubMultiple([
-        {
-          object: vscode.workspace,
-          method: "workspaceFolders",
-          returns: ["/#"],
-          isNotMethod: true,
-        },
-      ]);
+      stubWorkspaceFolders(["/#"]);
     },
     hasWorkspaceAnyFolder2: () => {
-      stubMultiple([
-        {
-          object: vscode.workspace,
-          method: "workspaceFolders",
-          returns: [],
-          isNotMethod: true,
-        },
-      ]);
+      stubWorkspaceFolders([]);
     },
     hasWorkspaceMoreThanOneFolder1: () => {
-      stubMultiple([
-        {
-          object: vscode.workspace,
-          method: "workspaceFolders",
-          returns: ["/#", "/test/#"],
-          isNotMethod: true,
-        },
-      ]);
+      stubWorkspaceFolders(["/#", "/test/#"]);
     },
     hasWorkspaceMoreThanOneFolder2: () => {
-      stubMultiple([
-        {
-          object: vscode.workspace,
-          method: "workspaceFolders",
-          returns: ["/#"],
-          isNotMethod: true,
-        },
-      ]);
+      stubWorkspaceFolders(["/#"]);
     },
     shouldReindexOnConfigurationChange1: () => {
       restoreStubbedMultiple([
@@ -213,6 +204,24 @@ export const getTestSetups = (utils: Utils) => {
           method: "shouldDisplayNotificationInStatusBar",
           returns: false,
         },
+      ]);
+    },
+    updateQpItemsWithNewDirectoryPath1: () => {
+      stubWorkspaceFolders([
+        "/test/path/to/workspace",
+        "/test2/path2/to2/workspace2",
+      ]);
+    },
+    updateQpItemsWithNewDirectoryPath2: () => {
+      stubWorkspaceFolders([
+        "/test/path/to/workspace",
+        "/test2/path2/to2/workspace2",
+      ]);
+    },
+    normalizeUriPath1: () => {
+      stubWorkspaceFolders([
+        "/test/path/to/workspace",
+        "/test2/path2/to2/workspace2",
       ]);
     },
   };
