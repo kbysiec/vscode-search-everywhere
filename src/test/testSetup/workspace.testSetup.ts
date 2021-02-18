@@ -250,7 +250,6 @@ export const getTestSetups = (workspace: Workspace) => {
         {
           object: workspaceAny.dataService,
           method: "fetchData",
-          // returns: getWorkspaceData(getWorkspaceDataItems()),
         },
         {
           object: workspaceAny.dataConverter,
@@ -624,12 +623,6 @@ export const getTestSetups = (workspace: Workspace) => {
           method: "isUriExistingInWorkspace",
           returns: Promise.resolve(false),
         },
-        // {
-        //   object: workspaceAny,
-        //   method: "directoryUriBeforePathUpdate",
-        //   returns: getItem(),
-        //   isNotMethod: true,
-        // },
       ]);
     },
     mergeWithDataFromCache1: () => {

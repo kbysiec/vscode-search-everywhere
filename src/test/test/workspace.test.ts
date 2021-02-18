@@ -164,35 +164,6 @@ describe("Workspace", () => {
   });
 
   describe("updateCacheByPath", () => {
-    // it(`1: should remove old data for given uri and get
-    //   new data if exists in workspace`, async () => {
-    //   const [updateDataStub] = setups.updateCacheByPath1();
-    // await workspaceAny.updateCacheByPath(getItem());
-    // assert.equal(updateDataStub.calledTwice, true);
-    // assert.deepEqual(updateDataStub.args[1][0], getQpItemsSymbolAndUriExt());
-    // });
-    // it(`2: should find items with old uris, replace the path
-    //   with new uri after directory renaming`, async () => {
-    //   const [downloadDataStub, updateDataStub] = setups.updateCacheByPath2();
-    //   await workspaceAny.updateCacheByPath(getDirectory("./test/fake-files/"));
-    //   assert.equal(
-    //     downloadDataStub.calledWith(getItems(1, "./test/fake-files/")),
-    //     true
-    //   );
-    //   assert.equal(updateDataStub.calledOnce, true);
-    //   assert.equal(
-    //     updateDataStub.calledWith(
-    //       getQpItemsSymbolAndUriExt("./test/fake-files/")
-    //     ),
-    //     true
-    //   );
-    // });
-    // it(`3: should do nothing if for given directory uri
-    //   there is not any item for replace the path`, async () => {
-    //   const [updateDataStub] = setups.updateCacheByPath3();
-    //   await workspaceAny.updateCacheByPath(getDirectory("./test/fake-files/"));
-    //   assert.equal(updateDataStub.called, false);
-    // });
     it(`1: should remove old data for given uri and get
       new data if exists in workspace`, async () => {
       const [updateDataStub] = setups.updateCacheByPath1();

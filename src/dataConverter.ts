@@ -151,26 +151,6 @@ class DataConverter {
     } as QuickPickItem;
   }
 
-  // private normalizeUriPath(path: string): string {
-  //   const workspaceFoldersPaths = this.getWorkspaceFoldersPaths();
-  //   let normalizedPath = path;
-  //   workspaceFoldersPaths.forEach((wfPath: string) => {
-  //     normalizedPath = normalizedPath.replace(wfPath, "");
-  //   });
-
-  //   return normalizedPath;
-  // }
-
-  // private getWorkspaceFoldersPaths(): string[] {
-  //   return (
-  //     (vscode.workspace.workspaceFolders &&
-  //       vscode.workspace.workspaceFolders.map(
-  //         (wf: vscode.WorkspaceFolder) => wf.uri.fsPath
-  //       )) ||
-  //     []
-  //   );
-  // }
-
   private fetchConfig() {
     this.icons = this.config.getIcons();
     this.shouldUseItemsFilterPhrases = this.config.shouldUseItemsFilterPhrases();

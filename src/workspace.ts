@@ -26,10 +26,6 @@ class Workspace {
 
   private progressStep: number = 0;
   private currentProgressValue: number = 0;
-  test1!: QuickPickItem[];
-  test2!: vscode.Uri;
-  test3!: QuickPickItem[];
-  test4!: boolean;
 
   constructor(
     private cache: Cache,

@@ -21,11 +21,6 @@ interface RestoreStubbedMultipleConfig {
   method: string;
 }
 
-// export interface StubMultipleOutput<T> {
-//   stubs: sinon.SinonStub<any[], any>[];
-//   other: T;
-// }
-
 export const stubMultiple = (
   configList: StubMultipleConfig[]
 ): sinon.SinonStub<any[], any>[] => {

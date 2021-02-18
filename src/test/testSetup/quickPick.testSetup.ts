@@ -9,9 +9,7 @@ export const getTestSetups = (quickPick: QuickPick) => {
   const quickPickAny = quickPick as any;
   return {
     init1: () => {
-      const quickPickInner = vscode.window.createQuickPick<
-        vscode.QuickPickItem
-      >();
+      const quickPickInner = vscode.window.createQuickPick<vscode.QuickPickItem>();
       return stubMultiple([
         {
           object: vscode.window,
@@ -31,9 +29,7 @@ export const getTestSetups = (quickPick: QuickPick) => {
           method: "shouldUseDebounce",
         },
       ]);
-      const quickPickInner = vscode.window.createQuickPick<
-        vscode.QuickPickItem
-      >();
+      const quickPickInner = vscode.window.createQuickPick<vscode.QuickPickItem>();
       stubMultiple([
         {
           object: vscode.window,
@@ -64,9 +60,7 @@ export const getTestSetups = (quickPick: QuickPick) => {
           method: "shouldUseDebounce",
         },
       ]);
-      const quickPickInner = vscode.window.createQuickPick<
-        vscode.QuickPickItem
-      >();
+      const quickPickInner = vscode.window.createQuickPick<vscode.QuickPickItem>();
       stubMultiple([
         {
           object: vscode.window,
@@ -86,32 +80,6 @@ export const getTestSetups = (quickPick: QuickPick) => {
         },
       ]);
     },
-    // reloadOnDidChangeValueEventListener1: () => {
-    //   restoreStubbedMultiple([
-    //     { object: quickPickAny.config, method: "shouldUseDebounce" },
-    //   ]);
-    //   return stubMultiple([
-    //     {
-    //       object: quickPickAny,
-    //       method: "onDidChangeValueEventListeners",
-    //       returns: getQuickPickOnDidChangeValueEventListeners(),
-    //       isNotMethod: true,
-    //     },
-    //     {
-    //       object: quickPickAny.config,
-    //       method: "shouldUseDebounce",
-    //       returns: false,
-    //     },
-    //     // {
-    //     //   object: quickPickAny,
-    //     //   method: "disposeOnDidChangeValueEventListeners",
-    //     // },
-    //     // {
-    //     //   object: quickPickAny,
-    //     //   method: "registerOnDidChangeValueEventListeners",
-    //     // },
-    //   ]);
-    // },
     reload1: () => {
       restoreStubbedMultiple([
         { object: quickPickAny.config, method: "shouldUseItemsFilterPhrases" },
@@ -165,9 +133,7 @@ export const getTestSetups = (quickPick: QuickPick) => {
       });
     },
     isInitialized1: () => {
-      const quickPickInner = vscode.window.createQuickPick<
-        vscode.QuickPickItem
-      >();
+      const quickPickInner = vscode.window.createQuickPick<vscode.QuickPickItem>();
       stubMultiple([
         {
           object: quickPickAny,
@@ -341,10 +307,6 @@ export const getTestSetups = (quickPick: QuickPick) => {
           object: vscode.window,
           method: "showTextDocument",
         },
-        // {
-        //   object: quickPickAny,
-        //   method: "selectQpItem",
-        // },
       ]);
     },
     openSelectedAfterEach: () => {
@@ -357,10 +319,6 @@ export const getTestSetups = (quickPick: QuickPick) => {
           object: vscode.window,
           method: "showTextDocument",
         },
-        // {
-        //   object: quickPickAny,
-        //   method: "selectQpItem",
-        // },
       ]);
     },
     openSelected3: () => {
@@ -615,13 +573,5 @@ export const getTestSetups = (quickPick: QuickPick) => {
         },
       ]);
     },
-    // onDidHide1: () => {
-    //   return stubMultiple([
-    //     // {
-    //     //   object: quickPickAny,
-    //     //   method: "setText",
-    //     // },
-    //   ]);
-    // },
   };
 };
