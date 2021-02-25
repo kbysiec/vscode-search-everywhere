@@ -118,52 +118,6 @@ export const getTestSetups = (workspaceCommon: WorkspaceCommon) => {
         },
       ]);
     },
-    indexWithProgressTask1: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceCommonAny.dataService,
-          method: "fetchData",
-        },
-      ]);
-
-      return stubMultiple([
-        {
-          object: workspaceCommonAny.dataService,
-          method: "fetchData",
-          returns: getWorkspaceData(),
-        },
-      ]);
-    },
-    indexWithProgressTask2: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceCommonAny.utils,
-          method: "sleep",
-        },
-        {
-          object: workspaceCommonAny.dataService,
-          method: "fetchData",
-        },
-      ]);
-
-      return stubMultiple([
-        {
-          object: workspaceCommonAny.utils,
-          method: "sleep",
-        },
-        {
-          object: workspaceCommonAny.dataService,
-          method: "fetchData",
-          returns: getWorkspaceData(),
-        },
-        {
-          object: workspaceCommonAny.dataService,
-          method: "onDidItemIndexed",
-          returns: "aaaaa",
-          isNotMethod: true,
-        },
-      ]);
-    },
     registerAction1: () => {
       restoreStubbedMultiple([
         {
@@ -223,14 +177,6 @@ export const getTestSetups = (workspaceCommon: WorkspaceCommon) => {
         {
           object: workspaceCommonAny.dataConverter,
           method: "cancel",
-        },
-      ]);
-    },
-    onCancellationRequested1: () => {
-      return stubMultiple([
-        {
-          object: workspaceCommonAny,
-          method: "cancelIndexing",
         },
       ]);
     },
