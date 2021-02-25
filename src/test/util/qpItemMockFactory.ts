@@ -107,17 +107,6 @@ export const getQpItemsSymbolAndUriExt = (
 ): QuickPickItem[] => {
   const qpItemsSymbolAndUriExt: QuickPickItem[] = [
     {
-      label: "fake-1.ts",
-      description: "File",
-      detail: "/./fake/fake-1.ts",
-      uri: vscode.Uri.file("/./fake/fake-1.ts"),
-      kind: 0,
-      range: {
-        start: new vscode.Position(0, 0),
-        end: new vscode.Position(0, 0),
-      },
-    },
-    {
       label: "fake-2.ts",
       description: "File",
       detail: `${path}fake-2.ts`,

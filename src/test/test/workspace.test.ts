@@ -1,17 +1,11 @@
-import * as vscode from "vscode";
 import { assert } from "chai";
-import { getProgress } from "../util/mockFactory";
 import {
   getConfigurationChangeEvent,
   getWorkspaceFoldersChangeEvent,
   getTextDocumentChangeEvent,
   getFileRenameEvent,
 } from "../util/eventMockFactory";
-import {
-  getQpItems,
-  getQpItemsSymbolAndUriExt,
-} from "../util/qpItemMockFactory";
-import { getItems, getItem, getDirectory } from "../util/itemMockFactory";
+import { getItem } from "../util/itemMockFactory";
 import { getCacheStub, getUtilsStub, getConfigStub } from "../util/stubFactory";
 import ActionType from "../../enum/actionType";
 import Cache from "../../cache";
@@ -38,13 +32,11 @@ describe("Workspace", () => {
   });
 
   describe("index", () => {
-    it(`1: should registerAction method be invoked
-      which register rebuild action`, async () => {
-      const [registerStub] = setups.index1();
-      await workspaceAny.index();
+    it("1: should common.index method be invoked", async () => {
+      const [indexStub] = setups.index1();
+      await workspace.index("test comment");
 
-      assert.equal(registerStub.calledOnce, true);
-      assert.equal(registerStub.args[0][0].type, ActionType.Rebuild);
+      assert.equal(indexStub.calledOnce, true);
     });
   });
 
@@ -58,6 +50,7 @@ describe("Workspace", () => {
         createFileSystemWatcherStub,
         onWillProcessingStub,
         onDidProcessingStub,
+        onWillExecuteActionStub,
       ] = stubs;
 
       workspace.registerEventListeners();
@@ -71,11 +64,12 @@ describe("Workspace", () => {
       assert.equal(fileWatcherStub.onDidDelete.calledOnce, true);
       assert.equal(onWillProcessingStub.calledOnce, true);
       assert.equal(onDidProcessingStub.calledOnce, true);
+      assert.equal(onWillExecuteActionStub.calledOnce, true);
     });
   });
 
   describe("getData", () => {
-    it("1: should cache.getData method be invoked", () => {
+    it("1: should common.getData method be invoked", () => {
       const [getDataStub] = setups.getData1();
 
       workspace.getData();
@@ -83,247 +77,9 @@ describe("Workspace", () => {
     });
   });
 
-  describe("indexWithProgress", () => {
-    it(`1: should vscode.window.withProgress method be invoked
-      if workspace has opened at least one folder`, async () => {
-      const [withProgressStub] = setups.indexWithProgress1();
-
-      await workspaceAny.indexWithProgress();
-      assert.equal(withProgressStub.calledOnce, true);
-    });
-
-    it(`2: should printNoFolderOpenedMessage method be invoked
-      if workspace does not has opened at least one folder`, async () => {
-      const [printNoFolderOpenedMessageStub] = setups.indexWithProgress2();
-
-      await workspaceAny.indexWithProgress();
-      assert.equal(printNoFolderOpenedMessageStub.calledOnce, true);
-    });
-  });
-
-  describe("indexWithProgressTask", () => {
-    it(`1: should existing onDidItemIndexed subscription be disposed`, async () => {
-      const {
-        onDidItemIndexedSubscription,
-        stubs,
-      } = setups.indexWithProgressTask1();
-      const [onDidItemIndexedStub] = stubs;
-      const cancellationTokenSource = new vscode.CancellationTokenSource();
-
-      await workspaceAny.indexWithProgressTask(
-        undefined,
-        cancellationTokenSource.token
-      );
-
-      assert.equal(onDidItemIndexedStub.calledOnce, true);
-      assert.equal(onDidItemIndexedSubscription.dispose.calledOnce, true);
-    });
-
-    it(`2: should utils.sleep method be invoked`, async () => {
-      const [sleepStub] = setups.indexWithProgressTask2();
-      const cancellationTokenSource = new vscode.CancellationTokenSource();
-
-      await workspaceAny.indexWithProgressTask(
-        undefined,
-        cancellationTokenSource.token
-      );
-
-      assert.equal(sleepStub.calledOnce, true);
-    });
-  });
-
-  describe("indexWorkspace", () => {
-    it("1: should reset cache to initial empty state", async () => {
-      const [clearStub] = setups.indexWorkspace1();
-
-      await workspaceAny.indexWorkspace();
-      assert.equal(clearStub.calledOnce, true);
-    });
-
-    it("2: should index all workspace files", async () => {
-      const [downloadDataStub] = setups.indexWorkspace2();
-
-      await workspaceAny.indexWorkspace();
-      assert.equal(downloadDataStub.calledOnce, true);
-    });
-
-    it("3: should update cache with indexed workspace files", async () => {
-      const [updateDataStub] = setups.indexWorkspace3();
-
-      await workspaceAny.indexWorkspace();
-      assert.equal(updateDataStub.calledWith(getQpItems()), true);
-    });
-  });
-
-  describe("downloadData", () => {
-    it("1: should return data for quick pick", async () => {
-      setups.downloadData1();
-
-      assert.deepEqual(await workspaceAny.downloadData(), getQpItems());
-    });
-  });
-
-  describe("updateCacheByPath", () => {
-    it(`1: should remove old data for given uri and get
-      new data if exists in workspace`, async () => {
-      const [updateDataStub] = setups.updateCacheByPath1();
-      await workspaceAny.updateCacheByPath(getItem());
-      assert.equal(updateDataStub.calledTwice, true);
-      assert.deepEqual(updateDataStub.args[1][0], getQpItemsSymbolAndUriExt());
-    });
-    it(`2: should find items with old uris, replace the path
-      with new uri after directory renaming`, async () => {
-      const [updateDataStub] = setups.updateCacheByPath2();
-      await workspaceAny.updateCacheByPath(getDirectory("./test/fake-files/"));
-      assert.equal(updateDataStub.calledOnce, true);
-      assert.equal(
-        updateDataStub.calledWith(getQpItems(1, "/./fake-new/")),
-        true
-      );
-    });
-    it(`3: should do nothing if the data is empty
-      after directory renaming`, async () => {
-      const [updateDataStub] = setups.updateCacheByPath3();
-      await workspaceAny.updateCacheByPath(getDirectory("./test/fake-files/"));
-      assert.equal(updateDataStub.calledOnce, false);
-    });
-    it(`4: should index method be invoked which
-      register rebuild action if error is thrown`, async () => {
-      const [indexStub] = setups.updateCacheByPath4();
-      await workspaceAny.updateCacheByPath(getItem());
-      assert.equal(indexStub.calledOnce, true);
-    });
-    it(`5: should remove old data for given uri and get
-      new data if file was moved to another directory`, async () => {
-      const [updateDataStub] = setups.updateCacheByPath5();
-      await workspaceAny.updateCacheByPath(getItem());
-      assert.equal(updateDataStub.calledTwice, true);
-      assert.deepEqual(
-        updateDataStub.args[1][0],
-        getQpItemsSymbolAndUriExt("./fake-new/")
-      );
-    });
-  });
-
-  describe("removeFromCacheByPath", () => {
-    it("1: should do nothing if getData method returns undefined", async () => {
-      const [updateDataStub] = setups.removeFromCacheByPath1();
-
-      await workspaceAny.removeFromCacheByPath(getItem());
-      assert.equal(updateDataStub.called, false);
-    });
-
-    it("2: should remove given item from stored data", async () => {
-      const [updateDataStub] = setups.removeFromCacheByPath2();
-
-      await workspaceAny.removeFromCacheByPath(getItem());
-      assert.equal(
-        updateDataStub.calledWith(getQpItems(1, undefined, 1)),
-        true
-      );
-    });
-
-    it(`3: should not remove items from stored data for
-      given renamed directory uri`, async () => {
-      const { qpItems, stubs } = setups.removeFromCacheByPath3();
-      const [updateDataStub] = stubs;
-
-      await workspaceAny.removeFromCacheByPath(getDirectory("./fake"));
-      assert.equal(updateDataStub.calledWith(qpItems), true);
-    });
-
-    it(`4: should remove items from stored data
-      if file was moved to another directory`, async () => {
-      const [updateDataStub] = setups.removeFromCacheByPath4();
-      await workspaceAny.removeFromCacheByPath(getItem());
-      assert.equal(
-        updateDataStub.calledWith(getQpItems(1, undefined, 1)),
-        true
-      );
-    });
-  });
-
-  describe("mergeWithDataFromCache", () => {
-    it("1: should return QuickPickItem[] containing merged cached and given data", () => {
-      setups.mergeWithDataFromCache1();
-
-      assert.deepEqual(
-        workspaceAny.mergeWithDataFromCache(getQpItems(1, undefined, 2)),
-        getQpItems(3)
-      );
-    });
-
-    it("2: should return QuickPickItem[] containing given data if cache is empty", () => {
-      setups.mergeWithDataFromCache2();
-
-      assert.deepEqual(
-        workspaceAny.mergeWithDataFromCache(getQpItems(1)),
-        getQpItems(1)
-      );
-    });
-  });
-
-  describe("cleanDirectoryRenamingData", () => {
-    it("1: should variables values related to directory renaming be set to undefined", () => {
-      setups.cleanDirectoryRenamingData1();
-      workspaceAny.cleanDirectoryRenamingData();
-
-      assert.equal(workspaceAny.directoryUriBeforePathUpdate, undefined);
-      assert.equal(workspaceAny.urisForDirectoryPathUpdate, undefined);
-    });
-  });
-
-  describe("registerAction", () => {
-    it("1: should actionProcessor.register method be invoked", async () => {
-      const [registerStub] = setups.registerAction1();
-
-      await workspaceAny.registerAction(
-        ActionType.Rebuild,
-        () => {},
-        "test comment"
-      );
-
-      assert.equal(registerStub.calledOnce, true);
-      assert.equal(registerStub.args[0][0].type, ActionType.Rebuild);
-    });
-  });
-
-  describe("resetProgress", () => {
-    it("1: should variables values related to indexing progress be set to 0", () => {
-      setups.resetProgress1();
-      workspaceAny.resetProgress();
-
-      assert.equal(workspaceAny.progressStep, 0);
-      assert.equal(workspaceAny.currentProgressValue, 0);
-    });
-  });
-
-  describe("initComponents", () => {
-    it("1: should init components", async () => {
-      workspaceAny.initComponents();
-
-      assert.equal(typeof workspaceAny.dataService, "object");
-      assert.equal(typeof workspaceAny.dataConverter, "object");
-      assert.equal(typeof workspaceAny.actionProcessor, "object");
-    });
-  });
-
-  describe("reloadComponents", () => {
-    it("1: should components reload methods be invoked", async () => {
-      const [
-        dataConverterReloadStub,
-        dataServiceReloadStub,
-      ] = setups.reloadComponents1();
-      workspaceAny.reloadComponents();
-
-      assert.equal(dataConverterReloadStub.calledOnce, true);
-      assert.equal(dataServiceReloadStub.calledOnce, true);
-    });
-  });
-
   describe("onDidChangeConfiguration", () => {
     it(`1: should index method be invoked which register
-      rebuild action if extension configuration has changed`, async () => {
+        rebuild action if extension configuration has changed`, async () => {
       const [indexStub] = setups.onDidChangeConfiguration1();
 
       await workspaceAny.onDidChangeConfiguration(
@@ -334,7 +90,7 @@ describe("Workspace", () => {
     });
 
     it(`2: should index method be invoked which register
-    rebuild action if isDebounceConfigurationToggled is true`, async () => {
+      rebuild action if isDebounceConfigurationToggled is true`, async () => {
       const eventEmitter = setups.onDidChangeConfiguration2();
 
       await workspaceAny.onDidChangeConfiguration(
@@ -371,7 +127,7 @@ describe("Workspace", () => {
 
   describe("onDidChangeWorkspaceFolders", () => {
     it(`1: should index method be invoked which register
-      rebuild action if amount of opened folders in workspace has changed`, async () => {
+        rebuild action if amount of opened folders in workspace has changed`, async () => {
       const [indexStub] = setups.onDidChangeWorkspaceFolders1();
 
       await workspaceAny.onDidChangeWorkspaceFolders(
@@ -393,7 +149,7 @@ describe("Workspace", () => {
 
   describe("onDidChangeTextDocument", () => {
     it(`1: should registerAction method be invoked which register update
-      action if text document has changed and exists in workspace`, async () => {
+        action if text document has changed and exists in workspace`, async () => {
       const [registerActionStub] = setups.onDidChangeTextDocument1();
       const textDocumentChangeEvent = await getTextDocumentChangeEvent(true);
       await workspaceAny.onDidChangeTextDocument(textDocumentChangeEvent);
@@ -421,7 +177,7 @@ describe("Workspace", () => {
 
   describe("onDidRenameFiles", () => {
     it(`1: should registerAction method be invoked which register remove
-      action if workspace contains more than one folder`, async () => {
+        action if workspace contains more than one folder`, async () => {
       const [registerActionStub] = setups.onDidRenameFiles1();
 
       await workspaceAny.onDidRenameFiles(getFileRenameEvent());
@@ -441,8 +197,8 @@ describe("Workspace", () => {
 
   describe("onDidFileSave", () => {
     it(`1: should registerAction method be invoked which register
-      update action if file or directory has been renamed and
-      exists in workspace`, async () => {
+        update action if file or directory has been renamed and
+        exists in workspace`, async () => {
       const [registerActionStub] = setups.onDidFileSave1();
       await workspaceAny.onDidFileSave(getItem());
 
@@ -451,7 +207,7 @@ describe("Workspace", () => {
     });
 
     it(`2: should do nothing if file or directory has been
-      renamed but does not exist in workspace`, async () => {
+        renamed but does not exist in workspace`, async () => {
       const [registerActionStub] = setups.onDidFileSave2();
       await workspaceAny.onDidFileSave(getItem());
 
@@ -476,62 +232,6 @@ describe("Workspace", () => {
 
       assert.equal(registerActionStub.calledOnce, true);
       assert.equal(registerActionStub.args[0][0], ActionType.Remove);
-    });
-  });
-
-  describe("onCancellationRequested", () => {
-    it(`1: should dataService.cancel, dataConverter.cancel methods be invoked`, async () => {
-      const [
-        dataServiceCancelStub,
-        dataConverterCancelStub,
-      ] = setups.onCancellationRequested1();
-      await workspaceAny.onCancellationRequested();
-
-      assert.equal(dataServiceCancelStub.calledOnce, true);
-      assert.equal(dataConverterCancelStub.calledOnce, true);
-    });
-  });
-
-  describe("onDidItemIndexed", () => {
-    it("1: should increase progress with message", () => {
-      const progress = getProgress(1);
-      workspaceAny.onDidItemIndexed(progress, 20);
-
-      assert.equal(
-        progress.report.calledWith({
-          increment: 5,
-          message: " 5%",
-        }),
-        true
-      );
-    });
-
-    it("2: should increase progress with empty message", () => {
-      const progress = getProgress();
-      workspaceAny.onDidItemIndexed(progress, 20);
-
-      assert.equal(
-        progress.report.calledWith({
-          increment: 5,
-          message: " ",
-        }),
-        true
-      );
-    });
-
-    it("3: should calculate and set progress step if is empty", () => {
-      const progress = getProgress();
-      workspaceAny.onDidItemIndexed(progress, 20);
-
-      assert.equal(workspaceAny.progressStep, 5);
-    });
-
-    it("4: should omit calculating progress step if is already done", () => {
-      setups.onDidItemIndexed4();
-      const progress = getProgress();
-      workspaceAny.onDidItemIndexed(progress, 20);
-
-      assert.equal(workspaceAny.progressStep, 1);
     });
   });
 

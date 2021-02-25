@@ -1,14 +1,14 @@
 import * as vscode from "vscode";
 import Workspace from "../../workspace";
 import { getFileWatcherStub } from "../util/eventMockFactory";
-import { getItems, getDirectory, getItem } from "../util/itemMockFactory";
+import { getItems, getDirectory } from "../util/itemMockFactory";
 import {
   getSubscription,
   getWorkspaceData,
   getEventEmitter,
   getConfiguration,
 } from "../util/mockFactory";
-import { getQpItems, getQpItemsSymbolAndUri } from "../util/qpItemMockFactory";
+import { getQpItems } from "../util/qpItemMockFactory";
 import { stubMultiple, restoreStubbedMultiple } from "../util/stubHelpers";
 
 export const getTestSetups = (workspace: Workspace) => {
@@ -36,8 +36,8 @@ export const getTestSetups = (workspace: Workspace) => {
     index1: () => {
       return stubMultiple([
         {
-          object: workspaceAny.actionProcessor,
-          method: "register",
+          object: workspaceAny.common,
+          method: "index",
         },
       ]);
     },
@@ -69,6 +69,10 @@ export const getTestSetups = (workspace: Workspace) => {
           object: workspaceAny.actionProcessor,
           method: "onDidProcessing",
         },
+        {
+          object: workspaceAny.actionProcessor,
+          method: "onWillExecuteAction",
+        },
       ]);
 
       return {
@@ -77,16 +81,9 @@ export const getTestSetups = (workspace: Workspace) => {
       };
     },
     getData1: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceAny.cache,
-          method: "getData",
-        },
-      ]);
-
       return stubMultiple([
         {
-          object: workspaceAny.cache,
+          object: workspaceAny.common,
           method: "getData",
           returns: Promise.resolve(getItems()),
         },
@@ -258,373 +255,6 @@ export const getTestSetups = (workspace: Workspace) => {
         },
       ]);
     },
-    updateCacheByPath1: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceAny.cache,
-          method: "updateData",
-        },
-      ]);
-
-      return stubMultiple([
-        {
-          object: workspaceAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceAny,
-          method: "downloadData",
-          returns: Promise.resolve(getQpItemsSymbolAndUri()),
-        },
-        {
-          object: workspaceAny,
-          method: "getData",
-          customReturns: true,
-          returns: [
-            {
-              onCall: 0,
-              returns: getQpItems(),
-            },
-            {
-              onCall: 1,
-              returns: getQpItems(1),
-            },
-          ],
-        },
-        {
-          object: workspaceAny.dataService,
-          method: "isUriExistingInWorkspace",
-          returns: Promise.resolve(true),
-        },
-        {
-          object: workspaceAny.actionProcessor,
-          method: "register",
-        },
-        {
-          object: workspaceAny,
-          method: "urisForDirectoryPathUpdate",
-          returns: [],
-          isNotMethod: true,
-        },
-      ]);
-    },
-    updateCacheByPath2: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceAny.utils,
-          method: "getUrisWithNewDirectoryName",
-        },
-        {
-          object: workspaceAny.utils,
-          method: "getNameFromUri",
-        },
-        {
-          object: workspaceAny.utils,
-          method: "updateQpItemsWithNewDirectoryPath",
-        },
-        {
-          object: workspaceAny.utils,
-          method: "normalizeUriPath",
-        },
-        {
-          object: workspaceAny.utils,
-          method: "getWorkspaceFoldersPaths",
-        },
-      ]);
-
-      const workspaceFolders = [
-        {
-          index: 0,
-          name: "/test/path/to/workspace",
-          uri: vscode.Uri.file("/test/path/to/workspace"),
-        },
-      ];
-
-      return stubMultiple([
-        {
-          object: workspaceAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceAny,
-          method: "directoryUriBeforePathUpdate",
-          returns: getDirectory("./fake/"),
-          isNotMethod: true,
-        },
-        {
-          object: workspaceAny,
-          method: "directoryUriAfterPathUpdate",
-          returns: getDirectory("./fake-new/"),
-          isNotMethod: true,
-        },
-        {
-          object: workspaceAny,
-          method: "urisForDirectoryPathUpdate",
-          returns: getItems(1),
-          isNotMethod: true,
-        },
-        {
-          object: workspaceAny.utils,
-          method: "getUrisWithNewDirectoryName",
-          returns: getItems(1, "./test/fake-files/"),
-        },
-        {
-          object: workspaceAny,
-          method: "getData",
-          returns: getQpItems(1),
-        },
-        {
-          object: vscode.workspace,
-          method: "workspaceFolders",
-          returns: workspaceFolders,
-          isNotMethod: true,
-        },
-      ]);
-    },
-    updateCacheByPath3: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceAny.utils,
-          method: "getNameFromUri",
-        },
-      ]);
-
-      return stubMultiple([
-        {
-          object: workspaceAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceAny,
-          method: "directoryUriBeforePathUpdate",
-          returns: getDirectory("./fake/"),
-          isNotMethod: true,
-        },
-        {
-          object: workspaceAny,
-          method: "directoryUriAfterPathUpdate",
-          returns: getDirectory("./fake-new/"),
-          isNotMethod: true,
-        },
-        {
-          object: workspaceAny,
-          method: "urisForDirectoryPathUpdate",
-          returns: getItems(1),
-          isNotMethod: true,
-        },
-        {
-          object: workspaceAny,
-          method: "getData",
-          returns: undefined,
-        },
-      ]);
-    },
-    updateCacheByPath4: () => {
-      return stubMultiple([
-        {
-          object: workspaceAny,
-          method: "index",
-        },
-        {
-          object: workspaceAny.dataService,
-          method: "isUriExistingInWorkspace",
-          returns: Promise.resolve(true),
-        },
-        {
-          object: workspaceAny.actionProcessor,
-          method: "register",
-        },
-        {
-          object: workspaceAny,
-          method: "removeFromCacheByPath",
-          throws: new Error("test error"),
-        },
-      ]);
-    },
-    updateCacheByPath5: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceAny.utils,
-          method: "getNameFromUri",
-        },
-      ]);
-
-      return stubMultiple([
-        {
-          object: workspaceAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceAny,
-          method: "downloadData",
-          returns: Promise.resolve(getQpItemsSymbolAndUri("./fake-new/")),
-        },
-        {
-          object: workspaceAny,
-          method: "getData",
-          customReturns: true,
-          returns: [
-            {
-              onCall: 0,
-              returns: getQpItems(),
-            },
-            {
-              onCall: 1,
-              returns: getQpItems(1),
-            },
-          ],
-        },
-        {
-          object: workspaceAny.dataService,
-          method: "isUriExistingInWorkspace",
-          returns: Promise.resolve(true),
-        },
-        {
-          object: workspaceAny.actionProcessor,
-          method: "register",
-        },
-        {
-          object: workspaceAny,
-          method: "urisForDirectoryPathUpdate",
-          returns: getItems(1),
-          isNotMethod: true,
-        },
-        {
-          object: workspaceAny,
-          method: "directoryUriBeforePathUpdate",
-          returns: getItem("./old-fake/"),
-          isNotMethod: true,
-        },
-      ]);
-    },
-    removeFromCacheByPath1: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceAny.cache,
-          method: "updateData",
-        },
-      ]);
-      stubDataServiceConfig();
-
-      return stubMultiple([
-        {
-          object: workspaceAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceAny,
-          method: "getData",
-          returns: undefined,
-        },
-      ]);
-    },
-    removeFromCacheByPath2: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceAny.cache,
-          method: "updateData",
-        },
-      ]);
-
-      return stubMultiple([
-        {
-          object: workspaceAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceAny,
-          method: "getData",
-          returns: getQpItems(),
-        },
-        {
-          object: workspaceAny.dataService,
-          method: "isUriExistingInWorkspace",
-          returns: Promise.resolve(true),
-        },
-      ]);
-    },
-    removeFromCacheByPath3: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceAny.utils,
-          method: "getNameFromUri",
-        },
-      ]);
-
-      const qpItems = getQpItems();
-      const stubs = stubMultiple([
-        {
-          object: workspaceAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceAny,
-          method: "getData",
-          returns: qpItems,
-        },
-        {
-          object: workspaceAny.dataService,
-          method: "isUriExistingInWorkspace",
-          returns: Promise.resolve(false),
-        },
-        {
-          object: workspaceAny,
-          method: "directoryUriBeforePathUpdate",
-          returns: getDirectory("./old-fake"),
-          isNotMethod: true,
-        },
-      ]);
-
-      return {
-        qpItems,
-        stubs,
-      };
-    },
-    removeFromCacheByPath4: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceAny.utils,
-          method: "getNameFromUri",
-        },
-      ]);
-
-      return stubMultiple([
-        {
-          object: workspaceAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceAny,
-          method: "getData",
-          returns: getQpItems(),
-        },
-        {
-          object: workspaceAny.dataService,
-          method: "isUriExistingInWorkspace",
-          returns: Promise.resolve(false),
-        },
-      ]);
-    },
     mergeWithDataFromCache1: () => {
       stubMultiple([
         {
@@ -763,7 +393,7 @@ export const getTestSetups = (workspace: Workspace) => {
 
       return stubMultiple([
         {
-          object: workspaceAny,
+          object: workspaceAny.common,
           method: "registerAction",
         },
         {
@@ -818,7 +448,7 @@ export const getTestSetups = (workspace: Workspace) => {
 
       return stubMultiple([
         {
-          object: workspaceAny,
+          object: workspaceAny.common,
           method: "registerAction",
         },
         {
@@ -838,7 +468,7 @@ export const getTestSetups = (workspace: Workspace) => {
 
       return stubMultiple([
         {
-          object: workspaceAny,
+          object: workspaceAny.common,
           method: "registerAction",
         },
         {
@@ -851,7 +481,7 @@ export const getTestSetups = (workspace: Workspace) => {
     onDidChangeTextDocument2: () => {
       return stubMultiple([
         {
-          object: workspaceAny,
+          object: workspaceAny.common,
           method: "registerAction",
         },
         {
@@ -864,7 +494,7 @@ export const getTestSetups = (workspace: Workspace) => {
     onDidChangeTextDocument3: () => {
       return stubMultiple([
         {
-          object: workspaceAny,
+          object: workspaceAny.common,
           method: "registerAction",
         },
         {
@@ -881,7 +511,7 @@ export const getTestSetups = (workspace: Workspace) => {
 
       return stubMultiple([
         {
-          object: workspaceAny,
+          object: workspaceAny.common,
           method: "registerAction",
         },
         {
@@ -898,7 +528,7 @@ export const getTestSetups = (workspace: Workspace) => {
 
       return stubMultiple([
         {
-          object: workspaceAny,
+          object: workspaceAny.common,
           method: "registerAction",
         },
         {
@@ -911,7 +541,7 @@ export const getTestSetups = (workspace: Workspace) => {
     onDidFileSave1: () => {
       return stubMultiple([
         {
-          object: workspaceAny,
+          object: workspaceAny.common,
           method: "registerAction",
         },
         {
@@ -924,7 +554,7 @@ export const getTestSetups = (workspace: Workspace) => {
     onDidFileSave2: () => {
       return stubMultiple([
         {
-          object: workspaceAny,
+          object: workspaceAny.common,
           method: "registerAction",
         },
         {
@@ -937,7 +567,7 @@ export const getTestSetups = (workspace: Workspace) => {
     onDidFileFolderCreate1: () => {
       return stubMultiple([
         {
-          object: workspaceAny,
+          object: workspaceAny.common,
           method: "registerAction",
         },
       ]);
@@ -945,7 +575,7 @@ export const getTestSetups = (workspace: Workspace) => {
     onDidFileFolderDelete1: () => {
       return stubMultiple([
         {
-          object: workspaceAny,
+          object: workspaceAny.common,
           method: "registerAction",
         },
       ]);
@@ -965,7 +595,7 @@ export const getTestSetups = (workspace: Workspace) => {
     onDidItemIndexed4: () => {
       stubMultiple([
         {
-          object: workspaceAny,
+          object: workspaceAny.common,
           method: "progressStep",
           returns: 1,
           isNotMethod: true,
