@@ -275,8 +275,34 @@ export const getTestSetups = (extensionController: ExtensionController) => {
     onWillProcessing1: () => {
       return stubMultiple([
         {
-          object: extensionControllerAny,
-          method: "setBusy",
+          object: extensionControllerAny.quickPick,
+          method: "showLoading",
+        },
+        {
+          object: extensionControllerAny.quickPick,
+          method: "setPlaceholder",
+        },
+        {
+          object: extensionControllerAny.quickPick,
+          method: "isInitialized",
+          returns: true,
+        },
+      ]);
+    },
+    onWillProcessing2: () => {
+      return stubMultiple([
+        {
+          object: extensionControllerAny.quickPick,
+          method: "showLoading",
+        },
+        {
+          object: extensionControllerAny.quickPick,
+          method: "setPlaceholder",
+        },
+        {
+          object: extensionControllerAny.quickPick,
+          method: "isInitialized",
+          returns: false,
         },
       ]);
     },
@@ -319,6 +345,32 @@ export const getTestSetups = (extensionController: ExtensionController) => {
         {
           object: extensionControllerAny.quickPick,
           method: "loadItems",
+        },
+      ]);
+    },
+    onDidProcessing3: () => {
+      return stubMultiple([
+        {
+          object: extensionControllerAny.quickPick,
+          method: "setItems",
+        },
+        {
+          object: extensionControllerAny.workspace,
+          method: "getData",
+          returns: Promise.resolve(getQpItems()),
+        },
+      ]);
+    },
+    onDidProcessing4: () => {
+      return stubMultiple([
+        {
+          object: extensionControllerAny.quickPick,
+          method: "setItems",
+        },
+        {
+          object: extensionControllerAny.workspace,
+          method: "getData",
+          returns: Promise.resolve(),
         },
       ]);
     },

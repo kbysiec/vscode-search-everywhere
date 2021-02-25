@@ -86,122 +86,36 @@ describe("ExtensionController", () => {
   describe("startup", () => {
     it("1: should workspace.index method be invoked if shouldInitOnStartup method returns true", async () => {
       const [indexStub] = setups.startup1();
-      await extensionControllerAny.startup();
+      await extensionController.startup();
 
       assert.equal(indexStub.calledOnce, true);
     });
 
     it("2: should do nothing if shouldInitOnStartup method returns false", async () => {
       const [indexStub] = setups.startup2();
-      await extensionControllerAny.startup();
+      await extensionController.startup();
 
       assert.equal(indexStub.calledOnce, false);
     });
   });
 
-  describe("setQuickPickData", () => {
-    it("1: should load data to quick pick from cache", async () => {
-      const [setItemsStub] = setups.setQuickPickData1();
-      await extensionControllerAny.setQuickPickData();
-
-      assert.equal(setItemsStub.calledWith(getQpItems()), true);
-    });
-
-    it("2: should load empty array to quick pick if cache is empty", async () => {
-      setups.setQuickPickData2();
-      await extensionControllerAny.setQuickPickData();
-
-      assert.equal(extensionControllerAny.quickPick.items.length, 0);
-    });
-  });
-
-  describe("setBusy", () => {
-    it(`1: should change the state of components to busy
-      if quick pick is initialized`, () => {
-      const [
-        setQuickPickLoadingStub,
-        setQuickPickPlaceholderStub,
-      ] = setups.setBusy1();
-
-      extensionControllerAny.setBusy(true);
-
-      assert.equal(setQuickPickLoadingStub.calledWith(true), true);
-      assert.equal(setQuickPickPlaceholderStub.calledWith(true), true);
-    });
-  });
-
-  describe("setQuickPickLoading", () => {
-    it("1: should change quick pick state to loading", () => {
-      const [showLoadingStub] = setups.setQuickPickLoading1();
-      extensionControllerAny.setQuickPickLoading(true);
-
-      assert.equal(showLoadingStub.calledWith(true), true);
-    });
-  });
-
-  describe("setQuickPickPlaceholder", () => {
-    it("1: should change quick pick placeholder to appropriate for loading state", () => {
-      const [setPlaceholderStub] = setups.setQuickPickPlaceholder1();
-      extensionControllerAny.setQuickPickPlaceholder(true);
-
-      assert.equal(setPlaceholderStub.calledWith(true), true);
-    });
-  });
-
-  describe("shouldIndexOnQuickPickOpen", () => {
-    it(`1: should return true if initialization is delayed
-      and quick pick is not initialized`, async () => {
-      setups.shouldIndexOnQuickPickOpen1();
-      assert.equal(extensionControllerAny.shouldIndexOnQuickPickOpen(), true);
-    });
-
-    it("2: should return false if initialization is on startup", async () => {
-      setups.shouldIndexOnQuickPickOpen2();
-      assert.equal(extensionControllerAny.shouldIndexOnQuickPickOpen(), false);
-    });
-
-    it("3: should return false if quick pick has been already initialized", async () => {
-      setups.shouldIndexOnQuickPickOpen3();
-      assert.equal(extensionControllerAny.shouldIndexOnQuickPickOpen(), false);
-    });
-  });
-
-  describe("initComponents", () => {
-    it("1: should init components", async () => {
-      extensionControllerAny.initComponents();
-
-      assert.equal(typeof extensionControllerAny.cache, "object");
-      assert.equal(typeof extensionControllerAny.config, "object");
-      assert.equal(typeof extensionControllerAny.utils, "object");
-      assert.equal(typeof extensionControllerAny.workspace, "object");
-      assert.equal(typeof extensionControllerAny.quickPick, "object");
-    });
-  });
-
-  describe("registerEventListeners", () => {
-    it("1: should register extensionController event listeners", () => {
-      const [
-        onWillProcessingStub,
-        onDidProcessingStub,
-        onWillExecuteActionStub,
-        onDidDebounceConfigToggleStub,
-      ] = setups.registerEventListeners1();
-
-      extensionControllerAny.registerEventListeners();
-
-      assert.equal(onWillProcessingStub.calledOnce, true);
-      assert.equal(onDidProcessingStub.calledOnce, true);
-      assert.equal(onWillExecuteActionStub.calledOnce, true);
-      assert.equal(onDidDebounceConfigToggleStub.calledOnce, true);
-    });
-  });
-
   describe("onWillProcessing", () => {
-    it("1: should setBusy method be invoked with true as parameter", () => {
-      const [setBusyStub] = setups.onWillProcessing1();
+    it(`1: should quickPick.showLoading and quickPick.setQuickPickPlaceholder
+      methods be invoked with true as parameter`, () => {
+      const [showLoadingStub, setPlaceholderStub] = setups.onWillProcessing1();
       extensionControllerAny.onWillProcessing();
 
-      assert.equal(setBusyStub.calledWith(true), true);
+      assert.equal(showLoadingStub.calledWith(true), true);
+      assert.equal(setPlaceholderStub.calledWith(true), true);
+    });
+
+    it(`2: should quickPick.showLoading and quickPick.setQuickPickPlaceholder
+    methods not be invoked`, () => {
+      const [showLoadingStub, setPlaceholderStub] = setups.onWillProcessing2();
+      extensionControllerAny.onWillProcessing();
+
+      assert.equal(showLoadingStub.calledWith(false), false);
+      assert.equal(setPlaceholderStub.calledWith(false), false);
     });
   });
 
@@ -228,6 +142,21 @@ describe("ExtensionController", () => {
       await extensionControllerAny.onDidProcessing();
 
       assert.equal(initStub.calledOnce, true);
+    });
+    it(`3: should quickPick.setItems method be invoked with
+      data from workspace.getData method as a parameter`, async () => {
+      const [setItemsStub] = setups.onDidProcessing3();
+      await extensionControllerAny.onDidProcessing();
+
+      assert.equal(setItemsStub.calledWith(getQpItems()), true);
+    });
+
+    it(`4: should quickPick.setItems method be invoked with
+      empty array as a parameter if workspace.getData returns nothing`, async () => {
+      const [setItemsStub] = setups.onDidProcessing4();
+      await extensionControllerAny.onDidProcessing();
+
+      assert.equal(setItemsStub.calledWith([]), true);
     });
   });
 
