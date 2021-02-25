@@ -97,20 +97,6 @@ class Utils {
       .map((qpItem: QuickPickItem) => qpItem.uri);
   }
 
-  getUrisWithNewDirectoryName(
-    uris: vscode.Uri[],
-    oldDirectoryUri: vscode.Uri,
-    newDirectoryUri: vscode.Uri
-  ): vscode.Uri[] {
-    return uris.map((oldUri: vscode.Uri) => {
-      const path = oldUri.fsPath.replace(
-        oldDirectoryUri.fsPath,
-        newDirectoryUri.fsPath
-      );
-      return vscode.Uri.file(path);
-    });
-  }
-
   getNotificationLocation(): vscode.ProgressLocation {
     return this.config.shouldDisplayNotificationInStatusBar()
       ? vscode.ProgressLocation.Window

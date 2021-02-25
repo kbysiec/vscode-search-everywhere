@@ -205,31 +205,6 @@ describe("Utils", () => {
     });
   });
 
-  describe("getUrisWithNewDirectoryName", () => {
-    it("1: should return vscode.Uri[] with updated directory path", () => {
-      assert.deepEqual(
-        utils.getUrisWithNewDirectoryName(
-          getItems(),
-          getDirectory("./fake/"),
-          getDirectory("./test/fake-files/")
-        ),
-        getItems(2, "./test/fake-files/")
-      );
-    });
-
-    it(`2: should return unchanged vscode.Uri[]
-      if old directory path does not exist in workspace`, () => {
-      assert.deepEqual(
-        utils.getUrisWithNewDirectoryName(
-          getItems(),
-          getDirectory("./fake/not-exist/"),
-          getDirectory("./test/fake-files/")
-        ),
-        getItems(2, "./fake/")
-      );
-    });
-  });
-
   describe("getNotificationLocation", () => {
     it(`1: should return vscode.ProgressLocation.Window
       if shouldDisplayNotificationInStatusBar is true`, () => {
