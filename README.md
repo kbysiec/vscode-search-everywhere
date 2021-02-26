@@ -90,6 +90,10 @@ Ability to decide whether use extension exclude patterns or "Files: Exclude" and
 
   Search any symbol/file in the currently opened workspace.
 
+  Default keybinding for the command is:
+  * mac: `alt + cmd + p`
+  * win/linux: `ctrl + alt + p`
+
 * `searchEverywhere.reload`
 
   Re-index the whole workspace.
