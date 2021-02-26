@@ -27,9 +27,9 @@ class QuickPick {
     this.quickPick.matchOnDetail = true;
     this.quickPick.matchOnDescription = true;
 
-    this.quickPick.onDidHide(this.onDidHide);
-    this.quickPick.onDidAccept(this.onDidAccept);
-    this.quickPick.onDidChangeValue(this.onDidChangeValue);
+    this.quickPick.onDidHide(this.handleDidHide);
+    this.quickPick.onDidAccept(this.handleDidAccept);
+    this.quickPick.onDidChangeValue(this.handleDidChangeValue);
     this.registerOnDidChangeValueEventListeners();
   }
 
@@ -94,10 +94,10 @@ class QuickPick {
 
   private registerOnDidChangeValueWithDebounceEventListeners(): void {
     const onDidChangeValueClearingEventListener = this.quickPick.onDidChangeValue(
-      this.onDidChangeValueClearing
+      this.handleDidChangeValueClearing
     );
     const onDidChangeValueEventListener = this.quickPick.onDidChangeValue(
-      debounce(this.onDidChangeValue, 400)
+      debounce(this.handleDidChangeValue, 400)
     );
 
     this.onDidChangeValueEventListeners.push(
@@ -108,7 +108,7 @@ class QuickPick {
 
   private registerOnDidChangeValueWithoutDebounceEventListeners(): void {
     const onDidChangeValueEventListener = this.quickPick.onDidChangeValue(
-      debounce(this.onDidChangeValue, 400)
+      debounce(this.handleDidChangeValue, 400)
     );
 
     this.onDidChangeValueEventListeners.push(onDidChangeValueEventListener);
@@ -202,11 +202,11 @@ class QuickPick {
     this.helpItems = this.getHelpItems();
   }
 
-  private onDidChangeValueClearing = (): void => {
+  private handleDidChangeValueClearing = (): void => {
     this.quickPick.items = [];
   };
 
-  private onDidChangeValue = (text: string): void => {
+  private handleDidChangeValue = (text: string): void => {
     this.shouldLoadHelpItems(text) ? this.loadItems(true) : this.loadItems();
   };
 
@@ -218,12 +218,12 @@ class QuickPick {
     );
   }
 
-  private onDidAccept = async (): Promise<void> => {
+  private handleDidAccept = async (): Promise<void> => {
     const selectedItem = this.quickPick.selectedItems[0];
     selectedItem && (await this.openSelected(selectedItem));
   };
 
-  private onDidHide = (): void => {
+  private handleDidHide = (): void => {
     this.setText("");
   };
 }

@@ -197,36 +197,36 @@ describe("QuickPick", () => {
     });
   });
 
-  describe("onDidChangeValueClearing", () => {
+  describe("handleDidChangeValueClearing", () => {
     it("1: should clear quick pick items", () => {
-      setups.onDidChangeValueClearing1();
-      quickPickAny.onDidChangeValueClearing();
+      setups.handleDidChangeValueClearing1();
+      quickPickAny.handleDidChangeValueClearing();
 
       assert.equal(quickPickAny.quickPick.items.length, 0);
     });
   });
 
-  describe("onDidChangeValue", () => {
+  describe("handleDidChangeValue", () => {
     it("1: should load workspace items", async () => {
-      const [loadItemsStub] = setups.onDidChangeValue1();
-      await quickPickAny.onDidChangeValue("test text");
+      const [loadItemsStub] = setups.handleDidChangeValue1();
+      await quickPickAny.handleDidChangeValue("test text");
 
       assert.equal(loadItemsStub.calledOnce, true);
     });
 
     it("2: should load help items", async () => {
-      const [loadItemsStub] = setups.onDidChangeValue2();
-      await quickPickAny.onDidChangeValue("?");
+      const [loadItemsStub] = setups.handleDidChangeValue2();
+      await quickPickAny.handleDidChangeValue("?");
 
       assert.equal(loadItemsStub.calledOnce, true);
     });
   });
 
-  describe("onDidAccept", () => {
+  describe("handleDidAccept", () => {
     it("1: should open selected qpItem with uri scheme equals to 'file'", async () => {
-      const [revealRangeStub] = await setups.onDidAccept1();
+      const [revealRangeStub] = await setups.handleDidAccept1();
       quickPickAny.quickPick.selectedItems[0] = getQpItem();
-      await quickPickAny.onDidAccept();
+      await quickPickAny.handleDidAccept();
 
       assert.equal(revealRangeStub.calledOnce, true);
 
@@ -234,9 +234,9 @@ describe("QuickPick", () => {
     });
 
     it("2: should open selected qpItem with uri scheme equals to 'untitled'", async () => {
-      const [revealRangeStub] = await setups.onDidAccept2();
+      const [revealRangeStub] = await setups.handleDidAccept2();
       quickPickAny.quickPick.selectedItems[0] = getUntitledQpItem();
-      await quickPickAny.onDidAccept();
+      await quickPickAny.handleDidAccept();
 
       assert.equal(revealRangeStub.calledOnce, true);
 
@@ -244,17 +244,17 @@ describe("QuickPick", () => {
     });
 
     it("3: should open selected qpItem which is help item", async () => {
-      const [loadItemsStub] = setups.onDidAccept3();
+      const [loadItemsStub] = setups.handleDidAccept3();
       quickPickAny.quickPick.selectedItems[0] = getQpHelpItem("?", "0", "$$");
-      await quickPickAny.onDidAccept();
+      await quickPickAny.handleDidAccept();
 
       assert.equal(loadItemsStub.calledOnce, true);
     });
   });
 
-  describe("onDidHide", () => {
+  describe("handleDidHide", () => {
     it("1: should setText method be invoked with empty string as argument", () => {
-      quickPickAny.onDidHide();
+      quickPickAny.handleDidHide();
 
       assert.equal(quickPickAny.quickPick.value, "");
     });

@@ -135,11 +135,11 @@ describe("WorkspaceCommon", () => {
     });
   });
 
-  describe("onCancellationRequested", () => {
+  describe("handleCancellationRequested", () => {
     it("1: should cancelIndexing method be invoked", () => {
       const [cancelIndexingStub] = setups.cancelIndexing1();
 
-      (workspaceCommon as any).onCancellationRequested();
+      (workspaceCommon as any).handleCancellationRequested();
       assert.deepEqual(cancelIndexingStub.calledOnce, true);
     });
   });

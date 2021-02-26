@@ -41,26 +41,30 @@ class Workspace {
 
   registerEventListeners(): void {
     vscode.workspace.onDidChangeConfiguration(
-      debounce(this.onDidChangeConfiguration, 250)
+      debounce(this.handleDidChangeConfiguration, 250)
     );
     vscode.workspace.onDidChangeWorkspaceFolders(
-      debounce(this.onDidChangeWorkspaceFolders, 250)
+      debounce(this.handleDidChangeWorkspaceFolders, 250)
     );
-    vscode.workspace.onDidChangeTextDocument(this.onDidChangeTextDocument);
-    vscode.workspace.onDidRenameFiles(this.onDidRenameFiles);
+    vscode.workspace.onDidChangeTextDocument(this.handleDidChangeTextDocument);
+    vscode.workspace.onDidRenameFiles(this.handleDidRenameFiles);
 
     const fileWatcher = vscode.workspace.createFileSystemWatcher(
       appConfig.globPattern
     );
-    fileWatcher.onDidChange(this.onDidFileSave);
+    fileWatcher.onDidChange(this.handleDidFileSave);
     // necessary to invoke updateCacheByPath after removeCacheByPath
-    fileWatcher.onDidCreate(debounce(this.onDidFileFolderCreate, 260));
-    fileWatcher.onDidDelete(this.onDidFileFolderDelete);
+    fileWatcher.onDidCreate(debounce(this.handleDidFileFolderCreate, 260));
+    fileWatcher.onDidDelete(this.handleDidFileFolderDelete);
 
-    this.actionProcessor.onDidProcessing(this.onDidActionProcessorProcessing);
-    this.actionProcessor.onWillProcessing(this.onWillActionProcessorProcessing);
+    this.actionProcessor.onDidProcessing(
+      this.handleDidActionProcessorProcessing
+    );
+    this.actionProcessor.onWillProcessing(
+      this.handleWillActionProcessorProcessing
+    );
     this.actionProcessor.onWillExecuteAction(
-      this.onWillActionProcessorExecuteAction
+      this.handleWillActionProcessorExecuteAction
     );
   }
 
@@ -101,28 +105,28 @@ class Workspace {
     this.dataService.reload();
   }
 
-  private onDidChangeConfiguration = async (
+  private handleDidChangeConfiguration = async (
     event: vscode.ConfigurationChangeEvent
   ): Promise<void> => {
     this.cache.clearConfig();
     if (this.utils.shouldReindexOnConfigurationChange(event)) {
       this.reloadComponents();
       this.events.onWillReindexOnConfigurationChangeEventEmitter.fire();
-      await this.index("onDidChangeConfiguration");
+      await this.index("handleDidChangeConfiguration");
     } else if (this.utils.isDebounceConfigurationToggled(event)) {
       this.events.onDidDebounceConfigToggleEventEmitter.fire();
     }
   };
 
-  private onDidChangeWorkspaceFolders = async (
+  private handleDidChangeWorkspaceFolders = async (
     event: vscode.WorkspaceFoldersChangeEvent
   ): Promise<void> => {
     if (this.utils.hasWorkspaceChanged(event)) {
-      await this.index("onDidChangeWorkspaceFolders");
+      await this.index("handleDidChangeWorkspaceFolders");
     }
   };
 
-  private onDidChangeTextDocument = async (
+  private handleDidChangeTextDocument = async (
     event: vscode.TextDocumentChangeEvent
   ) => {
     const uri = event.document.uri;
@@ -135,7 +139,7 @@ class Workspace {
       await this.common.registerAction(
         ActionType.Update,
         this.updater.updateCacheByPath.bind(this.updater, uri),
-        "onDidChangeTextDocument",
+        "handleDidChangeTextDocument",
         uri
       );
     }
@@ -146,7 +150,7 @@ class Workspace {
     visual studio code issue.
  */
   // TODO Submit issue on github
-  private onDidRenameFiles = async (event: vscode.FileRenameEvent) => {
+  private handleDidRenameFiles = async (event: vscode.FileRenameEvent) => {
     const uri = event.files[0].oldUri;
     const hasWorkspaceMoreThanOneFolder = this.utils.hasWorkspaceMoreThanOneFolder();
     this.common.directoryUriBeforePathUpdate = event.files[0].oldUri;
@@ -155,13 +159,13 @@ class Workspace {
       await this.common.registerAction(
         ActionType.Remove,
         this.remover.removeFromCacheByPath.bind(this.remover, uri),
-        "onDidRenameFiles",
+        "handleDidRenameFiles",
         uri
       );
     }
   };
 
-  private onDidFileSave = async (uri: vscode.Uri) => {
+  private handleDidFileSave = async (uri: vscode.Uri) => {
     const isUriExistingInWorkspace = await this.dataService.isUriExistingInWorkspace(
       uri
     );
@@ -169,42 +173,42 @@ class Workspace {
       await this.common.registerAction(
         ActionType.Update,
         this.updater.updateCacheByPath.bind(this.updater, uri),
-        "onDidFileSave",
+        "handleDidFileSave",
         uri
       );
     }
   };
 
-  private onDidFileFolderCreate = async (uri: vscode.Uri) => {
+  private handleDidFileFolderCreate = async (uri: vscode.Uri) => {
     // necessary to invoke updateCacheByPath after removeCacheByPath
     await this.utils.sleep(1);
 
     await this.common.registerAction(
       ActionType.Update,
       this.updater.updateCacheByPath.bind(this.updater, uri),
-      "onDidFileFolderCreate",
+      "handleDidFileFolderCreate",
       uri
     );
   };
 
-  private onDidFileFolderDelete = async (uri: vscode.Uri) => {
+  private handleDidFileFolderDelete = async (uri: vscode.Uri) => {
     await this.common.registerAction(
       ActionType.Remove,
       this.remover.removeFromCacheByPath.bind(this.remover, uri),
-      "onDidFileFolderDelete",
+      "handleDidFileFolderDelete",
       uri
     );
   };
 
-  private onWillActionProcessorProcessing = () => {
+  private handleWillActionProcessorProcessing = () => {
     this.events.onWillProcessingEventEmitter.fire();
   };
 
-  private onDidActionProcessorProcessing = () => {
+  private handleDidActionProcessorProcessing = () => {
     this.events.onDidProcessingEventEmitter.fire();
   };
 
-  private onWillActionProcessorExecuteAction = (action: Action) => {
+  private handleWillActionProcessorExecuteAction = (action: Action) => {
     this.events.onWillExecuteActionEventEmitter.fire(action);
   };
 }

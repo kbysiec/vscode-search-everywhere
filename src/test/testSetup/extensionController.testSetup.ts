@@ -155,7 +155,7 @@ export const getTestSetups = (extensionController: ExtensionController) => {
         },
       ]);
     },
-    onWillProcessing1: () => {
+    handleWillProcessing1: () => {
       return stubMultiple([
         {
           object: extensionControllerAny.quickPick,
@@ -172,7 +172,7 @@ export const getTestSetups = (extensionController: ExtensionController) => {
         },
       ]);
     },
-    onWillProcessing2: () => {
+    handleWillProcessing2: () => {
       return stubMultiple([
         {
           object: extensionControllerAny.quickPick,
@@ -189,7 +189,7 @@ export const getTestSetups = (extensionController: ExtensionController) => {
         },
       ]);
     },
-    onDidProcessing1: () => {
+    handleDidProcessing1: () => {
       return stubMultiple([
         {
           object: extensionControllerAny,
@@ -214,7 +214,7 @@ export const getTestSetups = (extensionController: ExtensionController) => {
         },
       ]);
     },
-    onDidProcessing2: () => {
+    handleDidProcessing2: () => {
       return stubMultiple([
         {
           object: extensionControllerAny.quickPick,
@@ -231,7 +231,7 @@ export const getTestSetups = (extensionController: ExtensionController) => {
         },
       ]);
     },
-    onDidProcessing3: () => {
+    handleDidProcessing3: () => {
       return stubMultiple([
         {
           object: extensionControllerAny.quickPick,
@@ -244,7 +244,7 @@ export const getTestSetups = (extensionController: ExtensionController) => {
         },
       ]);
     },
-    onDidProcessing4: () => {
+    handleDidProcessing4: () => {
       return stubMultiple([
         {
           object: extensionControllerAny.quickPick,
@@ -257,7 +257,7 @@ export const getTestSetups = (extensionController: ExtensionController) => {
         },
       ]);
     },
-    onWillExecuteAction1: () => {
+    handleWillExecuteAction1: () => {
       return stubMultiple([
         {
           object: extensionControllerAny.quickPick,
@@ -269,7 +269,7 @@ export const getTestSetups = (extensionController: ExtensionController) => {
         },
       ]);
     },
-    onWillExecuteAction2: () => {
+    handleWillExecuteAction2: () => {
       return stubMultiple([
         {
           object: extensionControllerAny.quickPick,
@@ -281,7 +281,7 @@ export const getTestSetups = (extensionController: ExtensionController) => {
         },
       ]);
     },
-    onDidDebounceConfigToggle1: () => {
+    handleDidDebounceConfigToggle1: () => {
       return stubMultiple([
         {
           object: extensionControllerAny,
@@ -293,7 +293,7 @@ export const getTestSetups = (extensionController: ExtensionController) => {
         },
       ]);
     },
-    onWillReindexOnConfigurationChange1: () => {
+    handleWillReindexOnConfigurationChange1: () => {
       return stubMultiple([
         {
           object: extensionControllerAny.quickPick,

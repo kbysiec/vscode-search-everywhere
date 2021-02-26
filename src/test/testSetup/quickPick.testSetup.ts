@@ -271,7 +271,7 @@ export const getTestSetups = (quickPick: QuickPick) => {
         },
       ]);
     },
-    onDidChangeValueClearing1: () => {
+    handleDidChangeValueClearing1: () => {
       stubMultiple([
         {
           object: quickPickAny.quickPick,
@@ -280,7 +280,7 @@ export const getTestSetups = (quickPick: QuickPick) => {
         },
       ]);
     },
-    onDidChangeValue1: () => {
+    handleDidChangeValue1: () => {
       return stubMultiple([
         {
           object: quickPickAny,
@@ -288,7 +288,7 @@ export const getTestSetups = (quickPick: QuickPick) => {
         },
       ]);
     },
-    onDidChangeValue2: () => {
+    handleDidChangeValue2: () => {
       return stubMultiple([
         {
           object: quickPickAny,
@@ -308,7 +308,7 @@ export const getTestSetups = (quickPick: QuickPick) => {
         },
       ]);
     },
-    onDidAccept1: async () => {
+    handleDidAccept1: async () => {
       const document = await vscode.workspace.openTextDocument(
         getUntitledItem()
       );
@@ -330,7 +330,7 @@ export const getTestSetups = (quickPick: QuickPick) => {
         },
       ]);
     },
-    onDidAccept2: async () => {
+    handleDidAccept2: async () => {
       const document = await vscode.workspace.openTextDocument(
         getUntitledItem()
       );
@@ -372,7 +372,7 @@ export const getTestSetups = (quickPick: QuickPick) => {
         },
       ]);
     },
-    onDidAccept3: () => {
+    handleDidAccept3: () => {
       return stubMultiple([
         {
           object: quickPickAny,

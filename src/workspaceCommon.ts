@@ -91,19 +91,19 @@ class WorkspaceCommon {
     }>,
     token: vscode.CancellationToken
   ): Promise<void> {
-    const onCancellationRequestedSubscription = token.onCancellationRequested(
-      this.onCancellationRequested.bind(this)
+    const handleCancellationRequestedSubscription = token.onCancellationRequested(
+      this.handleCancellationRequested.bind(this)
     );
 
-    const onDidItemIndexedSubscription = this.dataService.onDidItemIndexed(
-      this.onDidItemIndexed.bind(this, progress)
+    const handleDidItemIndexedSubscription = this.dataService.onDidItemIndexed(
+      this.handleDidItemIndexed.bind(this, progress)
     );
 
     await this.indexWorkspace();
 
     this.resetProgress();
-    onCancellationRequestedSubscription.dispose();
-    onDidItemIndexedSubscription.dispose();
+    handleCancellationRequestedSubscription.dispose();
+    handleDidItemIndexedSubscription.dispose();
 
     // necessary for proper way to complete progress
     this.utils.sleep(250);
@@ -120,11 +120,11 @@ class WorkspaceCommon {
     this.progressStep = 0;
   }
 
-  private onCancellationRequested = () => {
+  private handleCancellationRequested = () => {
     this.cancelIndexing();
   };
 
-  private onDidItemIndexed(
+  private handleDidItemIndexed(
     progress: vscode.Progress<{
       message?: string | undefined;
       increment?: number | undefined;

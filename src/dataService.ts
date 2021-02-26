@@ -14,9 +14,7 @@ class DataService {
   private itemsFilter!: ItemsFilter;
   private shouldUseFilesAndSearchExclude!: boolean;
 
-  private onDidItemIndexedEventEmitter: vscode.EventEmitter<
-    number
-  > = new vscode.EventEmitter();
+  private onDidItemIndexedEventEmitter: vscode.EventEmitter<number> = new vscode.EventEmitter();
   readonly onDidItemIndexed: vscode.Event<number> = this
     .onDidItemIndexedEventEmitter.event;
 

@@ -65,7 +65,7 @@ export const getTestSetups = (workspace: Workspace) => {
         },
       ]);
     },
-    onDidChangeConfiguration1: () => {
+    handleDidChangeConfiguration1: () => {
       restoreStubbedMultiple([
         {
           object: workspaceAny.utils,
@@ -85,7 +85,7 @@ export const getTestSetups = (workspace: Workspace) => {
         },
       ]);
     },
-    onDidChangeConfiguration2: () => {
+    handleDidChangeConfiguration2: () => {
       const eventEmitter = getEventEmitter();
       restoreStubbedMultiple([
         {
@@ -119,7 +119,7 @@ export const getTestSetups = (workspace: Workspace) => {
 
       return eventEmitter;
     },
-    onDidChangeConfiguration3: () => {
+    handleDidChangeConfiguration3: () => {
       restoreStubbedMultiple([
         {
           object: workspaceAny.utils,
@@ -152,7 +152,7 @@ export const getTestSetups = (workspace: Workspace) => {
         },
       ]);
     },
-    onDidChangeConfiguration4: () => {
+    handleDidChangeConfiguration4: () => {
       restoreStubbedMultiple([
         { object: workspaceAny.cache, method: "clearConfig" },
       ]);
@@ -164,7 +164,7 @@ export const getTestSetups = (workspace: Workspace) => {
         },
       ]);
     },
-    onDidChangeWorkspaceFolders1: () => {
+    handleDidChangeWorkspaceFolders1: () => {
       restoreStubbedMultiple([
         { object: workspaceAny.utils, method: "hasWorkspaceChanged" },
       ]);
@@ -181,7 +181,7 @@ export const getTestSetups = (workspace: Workspace) => {
         },
       ]);
     },
-    onDidChangeWorkspaceFolders2: () => {
+    handleDidChangeWorkspaceFolders2: () => {
       restoreStubbedMultiple([
         { object: workspaceAny.utils, method: "hasWorkspaceChanged" },
       ]);
@@ -198,7 +198,7 @@ export const getTestSetups = (workspace: Workspace) => {
         },
       ]);
     },
-    onDidChangeTextDocument1: () => {
+    handleDidChangeTextDocument1: () => {
       restoreStubbedMultiple([
         {
           object: vscode.workspace,
@@ -218,7 +218,7 @@ export const getTestSetups = (workspace: Workspace) => {
         },
       ]);
     },
-    onDidChangeTextDocument2: () => {
+    handleDidChangeTextDocument2: () => {
       return stubMultiple([
         {
           object: workspaceAny.common,
@@ -231,7 +231,7 @@ export const getTestSetups = (workspace: Workspace) => {
         },
       ]);
     },
-    onDidChangeTextDocument3: () => {
+    handleDidChangeTextDocument3: () => {
       return stubMultiple([
         {
           object: workspaceAny.common,
@@ -244,7 +244,7 @@ export const getTestSetups = (workspace: Workspace) => {
         },
       ]);
     },
-    onDidRenameFiles1: () => {
+    handleDidRenameFiles1: () => {
       restoreStubbedMultiple([
         { object: workspaceAny.utils, method: "hasWorkspaceMoreThanOneFolder" },
       ]);
@@ -261,7 +261,7 @@ export const getTestSetups = (workspace: Workspace) => {
         },
       ]);
     },
-    onDidRenameFiles2: () => {
+    handleDidRenameFiles2: () => {
       restoreStubbedMultiple([
         { object: workspaceAny.utils, method: "hasWorkspaceMoreThanOneFolder" },
       ]);
@@ -278,7 +278,7 @@ export const getTestSetups = (workspace: Workspace) => {
         },
       ]);
     },
-    onDidFileSave1: () => {
+    handleDidFileSave1: () => {
       return stubMultiple([
         {
           object: workspaceAny.common,
@@ -291,7 +291,7 @@ export const getTestSetups = (workspace: Workspace) => {
         },
       ]);
     },
-    onDidFileSave2: () => {
+    handleDidFileSave2: () => {
       return stubMultiple([
         {
           object: workspaceAny.common,
@@ -304,7 +304,7 @@ export const getTestSetups = (workspace: Workspace) => {
         },
       ]);
     },
-    onDidFileFolderCreate1: () => {
+    handleDidFileFolderCreate1: () => {
       return stubMultiple([
         {
           object: workspaceAny.common,
@@ -312,7 +312,7 @@ export const getTestSetups = (workspace: Workspace) => {
         },
       ]);
     },
-    onDidFileFolderDelete1: () => {
+    handleDidFileFolderDelete1: () => {
       return stubMultiple([
         {
           object: workspaceAny.common,
@@ -320,7 +320,7 @@ export const getTestSetups = (workspace: Workspace) => {
         },
       ]);
     },
-    onWillActionProcessorProcessing1: () => {
+    handleWillActionProcessorProcessing1: () => {
       const eventEmitter = getEventEmitter();
       stubMultiple([
         {
@@ -333,7 +333,7 @@ export const getTestSetups = (workspace: Workspace) => {
 
       return eventEmitter;
     },
-    onDidActionProcessorProcessing1: () => {
+    handleDidActionProcessorProcessing1: () => {
       const eventEmitter = getEventEmitter();
       stubMultiple([
         {
@@ -346,7 +346,7 @@ export const getTestSetups = (workspace: Workspace) => {
 
       return eventEmitter;
     },
-    onWillActionProcessorExecuteAction1: () => {
+    handleWillActionProcessorExecuteAction1: () => {
       const eventEmitter = getEventEmitter();
       stubMultiple([
         {

@@ -82,22 +82,22 @@ class ExtensionController {
   }
 
   private registerEventListeners() {
-    this.workspace.events.onWillProcessing(this.onWillProcessing);
-    this.workspace.events.onDidProcessing(this.onDidProcessing);
-    this.workspace.events.onWillExecuteAction(this.onWillExecuteAction);
+    this.workspace.events.onWillProcessing(this.handleWillProcessing);
+    this.workspace.events.onDidProcessing(this.handleDidProcessing);
+    this.workspace.events.onWillExecuteAction(this.handleWillExecuteAction);
     this.workspace.events.onDidDebounceConfigToggle(
-      this.onDidDebounceConfigToggle
+      this.handleDidDebounceConfigToggle
     );
     this.workspace.events.onWillReindexOnConfigurationChange(
-      this.onWillReindexOnConfigurationChange
+      this.handleWillReindexOnConfigurationChange
     );
   }
 
-  private onWillProcessing = () => {
+  private handleWillProcessing = () => {
     this.setBusy(true);
   };
 
-  private onDidProcessing = async () => {
+  private handleDidProcessing = async () => {
     await this.setQuickPickData();
 
     !this.quickPick.isInitialized() && this.quickPick.init();
@@ -106,20 +106,20 @@ class ExtensionController {
     this.setBusy(false);
   };
 
-  private onWillExecuteAction = (action: Action) => {
+  private handleWillExecuteAction = (action: Action) => {
     if (action.type === ActionType.Rebuild) {
       this.quickPick.setItems([]);
       this.quickPick.loadItems();
     }
   };
 
-  private onDidDebounceConfigToggle = () => {
+  private handleDidDebounceConfigToggle = () => {
     this.setBusy(true);
     this.quickPick.reloadOnDidChangeValueEventListener();
     this.setBusy(false);
   };
 
-  private onWillReindexOnConfigurationChange = () => {
+  private handleWillReindexOnConfigurationChange = () => {
     this.quickPick.reload();
   };
 }
