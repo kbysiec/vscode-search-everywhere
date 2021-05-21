@@ -95,12 +95,11 @@ class ExtensionController {
 
   private handleWillProcessing = () => {
     this.setBusy(true);
+    !this.quickPick.isInitialized() && this.quickPick.init();
   };
 
   private handleDidProcessing = async () => {
     await this.setQuickPickData();
-
-    !this.quickPick.isInitialized() && this.quickPick.init();
 
     this.quickPick.loadItems();
     this.setBusy(false);

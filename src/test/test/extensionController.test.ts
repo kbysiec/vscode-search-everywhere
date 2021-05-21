@@ -102,10 +102,8 @@ describe("ExtensionController", () => {
   describe("handleWillProcessing", () => {
     it(`1: should quickPick.showLoading and quickPick.setQuickPickPlaceholder
       methods be invoked with true as parameter`, () => {
-      const [
-        showLoadingStub,
-        setPlaceholderStub,
-      ] = setups.handleWillProcessing1();
+      const [showLoadingStub, setPlaceholderStub] =
+        setups.handleWillProcessing1();
       extensionControllerAny.handleWillProcessing();
 
       assert.equal(showLoadingStub.calledWith(true), true);
@@ -114,26 +112,27 @@ describe("ExtensionController", () => {
 
     it(`2: should quickPick.showLoading and quickPick.setQuickPickPlaceholder
     methods not be invoked`, () => {
-      const [
-        showLoadingStub,
-        setPlaceholderStub,
-      ] = setups.handleWillProcessing2();
+      const [showLoadingStub, setPlaceholderStub] =
+        setups.handleWillProcessing2();
       extensionControllerAny.handleWillProcessing();
 
       assert.equal(showLoadingStub.calledWith(false), false);
       assert.equal(setPlaceholderStub.calledWith(false), false);
+    });
+
+    it(`3: should quickPick.init method be invoked if quickPick is not initialized`, async () => {
+      const [initStub] = setups.handleWillProcessing3();
+      await extensionControllerAny.handleWillProcessing();
+
+      assert.equal(initStub.calledOnce, true);
     });
   });
 
   describe("handleDidProcessing", () => {
     it(`1: should setQuickPickData, loadItemsStub methods
       be invoked and and setBusy method with false as parameter`, async () => {
-      const [
-        setQuickPickDataStub,
-        initStub,
-        loadItemsStub,
-        setBusyStub,
-      ] = setups.handleDidProcessing1();
+      const [setQuickPickDataStub, initStub, loadItemsStub, setBusyStub] =
+        setups.handleDidProcessing1();
 
       await extensionControllerAny.handleDidProcessing();
 
@@ -143,23 +142,17 @@ describe("ExtensionController", () => {
       assert.equal(setBusyStub.calledWith(false), true);
     });
 
-    it(`2: should init method be invoked if quickPick is not initialized`, async () => {
-      const [initStub] = setups.handleDidProcessing2();
-      await extensionControllerAny.handleDidProcessing();
-
-      assert.equal(initStub.calledOnce, true);
-    });
-    it(`3: should quickPick.setItems method be invoked with
+    it(`2: should quickPick.setItems method be invoked with
       data from workspace.getData method as a parameter`, async () => {
-      const [setItemsStub] = setups.handleDidProcessing3();
+      const [setItemsStub] = setups.handleDidProcessing2();
       await extensionControllerAny.handleDidProcessing();
 
       assert.equal(setItemsStub.calledWith(getQpItems()), true);
     });
 
-    it(`4: should quickPick.setItems method be invoked with
+    it(`3: should quickPick.setItems method be invoked with
       empty array as a parameter if workspace.getData returns nothing`, async () => {
-      const [setItemsStub] = setups.handleDidProcessing4();
+      const [setItemsStub] = setups.handleDidProcessing3();
       await extensionControllerAny.handleDidProcessing();
 
       assert.equal(setItemsStub.calledWith([]), true);
@@ -191,10 +184,8 @@ describe("ExtensionController", () => {
 
   describe("handleDidDebounceConfigToggle", () => {
     it("1: should setBusy and reloadOnDidChangeValueEventListener methods be invoked", () => {
-      const [
-        setBusyStub,
-        reloadOnDidChangeValueEventListenerStub,
-      ] = setups.handleDidDebounceConfigToggle1();
+      const [setBusyStub, reloadOnDidChangeValueEventListenerStub] =
+        setups.handleDidDebounceConfigToggle1();
 
       extensionControllerAny.handleDidDebounceConfigToggle();
 

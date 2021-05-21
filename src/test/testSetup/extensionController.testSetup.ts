@@ -1,7 +1,7 @@
-import * as vscode from "vscode";
 import ExtensionController from "../../extensionController";
 import { getQpItems } from "../util/qpItemMockFactory";
-import { stubMultiple } from "../util/stubHelpers";
+import { getQuickPickStub } from "../util/stubFactory";
+import { restoreStubbedMultiple, stubMultiple } from "../util/stubHelpers";
 
 export const getTestSetups = (extensionController: ExtensionController) => {
   const extensionControllerAny = extensionController as any;
@@ -189,6 +189,19 @@ export const getTestSetups = (extensionController: ExtensionController) => {
         },
       ]);
     },
+    handleWillProcessing3: () => {
+      return stubMultiple([
+        {
+          object: extensionControllerAny.quickPick,
+          method: "init",
+        },
+        {
+          object: extensionControllerAny.quickPick,
+          method: "isInitialized",
+          returns: false,
+        },
+      ]);
+    },
     handleDidProcessing1: () => {
       return stubMultiple([
         {
@@ -214,24 +227,24 @@ export const getTestSetups = (extensionController: ExtensionController) => {
         },
       ]);
     },
+
     handleDidProcessing2: () => {
-      return stubMultiple([
+      stubMultiple([
         {
-          object: extensionControllerAny.quickPick,
-          method: "init",
-        },
-        {
-          object: extensionControllerAny.quickPick,
-          method: "isInitialized",
-          returns: false,
-        },
-        {
-          object: extensionControllerAny.quickPick,
-          method: "loadItems",
+          object: extensionControllerAny,
+          method: "quickPick",
+          returns: getQuickPickStub(),
+          isNotMethod: true,
         },
       ]);
-    },
-    handleDidProcessing3: () => {
+
+      restoreStubbedMultiple([
+        {
+          object: extensionControllerAny.quickPick,
+          method: "setItems",
+        },
+      ]);
+
       return stubMultiple([
         {
           object: extensionControllerAny.quickPick,
@@ -244,7 +257,23 @@ export const getTestSetups = (extensionController: ExtensionController) => {
         },
       ]);
     },
-    handleDidProcessing4: () => {
+    handleDidProcessing3: () => {
+      stubMultiple([
+        {
+          object: extensionControllerAny,
+          method: "quickPick",
+          returns: getQuickPickStub(),
+          isNotMethod: true,
+        },
+      ]);
+
+      restoreStubbedMultiple([
+        {
+          object: extensionControllerAny.quickPick,
+          method: "setItems",
+        },
+      ]);
+
       return stubMultiple([
         {
           object: extensionControllerAny.quickPick,
