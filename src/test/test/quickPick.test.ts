@@ -224,23 +224,19 @@ describe("QuickPick", () => {
 
   describe("handleDidAccept", () => {
     it("1: should open selected qpItem with uri scheme equals to 'file'", async () => {
-      const [revealRangeStub] = await setups.handleDidAccept1();
+      const [revealRangeStub] = setups.handleDidAccept1();
       quickPickAny.quickPick.selectedItems[0] = getQpItem();
       await quickPickAny.handleDidAccept();
 
       assert.equal(revealRangeStub.calledOnce, true);
-
-      revealRangeStub.restore();
     });
 
     it("2: should open selected qpItem with uri scheme equals to 'untitled'", async () => {
-      const [revealRangeStub] = await setups.handleDidAccept2();
+      const [revealRangeStub] = setups.handleDidAccept2();
       quickPickAny.quickPick.selectedItems[0] = getUntitledQpItem();
       await quickPickAny.handleDidAccept();
 
       assert.equal(revealRangeStub.calledOnce, true);
-
-      revealRangeStub.restore();
     });
 
     it("3: should open selected qpItem which is help item", async () => {

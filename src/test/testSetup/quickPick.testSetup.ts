@@ -3,13 +3,15 @@ import QuickPick from "../../quickPick";
 import { getQuickPickOnDidChangeValueEventListeners } from "../util/eventMockFactory";
 import { getItem, getUntitledItem } from "../util/itemMockFactory";
 import { getQpItems, getQpHelpItems } from "../util/qpItemMockFactory";
+import { getTextEditorStub } from "../util/stubFactory";
 import { stubMultiple, restoreStubbedMultiple } from "../util/stubHelpers";
 
 export const getTestSetups = (quickPick: QuickPick) => {
   const quickPickAny = quickPick as any;
   return {
     init1: () => {
-      const quickPickInner = vscode.window.createQuickPick<vscode.QuickPickItem>();
+      const quickPickInner =
+        vscode.window.createQuickPick<vscode.QuickPickItem>();
       return stubMultiple([
         {
           object: vscode.window,
@@ -29,7 +31,8 @@ export const getTestSetups = (quickPick: QuickPick) => {
           method: "shouldUseDebounce",
         },
       ]);
-      const quickPickInner = vscode.window.createQuickPick<vscode.QuickPickItem>();
+      const quickPickInner =
+        vscode.window.createQuickPick<vscode.QuickPickItem>();
       stubMultiple([
         {
           object: vscode.window,
@@ -60,7 +63,8 @@ export const getTestSetups = (quickPick: QuickPick) => {
           method: "shouldUseDebounce",
         },
       ]);
-      const quickPickInner = vscode.window.createQuickPick<vscode.QuickPickItem>();
+      const quickPickInner =
+        vscode.window.createQuickPick<vscode.QuickPickItem>();
       stubMultiple([
         {
           object: vscode.window,
@@ -133,7 +137,8 @@ export const getTestSetups = (quickPick: QuickPick) => {
       });
     },
     isInitialized1: () => {
-      const quickPickInner = vscode.window.createQuickPick<vscode.QuickPickItem>();
+      const quickPickInner =
+        vscode.window.createQuickPick<vscode.QuickPickItem>();
       stubMultiple([
         {
           object: quickPickAny,
@@ -308,11 +313,8 @@ export const getTestSetups = (quickPick: QuickPick) => {
         },
       ]);
     },
-    handleDidAccept1: async () => {
-      const document = await vscode.workspace.openTextDocument(
-        getUntitledItem()
-      );
-      const editor = await vscode.window.showTextDocument(document);
+    handleDidAccept1: () => {
+      const editor = getTextEditorStub();
 
       return stubMultiple([
         {
@@ -330,11 +332,8 @@ export const getTestSetups = (quickPick: QuickPick) => {
         },
       ]);
     },
-    handleDidAccept2: async () => {
-      const document = await vscode.workspace.openTextDocument(
-        getUntitledItem()
-      );
-      const editor = await vscode.window.showTextDocument(document);
+    handleDidAccept2: () => {
+      const editor = getTextEditorStub();
 
       restoreStubbedMultiple([
         {
