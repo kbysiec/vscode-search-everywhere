@@ -14,9 +14,7 @@ export function deactivate() {
 }
 
 export async function activate(context: vscode.ExtensionContext) {
-  console.log(
-    'Congratulations, your extension "vscode-search-everywhere" is now active!'
-  );
+  console.log('Extension "vscode-search-everywhere" has been activated.');
 
   const extensionController: ExtensionController = new ExtensionController(
     context
