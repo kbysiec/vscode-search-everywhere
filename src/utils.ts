@@ -6,8 +6,11 @@ import QuickPickItem from "./interface/quickPickItem";
 
 class Utils {
   private readonly defaultSection = "searchEverywhere";
+  workspaceFoldersCommonPath = "";
 
-  constructor(private config: Config) {}
+  constructor(private config: Config) {
+    this.setWorkspaceFoldersCommonPath();
+  }
 
   hasWorkspaceAnyFolder(): boolean {
     return !!(
@@ -30,7 +33,8 @@ class Utils {
   shouldReindexOnConfigurationChange(
     event: vscode.ConfigurationChangeEvent
   ): boolean {
-    const shouldUseFilesAndSearchExclude = this.config.shouldUseFilesAndSearchExclude();
+    const shouldUseFilesAndSearchExclude =
+      this.config.shouldUseFilesAndSearchExclude();
     const excluded: string[] = [
       "shouldDisplayNotificationInStatusBar",
       "shouldInitOnStartup",
@@ -181,9 +185,17 @@ class Utils {
   normalizeUriPath(path: string): string {
     const workspaceFoldersPaths = this.getWorkspaceFoldersPaths();
     let normalizedPath = path;
-    workspaceFoldersPaths.forEach((wfPath: string) => {
-      normalizedPath = normalizedPath.replace(wfPath, "");
-    });
+
+    if (this.hasWorkspaceMoreThanOneFolder()) {
+      normalizedPath = normalizedPath.replace(
+        this.workspaceFoldersCommonPath,
+        ""
+      );
+    } else {
+      workspaceFoldersPaths.forEach((wfPath: string) => {
+        normalizedPath = normalizedPath.replace(wfPath, "");
+      });
+    }
 
     return normalizedPath;
   }
@@ -196,6 +208,31 @@ class Utils {
         )) ||
       []
     );
+  }
+
+  private setWorkspaceFoldersCommonPath() {
+    if (this.hasWorkspaceMoreThanOneFolder()) {
+      const workspaceFoldersPaths = this.getWorkspaceFoldersPaths();
+      const workspaceFoldersCommonPathTemp = this.getCommonSubstringFromStart(
+        workspaceFoldersPaths
+      );
+      const workspaceFoldersCommonPathArray =
+        workspaceFoldersCommonPathTemp.split("/");
+      workspaceFoldersCommonPathArray.pop();
+      this.workspaceFoldersCommonPath =
+        workspaceFoldersCommonPathArray.join("/");
+    }
+  }
+
+  private getCommonSubstringFromStart(strings: string[]) {
+    const A = strings.concat().sort(),
+      a1 = A[0],
+      a2 = A[A.length - 1],
+      L = a1.length;
+    let i = 0;
+
+    while (i < L && a1.charAt(i) === a2.charAt(i)) i++;
+    return a1.substring(0, i);
   }
 }
 
