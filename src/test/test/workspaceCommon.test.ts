@@ -57,7 +57,8 @@ describe("WorkspaceCommon", () => {
   });
 
   describe("wasDirectoryRenamed", () => {
-    it("1: should return true if the provided uri contains the extension", () => {
+    it(`1: should return true if the provided uri contains the extension
+      and directoryUriAfterPathUpdate is not null and undefined`, () => {
       setups.wasDirectoryRenamed1();
 
       assert.equal(workspaceCommon.wasDirectoryRenamed(), true);
@@ -65,6 +66,18 @@ describe("WorkspaceCommon", () => {
 
     it("2: should return false if the provided uri name contains the extension", () => {
       setups.wasDirectoryRenamed2();
+
+      assert.equal(workspaceCommon.wasDirectoryRenamed(), false);
+    });
+
+    it("3: should return false if directoryUriAfterPathUpdate property is null", () => {
+      setups.wasDirectoryRenamed3();
+
+      assert.equal(workspaceCommon.wasDirectoryRenamed(), false);
+    });
+
+    it("4: should return false if directoryUriAfterPathUpdate property is undefined", () => {
+      setups.wasDirectoryRenamed4();
 
       assert.equal(workspaceCommon.wasDirectoryRenamed(), false);
     });
@@ -124,10 +137,8 @@ describe("WorkspaceCommon", () => {
 
   describe("cancelIndexing", () => {
     it("1: should dataService.cancel and dataConverter.cancel methods be invoked", () => {
-      const [
-        dataServiceCancelStub,
-        dataConverterCancelStub,
-      ] = setups.cancelIndexing1();
+      const [dataServiceCancelStub, dataConverterCancelStub] =
+        setups.cancelIndexing1();
 
       workspaceCommon.cancelIndexing();
       assert.deepEqual(dataServiceCancelStub.calledOnce, true);

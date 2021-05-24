@@ -130,9 +130,8 @@ class Workspace {
     event: vscode.TextDocumentChangeEvent
   ) => {
     const uri = event.document.uri;
-    const isUriExistingInWorkspace = await this.dataService.isUriExistingInWorkspace(
-      uri
-    );
+    const isUriExistingInWorkspace =
+      await this.dataService.isUriExistingInWorkspace(uri);
     const hasContentChanged = event.contentChanges.length;
 
     if (isUriExistingInWorkspace && hasContentChanged) {
@@ -152,7 +151,8 @@ class Workspace {
   // TODO Submit issue on github
   private handleDidRenameFiles = async (event: vscode.FileRenameEvent) => {
     const uri = event.files[0].oldUri;
-    const hasWorkspaceMoreThanOneFolder = this.utils.hasWorkspaceMoreThanOneFolder();
+    const hasWorkspaceMoreThanOneFolder =
+      this.utils.hasWorkspaceMoreThanOneFolder();
     this.common.directoryUriBeforePathUpdate = event.files[0].oldUri;
     this.common.directoryUriAfterPathUpdate = event.files[0].newUri;
     if (hasWorkspaceMoreThanOneFolder) {
@@ -162,13 +162,19 @@ class Workspace {
         "handleDidRenameFiles",
         uri
       );
+
+      await this.common.registerAction(
+        ActionType.Update,
+        this.updater.updateCacheByPath.bind(this.updater, uri),
+        "handleDidRenameFiles",
+        uri
+      );
     }
   };
 
   private handleDidFileSave = async (uri: vscode.Uri) => {
-    const isUriExistingInWorkspace = await this.dataService.isUriExistingInWorkspace(
-      uri
-    );
+    const isUriExistingInWorkspace =
+      await this.dataService.isUriExistingInWorkspace(uri);
     if (isUriExistingInWorkspace) {
       await this.common.registerAction(
         ActionType.Update,

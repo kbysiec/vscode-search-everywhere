@@ -16,9 +16,8 @@ class WorkspaceRemover {
   async removeFromCacheByPath(uri: vscode.Uri): Promise<void> {
     let data = this.common.getData();
     if (data) {
-      const isUriExistingInWorkspace = await this.dataService.isUriExistingInWorkspace(
-        uri
-      );
+      const isUriExistingInWorkspace =
+        await this.dataService.isUriExistingInWorkspace(uri);
 
       data = isUriExistingInWorkspace
         ? this.removeFromDataForExistingUriInWorkspace(data, uri)
@@ -45,6 +44,7 @@ class WorkspaceRemover {
   ): QuickPickItem[] {
     this.fetchUrisForDirectoryPathUpdate(data, uri); // check if necessary
     this.common.directoryUriBeforePathUpdate = uri;
+
     return this.common.wasDirectoryRenamed()
       ? data
       : data.filter((qpItem: QuickPickItem) => {
@@ -56,11 +56,8 @@ class WorkspaceRemover {
     data: QuickPickItem[],
     uri: vscode.Uri
   ): void {
-    this.common.urisForDirectoryPathUpdate = this.utils.getUrisForDirectoryPathUpdate(
-      data,
-      uri,
-      this.common.fileKind
-    );
+    this.common.urisForDirectoryPathUpdate =
+      this.utils.getUrisForDirectoryPathUpdate(data, uri, this.common.fileKind);
   }
 }
 

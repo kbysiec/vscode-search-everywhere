@@ -10,12 +10,12 @@ import Utils from "./utils";
 
 class WorkspaceCommon {
   fileKind: number = 0;
+  progressStep: number = 0;
+  currentProgressValue: number = 0;
+
   urisForDirectoryPathUpdate: vscode.Uri[] | null = null;
   directoryUriBeforePathUpdate?: vscode.Uri | null = null;
   directoryUriAfterPathUpdate?: vscode.Uri | null = null;
-
-  progressStep: number = 0;
-  currentProgressValue: number = 0;
 
   constructor(
     private cache: Cache,
@@ -30,7 +30,10 @@ class WorkspaceCommon {
   }
 
   wasDirectoryRenamed(): boolean {
-    return this.isDirectory(this.directoryUriBeforePathUpdate!);
+    return (
+      this.isDirectory(this.directoryUriBeforePathUpdate!) &&
+      !!this.directoryUriAfterPathUpdate
+    );
   }
 
   async index(comment: string): Promise<void> {
@@ -91,9 +94,10 @@ class WorkspaceCommon {
     }>,
     token: vscode.CancellationToken
   ): Promise<void> {
-    const handleCancellationRequestedSubscription = token.onCancellationRequested(
-      this.handleCancellationRequested.bind(this)
-    );
+    const handleCancellationRequestedSubscription =
+      token.onCancellationRequested(
+        this.handleCancellationRequested.bind(this)
+      );
 
     const handleDidItemIndexedSubscription = this.dataService.onDidItemIndexed(
       this.handleDidItemIndexed.bind(this, progress)

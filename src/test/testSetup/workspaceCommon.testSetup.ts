@@ -40,6 +40,12 @@ export const getTestSetups = (workspaceCommon: WorkspaceCommon) => {
           returns: getDirectory("./fake/"),
           isNotMethod: true,
         },
+        {
+          object: workspaceCommonAny,
+          method: "directoryUriAfterPathUpdate",
+          returns: getItem(),
+          isNotMethod: true,
+        },
       ]);
     },
     wasDirectoryRenamed2: () => {
@@ -55,6 +61,58 @@ export const getTestSetups = (workspaceCommon: WorkspaceCommon) => {
           object: workspaceCommonAny,
           method: "directoryUriBeforePathUpdate",
           returns: getItem(),
+          isNotMethod: true,
+        },
+        {
+          object: workspaceCommonAny,
+          method: "directoryUriAfterPathUpdate",
+          returns: getItem(),
+          isNotMethod: true,
+        },
+      ]);
+    },
+    wasDirectoryRenamed3: () => {
+      restoreStubbedMultiple([
+        {
+          object: workspaceCommonAny.utils,
+          method: "getNameFromUri",
+        },
+      ]);
+
+      return stubMultiple([
+        {
+          object: workspaceCommonAny,
+          method: "directoryUriBeforePathUpdate",
+          returns: getItem(),
+          isNotMethod: true,
+        },
+        {
+          object: workspaceCommonAny,
+          method: "directoryUriAfterPathUpdate",
+          returns: null,
+          isNotMethod: true,
+        },
+      ]);
+    },
+    wasDirectoryRenamed4: () => {
+      restoreStubbedMultiple([
+        {
+          object: workspaceCommonAny.utils,
+          method: "getNameFromUri",
+        },
+      ]);
+
+      return stubMultiple([
+        {
+          object: workspaceCommonAny,
+          method: "directoryUriBeforePathUpdate",
+          returns: getItem(),
+          isNotMethod: true,
+        },
+        {
+          object: workspaceCommonAny,
+          method: "directoryUriAfterPathUpdate",
+          returns: undefined,
           isNotMethod: true,
         },
       ]);

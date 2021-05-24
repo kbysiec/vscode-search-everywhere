@@ -1,4 +1,5 @@
 import WorkspaceRemover from "../../workspaceRemover";
+import { getItem } from "../util/itemMockFactory";
 import { getConfiguration } from "../util/mockFactory";
 import { getQpItems } from "../util/qpItemMockFactory";
 import { restoreStubbedMultiple, stubMultiple } from "../util/stubHelpers";
@@ -140,6 +141,12 @@ export const getTestSetups = (workspaceRemover: WorkspaceRemover) => {
           object: workspaceRemoverAny.common,
           method: "isDirectory",
           returns: true,
+        },
+        {
+          object: workspaceRemoverAny.common,
+          method: "directoryUriAfterPathUpdate",
+          returns: getItem(),
+          isNotMethod: true,
         },
       ]);
 

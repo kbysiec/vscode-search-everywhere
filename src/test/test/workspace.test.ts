@@ -101,10 +101,8 @@ describe("Workspace", () => {
     });
 
     it("3: should do nothing if extension configuration has not changed", async () => {
-      const [
-        registerActionStub,
-        onDidDebounceConfigToggleEventEmitterStub,
-      ] = setups.handleDidChangeConfiguration3();
+      const [registerActionStub, onDidDebounceConfigToggleEventEmitterStub] =
+        setups.handleDidChangeConfiguration3();
 
       await workspaceAny.handleDidChangeConfiguration(
         getConfigurationChangeEvent(false)
@@ -176,14 +174,15 @@ describe("Workspace", () => {
   });
 
   describe("handleDidRenameFiles", () => {
-    it(`1: should registerAction method be invoked which register remove
-        action if workspace contains more than one folder`, async () => {
+    it(`1: should registerAction method be invoked twice to register remove and update
+        actions if workspace contains more than one folder`, async () => {
       const [registerActionStub] = setups.handleDidRenameFiles1();
 
       await workspaceAny.handleDidRenameFiles(getFileRenameEvent());
 
-      assert.equal(registerActionStub.calledOnce, true);
+      assert.equal(registerActionStub.calledTwice, true);
       assert.equal(registerActionStub.args[0][0], ActionType.Remove);
+      assert.equal(registerActionStub.args[1][0], ActionType.Update);
     });
 
     it("2: should do nothing if workspace contains either one folder or any", async () => {
