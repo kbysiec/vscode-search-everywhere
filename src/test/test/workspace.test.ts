@@ -1,18 +1,19 @@
 import { assert } from "chai";
-import {
-  getConfigurationChangeEvent,
-  getWorkspaceFoldersChangeEvent,
-  getTextDocumentChangeEvent,
-  getFileRenameEvent,
-} from "../util/eventMockFactory";
-import { getItem } from "../util/itemMockFactory";
-import { getCacheStub, getUtilsStub, getConfigStub } from "../util/stubFactory";
-import ActionType from "../../enum/actionType";
 import Cache from "../../cache";
-import Utils from "../../utils";
 import Config from "../../config";
+import ActionType from "../../enum/actionType";
+import IndexActionType from "../../enum/indexActionType";
+import Utils from "../../utils";
 import Workspace from "../../workspace";
 import { getTestSetups } from "../testSetup/workspace.testSetup";
+import {
+  getConfigurationChangeEvent,
+  getFileRenameEvent,
+  getTextDocumentChangeEvent,
+  getWorkspaceFoldersChangeEvent,
+} from "../util/eventMockFactory";
+import { getItem } from "../util/itemMockFactory";
+import { getCacheStub, getConfigStub, getUtilsStub } from "../util/stubFactory";
 
 describe("Workspace", () => {
   let cacheStub: Cache = getCacheStub();
@@ -34,7 +35,7 @@ describe("Workspace", () => {
   describe("index", () => {
     it("1: should common.index method be invoked", async () => {
       const [indexStub] = setups.index1();
-      await workspace.index("test comment");
+      await workspace.index(IndexActionType.Search);
 
       assert.equal(indexStub.calledOnce, true);
     });

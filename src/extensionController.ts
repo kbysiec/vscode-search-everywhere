@@ -6,6 +6,7 @@ import Workspace from "./workspace";
 import Config from "./config";
 import Action from "./interface/action";
 import ActionType from "./enum/actionType";
+import IndexActionType from "./enum/indexActionType";
 
 class ExtensionController {
   private utils!: Utils;
@@ -23,7 +24,7 @@ class ExtensionController {
   async search(): Promise<void> {
     if (this.utils.hasWorkspaceAnyFolder()) {
       this.shouldIndexOnQuickPickOpen() &&
-        (await this.workspace.index("search"));
+        (await this.workspace.index(IndexActionType.Search));
 
       this.quickPick.isInitialized() && this.loadItemsAndShowQuickPick();
     } else {
@@ -33,13 +34,13 @@ class ExtensionController {
 
   async reload(): Promise<void> {
     this.utils.hasWorkspaceAnyFolder()
-      ? await this.workspace.index("reload")
+      ? await this.workspace.index(IndexActionType.Reload)
       : this.utils.printNoFolderOpenedMessage();
   }
 
   async startup(): Promise<void> {
     this.config.shouldInitOnStartup() &&
-      (await this.workspace.index("startup"));
+      (await this.workspace.index(IndexActionType.Startup));
   }
 
   private loadItemsAndShowQuickPick() {

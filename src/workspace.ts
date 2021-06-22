@@ -6,6 +6,7 @@ import DataConverter from "./dataConverter";
 import QuickPickItem from "./interface/quickPickItem";
 import { appConfig } from "./appConfig";
 import ActionType from "./enum/actionType";
+import IndexActionType from "./enum/indexActionType";
 import Action from "./interface/action";
 import ActionProcessor from "./actionProcessor";
 import Config from "./config";
@@ -35,8 +36,8 @@ class Workspace {
     this.initComponents();
   }
 
-  async index(comment: string): Promise<void> {
-    await this.common.index(comment);
+  async index(indexActionType: IndexActionType): Promise<void> {
+    await this.common.index(indexActionType);
   }
 
   registerEventListeners(): void {
@@ -112,7 +113,7 @@ class Workspace {
     if (this.utils.shouldReindexOnConfigurationChange(event)) {
       this.reloadComponents();
       this.events.onWillReindexOnConfigurationChangeEventEmitter.fire();
-      await this.index("handleDidChangeConfiguration");
+      await this.index(IndexActionType.ConfigurationChange);
     } else if (this.utils.isDebounceConfigurationToggled(event)) {
       this.events.onDidDebounceConfigToggleEventEmitter.fire();
     }
@@ -122,7 +123,7 @@ class Workspace {
     event: vscode.WorkspaceFoldersChangeEvent
   ): Promise<void> => {
     if (this.utils.hasWorkspaceChanged(event)) {
-      await this.index("handleDidChangeWorkspaceFolders");
+      await this.index(IndexActionType.WorkspaceFoldersChange);
     }
   };
 
