@@ -1,10 +1,10 @@
-import * as vscode from "vscode";
-import * as sinon from "sinon";
 import { assert } from "chai";
-import { getCacheStub } from "../util/stubFactory";
-import Config from "../../config";
+import * as sinon from "sinon";
+import * as vscode from "vscode";
 import Cache from "../../cache";
+import Config from "../../config";
 import { getTestSetups } from "../testSetup/config.testSetup";
+import { getCacheStub } from "../util/stubFactory";
 
 describe("Config", () => {
   let configuration: { [key: string]: any };
@@ -142,24 +142,21 @@ describe("Config", () => {
     });
   });
 
-  describe("shouldUseFilesAndSearchExclude", () => {
-    it("1: should return boolean from configuration", () => {
-      const section = "searchEverywhere";
-      const key = "shouldUseFilesAndSearchExclude";
-
-      assert.equal(
-        config.shouldUseFilesAndSearchExclude(),
-        configuration[section][key]
-      );
-    });
-  });
-
   describe("getFilesAndSearchExclude", () => {
     it("1: should return array of exclude patterns from configuration", () => {
       assert.deepEqual(config.getFilesAndSearchExclude(), [
         "**/.git",
         "**/search_exclude/**",
       ]);
+    });
+  });
+
+  describe("getExcludeMode", () => {
+    it("1: should return exclude mode from configuration", () => {
+      const section = "searchEverywhere";
+      const key = "excludeMode";
+
+      assert.equal(config.getExcludeMode(), configuration[section][key]);
     });
   });
 });

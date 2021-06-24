@@ -1,9 +1,10 @@
-import * as vscode from "vscode";
 import * as sinon from "sinon";
-import WorkspaceData from "../../interface/workspaceData";
-import Item from "../../interface/item";
+import * as vscode from "vscode";
 import ActionType from "../../enum/actionType";
+import ExcludeMode from "../../enum/excludeMode";
 import Action from "../../interface/action";
+import Item from "../../interface/item";
+import WorkspaceData from "../../interface/workspaceData";
 
 export const getExtensionContext = (): vscode.ExtensionContext => {
   return {
@@ -43,7 +44,7 @@ export const getConfiguration = (): { [key: string]: any } => {
       },
       include: "**/*.{js,ts}",
       exclude: ["**/node_modules/**"],
-      shouldUseFilesAndSearchExclude: true,
+      excludeModee: ExcludeMode.SearchEverywhere,
     },
     customSection: {
       exclude: ["**/customFolder/**"],

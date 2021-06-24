@@ -1,7 +1,8 @@
 import * as vscode from "vscode";
+import ExcludeMode from "../../enum/excludeMode";
 import Utils from "../../utils";
 import { getWorkspaceData } from "../util/mockFactory";
-import { stubMultiple, restoreStubbedMultiple } from "../util/stubHelpers";
+import { restoreStubbedMultiple, stubMultiple } from "../util/stubHelpers";
 
 export const getTestSetups = (utils: Utils) => {
   const utilsAny = utils as any;
@@ -40,61 +41,61 @@ export const getTestSetups = (utils: Utils) => {
     },
     shouldReindexOnConfigurationChange1: () => {
       restoreStubbedMultiple([
-        { object: utilsAny.config, method: "shouldUseFilesAndSearchExclude" },
+        { object: utilsAny.config, method: "getExcludeMode" },
       ]);
       stubMultiple([
         {
           object: utilsAny.config,
-          method: "shouldUseFilesAndSearchExclude",
-          returns: false,
+          method: "getExcludeMode",
+          returns: ExcludeMode.SearchEverywhere,
         },
       ]);
     },
     shouldReindexOnConfigurationChange2: () => {
       restoreStubbedMultiple([
-        { object: utilsAny.config, method: "shouldUseFilesAndSearchExclude" },
+        { object: utilsAny.config, method: "getExcludeMode" },
       ]);
       stubMultiple([
         {
           object: utilsAny.config,
-          method: "shouldUseFilesAndSearchExclude",
-          returns: false,
+          method: "getExcludeMode",
+          returns: ExcludeMode.SearchEverywhere,
         },
       ]);
     },
     shouldReindexOnConfigurationChange3: () => {
       restoreStubbedMultiple([
-        { object: utilsAny.config, method: "shouldUseFilesAndSearchExclude" },
+        { object: utilsAny.config, method: "getExcludeMode" },
       ]);
       stubMultiple([
         {
           object: utilsAny.config,
-          method: "shouldUseFilesAndSearchExclude",
-          returns: false,
+          method: "getExcludeMode",
+          returns: ExcludeMode.SearchEverywhere,
         },
       ]);
     },
     shouldReindexOnConfigurationChange4: () => {
       restoreStubbedMultiple([
-        { object: utilsAny.config, method: "shouldUseFilesAndSearchExclude" },
+        { object: utilsAny.config, method: "getExcludeMode" },
       ]);
       stubMultiple([
         {
           object: utilsAny.config,
-          method: "shouldUseFilesAndSearchExclude",
-          returns: true,
+          method: "getExcludeMode",
+          returns: ExcludeMode.FilesAndSearch,
         },
       ]);
     },
     shouldReindexOnConfigurationChange5: () => {
       restoreStubbedMultiple([
-        { object: utilsAny.config, method: "shouldUseFilesAndSearchExclude" },
+        { object: utilsAny.config, method: "getExcludeMode" },
       ]);
       stubMultiple([
         {
           object: utilsAny.config,
-          method: "shouldUseFilesAndSearchExclude",
-          returns: true,
+          method: "getExcludeMode",
+          returns: ExcludeMode.FilesAndSearch,
         },
       ]);
     },

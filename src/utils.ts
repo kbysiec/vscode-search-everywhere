@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import Config from "./config";
+import ExcludeMode from "./enum/excludeMode";
 import Item from "./interface/item";
 import QuickPickItem from "./interface/quickPickItem";
 import WorkspaceData from "./interface/workspaceData";
@@ -33,8 +34,7 @@ class Utils {
   shouldReindexOnConfigurationChange(
     event: vscode.ConfigurationChangeEvent
   ): boolean {
-    const shouldUseFilesAndSearchExclude =
-      this.config.shouldUseFilesAndSearchExclude();
+    const excludeMode = this.config.getExcludeMode();
     const excluded: string[] = [
       "shouldDisplayNotificationInStatusBar",
       "shouldInitOnStartup",
@@ -47,7 +47,7 @@ class Utils {
         !excluded.some((config: string) =>
           event.affectsConfiguration(config)
         )) ||
-      (shouldUseFilesAndSearchExclude &&
+      (excludeMode === ExcludeMode.FilesAndSearch &&
         (event.affectsConfiguration("files.exclude") ||
           event.affectsConfiguration("search.exclude")))
     );
@@ -231,7 +231,9 @@ class Utils {
       L = a1.length;
     let i = 0;
 
-    while (i < L && a1.charAt(i) === a2.charAt(i)) i++;
+    while (i < L && a1.charAt(i) === a2.charAt(i)) {
+      i++;
+    }
     return a1.substring(0, i);
   }
 }

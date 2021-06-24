@@ -144,11 +144,6 @@
           "default": "**/*.{js,jsx,ts,tsx}",
           "description": "String with include pattern. Any file matching this glob will be included in indexing."
         },
-        "searchEverywhere.shouldUseFilesAndSearchExclude": {
-          "type": "boolean",
-          "default": false,
-          "description": "Should \"Files: Exclude\" and \"Search: Exclude\" be used instead of extension exclude pattern."
-        },
         "searchEverywhere.excludeMode": {
           "type": "string",
           "enum": [

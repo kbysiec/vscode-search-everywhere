@@ -1,19 +1,20 @@
-import * as vscode from "vscode";
-import * as sinon from "sinon";
 import { assert, expect } from "chai";
-import { getWorkspaceData, getAction } from "../util/mockFactory";
-import {
-  getWorkspaceFoldersChangeEvent,
-  getConfigurationChangeEvent,
-} from "../util/eventMockFactory";
-import { getConfigStub } from "../util/stubFactory";
-import Action from "../../interface/action";
-import ActionType from "../../enum/actionType";
-import Utils from "../../utils";
+import * as sinon from "sinon";
+import * as vscode from "vscode";
 import Config from "../../config";
-import { getQpItems, getQpItem } from "../util/qpItemMockFactory";
-import { getDirectory, getItem, getItems } from "../util/itemMockFactory";
+import ActionType from "../../enum/actionType";
+import ExcludeMode from "../../enum/excludeMode";
+import Action from "../../interface/action";
+import Utils from "../../utils";
 import { getTestSetups } from "../testSetup/utils.testSetup";
+import {
+  getConfigurationChangeEvent,
+  getWorkspaceFoldersChangeEvent,
+} from "../util/eventMockFactory";
+import { getDirectory, getItem, getItems } from "../util/itemMockFactory";
+import { getAction, getWorkspaceData } from "../util/mockFactory";
+import { getQpItem, getQpItems } from "../util/qpItemMockFactory";
+import { getConfigStub } from "../util/stubFactory";
 
 describe("Utils", () => {
   let configStub: Config = getConfigStub();
@@ -102,25 +103,38 @@ describe("Utils", () => {
       );
     });
 
-    it(`4: should return true if shouldUseFilesAndSearchExclude is true
+    it(`4: should return true if exclude mode is set to 'files and search',
       configuration has changed and files.exclude has changed`, () => {
       setups.shouldReindexOnConfigurationChange4();
 
       assert.equal(
         utils.shouldReindexOnConfigurationChange(
-          getConfigurationChangeEvent(false, false, true, true, true)
+          getConfigurationChangeEvent(
+            false,
+            false,
+            true,
+            ExcludeMode.FilesAndSearch,
+            true
+          )
         ),
         true
       );
     });
 
-    it(`5: should return true if shouldUseFilesAndSearchExclude is true
+    it(`5: should return true if exclude mode is set to 'files and search',
       configuration has changed and search.exclude has changed`, () => {
       setups.shouldReindexOnConfigurationChange5();
 
       assert.equal(
         utils.shouldReindexOnConfigurationChange(
-          getConfigurationChangeEvent(false, false, true, true, false, true)
+          getConfigurationChangeEvent(
+            false,
+            false,
+            true,
+            ExcludeMode.FilesAndSearch,
+            false,
+            true
+          )
         ),
         true
       );

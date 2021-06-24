@@ -23,7 +23,6 @@ class Config {
     helpPhrase: "?",
     exclude: [] as string[],
     include: "",
-    shouldUseFilesAndSearchExclude: false,
     excludeMode: ExcludeMode.SearchEverywhere,
   };
   private readonly defaultSection = "searchEverywhere";
@@ -90,13 +89,6 @@ class Config {
 
   getInclude(): string {
     return this.get(ConfigKey.include, this.default.include);
-  }
-
-  shouldUseFilesAndSearchExclude(): boolean {
-    return this.get(
-      ConfigKey.shouldUseFilesAndSearchExclude,
-      this.default.shouldUseFilesAndSearchExclude
-    );
   }
 
   getFilesAndSearchExclude(): string[] {

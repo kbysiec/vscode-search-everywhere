@@ -10,7 +10,6 @@ enum ConfigKey {
   helpPhrase = "helpPhrase",
   exclude = "exclude",
   include = "include",
-  shouldUseFilesAndSearchExclude = "shouldUseFilesAndSearchExclude",
   excludeMode = "excludeMode",
 }
 

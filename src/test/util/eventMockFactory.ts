@@ -1,5 +1,6 @@
-import * as vscode from "vscode";
 import * as sinon from "sinon";
+import * as vscode from "vscode";
+import ExcludeMode from "../../enum/excludeMode";
 import { getUntitledItem } from "./itemMockFactory";
 
 export const getWorkspaceFoldersChangeEvent = (flag: boolean) => {
@@ -24,7 +25,7 @@ export const getConfigurationChangeEvent = (
   flag: boolean = true,
   shouldUseExcludedArray: boolean = true,
   isExcluded: boolean = true,
-  shouldUseFilesAndSearchExclude: boolean = false,
+  excludeMode: ExcludeMode = ExcludeMode.SearchEverywhere,
   flagForFilesExclude: boolean = false,
   flagForSearchExclude: boolean = false
 ) => {
@@ -36,7 +37,7 @@ export const getConfigurationChangeEvent = (
         ? flag
         : shouldUseExcludedArray
         ? flag && isExcluded
-        : shouldUseFilesAndSearchExclude
+        : excludeMode === ExcludeMode.FilesAndSearch
         ? section === "files.exclude"
           ? flagForFilesExclude
           : section === "search.exclude"
