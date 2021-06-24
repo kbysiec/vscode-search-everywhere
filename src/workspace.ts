@@ -1,17 +1,17 @@
 import * as vscode from "vscode";
-import Cache from "./cache";
-import Utils from "./utils";
-import DataService from "./dataService";
-import DataConverter from "./dataConverter";
-import QuickPickItem from "./interface/quickPickItem";
+import ActionProcessor from "./actionProcessor";
 import { appConfig } from "./appConfig";
+import Cache from "./cache";
+import Config from "./config";
+import DataConverter from "./dataConverter";
+import DataService from "./dataService";
 import ActionType from "./enum/actionType";
 import IndexActionType from "./enum/indexActionType";
 import Action from "./interface/action";
-import ActionProcessor from "./actionProcessor";
-import Config from "./config";
-import WorkspaceEventsEmitter from "./workspaceEventsEmitter";
+import QuickPickItem from "./interface/quickPickItem";
+import Utils from "./utils";
 import WorkspaceCommon from "./workspaceCommon";
+import WorkspaceEventsEmitter from "./workspaceEventsEmitter";
 import WorkspaceRemover from "./workspaceRemover";
 import WorkspaceUpdater from "./workspaceUpdater";
 

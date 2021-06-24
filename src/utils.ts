@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import WorkspaceData from "./interface/workspaceData";
-import Item from "./interface/item";
 import Config from "./config";
+import Item from "./interface/item";
 import QuickPickItem from "./interface/quickPickItem";
+import WorkspaceData from "./interface/workspaceData";
 
 class Utils {
   private readonly defaultSection = "searchEverywhere";

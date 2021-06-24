@@ -1,12 +1,12 @@
 import * as vscode from "vscode";
-import QuickPick from "./quickPick";
-import Utils from "./utils";
 import Cache from "./cache";
-import Workspace from "./workspace";
 import Config from "./config";
-import Action from "./interface/action";
 import ActionType from "./enum/actionType";
 import IndexActionType from "./enum/indexActionType";
+import Action from "./interface/action";
+import QuickPick from "./quickPick";
+import Utils from "./utils";
+import Workspace from "./workspace";
 
 class ExtensionController {
   private utils!: Utils;

@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import Cache from "./cache";
 import ConfigKey from "./enum/configKey";
+import ExcludeMode from "./enum/excludeMode";
 import Icons from "./interface/icons";
 import ItemsFilter from "./interface/itemsFilter";
 import ItemsFilterPhrases from "./interface/itemsFilterPhrases";
@@ -23,6 +24,7 @@ class Config {
     exclude: [] as string[],
     include: "",
     shouldUseFilesAndSearchExclude: false,
+    excludeMode: ExcludeMode.SearchEverywhere,
   };
   private readonly defaultSection = "searchEverywhere";
 
@@ -112,6 +114,10 @@ class Config {
     }
 
     return excludePatterns;
+  }
+
+  getExcludeMode(): ExcludeMode {
+    return this.get(ConfigKey.excludeMode, this.default.excludeMode);
   }
 
   private getFilesExclude(): string[] {

@@ -148,6 +148,16 @@
           "type": "boolean",
           "default": false,
           "description": "Should \"Files: Exclude\" and \"Search: Exclude\" be used instead of extension exclude pattern."
+        },
+        "searchEverywhere.excludeMode": {
+          "type": "string",
+          "enum": [
+            "search everywhere",
+            "files and search",
+            "gitignore"
+          ],
+          "default": "search everywhere",
+          "description": "Ability to choose which exclude option should be applied."
         }
       }
     },

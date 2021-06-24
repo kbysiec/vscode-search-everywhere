@@ -1,49 +1,24 @@
 import * as vscode from "vscode";
 import DataService from "../../dataService";
+import ExcludeMode from "../../enum/excludeMode";
 import ItemsFilter from "../../interface/itemsFilter";
 import {
-  getItems,
   getDocumentSymbolItemSingleLineArray,
+  getItems,
 } from "../util/itemMockFactory";
-import { getWorkspaceData, getItemsFilter } from "../util/mockFactory";
+import { getItemsFilter, getWorkspaceData } from "../util/mockFactory";
 import { restoreStubbedMultiple, stubMultiple } from "../util/stubHelpers";
 
 export const getTestSetups = (dataService: DataService) => {
   const dataServiceAny = dataService as any;
 
+  // dataServiceAny.patternProvider = getPatternProviderStub();
+
   const stubConfig = (
-    includePatterns: string = "",
-    excludePatterns: string[] = [],
-    shouldUseFilesAndSearchExclude: boolean = false,
-    filesAndSearchExcludePatterns: string[] = [],
     itemsFilter: ItemsFilter = {},
     isCancelled: boolean = false
   ) => {
     stubMultiple([
-      {
-        object: dataServiceAny,
-        method: "includePatterns",
-        returns: includePatterns,
-        isNotMethod: true,
-      },
-      {
-        object: dataServiceAny,
-        method: "excludePatterns",
-        returns: excludePatterns,
-        isNotMethod: true,
-      },
-      {
-        object: dataServiceAny,
-        method: "shouldUseFilesAndSearchExclude",
-        returns: shouldUseFilesAndSearchExclude,
-        isNotMethod: true,
-      },
-      {
-        object: dataServiceAny,
-        method: "filesAndSearchExcludePatterns",
-        returns: filesAndSearchExcludePatterns,
-        isNotMethod: true,
-      },
       {
         object: dataServiceAny,
         method: "itemsFilter",
@@ -54,6 +29,18 @@ export const getTestSetups = (dataService: DataService) => {
         object: dataServiceAny,
         method: "isCancelled",
         returns: isCancelled,
+        isNotMethod: true,
+      },
+      {
+        object: dataServiceAny.patternProvider,
+        method: "excludeMode",
+        returns: ExcludeMode.SearchEverywhere,
+        isNotMethod: true,
+      },
+      {
+        object: dataServiceAny.patternProvider,
+        method: "extensionExcludePatterns",
+        returns: ["**/.history/**", "**/.vscode/**"],
         isNotMethod: true,
       },
     ]);
@@ -98,17 +85,17 @@ export const getTestSetups = (dataService: DataService) => {
       restoreStubbedMultiple([
         { object: dataServiceAny.utils, method: "createWorkspaceData" },
       ]);
-      stubConfig(undefined, undefined, true);
+      stubConfig();
       stubFetchingItems();
     },
     fetchData2: () => {
       restoreFetchingItemsStubs();
-      stubConfig(undefined, ["**/node_modules/**"]);
+      stubConfig();
       stubFetchingItems();
     },
     fetchData3: () => {
       restoreFetchingItemsStubs();
-      stubConfig(undefined, ["**/node_modules/**", "**/bower_components/**"]);
+      stubConfig();
       stubFetchingItems();
     },
     fetchData4: () => {
@@ -117,6 +104,10 @@ export const getTestSetups = (dataService: DataService) => {
         {
           object: vscode.workspace,
           method: "findFiles",
+        },
+        {
+          object: vscode.commands,
+          method: "executeCommand",
         },
       ]);
       stubConfig();
@@ -129,6 +120,22 @@ export const getTestSetups = (dataService: DataService) => {
           object: vscode.workspace,
           method: "findFiles",
           throws: "test error",
+        },
+        {
+          object: vscode.commands,
+          method: "executeCommand",
+        },
+        {
+          object: dataServiceAny.patternProvider,
+          method: "extensionExcludePatterns",
+          returns: [],
+          isNotMethod: true,
+        },
+        {
+          object: dataServiceAny.patternProvider,
+          method: "excludeMode",
+          returns: ExcludeMode.SearchEverywhere,
+          isNotMethod: true,
         },
       ]);
     },
@@ -168,25 +175,12 @@ export const getTestSetups = (dataService: DataService) => {
     },
     fetchData7: () => {
       restoreFetchingItemsStubs();
-      stubConfig(
-        undefined,
-        ["**/node_modules/**", "**/bower_components/**"],
-        undefined,
-        undefined,
-        undefined,
-        true
-      );
+      stubConfig(undefined, true);
       stubFetchingItems();
     },
     fetchData8: () => {
       restoreFetchingItemsStubs();
-      stubConfig(
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        getItemsFilter([0])
-      );
+      stubConfig(getItemsFilter([0]));
       stubMultiple([
         {
           object: dataServiceAny.utils,
@@ -209,13 +203,7 @@ export const getTestSetups = (dataService: DataService) => {
     },
     fetchData9: () => {
       restoreFetchingItemsStubs();
-      stubConfig(
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        getItemsFilter([], [0])
-      );
+      stubConfig(getItemsFilter([], [0]));
       stubMultiple([
         {
           object: dataServiceAny.utils,
@@ -236,13 +224,7 @@ export const getTestSetups = (dataService: DataService) => {
     },
     fetchData10: () => {
       restoreFetchingItemsStubs();
-      stubConfig(
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        getItemsFilter([], [], ["fake"])
-      );
+      stubConfig(getItemsFilter([], [], ["fake"]));
       stubMultiple([
         {
           object: dataServiceAny.utils,

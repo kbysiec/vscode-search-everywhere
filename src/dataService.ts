@@ -1,26 +1,26 @@
 import * as vscode from "vscode";
 import Config from "./config";
-import WorkspaceData from "./interface/workspaceData";
-import Utils from "./utils";
-import ItemsFilter from "./interface/itemsFilter";
 import Item from "./interface/item";
+import ItemsFilter from "./interface/itemsFilter";
+import WorkspaceData from "./interface/workspaceData";
+import PatternProvider from "./patternProvider";
+import Utils from "./utils";
 
 class DataService {
   isCancelled!: boolean;
 
-  private includePatterns!: string;
-  private excludePatterns!: string[];
-  private filesAndSearchExcludePatterns!: string[];
   private itemsFilter!: ItemsFilter;
-  private shouldUseFilesAndSearchExclude!: boolean;
+  private patternProvider!: PatternProvider;
 
-  private onDidItemIndexedEventEmitter: vscode.EventEmitter<number> = new vscode.EventEmitter();
-  readonly onDidItemIndexed: vscode.Event<number> = this
-    .onDidItemIndexedEventEmitter.event;
+  private onDidItemIndexedEventEmitter: vscode.EventEmitter<number> =
+    new vscode.EventEmitter();
+  readonly onDidItemIndexed: vscode.Event<number> =
+    this.onDidItemIndexedEventEmitter.event;
 
   constructor(private utils: Utils, private config: Config) {
     this.setCancelled(false);
     this.fetchConfig();
+    this.initComponents();
   }
 
   reload() {
@@ -44,15 +44,19 @@ class DataService {
   }
 
   async isUriExistingInWorkspace(uri: vscode.Uri): Promise<boolean> {
-    const uris = await this.fetchUris();
+    const uris = await this.fetchUris(false);
     return uris.some(
       (existingUri: vscode.Uri) => existingUri.fsPath === uri.fsPath
     );
   }
 
-  private async fetchUris(): Promise<vscode.Uri[]> {
-    const includePatterns = this.getIncludePattern();
-    const excludePatterns = this.getExcludePatterns();
+  private async fetchUris(
+    shouldClearGitignoreExcludePatterns: boolean = true
+  ): Promise<vscode.Uri[]> {
+    const includePatterns = this.patternProvider.getIncludePatterns();
+    const excludePatterns = await this.patternProvider.getExcludePatterns(
+      shouldClearGitignoreExcludePatterns
+    );
     try {
       return await vscode.workspace.findFiles(includePatterns, excludePatterns);
     } catch (error) {
@@ -63,28 +67,6 @@ class DataService {
 
   private async getUris(uris?: vscode.Uri[]): Promise<vscode.Uri[]> {
     return uris && uris.length ? uris : await this.fetchUris();
-  }
-
-  private getIncludePattern(): string {
-    return this.includePatterns;
-  }
-
-  private getExcludePatterns(): string {
-    let excludePatterns: string[] = this.shouldUseFilesAndSearchExclude
-      ? this.filesAndSearchExcludePatterns
-      : this.excludePatterns;
-
-    return this.getExcludePatternsAsString(excludePatterns);
-  }
-
-  private getExcludePatternsAsString(patterns: string[]): string {
-    if (patterns.length === 0) {
-      return "";
-    } else if (patterns.length === 1) {
-      return patterns[0];
-    } else {
-      return `{${patterns.join(",")}}`;
-    }
   }
 
   private async includeSymbols(
@@ -317,15 +299,15 @@ class DataService {
   }
 
   private fetchConfig() {
-    this.includePatterns = this.config.getInclude();
-    this.excludePatterns = this.config.getExclude();
-    this.shouldUseFilesAndSearchExclude = this.config.shouldUseFilesAndSearchExclude();
-    this.filesAndSearchExcludePatterns = this.config.getFilesAndSearchExclude();
     this.itemsFilter = this.config.getItemsFilter();
   }
 
   private setCancelled(value: boolean) {
     this.isCancelled = value;
+  }
+
+  private initComponents() {
+    this.patternProvider = new PatternProvider(this.config);
   }
 }
 

@@ -1,16 +1,17 @@
-import * as vscode from "vscode";
 import * as sinon from "sinon";
-import Cache from "../../cache";
-import Utils from "../../utils";
-import Config from "../../config";
-import { getExtensionContext, getConfiguration } from "./mockFactory";
-import { createStubInstance } from "./stubbedClass";
-import WorkspaceCommon from "../../workspaceCommon";
-import DataService from "../../dataService";
-import DataConverter from "../../dataConverter";
+import * as vscode from "vscode";
 import ActionProcessor from "../../actionProcessor";
-import WorkspaceRemover from "../../workspaceRemover";
+import Cache from "../../cache";
+import Config from "../../config";
+import DataConverter from "../../dataConverter";
+import DataService from "../../dataService";
+import PatternProvider from "../../patternProvider";
 import QuickPick from "../../quickPick";
+import Utils from "../../utils";
+import WorkspaceCommon from "../../workspaceCommon";
+import WorkspaceRemover from "../../workspaceRemover";
+import { getConfiguration, getExtensionContext } from "./mockFactory";
+import { createStubInstance } from "./stubbedClass";
 
 export function getCacheStub(): Cache {
   const cacheStubTemp: any = createStubInstance(Cache);
@@ -84,6 +85,12 @@ export function getQuickPickStub(): QuickPick {
   return quickPickStubTemp as QuickPick;
 }
 
+export function getPatternProviderStub(): PatternProvider {
+  const patternProviderTemp: any = createStubInstance(PatternProvider);
+  patternProviderTemp.config = getConfigStub();
+  return patternProviderTemp as PatternProvider;
+}
+
 export function getTextEditorStub(
   isUntitled: boolean = true
 ): vscode.TextEditor {
@@ -123,4 +130,30 @@ export function getTextEditorStub(
     show: sinon.stub(),
     hide: sinon.stub(),
   } as vscode.TextEditor;
+}
+
+export function getTextDocumentStub(
+  isUntitled: boolean = true
+): vscode.TextDocument {
+  return {
+    uri: createStubInstance(vscode.Uri),
+    fileName: "",
+    isUntitled,
+    languageId: "",
+    version: 1,
+    isDirty: true,
+    isClosed: true,
+    save: sinon.stub(),
+    eol: vscode.EndOfLine.LF,
+    lineCount: 0,
+    lineAt: (arg: any) => {
+      return {} as vscode.TextLine;
+    },
+    offsetAt: sinon.stub(),
+    positionAt: sinon.stub(),
+    getText: () => "",
+    getWordRangeAtPosition: sinon.stub(),
+    validateRange: sinon.stub(),
+    validatePosition: sinon.stub(),
+  } as vscode.TextDocument;
 }

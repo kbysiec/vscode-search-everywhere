@@ -1,10 +1,9 @@
 import * as vscode from "vscode";
 import QuickPick from "../../quickPick";
 import { getQuickPickOnDidChangeValueEventListeners } from "../util/eventMockFactory";
-import { getItem, getUntitledItem } from "../util/itemMockFactory";
-import { getQpItems, getQpHelpItems } from "../util/qpItemMockFactory";
+import { getQpHelpItems, getQpItems } from "../util/qpItemMockFactory";
 import { getTextEditorStub } from "../util/stubFactory";
-import { stubMultiple, restoreStubbedMultiple } from "../util/stubHelpers";
+import { restoreStubbedMultiple, stubMultiple } from "../util/stubHelpers";
 
 export const getTestSetups = (quickPick: QuickPick) => {
   const quickPickAny = quickPick as any;
@@ -315,6 +314,13 @@ export const getTestSetups = (quickPick: QuickPick) => {
     },
     handleDidAccept1: () => {
       const editor = getTextEditorStub();
+
+      restoreStubbedMultiple([
+        {
+          object: vscode.workspace,
+          method: "openTextDocument",
+        },
+      ]);
 
       return stubMultiple([
         {

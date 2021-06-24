@@ -11,6 +11,7 @@ enum ConfigKey {
   exclude = "exclude",
   include = "include",
   shouldUseFilesAndSearchExclude = "shouldUseFilesAndSearchExclude",
+  excludeMode = "excludeMode",
 }
 
 export default ConfigKey;

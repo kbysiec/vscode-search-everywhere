@@ -1,10 +1,10 @@
 import { assert } from "chai";
-import { getItems, getItem } from "../util/itemMockFactory";
-import { getUtilsStub, getConfigStub } from "../util/stubFactory";
+import Config from "../../config";
 import DataService from "../../dataService";
 import Utils from "../../utils";
-import Config from "../../config";
 import { getTestSetups } from "../testSetup/dataService.testSetup";
+import { getItem, getItems } from "../util/itemMockFactory";
+import { getConfigStub, getUtilsStub } from "../util/stubFactory";
 
 describe("DataService", () => {
   let utilsStub: Utils = getUtilsStub();
