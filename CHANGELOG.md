@@ -2,6 +2,8 @@
 
 All notable changes to the "vscode-search-everywhere" extension will be documented in this file.
 
+## [1.1.0] - 2021-06-24
+- Setting `searchEverywhere.shouldUseFilesAndSearchExclude` replaced with `searchEverywhere.excludeMode` allowing to choose source of exclude patterns: extension, files and search, gitignore
 ## [1.0.9] - 2021-05-24
 - Fixed bug concerning loading items to not existing quick pick on handleDidProcessing callback. QuickPick initialization moved to handleWillProcessing callback,
 - Fixed bug concerning updating list after removing whole folder with multiple files,

@@ -2,7 +2,7 @@
   "name": "vscode-search-everywhere",
   "displayName": "Search everywhere",
   "description": "Alternative for 'Go to symbol in workspace'. Fast and customizable files, symbols search engine",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "preview": false,
   "publisher": "kbysiec",
   "author": {
@@ -152,7 +152,7 @@
             "gitignore"
           ],
           "default": "search everywhere",
-          "description": "Ability to choose which exclude option should be applied."
+          "description": "Ability to choose which exclude option should be applied. If gitignore file is not found or is empty, extension setting is used as a fallback."
         }
       }
     },

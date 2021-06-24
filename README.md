@@ -247,14 +247,24 @@ Default value:
 "**/*.{js,jsx,ts,tsx}"
 ```
 
-* `searchEverywhere.shouldUseFilesAndSearchExclude`
+* `searchEverywhere.excludeMode`
 
-Should "Files: Exclude" and "Search: Exclude" be used instead of extension exclude pattern.
-Default value: `false`.
+Ability to choose which exclude option should be applied. If gitignore file is not found or is empty, extension setting is used as a fallback. Available options: `search everywhere`, `files and search`, `gitignore`.
+Default value: `search everywhere`.
 
 ## Release Notes
 
 Please check changelog for release details.
+
+## How to run it locally
+
+If you would like to run the extension locally, go through the following steps:
+
+  1. clone the repository
+  2. run `npm install` to install all dependencies
+  3. open `run and debug` view
+  4. run `run extension`
+  5. enjoy development!
 
 ## Author
 
