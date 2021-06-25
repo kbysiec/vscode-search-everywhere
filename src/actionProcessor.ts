@@ -29,7 +29,6 @@ class ActionProcessor {
 
   async register(action: Action): Promise<void> {
     this.add(action);
-    // this.reduce(); // here is slower - executed every time
     await this.processIfIsNotBusy();
   }
 

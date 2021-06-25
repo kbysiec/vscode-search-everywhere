@@ -149,7 +149,6 @@ class Workspace {
     contains more than one folder opened. It is a workaround for this
     visual studio code issue.
  */
-  // TODO Submit issue on github
   private handleDidRenameFiles = async (event: vscode.FileRenameEvent) => {
     const uri = event.files[0].oldUri;
     const hasWorkspaceMoreThanOneFolder =
