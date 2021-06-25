@@ -24,18 +24,15 @@ class PatternProvider {
   async getExcludePatterns(
     shouldfetchGitignoreExcludePatterns: boolean
   ): Promise<string> {
-    let excludePatterns: string[] = [];
-
-    if (this.excludeMode === ExcludeMode.SearchEverywhere) {
-      excludePatterns = this.extensionExcludePatterns;
-    } else if (this.excludeMode === ExcludeMode.FilesAndSearch) {
-      excludePatterns = this.filesAndSearchExcludePatterns;
-    } else {
-      excludePatterns = await this.getGitignoreExclude(
+    const excludePatterns: { [k: string]: string[] } = {
+      [ExcludeMode.SearchEverywhere]: this.extensionExcludePatterns,
+      [ExcludeMode.FilesAndSearch]: this.filesAndSearchExcludePatterns,
+      [ExcludeMode.Gitignore]: await this.getGitignoreExclude(
         shouldfetchGitignoreExcludePatterns
-      );
-    }
-    return this.getExcludePatternsAsString(excludePatterns);
+      ),
+    };
+
+    return this.getExcludePatternsAsString(excludePatterns[this.excludeMode]);
   }
 
   private async getGitignoreExclude(
@@ -89,13 +86,13 @@ class PatternProvider {
   }
 
   private getExcludePatternsAsString(patterns: string[]): string {
-    if (patterns.length === 0) {
-      return "";
-    } else if (patterns.length === 1) {
-      return patterns[0];
-    } else {
-      return `{${patterns.join(",")}}`;
-    }
+    const excludePatternsFormat: { [k: number]: string } = {
+      0: "",
+      1: patterns[0],
+      [patterns.length > 1 ? patterns.length : -1]: `{${patterns.join(",")}}`,
+    };
+
+    return excludePatternsFormat[patterns.length];
   }
 
   private fetchConfig() {

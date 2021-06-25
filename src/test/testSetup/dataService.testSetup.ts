@@ -119,7 +119,17 @@ export const getTestSetups = (dataService: DataService) => {
         {
           object: vscode.workspace,
           method: "findFiles",
-          throws: "test error",
+          customReturns: true,
+          returns: [
+            {
+              onCall: 0,
+              returns: Promise.resolve([]),
+            },
+            {
+              onCall: 1,
+              throws: "wwwww",
+            },
+          ],
         },
         {
           object: vscode.commands,
@@ -129,6 +139,12 @@ export const getTestSetups = (dataService: DataService) => {
           object: dataServiceAny.patternProvider,
           method: "extensionExcludePatterns",
           returns: [],
+          isNotMethod: true,
+        },
+        {
+          object: dataServiceAny.patternProvider,
+          method: "fallbackExcludePatterns",
+          returns: [".vscode", ".history"],
           isNotMethod: true,
         },
         {
