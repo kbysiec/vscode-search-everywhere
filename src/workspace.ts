@@ -47,7 +47,9 @@ class Workspace {
     vscode.workspace.onDidChangeWorkspaceFolders(
       debounce(this.handleDidChangeWorkspaceFolders, 250)
     );
-    vscode.workspace.onDidChangeTextDocument(this.handleDidChangeTextDocument);
+    vscode.workspace.onDidChangeTextDocument(
+      debounce(this.handleDidChangeTextDocument, 700)
+    );
     vscode.workspace.onDidRenameFiles(this.handleDidRenameFiles);
 
     const fileWatcher = vscode.workspace.createFileSystemWatcher(
