@@ -14,8 +14,8 @@ class WorkspaceCommon {
   currentProgressValue: number = 0;
 
   urisForDirectoryPathUpdate: vscode.Uri[] | null = null;
-  directoryUriBeforePathUpdate?: vscode.Uri | null = null;
-  directoryUriAfterPathUpdate?: vscode.Uri | null = null;
+  directoryUriBeforePathUpdate: vscode.Uri | null = null;
+  directoryUriAfterPathUpdate: vscode.Uri | null = null;
 
   constructor(
     private cache: Cache,
