@@ -324,5 +324,30 @@ export const getTestSetups = (dataService: DataService) => {
         },
       ]);
     },
+    isUriExistingInWorkspace3: () => {
+      stubMultiple([
+        {
+          object: dataServiceAny,
+          method: "uris",
+          returns: getItems(),
+          isNotMethod: true,
+        },
+      ]);
+    },
+    isUriExistingInWorkspace4: () => {
+      stubMultiple([
+        {
+          object: dataServiceAny,
+          method: "fetchUris",
+          returns: Promise.resolve(getItems()),
+        },
+        {
+          object: dataServiceAny,
+          method: "uris",
+          returns: [],
+          isNotMethod: true,
+        },
+      ]);
+    },
   };
 };

@@ -12,6 +12,8 @@ class DataService {
   private itemsFilter!: ItemsFilter;
   private patternProvider!: PatternProvider;
 
+  private uris: vscode.Uri[] | null = null;
+
   private onDidItemIndexedEventEmitter: vscode.EventEmitter<number> =
     new vscode.EventEmitter();
   readonly onDidItemIndexed: vscode.Event<number> =
@@ -43,11 +45,21 @@ class DataService {
     return workspaceData;
   }
 
-  async isUriExistingInWorkspace(uri: vscode.Uri): Promise<boolean> {
-    const uris = await this.fetchUris(false);
+  async isUriExistingInWorkspace(
+    uri: vscode.Uri,
+    checkInCache: boolean = false
+  ): Promise<boolean> {
+    const uris = checkInCache
+      ? await this.getCachedUris()
+      : await this.fetchUris(false);
+
     return uris.some(
       (existingUri: vscode.Uri) => existingUri.fsPath === uri.fsPath
     );
+  }
+
+  clearCachedUris(): void {
+    this.uris = null;
   }
 
   private async fetchUris(
@@ -67,6 +79,13 @@ class DataService {
 
   private async getUris(uris?: vscode.Uri[]): Promise<vscode.Uri[]> {
     return uris && uris.length ? uris : await this.fetchUris();
+  }
+
+  private async getCachedUris(): Promise<vscode.Uri[]> {
+    if (!this.uris || !this.uris.length) {
+      this.uris = await this.fetchUris();
+    }
+    return this.uris;
   }
 
   private async includeSymbols(

@@ -37,6 +37,8 @@ class WorkspaceCommon {
   }
 
   async index(comment: string): Promise<void> {
+    this.dataService.clearCachedUris();
+
     await this.registerAction(
       ActionType.Rebuild,
       this.indexWithProgress.bind(this),

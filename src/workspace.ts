@@ -134,7 +134,7 @@ class Workspace {
   ) => {
     const uri = event.document.uri;
     const isUriExistingInWorkspace =
-      await this.dataService.isUriExistingInWorkspace(uri);
+      await this.dataService.isUriExistingInWorkspace(uri, true);
     const hasContentChanged = event.contentChanges.length;
 
     if (isUriExistingInWorkspace && hasContentChanged) {
@@ -152,6 +152,8 @@ class Workspace {
     visual studio code issue.
  */
   private handleDidRenameFiles = async (event: vscode.FileRenameEvent) => {
+    this.dataService.clearCachedUris();
+
     const uri = event.files[0].oldUri;
     const hasWorkspaceMoreThanOneFolder =
       this.utils.hasWorkspaceMoreThanOneFolder();
@@ -175,6 +177,8 @@ class Workspace {
   };
 
   private handleDidFileSave = async (uri: vscode.Uri) => {
+    this.dataService.clearCachedUris();
+
     const isUriExistingInWorkspace =
       await this.dataService.isUriExistingInWorkspace(uri);
     if (isUriExistingInWorkspace) {
@@ -191,6 +195,8 @@ class Workspace {
     // necessary to invoke updateCacheByPath after removeCacheByPath
     await this.utils.sleep(1);
 
+    this.dataService.clearCachedUris();
+
     await this.common.registerAction(
       ActionType.Update,
       this.updater.updateCacheByPath.bind(this.updater, uri),
@@ -200,6 +206,8 @@ class Workspace {
   };
 
   private handleDidFileFolderDelete = async (uri: vscode.Uri) => {
+    this.dataService.clearCachedUris();
+
     await this.common.registerAction(
       ActionType.Remove,
       this.remover.removeFromCacheByPath.bind(this.remover, uri),
