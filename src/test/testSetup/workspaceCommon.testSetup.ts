@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import WorkspaceCommon from "../../workspaceCommon";
 import { getDirectory, getItem, getItems } from "../util/itemMockFactory";
-import { getWorkspaceData } from "../util/mockFactory";
 import { getQpItems } from "../util/qpItemMockFactory";
 import { restoreStubbedMultiple, stubMultiple } from "../util/stubHelpers";
 
@@ -31,6 +30,10 @@ export const getTestSetups = (workspaceCommon: WorkspaceCommon) => {
           object: workspaceCommonAny.utils,
           method: "getNameFromUri",
         },
+        {
+          object: workspaceCommonAny.dataService.patternProvider,
+          method: "getExcludePatterns",
+        },
       ]);
 
       return stubMultiple([
@@ -46,6 +49,11 @@ export const getTestSetups = (workspaceCommon: WorkspaceCommon) => {
           returns: getItem(),
           isNotMethod: true,
         },
+        {
+          object: workspaceCommonAny.dataService.patternProvider,
+          method: "getExcludePatterns",
+          returns: Promise.resolve(["**/.history/**", "**/.vscode/**"]),
+        },
       ]);
     },
     wasDirectoryRenamed2: () => {
@@ -53,6 +61,10 @@ export const getTestSetups = (workspaceCommon: WorkspaceCommon) => {
         {
           object: workspaceCommonAny.utils,
           method: "getNameFromUri",
+        },
+        {
+          object: workspaceCommonAny.dataService.patternProvider,
+          method: "getExcludePatterns",
         },
       ]);
 
@@ -69,6 +81,11 @@ export const getTestSetups = (workspaceCommon: WorkspaceCommon) => {
           returns: getItem(),
           isNotMethod: true,
         },
+        {
+          object: workspaceCommonAny.dataService.patternProvider,
+          method: "getExcludePatterns",
+          returns: Promise.resolve(["**/.history/**", "**/.vscode/**"]),
+        },
       ]);
     },
     wasDirectoryRenamed3: () => {
@@ -76,6 +93,10 @@ export const getTestSetups = (workspaceCommon: WorkspaceCommon) => {
         {
           object: workspaceCommonAny.utils,
           method: "getNameFromUri",
+        },
+        {
+          object: workspaceCommonAny.dataService.patternProvider,
+          method: "getExcludePatterns",
         },
       ]);
 
@@ -92,6 +113,11 @@ export const getTestSetups = (workspaceCommon: WorkspaceCommon) => {
           returns: null,
           isNotMethod: true,
         },
+        {
+          object: workspaceCommonAny.dataService.patternProvider,
+          method: "getExcludePatterns",
+          returns: Promise.resolve(["**/.history/**", "**/.vscode/**"]),
+        },
       ]);
     },
     wasDirectoryRenamed4: () => {
@@ -99,6 +125,10 @@ export const getTestSetups = (workspaceCommon: WorkspaceCommon) => {
         {
           object: workspaceCommonAny.utils,
           method: "getNameFromUri",
+        },
+        {
+          object: workspaceCommonAny.dataService.patternProvider,
+          method: "getExcludePatterns",
         },
       ]);
 
@@ -115,6 +145,11 @@ export const getTestSetups = (workspaceCommon: WorkspaceCommon) => {
           returns: undefined,
           isNotMethod: true,
         },
+        {
+          object: workspaceCommonAny.dataService.patternProvider,
+          method: "getExcludePatterns",
+          returns: Promise.resolve(["**/.history/**", "**/.vscode/**"]),
+        },
       ]);
     },
     index1: () => {
@@ -123,12 +158,21 @@ export const getTestSetups = (workspaceCommon: WorkspaceCommon) => {
           object: workspaceCommonAny.actionProcessor,
           method: "register",
         },
+        {
+          object: workspaceCommonAny.dataService.patternProvider,
+          method: "getExcludePatterns",
+        },
       ]);
 
       return stubMultiple([
         {
           object: workspaceCommonAny.actionProcessor,
           method: "register",
+        },
+        {
+          object: workspaceCommonAny.dataService.patternProvider,
+          method: "getExcludePatterns",
+          returns: Promise.resolve(["**/.history/**", "**/.vscode/**"]),
         },
       ]);
     },
@@ -137,6 +181,10 @@ export const getTestSetups = (workspaceCommon: WorkspaceCommon) => {
         {
           object: workspaceCommonAny.utils,
           method: "hasWorkspaceAnyFolder",
+        },
+        {
+          object: workspaceCommonAny.dataService.patternProvider,
+          method: "getExcludePatterns",
         },
       ]);
 
@@ -149,6 +197,11 @@ export const getTestSetups = (workspaceCommon: WorkspaceCommon) => {
           object: workspaceCommonAny.utils,
           method: "hasWorkspaceAnyFolder",
           returns: true,
+        },
+        {
+          object: workspaceCommonAny.dataService.patternProvider,
+          method: "getExcludePatterns",
+          returns: Promise.resolve(["**/.history/**", "**/.vscode/**"]),
         },
       ]);
     },

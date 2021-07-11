@@ -150,7 +150,7 @@ describe("Workspace", () => {
     it(`1: should registerAction method be invoked which register update
         action if text document has changed and exists in workspace`, async () => {
       const [registerActionStub] = setups.handleDidChangeTextDocument1();
-      const textDocumentChangeEvent = await getTextDocumentChangeEvent(true);
+      const textDocumentChangeEvent = getTextDocumentChangeEvent(true);
       await workspaceAny.handleDidChangeTextDocument(textDocumentChangeEvent);
 
       assert.equal(registerActionStub.calledOnce, true);
@@ -159,7 +159,7 @@ describe("Workspace", () => {
 
     it(`2: should do nothing if text document does not exist in workspace`, async () => {
       const [registerActionStub] = setups.handleDidChangeTextDocument2();
-      const textDocumentChangeEvent = await getTextDocumentChangeEvent(true);
+      const textDocumentChangeEvent = getTextDocumentChangeEvent(true);
       await workspaceAny.handleDidChangeTextDocument(textDocumentChangeEvent);
 
       assert.equal(registerActionStub.calledOnce, false);

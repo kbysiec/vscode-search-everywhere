@@ -1,8 +1,7 @@
 import * as vscode from "vscode";
 import ActionProcessor from "../../actionProcessor";
 import ActionType from "../../enum/actionType";
-import Action from "../../interface/action";
-import { getAction, getEventEmitter, getActions } from "../util/mockFactory";
+import { getAction, getActions, getEventEmitter } from "../util/mockFactory";
 import { restoreStubbedMultiple, stubMultiple } from "../util/stubHelpers";
 
 export const getTestSetups = (actionProcessor: ActionProcessor) => {
@@ -125,7 +124,7 @@ export const getTestSetups = (actionProcessor: ActionProcessor) => {
           "test action 3",
           3,
           true,
-          vscode.Uri.file("./#")
+          vscode.Uri.file("./test3/#")
         ),
       ];
 

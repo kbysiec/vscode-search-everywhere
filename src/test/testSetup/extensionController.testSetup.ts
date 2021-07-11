@@ -1,4 +1,3 @@
-import ExcludeMode from "../../enum/excludeMode";
 import ExtensionController from "../../extensionController";
 import { getQpItems } from "../util/qpItemMockFactory";
 import { getQuickPickStub } from "../util/stubFactory";
@@ -104,15 +103,8 @@ export const getTestSetups = (extensionController: ExtensionController) => {
         },
         {
           object: extensionControllerAny.workspace.dataService.patternProvider,
-          method: "excludeMode",
-          returns: ExcludeMode.SearchEverywhere,
-          isNotMethod: true,
-        },
-        {
-          object: extensionControllerAny.workspace.dataService.patternProvider,
-          method: "extensionExcludePatterns",
-          returns: ["**/.history/**", "**/.vscode/**"],
-          isNotMethod: true,
+          method: "getExcludePatterns",
+          returns: Promise.resolve(["**/.history/**", "**/.vscode/**"]),
         },
       ]);
     },

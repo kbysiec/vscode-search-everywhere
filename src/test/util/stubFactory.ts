@@ -38,6 +38,7 @@ export function getDataServiceStub(): DataService {
   const dataServiceStub: any = createStubInstance(DataService);
   dataServiceStub.utils = getUtilsStub();
   dataServiceStub.config = getConfigStub();
+  dataServiceStub.patternProvider = getPatternProviderStub();
 
   return dataServiceStub as DataService;
 }

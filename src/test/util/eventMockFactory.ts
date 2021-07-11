@@ -1,7 +1,7 @@
 import * as sinon from "sinon";
 import * as vscode from "vscode";
 import ExcludeMode from "../../enum/excludeMode";
-import { getUntitledItem } from "./itemMockFactory";
+import { getTextDocumentStub } from "./stubFactory";
 
 export const getWorkspaceFoldersChangeEvent = (flag: boolean) => {
   return flag
@@ -47,12 +47,11 @@ export const getConfigurationChangeEvent = (
   };
 };
 
-export const getTextDocumentChangeEvent = async (
+export const getTextDocumentChangeEvent = (
   shouldContentBeChanged: boolean = false
-): Promise<vscode.TextDocumentChangeEvent> => {
-  const itemUntitled = getUntitledItem();
+): vscode.TextDocumentChangeEvent => {
   const textDocumentChangeEvent = {
-    document: await vscode.workspace.openTextDocument(itemUntitled),
+    document: getTextDocumentStub(),
     contentChanges: [],
   };
   shouldContentBeChanged &&

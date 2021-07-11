@@ -199,13 +199,6 @@ export const getTestSetups = (workspace: Workspace) => {
       ]);
     },
     handleDidChangeTextDocument1: () => {
-      restoreStubbedMultiple([
-        {
-          object: vscode.workspace,
-          method: "openTextDocument",
-        },
-      ]);
-
       return stubMultiple([
         {
           object: workspaceAny.common,

@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import DataService from "../../dataService";
-import ExcludeMode from "../../enum/excludeMode";
 import ItemsFilter from "../../interface/itemsFilter";
 import {
   getDocumentSymbolItemSingleLineArray,
@@ -11,8 +10,6 @@ import { restoreStubbedMultiple, stubMultiple } from "../util/stubHelpers";
 
 export const getTestSetups = (dataService: DataService) => {
   const dataServiceAny = dataService as any;
-
-  // dataServiceAny.patternProvider = getPatternProviderStub();
 
   const stubConfig = (
     itemsFilter: ItemsFilter = {},
@@ -33,15 +30,8 @@ export const getTestSetups = (dataService: DataService) => {
       },
       {
         object: dataServiceAny.patternProvider,
-        method: "excludeMode",
-        returns: ExcludeMode.SearchEverywhere,
-        isNotMethod: true,
-      },
-      {
-        object: dataServiceAny.patternProvider,
-        method: "extensionExcludePatterns",
-        returns: ["**/.history/**", "**/.vscode/**"],
-        isNotMethod: true,
+        method: "getExcludePatterns",
+        returns: Promise.resolve(["**/.history/**", "**/.vscode/**"]),
       },
     ]);
   };
@@ -119,39 +109,11 @@ export const getTestSetups = (dataService: DataService) => {
         {
           object: vscode.workspace,
           method: "findFiles",
-          customReturns: true,
-          returns: [
-            {
-              onCall: 0,
-              returns: Promise.resolve([]),
-            },
-            {
-              onCall: 1,
-              throws: "wwwww",
-            },
-          ],
+          throws: "test error",
         },
         {
           object: vscode.commands,
           method: "executeCommand",
-        },
-        {
-          object: dataServiceAny.patternProvider,
-          method: "extensionExcludePatterns",
-          returns: [],
-          isNotMethod: true,
-        },
-        {
-          object: dataServiceAny.patternProvider,
-          method: "fallbackExcludePatterns",
-          returns: [".vscode", ".history"],
-          isNotMethod: true,
-        },
-        {
-          object: dataServiceAny.patternProvider,
-          method: "excludeMode",
-          returns: ExcludeMode.SearchEverywhere,
-          isNotMethod: true,
         },
       ]);
     },
