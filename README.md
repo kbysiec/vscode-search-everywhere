@@ -249,7 +249,7 @@ Default value:
 
 * `searchEverywhere.excludeMode`
 
-Ability to choose which exclude option should be applied. If gitignore file is not found or is empty, extension setting is used as a fallback. Available options: `search everywhere`, `files and search`, `gitignore`.
+Ability to choose which exclude option should be applied. If gitignore file is not found or is empty, the extension option is used as a fallback. Available options: `search everywhere`, `files and search`, `gitignore`. To see the changes from the updated gitignore file after indexing, the reload must be done.
 Default value: `search everywhere`.
 
 ## Release Notes
