@@ -60,13 +60,32 @@ export const getTextDocumentChangeEvent = (
   return textDocumentChangeEvent;
 };
 
-export const getFileRenameEvent = () => ({
-  files: [
-    {
-      oldUri: vscode.Uri.file("./#"),
-      newUri: vscode.Uri.file("./test/#"),
-    },
-  ],
+export const getFileRenameEvent = (isDirectory: boolean = false) => ({
+  files: isDirectory
+    ? [
+        {
+          oldUri: vscode.Uri.file("./test"),
+          newUri: vscode.Uri.file("./testNew"),
+        },
+      ]
+    : [
+        {
+          oldUri: vscode.Uri.file("./test/#"),
+          newUri: vscode.Uri.file("./testNew/#"),
+        },
+        {
+          oldUri: vscode.Uri.file("./test2/#"),
+          newUri: vscode.Uri.file("./testNew2/#"),
+        },
+      ],
+});
+
+export const getFileCreateEvent = () => ({
+  files: [vscode.Uri.file("./#")],
+});
+
+export const getFileDeleteEvent = () => ({
+  files: [vscode.Uri.file("./#")],
 });
 
 export const getFileWatcherStub = () => {

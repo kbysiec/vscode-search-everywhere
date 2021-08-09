@@ -1,10 +1,10 @@
-import * as vscode from "vscode";
 import { assert } from "chai";
-import { getExtensionContext, getAction } from "../util/mockFactory";
-import { getQpItems } from "../util/qpItemMockFactory";
+import * as vscode from "vscode";
 import ActionType from "../../enum/actionType";
 import ExtensionController from "../../extensionController";
 import { getTestSetups } from "../testSetup/extensionController.testSetup";
+import { getAction, getExtensionContext } from "../util/mockFactory";
+import { getQpItems } from "../util/qpItemMockFactory";
 
 describe("ExtensionController", () => {
   let context: vscode.ExtensionContext = getExtensionContext();
@@ -150,13 +150,13 @@ describe("ExtensionController", () => {
       assert.equal(setItemsStub.calledWith(getQpItems()), true);
     });
 
-    it(`3: should quickPick.setItems method be invoked with
-      empty array as a parameter if workspace.getData returns nothing`, async () => {
-      const [setItemsStub] = setups.handleDidProcessing3();
-      await extensionControllerAny.handleDidProcessing();
+    // it(`3: should quickPick.setItems method be invoked with
+    //   empty array as a parameter if workspace.getData returns nothing`, async () => {
+    //   const [setItemsStub] = setups.handleDidProcessing3();
+    //   await extensionControllerAny.handleDidProcessing();
 
-      assert.equal(setItemsStub.calledWith([]), true);
-    });
+    //   assert.equal(setItemsStub.calledWith([]), true);
+    // });
   });
 
   describe("handleWillExecuteAction", () => {

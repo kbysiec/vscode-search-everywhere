@@ -1,85 +1,61 @@
 import * as vscode from "vscode";
 import Cache from "./cache";
-import DataService from "./dataService";
+import DetailedActionType from "./enum/detailedActionType";
 import QuickPickItem from "./interface/quickPickItem";
 import Utils from "./utils";
 import WorkspaceCommon from "./workspaceCommon";
-import WorkspaceRemover from "./workspaceRemover";
 
 class WorkspaceUpdater {
   constructor(
     private common: WorkspaceCommon,
-    private remover: WorkspaceRemover,
-    private dataService: DataService,
     private cache: Cache,
     private utils: Utils
   ) {}
-  async updateCacheByPath(uri: vscode.Uri): Promise<void> {
+
+  async updateCacheByPath(
+    uri: vscode.Uri,
+    detailedActionType: DetailedActionType,
+    oldUri?: vscode.Uri
+  ) {
     try {
-      if (this.wasItemsMovedToAnotherDirectoryOrDirectoryWasRenamed()) {
-        this.common.wasDirectoryRenamed()
-          ? this.updateDataAfterDirectoryRenaming()
-          : await this.updateDataAfterMovingToAnotherDirectory(uri);
-      } else {
-        (await this.dataService.isUriExistingInWorkspace(uri)) &&
-          (await this.updateDataAfterChangesInExistingFile(uri));
-      }
-      this.cleanDirectoryRenamingData();
+      const updateFnByDetailedActionType: { [key: string]: Function } = {
+        [DetailedActionType.CreateNewFile]: this.updateUri.bind(this, uri),
+        [DetailedActionType.RenameOrMoveFile]: this.updateUri.bind(this, uri),
+        [DetailedActionType.TextChange]: this.updateUri.bind(this, uri),
+        [DetailedActionType.RenameOrMoveDirectory]: this.updateFolder.bind(
+          this,
+          uri,
+          oldUri!
+        ),
+      };
+
+      const updateFn = updateFnByDetailedActionType[detailedActionType];
+      updateFn && (await updateFn());
     } catch (error) {
       this.utils.printErrorMessage(error);
       await this.common.index("on error catch");
     }
   }
 
-  private wasItemsMovedToAnotherDirectoryOrDirectoryWasRenamed(): boolean {
-    return (
-      !!this.common.urisForDirectoryPathUpdate &&
-      !!this.common.urisForDirectoryPathUpdate.length
-    );
-  }
-
-  private updateDataAfterDirectoryRenaming(): void {
-    let data = this.common.getData();
-    if (data) {
-      data = this.utils.updateQpItemsWithNewDirectoryPath(
-        data,
-        this.common.directoryUriBeforePathUpdate!,
-        this.common.directoryUriAfterPathUpdate!
-      );
-      this.cache.updateData(data);
-    }
-  }
-
-  private async updateDataAfterMovingToAnotherDirectory(
-    uri: vscode.Uri
-  ): Promise<void> {
-    await this.updateDataForExistingUriInWorkspace(uri);
-  }
-
-  private async updateDataAfterChangesInExistingFile(
-    uri: vscode.Uri
-  ): Promise<void> {
-    await this.updateDataForExistingUriInWorkspace(uri);
-  }
-
-  private cleanDirectoryRenamingData() {
-    this.common.directoryUriBeforePathUpdate = null;
-    this.common.directoryUriAfterPathUpdate = null;
-    this.common.urisForDirectoryPathUpdate = null;
-  }
-
-  private async updateDataForExistingUriInWorkspace(
-    uri: vscode.Uri
-  ): Promise<void> {
-    await this.remover.removeFromCacheByPath(uri);
-    let data = await this.common.downloadData([uri]);
-    data = this.mergeWithDataFromCache(data);
+  private async updateUri(uri: vscode.Uri) {
+    const dataForUri = await this.common.downloadData([uri]);
+    const data = this.mergeWithDataFromCache(dataForUri);
     this.cache.updateData(data);
+  }
+
+  private updateFolder(uri: vscode.Uri, oldUri: vscode.Uri) {
+    const data = this.common.getData();
+    const updatedData = this.utils.updateQpItemsWithNewDirectoryPath(
+      data,
+      oldUri!,
+      uri
+    );
+    this.cache.updateData(updatedData);
   }
 
   private mergeWithDataFromCache(data: QuickPickItem[]): QuickPickItem[] {
     const dataFromCache = this.common.getData();
-    return dataFromCache ? dataFromCache.concat(data) : data;
+    return dataFromCache.concat(data);
   }
 }
 

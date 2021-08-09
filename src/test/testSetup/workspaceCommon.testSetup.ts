@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import WorkspaceCommon from "../../workspaceCommon";
-import { getDirectory, getItem, getItems } from "../util/itemMockFactory";
+import { getDirectory, getItem } from "../util/itemMockFactory";
 import { getQpItems } from "../util/qpItemMockFactory";
 import { restoreStubbedMultiple, stubMultiple } from "../util/stubHelpers";
 
@@ -20,7 +20,23 @@ export const getTestSetups = (workspaceCommon: WorkspaceCommon) => {
         {
           object: workspaceCommonAny.cache,
           method: "getData",
-          returns: Promise.resolve(getItems()),
+          returns: getQpItems(),
+        },
+      ]);
+    },
+    getData2: () => {
+      restoreStubbedMultiple([
+        {
+          object: workspaceCommonAny.cache,
+          method: "getData",
+        },
+      ]);
+
+      return stubMultiple([
+        {
+          object: workspaceCommonAny.cache,
+          method: "getData",
+          returns: undefined,
         },
       ]);
     },

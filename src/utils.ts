@@ -200,6 +200,11 @@ class Utils {
     return normalizedPath;
   }
 
+  isDirectory(uri: vscode.Uri): boolean {
+    const name = this.getNameFromUri(uri);
+    return !name.includes(".");
+  }
+
   private getWorkspaceFoldersPaths(): string[] {
     return (
       (vscode.workspace.workspaceFolders &&

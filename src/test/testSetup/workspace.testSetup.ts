@@ -1,9 +1,8 @@
 import * as vscode from "vscode";
 import Workspace from "../../workspace";
-import { getFileWatcherStub } from "../util/eventMockFactory";
 import { getItems } from "../util/itemMockFactory";
 import { getEventEmitter } from "../util/mockFactory";
-import { stubMultiple, restoreStubbedMultiple } from "../util/stubHelpers";
+import { restoreStubbedMultiple, stubMultiple } from "../util/stubHelpers";
 
 export const getTestSetups = (workspace: Workspace) => {
   const workspaceAny = workspace as any;
@@ -18,8 +17,7 @@ export const getTestSetups = (workspace: Workspace) => {
       ]);
     },
     registerEventListeners1: () => {
-      const fileWatcherStub = getFileWatcherStub();
-      const stubs = stubMultiple([
+      return stubMultiple([
         {
           object: vscode.workspace,
           method: "onDidChangeConfiguration",
@@ -31,11 +29,6 @@ export const getTestSetups = (workspace: Workspace) => {
         {
           object: vscode.workspace,
           method: "onDidChangeTextDocument",
-        },
-        {
-          object: vscode.workspace,
-          method: "createFileSystemWatcher",
-          returns: fileWatcherStub,
         },
         {
           object: workspaceAny.actionProcessor,
@@ -50,11 +43,6 @@ export const getTestSetups = (workspace: Workspace) => {
           method: "onWillExecuteAction",
         },
       ]);
-
-      return {
-        fileWatcherStub,
-        stubs,
-      };
     },
     getData1: () => {
       return stubMultiple([
@@ -239,7 +227,7 @@ export const getTestSetups = (workspace: Workspace) => {
     },
     handleDidRenameFiles1: () => {
       restoreStubbedMultiple([
-        { object: workspaceAny.utils, method: "hasWorkspaceMoreThanOneFolder" },
+        { object: workspaceAny.utils, method: "isDirectory" },
       ]);
 
       return stubMultiple([
@@ -249,14 +237,14 @@ export const getTestSetups = (workspace: Workspace) => {
         },
         {
           object: workspaceAny.utils,
-          method: "hasWorkspaceMoreThanOneFolder",
-          returns: true,
+          method: "isDirectory",
+          returns: false,
         },
       ]);
     },
     handleDidRenameFiles2: () => {
       restoreStubbedMultiple([
-        { object: workspaceAny.utils, method: "hasWorkspaceMoreThanOneFolder" },
+        { object: workspaceAny.utils, method: "isDirectory" },
       ]);
 
       return stubMultiple([
@@ -266,50 +254,76 @@ export const getTestSetups = (workspace: Workspace) => {
         },
         {
           object: workspaceAny.utils,
-          method: "hasWorkspaceMoreThanOneFolder",
+          method: "isDirectory",
+          returns: true,
+        },
+      ]);
+    },
+    handleDidCreateFiles1: () => {
+      restoreStubbedMultiple([
+        { object: workspaceAny.utils, method: "isDirectory" },
+      ]);
+
+      return stubMultiple([
+        {
+          object: workspaceAny.common,
+          method: "registerAction",
+        },
+        {
+          object: workspaceAny.utils,
+          method: "isDirectory",
           returns: false,
         },
       ]);
     },
-    handleDidFileSave1: () => {
+    handleDidCreateFiles2: () => {
+      restoreStubbedMultiple([
+        { object: workspaceAny.utils, method: "isDirectory" },
+      ]);
+
       return stubMultiple([
         {
           object: workspaceAny.common,
           method: "registerAction",
         },
         {
-          object: workspaceAny.dataService,
-          method: "isUriExistingInWorkspace",
-          returns: Promise.resolve(true),
+          object: workspaceAny.utils,
+          method: "isDirectory",
+          returns: true,
         },
       ]);
     },
-    handleDidFileSave2: () => {
+    handleDidDeleteFiles1: () => {
+      restoreStubbedMultiple([
+        { object: workspaceAny.utils, method: "isDirectory" },
+      ]);
+
       return stubMultiple([
         {
           object: workspaceAny.common,
           method: "registerAction",
         },
         {
-          object: workspaceAny.dataService,
-          method: "isUriExistingInWorkspace",
-          returns: Promise.resolve(false),
+          object: workspaceAny.utils,
+          method: "isDirectory",
+          returns: false,
         },
       ]);
     },
-    handleDidFileFolderCreate1: () => {
+    handleDidDeleteFiles2: () => {
+      restoreStubbedMultiple([
+        { object: workspaceAny.utils, method: "isDirectory" },
+      ]);
+
       return stubMultiple([
         {
           object: workspaceAny.common,
           method: "registerAction",
         },
-      ]);
-    },
-    handleDidFileFolderDelete1: () => {
-      return stubMultiple([
         {
-          object: workspaceAny.common,
-          method: "registerAction",
+          object: workspaceAny.utils,
+          method: "isDirectory",
+          returns: true,
         },
       ]);
     },

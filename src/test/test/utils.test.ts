@@ -391,4 +391,13 @@ describe("Utils", () => {
       );
     });
   });
+
+  describe("isDirectory", () => {
+    it("1: should return true if passed uri is a directory", () => {
+      assert.equal(utils.isDirectory(getDirectory("./fake/")), true);
+    });
+    it("2: should return false if passed uri is a file", () => {
+      assert.equal(utils.isDirectory(getItem()), false);
+    });
+  });
 });

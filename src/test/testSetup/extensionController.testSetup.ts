@@ -262,35 +262,6 @@ export const getTestSetups = (extensionController: ExtensionController) => {
         },
       ]);
     },
-    handleDidProcessing3: () => {
-      stubMultiple([
-        {
-          object: extensionControllerAny,
-          method: "quickPick",
-          returns: getQuickPickStub(),
-          isNotMethod: true,
-        },
-      ]);
-
-      restoreStubbedMultiple([
-        {
-          object: extensionControllerAny.quickPick,
-          method: "setItems",
-        },
-      ]);
-
-      return stubMultiple([
-        {
-          object: extensionControllerAny.quickPick,
-          method: "setItems",
-        },
-        {
-          object: extensionControllerAny.workspace,
-          method: "getData",
-          returns: Promise.resolve(),
-        },
-      ]);
-    },
     handleWillExecuteAction1: () => {
       return stubMultiple([
         {

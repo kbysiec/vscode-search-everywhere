@@ -1,11 +1,11 @@
 import * as vscode from "vscode";
 import ActionProcessor from "./actionProcessor";
-import { appConfig } from "./appConfig";
 import Cache from "./cache";
 import Config from "./config";
 import DataConverter from "./dataConverter";
 import DataService from "./dataService";
 import ActionType from "./enum/actionType";
+import DetailedActionType from "./enum/detailedActionType";
 import IndexActionType from "./enum/indexActionType";
 import Action from "./interface/action";
 import QuickPickItem from "./interface/quickPickItem";
@@ -51,14 +51,8 @@ class Workspace {
       debounce(this.handleDidChangeTextDocument, 700)
     );
     vscode.workspace.onDidRenameFiles(this.handleDidRenameFiles);
-
-    const fileWatcher = vscode.workspace.createFileSystemWatcher(
-      appConfig.globPattern
-    );
-    fileWatcher.onDidChange(this.handleDidFileSave);
-    // necessary to invoke updateCacheByPath after removeCacheByPath
-    fileWatcher.onDidCreate(debounce(this.handleDidFileFolderCreate, 260));
-    fileWatcher.onDidDelete(this.handleDidFileFolderDelete);
+    vscode.workspace.onDidCreateFiles(this.handleDidCreateFiles);
+    vscode.workspace.onDidDeleteFiles(this.handleDidDeleteFiles);
 
     this.actionProcessor.onDidProcessing(
       this.handleDidActionProcessorProcessing
@@ -71,7 +65,7 @@ class Workspace {
     );
   }
 
-  getData(): QuickPickItem[] | undefined {
+  getData(): QuickPickItem[] {
     return this.common.getData();
   }
 
@@ -88,19 +82,8 @@ class Workspace {
       this.dataConverter,
       this.actionProcessor
     );
-    this.remover = new WorkspaceRemover(
-      this.common,
-      this.dataService,
-      this.cache,
-      this.utils
-    );
-    this.updater = new WorkspaceUpdater(
-      this.common,
-      this.remover,
-      this.dataService,
-      this.cache,
-      this.utils
-    );
+    this.remover = new WorkspaceRemover(this.common, this.cache);
+    this.updater = new WorkspaceUpdater(this.common, this.cache, this.utils);
   }
 
   private reloadComponents() {
@@ -137,81 +120,90 @@ class Workspace {
       await this.dataService.isUriExistingInWorkspace(uri, true);
     const hasContentChanged = event.contentChanges.length;
 
+    const actionType = DetailedActionType.TextChange;
+
     if (isUriExistingInWorkspace && hasContentChanged) {
       await this.common.registerAction(
+        ActionType.Remove,
+        this.remover.removeFromCacheByPath.bind(this.remover, uri, actionType),
+        "handleDidChangeTextDocumentNew",
+        uri
+      );
+
+      await this.common.registerAction(
         ActionType.Update,
-        this.updater.updateCacheByPath.bind(this.updater, uri),
-        "handleDidChangeTextDocument",
+        this.updater.updateCacheByPath.bind(this.updater, uri, actionType),
+        "handleDidChangeTextDocumentNew",
         uri
       );
     }
   };
 
-  /* fileWatcher.onDidDelete(this.onDelete) is not invoked if workspace
-    contains more than one folder opened. It is a workaround for this
-    visual studio code issue.
- */
   private handleDidRenameFiles = async (event: vscode.FileRenameEvent) => {
     this.dataService.clearCachedUris();
 
-    const uri = event.files[0].oldUri;
-    const hasWorkspaceMoreThanOneFolder =
-      this.utils.hasWorkspaceMoreThanOneFolder();
-    this.common.directoryUriBeforePathUpdate = event.files[0].oldUri;
-    this.common.directoryUriAfterPathUpdate = event.files[0].newUri;
-    if (hasWorkspaceMoreThanOneFolder) {
-      await this.common.registerAction(
-        ActionType.Remove,
-        this.remover.removeFromCacheByPath.bind(this.remover, uri),
-        "handleDidRenameFiles",
-        uri
-      );
+    const firstFile = event.files[0];
+    const actionType = this.utils.isDirectory(firstFile.oldUri)
+      ? DetailedActionType.RenameOrMoveDirectory
+      : DetailedActionType.RenameOrMoveFile;
+
+    for (let i = 0; i < event.files.length; i++) {
+      const file = event.files[i];
 
       await this.common.registerAction(
         ActionType.Update,
-        this.updater.updateCacheByPath.bind(this.updater, uri),
-        "handleDidRenameFiles",
-        uri
+        this.updater.updateCacheByPath.bind(
+          this.updater,
+          file.newUri,
+          actionType,
+          file.oldUri
+        ),
+        "handleDidRenameFilesNew",
+        file.newUri
       );
+
+      actionType === DetailedActionType.RenameOrMoveFile &&
+        (await this.common.registerAction(
+          ActionType.Remove,
+          this.remover.removeFromCacheByPath.bind(
+            this.remover,
+            file.oldUri,
+            actionType
+          ),
+          "handleDidRenameFilesNew",
+          file.oldUri
+        ));
     }
   };
 
-  private handleDidFileSave = async (uri: vscode.Uri) => {
+  private handleDidCreateFiles = async (event: vscode.FileCreateEvent) => {
     this.dataService.clearCachedUris();
 
-    const isUriExistingInWorkspace =
-      await this.dataService.isUriExistingInWorkspace(uri);
-    if (isUriExistingInWorkspace) {
-      await this.common.registerAction(
-        ActionType.Update,
-        this.updater.updateCacheByPath.bind(this.updater, uri),
-        "handleDidFileSave",
-        uri
-      );
-    }
-  };
-
-  private handleDidFileFolderCreate = async (uri: vscode.Uri) => {
-    // necessary to invoke updateCacheByPath after removeCacheByPath
-    await this.utils.sleep(1);
-
-    this.dataService.clearCachedUris();
+    const uri = event.files[0];
+    const actionType = this.utils.isDirectory(uri)
+      ? DetailedActionType.CreateNewDirectory
+      : DetailedActionType.CreateNewFile;
 
     await this.common.registerAction(
       ActionType.Update,
-      this.updater.updateCacheByPath.bind(this.updater, uri),
-      "handleDidFileFolderCreate",
+      this.updater.updateCacheByPath.bind(this.updater, uri, actionType),
+      "handleDidCreateFilesNew",
       uri
     );
   };
 
-  private handleDidFileFolderDelete = async (uri: vscode.Uri) => {
+  private handleDidDeleteFiles = async (event: vscode.FileDeleteEvent) => {
     this.dataService.clearCachedUris();
+
+    const uri = event.files[0];
+    const actionType = this.utils.isDirectory(uri)
+      ? DetailedActionType.RemoveDirectory
+      : DetailedActionType.RemoveFile;
 
     await this.common.registerAction(
       ActionType.Remove,
-      this.remover.removeFromCacheByPath.bind(this.remover, uri),
-      "handleDidFileFolderDelete",
+      this.remover.removeFromCacheByPath.bind(this.remover, uri, actionType),
+      "handleDidDeleteFilesNew",
       uri
     );
   };

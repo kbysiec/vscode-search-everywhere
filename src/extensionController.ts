@@ -49,7 +49,7 @@ class ExtensionController {
   }
 
   private async setQuickPickData(): Promise<void> {
-    const data = (await this.workspace.getData()) || [];
+    const data = await this.workspace.getData();
     this.quickPick.setItems(data);
   }
 

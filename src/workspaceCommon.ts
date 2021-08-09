@@ -13,10 +13,6 @@ class WorkspaceCommon {
   progressStep: number = 0;
   currentProgressValue: number = 0;
 
-  urisForDirectoryPathUpdate: vscode.Uri[] | null = null;
-  directoryUriBeforePathUpdate: vscode.Uri | null = null;
-  directoryUriAfterPathUpdate: vscode.Uri | null = null;
-
   constructor(
     private cache: Cache,
     private utils: Utils,
@@ -25,15 +21,8 @@ class WorkspaceCommon {
     private actionProcessor: ActionProcessor
   ) {}
 
-  getData(): QuickPickItem[] | undefined {
-    return this.cache.getData();
-  }
-
-  wasDirectoryRenamed(): boolean {
-    return (
-      this.isDirectory(this.directoryUriBeforePathUpdate!) &&
-      !!this.directoryUriAfterPathUpdate
-    );
+  getData(): QuickPickItem[] {
+    return this.cache.getData() || [];
   }
 
   async index(comment: string): Promise<void> {
@@ -82,11 +71,6 @@ class WorkspaceCommon {
   cancelIndexing(): void {
     this.dataService.cancel();
     this.dataConverter.cancel();
-  }
-
-  private isDirectory(uri: vscode.Uri): boolean {
-    const name = this.utils.getNameFromUri(uri);
-    return !name.includes(".");
   }
 
   private async indexWithProgressTask(

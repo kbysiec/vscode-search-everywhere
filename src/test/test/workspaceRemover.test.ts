@@ -1,82 +1,87 @@
 import { assert } from "chai";
-import WorkspaceRemover from "../../workspaceRemover";
-import WorkspaceCommon from "../../workspaceCommon";
-import DataService from "../../dataService";
 import Cache from "../../cache";
-import Utils from "../../utils";
-import {
-  getCacheStub,
-  getDataServiceStub,
-  getUtilsStub,
-  getWorkspaceCommonStub,
-} from "../util/stubFactory";
+import DetailedActionType from "../../enum/detailedActionType";
+import WorkspaceCommon from "../../workspaceCommon";
+import WorkspaceRemover from "../../workspaceRemover";
 import { getTestSetups } from "../testSetup/workspaceRemover.testSetup";
 import { getDirectory, getItem } from "../util/itemMockFactory";
 import { getQpItems } from "../util/qpItemMockFactory";
+import { getCacheStub, getWorkspaceCommonStub } from "../util/stubFactory";
 
 describe("WorkspaceRemover", () => {
   let commonStub: WorkspaceCommon = getWorkspaceCommonStub();
-  let dataServiceStub: DataService = getDataServiceStub();
   let cacheStub: Cache = getCacheStub();
-  let utilsStub: Utils = getUtilsStub();
   let workspaceRemover: WorkspaceRemover = new WorkspaceRemover(
     commonStub,
-    dataServiceStub,
-    cacheStub,
-    utilsStub
+    cacheStub
   );
   let setups = getTestSetups(workspaceRemover);
 
   beforeEach(() => {
     commonStub = getWorkspaceCommonStub();
-    dataServiceStub = getDataServiceStub();
     cacheStub = getCacheStub();
-    utilsStub = getUtilsStub();
-    workspaceRemover = new WorkspaceRemover(
-      commonStub,
-      dataServiceStub,
-      cacheStub,
-      utilsStub
-    );
+    workspaceRemover = new WorkspaceRemover(commonStub, cacheStub);
     setups = getTestSetups(workspaceRemover);
   });
 
   describe("removeFromCacheByPath", () => {
-    it("1: should do nothing if getData method returns undefined", async () => {
+    it("1: should remove given uri from stored data when file is removed ", () => {
       const [updateDataStub] = setups.removeFromCacheByPath1();
 
-      await workspaceRemover.removeFromCacheByPath(getItem());
-      assert.equal(updateDataStub.called, false);
+      workspaceRemover.removeFromCacheByPath(
+        getItem(),
+        DetailedActionType.RemoveFile
+      );
+      assert.equal(
+        updateDataStub.calledWith(getQpItems(1, undefined, 1)),
+        true
+      );
     });
 
-    it("2: should remove given item from stored data", async () => {
+    it("2: should remove given uri from stored data when file is renamed or moved", () => {
       const [updateDataStub] = setups.removeFromCacheByPath2();
 
-      await workspaceRemover.removeFromCacheByPath(getItem());
+      workspaceRemover.removeFromCacheByPath(
+        getItem(),
+        DetailedActionType.RenameOrMoveFile
+      );
       assert.equal(
         updateDataStub.calledWith(getQpItems(1, undefined, 1)),
         true
       );
     });
 
-    it(`3: should not remove items from stored data for
-      given renamed directory uri`, async () => {
-      const { qpItems, stubs } = setups.removeFromCacheByPath3();
-      const [updateDataStub] = stubs;
+    it("3: should remove given uri from stored data when text in file is changed", () => {
+      const [updateDataStub] = setups.removeFromCacheByPath3();
 
-      await workspaceRemover.removeFromCacheByPath(getDirectory("./fake"));
-      assert.equal(updateDataStub.calledWith(qpItems), true);
+      workspaceRemover.removeFromCacheByPath(
+        getItem(),
+        DetailedActionType.TextChange
+      );
+      assert.equal(
+        updateDataStub.calledWith(getQpItems(1, undefined, 1)),
+        true
+      );
     });
 
-    it(`4: should remove items from stored data
-      if file was moved to another directory`, async () => {
+    it("4: should remove all uris for given folder uri when directory is removed", () => {
       const [updateDataStub] = setups.removeFromCacheByPath4();
 
-      await workspaceRemover.removeFromCacheByPath(getItem());
-      assert.equal(
-        updateDataStub.calledWith(getQpItems(1, undefined, 1)),
-        true
+      workspaceRemover.removeFromCacheByPath(
+        getDirectory("./fake/"),
+        DetailedActionType.RemoveDirectory
       );
+      assert.equal(updateDataStub.calledWith([]), true);
+    });
+
+    it("5: should remove all uris for given folder uri when directory is renamed", () => {
+      const [updateDataStub] = setups.removeFromCacheByPath5();
+
+      workspaceRemover.removeFromCacheByPath(
+        getDirectory("./fake/"),
+        DetailedActionType.RenameOrMoveDirectory
+      );
+      assert.equal(updateDataStub.calledWith([]), true);
     });
   });
 });

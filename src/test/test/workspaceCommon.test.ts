@@ -1,8 +1,13 @@
 import { assert } from "chai";
-import WorkspaceCommon from "../../workspaceCommon";
-import DataService from "../../dataService";
+import ActionProcessor from "../../actionProcessor";
 import Cache from "../../cache";
+import DataConverter from "../../dataConverter";
+import DataService from "../../dataService";
+import ActionType from "../../enum/actionType";
 import Utils from "../../utils";
+import WorkspaceCommon from "../../workspaceCommon";
+import { getTestSetups } from "../testSetup/workspaceCommon.testSetup";
+import { getQpItems } from "../util/qpItemMockFactory";
 import {
   getActionProcessorStub,
   getCacheStub,
@@ -10,11 +15,6 @@ import {
   getDataServiceStub,
   getUtilsStub,
 } from "../util/stubFactory";
-import { getTestSetups } from "../testSetup/workspaceCommon.testSetup";
-import { getQpItems } from "../util/qpItemMockFactory";
-import DataConverter from "../../dataConverter";
-import ActionProcessor from "../../actionProcessor";
-import ActionType from "../../enum/actionType";
 
 describe("WorkspaceCommon", () => {
   let cacheStub: Cache = getCacheStub();
@@ -49,37 +49,15 @@ describe("WorkspaceCommon", () => {
 
   describe("getData", () => {
     it("1: should cache.getData method be invoked", () => {
-      const [getDataStub] = setups.getData1();
+      setups.getData1();
 
-      workspaceCommon.getData();
-      assert.equal(getDataStub.calledOnce, true);
-    });
-  });
-
-  describe("wasDirectoryRenamed", () => {
-    it(`1: should return true if the provided uri contains the extension
-      and directoryUriAfterPathUpdate is not null and undefined`, () => {
-      setups.wasDirectoryRenamed1();
-
-      assert.equal(workspaceCommon.wasDirectoryRenamed(), true);
+      assert.deepEqual(workspaceCommon.getData(), getQpItems());
     });
 
-    it("2: should return false if the provided uri name contains the extension", () => {
-      setups.wasDirectoryRenamed2();
+    it("2: should return empty array if cache.getData method returns undefined", () => {
+      setups.getData2();
 
-      assert.equal(workspaceCommon.wasDirectoryRenamed(), false);
-    });
-
-    it("3: should return false if directoryUriAfterPathUpdate property is null", () => {
-      setups.wasDirectoryRenamed3();
-
-      assert.equal(workspaceCommon.wasDirectoryRenamed(), false);
-    });
-
-    it("4: should return false if directoryUriAfterPathUpdate property is undefined", () => {
-      setups.wasDirectoryRenamed4();
-
-      assert.equal(workspaceCommon.wasDirectoryRenamed(), false);
+      assert.deepEqual(workspaceCommon.getData(), []);
     });
   });
 

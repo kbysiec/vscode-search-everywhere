@@ -8,11 +8,12 @@ import Workspace from "../../workspace";
 import { getTestSetups } from "../testSetup/workspace.testSetup";
 import {
   getConfigurationChangeEvent,
+  getFileCreateEvent,
+  getFileDeleteEvent,
   getFileRenameEvent,
   getTextDocumentChangeEvent,
   getWorkspaceFoldersChangeEvent,
 } from "../util/eventMockFactory";
-import { getItem } from "../util/itemMockFactory";
 import { getCacheStub, getConfigStub, getUtilsStub } from "../util/stubFactory";
 
 describe("Workspace", () => {
@@ -43,26 +44,20 @@ describe("Workspace", () => {
 
   describe("registerEventListeners", () => {
     it("1: should register workspace event listeners", () => {
-      const { fileWatcherStub, stubs } = setups.registerEventListeners1();
       const [
         onDidChangeConfigurationStub,
         onDidChangeWorkspaceFoldersStub,
         onDidChangeTextDocumentStub,
-        createFileSystemWatcherStub,
         onWillProcessingStub,
         onDidProcessingStub,
         onWillExecuteActionStub,
-      ] = stubs;
+      ] = setups.registerEventListeners1();
 
       workspace.registerEventListeners();
 
       assert.equal(onDidChangeConfigurationStub.calledOnce, true);
       assert.equal(onDidChangeWorkspaceFoldersStub.calledOnce, true);
       assert.equal(onDidChangeTextDocumentStub.calledOnce, true);
-      assert.equal(createFileSystemWatcherStub.calledOnce, true);
-      assert.equal(fileWatcherStub.onDidChange.calledOnce, true);
-      assert.equal(fileWatcherStub.onDidCreate.calledOnce, true);
-      assert.equal(fileWatcherStub.onDidDelete.calledOnce, true);
       assert.equal(onWillProcessingStub.calledOnce, true);
       assert.equal(onDidProcessingStub.calledOnce, true);
       assert.equal(onWillExecuteActionStub.calledOnce, true);
@@ -153,8 +148,9 @@ describe("Workspace", () => {
       const textDocumentChangeEvent = getTextDocumentChangeEvent(true);
       await workspaceAny.handleDidChangeTextDocument(textDocumentChangeEvent);
 
-      assert.equal(registerActionStub.calledOnce, true);
-      assert.equal(registerActionStub.args[0][0], ActionType.Update);
+      assert.equal(registerActionStub.calledTwice, true);
+      assert.equal(registerActionStub.args[0][0], ActionType.Remove);
+      assert.equal(registerActionStub.args[1][0], ActionType.Update);
     });
 
     it(`2: should do nothing if text document does not exist in workspace`, async () => {
@@ -176,59 +172,63 @@ describe("Workspace", () => {
 
   describe("handleDidRenameFiles", () => {
     it(`1: should registerAction method be invoked twice to register remove and update
-        actions if workspace contains more than one folder`, async () => {
+        actions for each renamed or moved file`, async () => {
       const [registerActionStub] = setups.handleDidRenameFiles1();
 
       await workspaceAny.handleDidRenameFiles(getFileRenameEvent());
 
-      assert.equal(registerActionStub.calledTwice, true);
-      assert.equal(registerActionStub.args[0][0], ActionType.Remove);
-      assert.equal(registerActionStub.args[1][0], ActionType.Update);
+      assert.equal(registerActionStub.callCount, 4);
+      assert.equal(registerActionStub.args[0][0], ActionType.Update);
+      assert.equal(registerActionStub.args[1][0], ActionType.Remove);
+      assert.equal(registerActionStub.args[2][0], ActionType.Update);
+      assert.equal(registerActionStub.args[3][0], ActionType.Remove);
     });
 
-    it("2: should do nothing if workspace contains either one folder or any", async () => {
+    it(`2: should registerAction method be invoked once to register update
+        action for renamed or moved directory`, async () => {
       const [registerActionStub] = setups.handleDidRenameFiles2();
 
-      await workspaceAny.handleDidRenameFiles(getFileRenameEvent());
-
-      assert.equal(registerActionStub.calledOnce, false);
-    });
-  });
-
-  describe("handleDidFileSave", () => {
-    it(`1: should registerAction method be invoked which register
-        update action if file or directory has been renamed and
-        exists in workspace`, async () => {
-      const [registerActionStub] = setups.handleDidFileSave1();
-      await workspaceAny.handleDidFileSave(getItem());
-
-      assert.equal(registerActionStub.calledOnce, true);
-      assert.equal(registerActionStub.args[0][0], ActionType.Update);
-    });
-
-    it(`2: should do nothing if file or directory has been
-        renamed but does not exist in workspace`, async () => {
-      const [registerActionStub] = setups.handleDidFileSave2();
-      await workspaceAny.handleDidFileSave(getItem());
-
-      assert.equal(registerActionStub.calledOnce, false);
-    });
-  });
-
-  describe("handleDidFileFolderCreate", () => {
-    it("1: should registerAction method be invoked which register update action", async () => {
-      const [registerActionStub] = setups.handleDidFileFolderCreate1();
-      await workspaceAny.handleDidFileFolderCreate(getItem());
+      await workspaceAny.handleDidRenameFiles(getFileRenameEvent(true));
 
       assert.equal(registerActionStub.calledOnce, true);
       assert.equal(registerActionStub.args[0][0], ActionType.Update);
     });
   });
 
-  describe("handleDidFileFolderDelete", () => {
-    it("1: should registerAction method be invoked which register remove action", async () => {
-      const [registerActionStub] = setups.handleDidFileFolderDelete1();
-      await workspaceAny.handleDidFileFolderDelete(getItem());
+  describe("handleDidCreateFiles", () => {
+    it(`1: should registerAction method be invoked which register update action
+      when file is created`, async () => {
+      const [registerActionStub] = setups.handleDidCreateFiles1();
+      await workspaceAny.handleDidCreateFiles(getFileCreateEvent());
+
+      assert.equal(registerActionStub.calledOnce, true);
+      assert.equal(registerActionStub.args[0][0], ActionType.Update);
+    });
+
+    it(`2: should registerAction method be invoked which register update action
+      when directory is created`, async () => {
+      const [registerActionStub] = setups.handleDidCreateFiles2();
+      await workspaceAny.handleDidCreateFiles(getFileCreateEvent());
+
+      assert.equal(registerActionStub.calledOnce, true);
+      assert.equal(registerActionStub.args[0][0], ActionType.Update);
+    });
+  });
+
+  describe("handleDidDeleteFiles", () => {
+    it(`1: should registerAction method be invoked which register remove action
+      when file is deleted`, async () => {
+      const [registerActionStub] = setups.handleDidDeleteFiles1();
+      await workspaceAny.handleDidDeleteFiles(getFileDeleteEvent());
+
+      assert.equal(registerActionStub.calledOnce, true);
+      assert.equal(registerActionStub.args[0][0], ActionType.Remove);
+    });
+
+    it(`2: should registerAction method be invoked which register remove action
+      when directory is deleted`, async () => {
+      const [registerActionStub] = setups.handleDidDeleteFiles2();
+      await workspaceAny.handleDidDeleteFiles(getFileDeleteEvent());
 
       assert.equal(registerActionStub.calledOnce, true);
       assert.equal(registerActionStub.args[0][0], ActionType.Remove);
