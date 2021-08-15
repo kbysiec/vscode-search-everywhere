@@ -115,9 +115,7 @@ class DataService {
 
     do {
       symbolsForUri = await this.getSymbolsForUri(uri);
-      if (counter) {
-        await this.utils.sleep(120);
-      }
+      !!counter && (await this.utils.sleep(120));
       counter++;
     } while (symbolsForUri === undefined && counter < maxCounter);
 

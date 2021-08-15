@@ -149,14 +149,6 @@ describe("ExtensionController", () => {
 
       assert.equal(setItemsStub.calledWith(getQpItems()), true);
     });
-
-    // it(`3: should quickPick.setItems method be invoked with
-    //   empty array as a parameter if workspace.getData returns nothing`, async () => {
-    //   const [setItemsStub] = setups.handleDidProcessing3();
-    //   await extensionControllerAny.handleDidProcessing();
-
-    //   assert.equal(setItemsStub.calledWith([]), true);
-    // });
   });
 
   describe("handleWillExecuteAction", () => {

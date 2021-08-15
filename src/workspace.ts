@@ -107,9 +107,8 @@ class Workspace {
   private handleDidChangeWorkspaceFolders = async (
     event: vscode.WorkspaceFoldersChangeEvent
   ): Promise<void> => {
-    if (this.utils.hasWorkspaceChanged(event)) {
-      await this.index(IndexActionType.WorkspaceFoldersChange);
-    }
+    this.utils.hasWorkspaceChanged(event) &&
+      (await this.index(IndexActionType.WorkspaceFoldersChange));
   };
 
   private handleDidChangeTextDocument = async (

@@ -25,7 +25,6 @@ class ExtensionController {
     if (this.utils.hasWorkspaceAnyFolder()) {
       this.shouldIndexOnQuickPickOpen() &&
         (await this.workspace.index(IndexActionType.Search));
-
       this.quickPick.isInitialized() && this.loadItemsAndShowQuickPick();
     } else {
       this.utils.printNoFolderOpenedMessage();
