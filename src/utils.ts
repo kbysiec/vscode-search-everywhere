@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import Config from "./config";
 import ExcludeMode from "./enum/excludeMode";
+import IndexStats from "./interface/indexStats";
 import Item from "./interface/item";
 import QuickPickItem from "./interface/quickPickItem";
 import WorkspaceData from "./interface/workspaceData";
@@ -69,6 +70,14 @@ class Utils {
     vscode.window.showInformationMessage(
       `Something went wrong...
       Extension encountered the following error: ${error.stack}`
+    );
+  }
+
+  printStatsMessage(indexStats: IndexStats): void {
+    vscode.window.showInformationMessage(
+      `Elapsed time: ${indexStats.ElapsedTimeInSeconds}s
+       Scanned files: ${indexStats.ScannedUrisCount}
+       Indexed items: ${indexStats.IndexedItemsCount}`
     );
   }
 
@@ -203,6 +212,10 @@ class Utils {
   isDirectory(uri: vscode.Uri): boolean {
     const name = this.getNameFromUri(uri);
     return !name.includes(".");
+  }
+
+  convertMsToSec(timeInMs: number) {
+    return Math.floor((timeInMs % (1000 * 60)) / 1000);
   }
 
   private getWorkspaceFoldersPaths(): string[] {

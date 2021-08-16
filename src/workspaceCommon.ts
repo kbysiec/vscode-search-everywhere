@@ -1,3 +1,4 @@
+import { performance } from "perf_hooks";
 import * as vscode from "vscode";
 import ActionProcessor from "./actionProcessor";
 import Cache from "./cache";
@@ -6,6 +7,7 @@ import DataService from "./dataService";
 import ActionType from "./enum/actionType";
 import Action from "./interface/action";
 import QuickPickItem from "./interface/quickPickItem";
+import WorkspaceData from "./interface/workspaceData";
 import Utils from "./utils";
 
 class WorkspaceCommon {
@@ -89,7 +91,8 @@ class WorkspaceCommon {
       this.handleDidItemIndexed.bind(this, progress)
     );
 
-    await this.indexWorkspace();
+    const startMeasure = this.startTimeMeasurement();
+    const data = await this.indexWorkspace();
 
     this.resetProgress();
     handleCancellationRequestedSubscription.dispose();
@@ -97,12 +100,36 @@ class WorkspaceCommon {
 
     // necessary for proper way to complete progress
     this.utils.sleep(250);
+
+    const elapsedTimeInMs = this.getTimeElapsed(startMeasure);
+    const elapsedTimeInSec = this.utils.convertMsToSec(elapsedTimeInMs);
+
+    this.printStats(data, elapsedTimeInSec);
   }
 
-  private async indexWorkspace(): Promise<void> {
+  private startTimeMeasurement() {
+    return performance.now();
+  }
+
+  private getTimeElapsed(start: number) {
+    const end = performance.now();
+    return end - start;
+  }
+
+  private printStats(data: WorkspaceData, elapsedTime: number) {
+    this.utils.printStatsMessage({
+      ElapsedTimeInSeconds: elapsedTime,
+      ScannedUrisCount: data.items.size,
+      IndexedItemsCount: data.count,
+    });
+  }
+
+  private async indexWorkspace(): Promise<WorkspaceData> {
     this.cache.clear();
-    const qpData = await this.downloadData();
+    const data = await this.dataService.fetchData();
+    const qpData = this.dataConverter.convertToQpData(data);
     this.cache.updateData(qpData);
+    return data;
   }
 
   private resetProgress() {
