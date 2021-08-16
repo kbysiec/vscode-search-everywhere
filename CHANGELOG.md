@@ -2,6 +2,9 @@
 
 All notable changes to the "vscode-search-everywhere" extension will be documented in this file.
 
+## [1.2.0] - 2021-08-16
+- Added stats message (elapsed time, number of scanned files, number of indexed items) displayed after indexing the workspace
+- Replaced fileWatcher events with workspace event listeners for files / folders manipulation which results in better performance and stability
 ## [1.1.0] - 2021-07-19
 - Setting `searchEverywhere.shouldUseFilesAndSearchExclude` replaced with `searchEverywhere.excludeMode` allowing to choose source of exclude patterns: extension, files and search, gitignore
 - Added debouncing for handleDidChangeTextDocument event callback
