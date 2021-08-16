@@ -4,9 +4,9 @@ import Cache from "./cache";
 import Config from "./config";
 import DataConverter from "./dataConverter";
 import DataService from "./dataService";
+import ActionTrigger from "./enum/actionTrigger";
 import ActionType from "./enum/actionType";
 import DetailedActionType from "./enum/detailedActionType";
-import IndexActionType from "./enum/indexActionType";
 import Action from "./interface/action";
 import QuickPickItem from "./interface/quickPickItem";
 import Utils from "./utils";
@@ -36,7 +36,7 @@ class Workspace {
     this.initComponents();
   }
 
-  async index(indexActionType: IndexActionType): Promise<void> {
+  async index(indexActionType: ActionTrigger): Promise<void> {
     await this.common.index(indexActionType);
   }
 
@@ -98,7 +98,7 @@ class Workspace {
     if (this.utils.shouldReindexOnConfigurationChange(event)) {
       this.reloadComponents();
       this.events.onWillReindexOnConfigurationChangeEventEmitter.fire();
-      await this.index(IndexActionType.ConfigurationChange);
+      await this.index(ActionTrigger.ConfigurationChange);
     } else if (this.utils.isDebounceConfigurationToggled(event)) {
       this.events.onDidDebounceConfigToggleEventEmitter.fire();
     }
@@ -108,7 +108,7 @@ class Workspace {
     event: vscode.WorkspaceFoldersChangeEvent
   ): Promise<void> => {
     this.utils.hasWorkspaceChanged(event) &&
-      (await this.index(IndexActionType.WorkspaceFoldersChange));
+      (await this.index(ActionTrigger.WorkspaceFoldersChange));
   };
 
   private handleDidChangeTextDocument = async (
@@ -125,14 +125,14 @@ class Workspace {
       await this.common.registerAction(
         ActionType.Remove,
         this.remover.removeFromCacheByPath.bind(this.remover, uri, actionType),
-        "handleDidChangeTextDocumentNew",
+        ActionTrigger.DidChangeTextDocument,
         uri
       );
 
       await this.common.registerAction(
         ActionType.Update,
         this.updater.updateCacheByPath.bind(this.updater, uri, actionType),
-        "handleDidChangeTextDocumentNew",
+        ActionTrigger.DidChangeTextDocument,
         uri
       );
     }
@@ -157,7 +157,7 @@ class Workspace {
           actionType,
           file.oldUri
         ),
-        "handleDidRenameFilesNew",
+        ActionTrigger.DidRenameFiles,
         file.newUri
       );
 
@@ -169,7 +169,7 @@ class Workspace {
             file.oldUri,
             actionType
           ),
-          "handleDidRenameFilesNew",
+          ActionTrigger.DidRenameFiles,
           file.oldUri
         ));
     }
@@ -186,7 +186,7 @@ class Workspace {
     await this.common.registerAction(
       ActionType.Update,
       this.updater.updateCacheByPath.bind(this.updater, uri, actionType),
-      "handleDidCreateFilesNew",
+      ActionTrigger.DidCreateFiles,
       uri
     );
   };
@@ -202,7 +202,7 @@ class Workspace {
     await this.common.registerAction(
       ActionType.Remove,
       this.remover.removeFromCacheByPath.bind(this.remover, uri, actionType),
-      "handleDidDeleteFilesNew",
+      ActionTrigger.DidDeleteFiles,
       uri
     );
   };

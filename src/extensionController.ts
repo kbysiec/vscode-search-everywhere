@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import Cache from "./cache";
 import Config from "./config";
+import ActionTrigger from "./enum/actionTrigger";
 import ActionType from "./enum/actionType";
-import IndexActionType from "./enum/indexActionType";
 import Action from "./interface/action";
 import QuickPick from "./quickPick";
 import Utils from "./utils";
@@ -24,7 +24,7 @@ class ExtensionController {
   async search(): Promise<void> {
     if (this.utils.hasWorkspaceAnyFolder()) {
       this.shouldIndexOnQuickPickOpen() &&
-        (await this.workspace.index(IndexActionType.Search));
+        (await this.workspace.index(ActionTrigger.Search));
       this.quickPick.isInitialized() && this.loadItemsAndShowQuickPick();
     } else {
       this.utils.printNoFolderOpenedMessage();
@@ -33,13 +33,13 @@ class ExtensionController {
 
   async reload(): Promise<void> {
     this.utils.hasWorkspaceAnyFolder()
-      ? await this.workspace.index(IndexActionType.Reload)
+      ? await this.workspace.index(ActionTrigger.Reload)
       : this.utils.printNoFolderOpenedMessage();
   }
 
   async startup(): Promise<void> {
     this.config.shouldInitOnStartup() &&
-      (await this.workspace.index(IndexActionType.Startup));
+      (await this.workspace.index(ActionTrigger.Startup));
   }
 
   private loadItemsAndShowQuickPick() {

@@ -1,8 +1,8 @@
 import { assert } from "chai";
 import Cache from "../../cache";
 import Config from "../../config";
+import ActionTrigger from "../../enum/actionTrigger";
 import ActionType from "../../enum/actionType";
-import IndexActionType from "../../enum/indexActionType";
 import Utils from "../../utils";
 import Workspace from "../../workspace";
 import { getTestSetups } from "../testSetup/workspace.testSetup";
@@ -36,7 +36,7 @@ describe("Workspace", () => {
   describe("index", () => {
     it("1: should common.index method be invoked", async () => {
       const [indexStub] = setups.index1();
-      await workspace.index(IndexActionType.Search);
+      await workspace.index(ActionTrigger.Search);
 
       assert.equal(indexStub.calledOnce, true);
     });
