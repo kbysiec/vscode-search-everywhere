@@ -1,5 +1,5 @@
 interface Icons {
-  [kind: number]: string;
+  [symbolKind: number]: string;
 }
 
 export default Icons;

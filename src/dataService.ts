@@ -72,7 +72,7 @@ class DataService {
     try {
       return await vscode.workspace.findFiles(includePatterns, excludePatterns);
     } catch (error) {
-      this.utils.printErrorMessage(error);
+      this.utils.printErrorMessage(error as Error);
       return Promise.resolve([]);
     }
   }
@@ -266,37 +266,43 @@ class DataService {
   }
 
   private isItemValid(item: vscode.Uri | vscode.DocumentSymbol): boolean {
-    let kind: number;
+    let symbolKind: number;
     let name: string | undefined;
     const isUri = item.hasOwnProperty("path");
 
     if (isUri) {
-      kind = 0;
+      symbolKind = 0;
       name = (item as vscode.Uri).path.split("/").pop();
     } else {
       const documentSymbol = item as vscode.DocumentSymbol;
-      kind = documentSymbol.kind;
+      symbolKind = documentSymbol.kind;
       name = documentSymbol.name;
     }
 
     return (
-      this.isInAllowedKinds(this.itemsFilter, kind) &&
-      this.isNotInIgnoredKinds(this.itemsFilter, kind) &&
+      this.isInAllowedKinds(this.itemsFilter, symbolKind) &&
+      this.isNotInIgnoredKinds(this.itemsFilter, symbolKind) &&
       this.isNotInIgnoredNames(this.itemsFilter, name)
     );
   }
 
-  private isInAllowedKinds(itemsFilter: ItemsFilter, kind: number): boolean {
+  private isInAllowedKinds(
+    itemsFilter: ItemsFilter,
+    symbolKind: number
+  ): boolean {
     return (
       !(itemsFilter.allowedKinds && itemsFilter.allowedKinds.length) ||
-      itemsFilter.allowedKinds.includes(kind)
+      itemsFilter.allowedKinds.includes(symbolKind)
     );
   }
 
-  private isNotInIgnoredKinds(itemsFilter: ItemsFilter, kind: number): boolean {
+  private isNotInIgnoredKinds(
+    itemsFilter: ItemsFilter,
+    symbolKind: number
+  ): boolean {
     return (
       !(itemsFilter.ignoredKinds && itemsFilter.ignoredKinds.length) ||
-      !itemsFilter.ignoredKinds.includes(kind)
+      !itemsFilter.ignoredKinds.includes(symbolKind)
     );
   }
 

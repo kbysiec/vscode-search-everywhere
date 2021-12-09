@@ -1,11 +1,11 @@
 import * as vscode from "vscode";
+import Config from "./config";
+import Icons from "./interface/icons";
+import Item from "./interface/item";
+import ItemsFilterPhrases from "./interface/itemsFilterPhrases";
 import QuickPickItem from "./interface/quickPickItem";
 import WorkspaceData from "./interface/workspaceData";
 import Utils from "./utils";
-import Item from "./interface/item";
-import Config from "./config";
-import Icons from "./interface/icons";
-import ItemsFilterPhrases from "./interface/itemsFilterPhrases";
 
 class DataConverter {
   isCancelled!: boolean;
@@ -33,8 +33,8 @@ class DataConverter {
     return qpData;
   }
 
-  getItemFilterPhraseForKind(kind: number): string {
-    return this.itemsFilterPhrases[kind] as string;
+  getItemFilterPhraseForKind(symbolKind: number): string {
+    return this.itemsFilterPhrases[symbolKind] as string;
   }
 
   private mapDataToQpData(data: Map<string, Item>): QuickPickItem[] {
@@ -110,16 +110,23 @@ class DataConverter {
   }
 
   private mapUriToQpItem(uri: vscode.Uri): QuickPickItem {
-    const kind = 0;
+    const symbolKind = 0;
     const name = this.utils.getNameFromUri(uri);
-    const icon = this.icons[kind] ? `$(${this.icons[kind]})` : "";
+    const icon = this.icons[symbolKind] ? `$(${this.icons[symbolKind]})` : "";
     const label = icon ? `${icon}  ${name}` : name;
     const start = new vscode.Position(0, 0);
     const end = new vscode.Position(0, 0);
-    const itemFilterPhrase = this.getItemFilterPhraseForKind(kind);
+    const itemFilterPhrase = this.getItemFilterPhraseForKind(symbolKind);
     const description = this.getUriToQpItemDescription(itemFilterPhrase, name);
 
-    return this.createQuickPickItem(uri, kind, start, end, label, description);
+    return this.createQuickPickItem(
+      uri,
+      symbolKind,
+      start,
+      end,
+      label,
+      description
+    );
   }
 
   private getUriToQpItemDescription(itemFilterPhrase: string, name: string) {
@@ -132,7 +139,7 @@ class DataConverter {
 
   private createQuickPickItem(
     uri: vscode.Uri,
-    kind: number,
+    symbolKind: number,
     start: vscode.Position,
     end: vscode.Position,
     label: string,
@@ -140,7 +147,7 @@ class DataConverter {
   ): QuickPickItem {
     return {
       uri,
-      kind,
+      symbolKind,
       range: {
         start,
         end,
@@ -153,7 +160,8 @@ class DataConverter {
 
   private fetchConfig() {
     this.icons = this.config.getIcons();
-    this.shouldUseItemsFilterPhrases = this.config.shouldUseItemsFilterPhrases();
+    this.shouldUseItemsFilterPhrases =
+      this.config.shouldUseItemsFilterPhrases();
     this.itemsFilterPhrases = this.config.getItemsFilterPhrases();
   }
 

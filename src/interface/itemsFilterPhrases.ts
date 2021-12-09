@@ -1,5 +1,5 @@
 interface ItemsFilterPhrases {
-  [kind: number]: string;
+  [symbolKind: number]: string;
 }
 
 export default ItemsFilterPhrases;

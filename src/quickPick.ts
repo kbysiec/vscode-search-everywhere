@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import QuickPickItem from "./interface/quickPickItem";
 import Config from "./config";
 import ItemsFilterPhrases from "./interface/itemsFilterPhrases";
+import QuickPickItem from "./interface/quickPickItem";
 const debounce = require("debounce");
 
 class QuickPick {
@@ -93,9 +93,8 @@ class QuickPick {
   }
 
   private registerOnDidChangeValueWithDebounceEventListeners(): void {
-    const onDidChangeValueClearingEventListener = this.quickPick.onDidChangeValue(
-      this.handleDidChangeValueClearing
-    );
+    const onDidChangeValueClearingEventListener =
+      this.quickPick.onDidChangeValue(this.handleDidChangeValueClearing);
     const onDidChangeValueEventListener = this.quickPick.onDidChangeValue(
       debounce(this.handleDidChangeValue, 400)
     );
@@ -125,7 +124,7 @@ class QuickPick {
   }
 
   private loadItemsForFilterPhrase(qpItem: QuickPickItem): void {
-    const filterPhrase = this.itemsFilterPhrases[qpItem.kind];
+    const filterPhrase = this.itemsFilterPhrases[qpItem.symbolKind];
     this.setText(filterPhrase);
     this.loadItems();
   }
@@ -177,23 +176,24 @@ class QuickPick {
   }
 
   private getHelpItemForKind(
-    kind: string,
+    symbolKind: string,
     itemFilterPhrase: string
   ): QuickPickItem {
     return {
       label: `${
         this.helpPhrase
       } Type ${itemFilterPhrase} for limit results to ${
-        vscode.SymbolKind[parseInt(kind)]
+        vscode.SymbolKind[parseInt(symbolKind)]
       } only`,
-      kind: Number(kind),
+      symbolKind: Number(symbolKind),
       isHelp: true,
       uri: vscode.Uri.parse("#"),
     } as QuickPickItem;
   }
 
   private fetchConfig(): void {
-    this.shouldUseItemsFilterPhrases = this.config.shouldUseItemsFilterPhrases();
+    this.shouldUseItemsFilterPhrases =
+      this.config.shouldUseItemsFilterPhrases();
     this.helpPhrase = this.config.getHelpPhrase();
     this.itemsFilterPhrases = this.config.getItemsFilterPhrases();
   }

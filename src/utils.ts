@@ -105,7 +105,8 @@ class Utils {
     return data
       .filter(
         (qpItem: QuickPickItem) =>
-          qpItem.uri.fsPath.includes(uri.fsPath) && qpItem.kind === fileKind
+          qpItem.uri.fsPath.includes(uri.fsPath) &&
+          qpItem.symbolKind === fileKind
       )
       .map((qpItem: QuickPickItem) => qpItem.uri);
   }

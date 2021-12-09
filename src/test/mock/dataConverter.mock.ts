@@ -8,7 +8,7 @@ export const itemUntitledUri = vscode.Uri.file("./fake/fake-1.ts");
 export const qpItemUntitled: QuickPickItem = {
   label: "fake-1.ts",
   uri: itemUntitledUri,
-  kind: 0,
+  symbolKind: 0,
 };
 
 export const mocks = {
@@ -85,7 +85,7 @@ export const mocks = {
         description: "File",
         detail: "/./fake/fake-1.ts",
         uri: workspaceDataItems[0].uri,
-        kind: 0,
+        symbolKind: 0,
         range: {
           start: new vscode.Position(0, 0),
           end: new vscode.Position(0, 0),
@@ -96,7 +96,7 @@ export const mocks = {
         description: "Module at lines: 1 - 4 in fake-1.ts",
         detail: "/./fake/fake-1.ts",
         uri: workspaceDataItems[0].uri,
-        kind: 1,
+        symbolKind: 1,
         range: {
           start: new vscode.Position(0, 0),
           end: new vscode.Position(3, 0),
@@ -107,7 +107,7 @@ export const mocks = {
         description: "Module at lines: 5 - 6 in fake-1.ts",
         detail: "/./fake/fake-1.ts",
         uri: workspaceDataItems[0].uri,
-        kind: 1,
+        symbolKind: 1,
         range: {
           start: new vscode.Position(4, 0),
           end: new vscode.Position(5, 0),
@@ -118,7 +118,7 @@ export const mocks = {
         description: "Module at line: 10",
         detail: "/./fake/fake-1.ts",
         uri: workspaceDataItems[0].uri,
-        kind: 1,
+        symbolKind: 1,
         range: {
           start: new vscode.Position(9, 0),
           end: new vscode.Position(9, 0),
@@ -178,7 +178,7 @@ export const mocks = {
         description: "[$$fake-1.ts] File",
         detail: "/./fake/fake-1.ts",
         uri: workspaceDataItems[0].uri,
-        kind: 0,
+        symbolKind: 0,
         range: {
           start: new vscode.Position(0, 0),
           end: new vscode.Position(0, 0),
@@ -189,7 +189,7 @@ export const mocks = {
         description: "[^^test name] Module at lines: 1 - 4 in fake-1.ts",
         detail: "/./fake/fake-1.ts",
         uri: workspaceDataItems[0].uri,
-        kind: 1,
+        symbolKind: 1,
         range: {
           start: new vscode.Position(0, 0),
           end: new vscode.Position(3, 0),
@@ -200,7 +200,7 @@ export const mocks = {
         description: "[^^test name 2] Module at lines: 5 - 6",
         detail: "/./fake/fake-1.ts",
         uri: workspaceDataItems[0].uri,
-        kind: 1,
+        symbolKind: 1,
         range: {
           start: new vscode.Position(4, 0),
           end: new vscode.Position(5, 0),
