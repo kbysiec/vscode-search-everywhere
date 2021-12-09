@@ -2,6 +2,8 @@
 
 All notable changes to the "vscode-search-everywhere" extension will be documented in this file.
 
+## [1.2.1] - 2021-12-09
+- Renamed QuickPick kind property to symbolKind due to new vscode QuickPick API (version 1.63.0)
 ## [1.2.0] - 2021-08-16
 - Added stats message (elapsed time, number of scanned files, number of indexed items) displayed after indexing the workspace
 - Replaced fileWatcher events with workspace event listeners for files / folders manipulation which results in better performance and stability
