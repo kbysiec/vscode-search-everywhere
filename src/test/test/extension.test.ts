@@ -1,9 +1,10 @@
-import * as vscode from "vscode";
 import { assert } from "chai";
-import { getExtensionContext } from "../util/mockFactory";
+import * as sinon from "sinon";
+import * as vscode from "vscode";
 import * as extension from "../../extension";
 import ExtensionController from "../../extensionController";
 import { getTestSetups } from "../testSetup/extension.testSetup";
+import { getExtensionContext } from "../util/mockFactory";
 
 describe("extension", () => {
   let context: vscode.ExtensionContext = getExtensionContext();
@@ -29,11 +30,15 @@ describe("extension", () => {
 
   describe("deactivate", () => {
     it("1: should function exist", () => {
-      const [logStub] = setups.deactivate1();
+      // const sandbox = sinon.createSandbox();
+      // const stub = sandbox.stub();
+      // const logStub = sandbox.replaceGetter(console, "log", () => stub());
+      const logStub = sinon.spy(console, "log", ["get"]);
+      // const [logStub] = setups.deactivate1();
+      // const logSpy = sinon.spy(console, "log", ["get"]);
       extension.deactivate();
 
-      assert.equal(logStub.calledOnce, true);
-      assert.equal(typeof extension.deactivate, "function");
+      assert.equal(logStub.get.calledOnce, true);
     });
   });
 

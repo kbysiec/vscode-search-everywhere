@@ -2,6 +2,9 @@
 
 All notable changes to the "vscode-search-everywhere" extension will be documented in this file.
 
+## [1.2.2] - 2022-02-18
+- Fixed issue related to not refreshing include patterns on configuration change
+
 ## [1.2.1] - 2021-12-09
 - Renamed QuickPick kind property to symbolKind due to new vscode QuickPick API (version 1.63.0)
 ## [1.2.0] - 2021-08-16

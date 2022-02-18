@@ -22,7 +22,6 @@ class DataService {
   constructor(private utils: Utils, private config: Config) {
     this.setCancelled(false);
     this.fetchConfig();
-    this.initComponents();
   }
 
   reload() {
@@ -323,14 +322,11 @@ class DataService {
 
   private fetchConfig() {
     this.itemsFilter = this.config.getItemsFilter();
+    this.patternProvider = new PatternProvider(this.config);
   }
 
   private setCancelled(value: boolean) {
     this.isCancelled = value;
-  }
-
-  private initComponents() {
-    this.patternProvider = new PatternProvider(this.config);
   }
 }
 
