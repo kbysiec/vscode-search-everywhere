@@ -2,15 +2,12 @@ import * as vscode from "vscode";
 import Cache from "./cache";
 import DetailedActionType from "./enum/detailedActionType";
 import QuickPickItem from "./interface/quickPickItem";
-import Utils from "./utils";
+import { utils } from "./utils";
+// import Utils from "./utils";
 import WorkspaceCommon from "./workspaceCommon";
 
 class WorkspaceUpdater {
-  constructor(
-    private common: WorkspaceCommon,
-    private cache: Cache,
-    private utils: Utils
-  ) {}
+  constructor(private common: WorkspaceCommon, private cache: Cache) {}
 
   async updateCacheByPath(
     uri: vscode.Uri,
@@ -32,7 +29,7 @@ class WorkspaceUpdater {
       const updateFn = updateFnByDetailedActionType[detailedActionType];
       updateFn && (await updateFn());
     } catch (error) {
-      this.utils.printErrorMessage(error);
+      utils.printErrorMessage(error as Error);
       await this.common.index("on error catch");
     }
   }
@@ -45,7 +42,7 @@ class WorkspaceUpdater {
 
   private updateFolder(uri: vscode.Uri, oldUri: vscode.Uri) {
     const data = this.common.getData();
-    const updatedData = this.utils.updateQpItemsWithNewDirectoryPath(
+    const updatedData = utils.updateQpItemsWithNewDirectoryPath(
       data,
       oldUri!,
       uri

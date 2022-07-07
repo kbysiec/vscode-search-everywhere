@@ -2,13 +2,15 @@ import { performance } from "perf_hooks";
 import * as vscode from "vscode";
 import ActionProcessor from "./actionProcessor";
 import Cache from "./cache";
+import Config from "./config";
 import DataConverter from "./dataConverter";
 import DataService from "./dataService";
 import ActionType from "./enum/actionType";
 import Action from "./interface/action";
 import QuickPickItem from "./interface/quickPickItem";
 import WorkspaceData from "./interface/workspaceData";
-import Utils from "./utils";
+import { utils } from "./utils";
+// import Utils from "./utils";
 
 class WorkspaceCommon {
   fileKind: number = 0;
@@ -17,10 +19,10 @@ class WorkspaceCommon {
 
   constructor(
     private cache: Cache,
-    private utils: Utils,
     private dataService: DataService,
     private dataConverter: DataConverter,
-    private actionProcessor: ActionProcessor
+    private actionProcessor: ActionProcessor,
+    private config: Config
   ) {}
 
   getData(): QuickPickItem[] {
@@ -38,16 +40,16 @@ class WorkspaceCommon {
   }
 
   async indexWithProgress(): Promise<void> {
-    this.utils.hasWorkspaceAnyFolder()
+    utils.hasWorkspaceAnyFolder()
       ? await vscode.window.withProgress(
           {
-            location: this.utils.getNotificationLocation(),
-            title: this.utils.getNotificationTitle(),
+            location: this.getNotificationLocation(),
+            title: this.getNotificationTitle(),
             cancellable: true,
           },
           this.indexWithProgressTask.bind(this)
         )
-      : this.utils.printNoFolderOpenedMessage();
+      : utils.printNoFolderOpenedMessage();
   }
 
   async registerAction(
@@ -99,10 +101,10 @@ class WorkspaceCommon {
     handleDidItemIndexedSubscription.dispose();
 
     // necessary for proper way to complete progress
-    this.utils.sleep(250);
+    utils.sleep(250);
 
     const elapsedTimeInMs = this.getTimeElapsed(startMeasure);
-    const elapsedTimeInSec = this.utils.convertMsToSec(elapsedTimeInMs);
+    const elapsedTimeInSec = utils.convertMsToSec(elapsedTimeInMs);
 
     this.printStats(data, elapsedTimeInSec);
   }
@@ -117,7 +119,7 @@ class WorkspaceCommon {
   }
 
   private printStats(data: WorkspaceData, elapsedTime: number) {
-    this.utils.printStatsMessage({
+    utils.printStatsMessage({
       ElapsedTimeInSeconds: elapsedTime,
       ScannedUrisCount: data.items.size,
       IndexedItemsCount: data.count,
@@ -179,6 +181,18 @@ class WorkspaceCommon {
           : ""
       }`,
     });
+  }
+
+  private getNotificationLocation(): vscode.ProgressLocation {
+    return this.config.shouldDisplayNotificationInStatusBar()
+      ? vscode.ProgressLocation.Window
+      : vscode.ProgressLocation.Notification;
+  }
+
+  private getNotificationTitle(): string {
+    return this.config.shouldDisplayNotificationInStatusBar()
+      ? "Indexing..."
+      : "Indexing workspace files and symbols...";
   }
 }
 

@@ -1,11 +1,9 @@
 import { assert, expect } from "chai";
 import * as sinon from "sinon";
-import * as vscode from "vscode";
-import Config from "../../config";
 import ActionType from "../../enum/actionType";
-import ExcludeMode from "../../enum/excludeMode";
 import Action from "../../interface/action";
-import Utils from "../../utils";
+import IndexStats from "../../interface/indexStats";
+import { utils } from "../../utils";
 import { getTestSetups } from "../testSetup/utils.testSetup";
 import {
   getConfigurationChangeEvent,
@@ -14,18 +12,16 @@ import {
 import { getDirectory, getItem, getItems } from "../util/itemMockFactory";
 import { getAction, getWorkspaceData } from "../util/mockFactory";
 import { getQpItem, getQpItems } from "../util/qpItemMockFactory";
-import { getConfigStub } from "../util/stubFactory";
+
+type SetupsType = ReturnType<typeof getTestSetups>;
 
 describe("Utils", () => {
-  let configStub: Config = getConfigStub();
-  let utils: Utils = new Utils(configStub);
-  let setups = getTestSetups(utils);
+  let setups: SetupsType;
 
-  beforeEach(() => {
-    configStub = getConfigStub();
-    utils = new Utils(configStub);
-    setups = getTestSetups(utils);
+  before(() => {
+    setups = getTestSetups();
   });
+  afterEach(() => setups.afterEach());
 
   describe("hasWorkspaceAnyFolder", () => {
     it("1: should return true if workspace contains at least one folder", () => {
@@ -67,79 +63,79 @@ describe("Utils", () => {
     });
   });
 
-  describe("shouldReindexOnConfigurationChange", () => {
-    it(`1: should return true if extension configuration has changed
-      and is not excluded from refreshing`, () => {
-      setups.shouldReindexOnConfigurationChange1();
+  // describe("shouldReindexOnConfigurationChange", () => {
+  //   it(`1: should return true if extension configuration has changed
+  //     and is not excluded from refreshing`, () => {
+  //     setups.shouldReindexOnConfigurationChange1();
 
-      assert.equal(
-        utils.shouldReindexOnConfigurationChange(
-          getConfigurationChangeEvent(true, true, false)
-        ),
-        true
-      );
-    });
+  //     assert.equal(
+  //       utils.shouldReindexOnConfigurationChange(
+  //         getConfigurationChangeEvent(true, true, false)
+  //       ),
+  //       true
+  //     );
+  //   });
 
-    it(`2: should return false if extension configuration has changed
-      but is excluded from refreshing`, () => {
-      setups.shouldReindexOnConfigurationChange2();
+  //   it(`2: should return false if extension configuration has changed
+  //     but is excluded from refreshing`, () => {
+  //     setups.shouldReindexOnConfigurationChange2();
 
-      assert.equal(
-        utils.shouldReindexOnConfigurationChange(
-          getConfigurationChangeEvent(false)
-        ),
-        false
-      );
-    });
+  //     assert.equal(
+  //       utils.shouldReindexOnConfigurationChange(
+  //         getConfigurationChangeEvent(false)
+  //       ),
+  //       false
+  //     );
+  //   });
 
-    it("3: should return false if extension configuration has not changed", () => {
-      setups.shouldReindexOnConfigurationChange3();
+  //   it("3: should return false if extension configuration has not changed", () => {
+  //     setups.shouldReindexOnConfigurationChange3();
 
-      assert.equal(
-        utils.shouldReindexOnConfigurationChange(
-          getConfigurationChangeEvent(false)
-        ),
-        false
-      );
-    });
+  //     assert.equal(
+  //       utils.shouldReindexOnConfigurationChange(
+  //         getConfigurationChangeEvent(false)
+  //       ),
+  //       false
+  //     );
+  //   });
 
-    it(`4: should return true if exclude mode is set to 'files and search',
-      configuration has changed and files.exclude has changed`, () => {
-      setups.shouldReindexOnConfigurationChange4();
+  //   it(`4: should return true if exclude mode is set to 'files and search',
+  //     configuration has changed and files.exclude has changed`, () => {
+  //     setups.shouldReindexOnConfigurationChange4();
 
-      assert.equal(
-        utils.shouldReindexOnConfigurationChange(
-          getConfigurationChangeEvent(
-            false,
-            false,
-            true,
-            ExcludeMode.FilesAndSearch,
-            true
-          )
-        ),
-        true
-      );
-    });
+  //     assert.equal(
+  //       utils.shouldReindexOnConfigurationChange(
+  //         getConfigurationChangeEvent(
+  //           false,
+  //           false,
+  //           true,
+  //           ExcludeMode.FilesAndSearch,
+  //           true
+  //         )
+  //       ),
+  //       true
+  //     );
+  //   });
 
-    it(`5: should return true if exclude mode is set to 'files and search',
-      configuration has changed and search.exclude has changed`, () => {
-      setups.shouldReindexOnConfigurationChange5();
+  //   it(`5: should return true if exclude mode is set to 'files and search',
+  //     configuration has changed and search.exclude has changed`, () => {
+  //     setups.shouldReindexOnConfigurationChange5();
 
-      assert.equal(
-        utils.shouldReindexOnConfigurationChange(
-          getConfigurationChangeEvent(
-            false,
-            false,
-            true,
-            ExcludeMode.FilesAndSearch,
-            false,
-            true
-          )
-        ),
-        true
-      );
-    });
-  });
+  //     assert.equal(
+  //       utils.shouldReindexOnConfigurationChange(
+  //         getConfigurationChangeEvent(
+  //           false,
+  //           false,
+  //           true,
+  //           ExcludeMode.FilesAndSearch,
+  //           false,
+  //           true
+  //         )
+  //       ),
+  //       true
+  //     );
+  //   });
+  // });
 
   describe("isDebounceConfigurationToggled", () => {
     it(`1: should return true if extension configuration
@@ -181,6 +177,27 @@ describe("Utils", () => {
     });
   });
 
+  describe("printStatsMessage", () => {
+    it("1: should display notification with scan stats", async () => {
+      const [showInformationMessageStub] = setups.printStatsMessage1();
+      const indexStats: IndexStats = {
+        ElapsedTimeInSeconds: 3,
+        ScannedUrisCount: 20,
+        IndexedItemsCount: 120,
+      };
+      utils.printStatsMessage(indexStats);
+
+      const calledWith = (
+        showInformationMessageStub.args[0][0] as string
+      ).replaceAll(" ", "");
+      const expected = `Elapsed time: ${indexStats.ElapsedTimeInSeconds}s
+      Scanned files: ${indexStats.ScannedUrisCount}
+      Indexed items: ${indexStats.IndexedItemsCount}`.replaceAll(" ", "");
+
+      assert.equal(calledWith, expected);
+    });
+  });
+
   describe("createWorkspaceData", () => {
     it("1: should create workspaceData object", () => {
       assert.deepEqual(utils.createWorkspaceData(), getWorkspaceData());
@@ -219,45 +236,45 @@ describe("Utils", () => {
     });
   });
 
-  describe("getNotificationLocation", () => {
-    it(`1: should return vscode.ProgressLocation.Window
-      if shouldDisplayNotificationInStatusBar is true`, () => {
-      setups.getNotificationLocation1();
+  // describe("getNotificationLocation", () => {
+  //   it(`1: should return vscode.ProgressLocation.Window
+  //     if shouldDisplayNotificationInStatusBar is true`, () => {
+  //     setups.getNotificationLocation1();
 
-      assert.equal(
-        utils.getNotificationLocation(),
-        vscode.ProgressLocation.Window
-      );
-    });
+  //     assert.equal(
+  //       utils.getNotificationLocation(),
+  //       vscode.ProgressLocation.Window
+  //     );
+  //   });
 
-    it(`2: should return vscode.ProgressLocation.Window
-      if shouldDisplayNotificationInStatusBar is false`, () => {
-      setups.getNotificationLocation2();
+  //   it(`2: should return vscode.ProgressLocation.Window
+  //     if shouldDisplayNotificationInStatusBar is false`, () => {
+  //     setups.getNotificationLocation2();
 
-      assert.equal(
-        utils.getNotificationLocation(),
-        vscode.ProgressLocation.Notification
-      );
-    });
-  });
+  //     assert.equal(
+  //       utils.getNotificationLocation(),
+  //       vscode.ProgressLocation.Notification
+  //     );
+  //   });
+  // });
 
-  describe("getNotificationTitle", () => {
-    it(`1: should return string 'Indexing...'
-      if shouldDisplayNotificationInStatusBar is true`, () => {
-      setups.getNotificationTitle1();
-      assert.equal(utils.getNotificationTitle(), "Indexing...");
-    });
+  // describe("getNotificationTitle", () => {
+  //   it(`1: should return string 'Indexing...'
+  //     if shouldDisplayNotificationInStatusBar is true`, () => {
+  //     setups.getNotificationTitle1();
+  //     assert.equal(utils.getNotificationTitle(), "Indexing...");
+  //   });
 
-    it(`2: should return string 'Indexing workspace files and symbols...'
-      if shouldDisplayNotificationInStatusBar is false`, () => {
-      setups.getNotificationTitle2();
+  //   it(`2: should return string 'Indexing workspace files and symbols...'
+  //     if shouldDisplayNotificationInStatusBar is false`, () => {
+  //     setups.getNotificationTitle2();
 
-      assert.equal(
-        utils.getNotificationTitle(),
-        "Indexing workspace files and symbols..."
-      );
-    });
-  });
+  //     assert.equal(
+  //       utils.getNotificationTitle(),
+  //       "Indexing workspace files and symbols..."
+  //     );
+  //   });
+  // });
 
   describe("sleep", () => {
     it("1: should be fulfilled", async () => {
@@ -354,6 +371,8 @@ describe("Utils", () => {
     });
   });
 
+  describe("getNameFromUri", () => {});
+
   describe("updateQpItemsWithNewDirectoryPath", () => {
     it("1: should update qpItems with new directory path", () => {
       setups.updateQpItemsWithNewDirectoryPath1();
@@ -382,13 +401,19 @@ describe("Utils", () => {
   });
 
   describe("normalizeUriPath", () => {
-    it("1: should return uri path without workspace part", () => {
-      setups.normalizeUriPath1();
+    it("1: should return uri path without workspace part if workspace has more than one folder", () => {
+      const { item, qpItem } = setups.normalizeUriPath1();
+      assert.equal(utils.normalizeUriPath(item.fsPath), qpItem.uri.fsPath);
+    });
 
-      assert.equal(
-        utils.normalizeUriPath(getItem().fsPath),
-        getQpItem().uri!.fsPath
-      );
+    it("2: should return uri path without workspace part if workspace has only one folder", () => {
+      const { item, qpItem } = setups.normalizeUriPath2();
+      assert.equal(utils.normalizeUriPath(item.fsPath), qpItem.uri.fsPath);
+    });
+
+    it("3: should return uri path with workspace part if workspace doesn't have any folder", () => {
+      const { item, qpItem } = setups.normalizeUriPath3();
+      assert.equal(utils.normalizeUriPath(item.fsPath), qpItem.uri.fsPath);
     });
   });
 
@@ -398,6 +423,31 @@ describe("Utils", () => {
     });
     it("2: should return false if passed uri is a file", () => {
       assert.equal(utils.isDirectory(getItem()), false);
+    });
+  });
+
+  describe("convertMsToSec", () => {
+    it("1: should get value in ms and convert it to seconds", () => {
+      assert.equal(utils.convertMsToSec(2000), 2);
+    });
+  });
+  describe("setWorkspaceFoldersCommonPath", () => {
+    it("1: should do nothing if workspace has only one folder", () => {
+      setups.setWorkspaceFoldersCommonPath1();
+      utils.setWorkspaceFoldersCommonPath();
+      assert.equal(utils.getWorkspaceFoldersCommonPathProp(), "");
+    });
+
+    it("2: should do nothing if workspace doesn't have any folder", () => {
+      setups.setWorkspaceFoldersCommonPath2();
+      utils.setWorkspaceFoldersCommonPath();
+      assert.equal(utils.getWorkspaceFoldersCommonPathProp(), "");
+    });
+
+    it("3: should extract common path if workspace has more than one folder", () => {
+      setups.setWorkspaceFoldersCommonPath3();
+      utils.setWorkspaceFoldersCommonPath();
+      assert.equal(utils.getWorkspaceFoldersCommonPathProp(), "/common/path");
     });
   });
 });

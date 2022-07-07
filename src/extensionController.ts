@@ -5,11 +5,12 @@ import ActionTrigger from "./enum/actionTrigger";
 import ActionType from "./enum/actionType";
 import Action from "./interface/action";
 import QuickPick from "./quickPick";
-import Utils from "./utils";
+import { utils } from "./utils";
+// import Utils from "./utils";
 import Workspace from "./workspace";
 
 class ExtensionController {
-  private utils!: Utils;
+  // private utils!: Utils;
   private cache!: Cache;
   private config!: Config;
   private workspace!: Workspace;
@@ -22,19 +23,19 @@ class ExtensionController {
   }
 
   async search(): Promise<void> {
-    if (this.utils.hasWorkspaceAnyFolder()) {
+    if (utils.hasWorkspaceAnyFolder()) {
       this.shouldIndexOnQuickPickOpen() &&
         (await this.workspace.index(ActionTrigger.Search));
       this.quickPick.isInitialized() && this.loadItemsAndShowQuickPick();
     } else {
-      this.utils.printNoFolderOpenedMessage();
+      utils.printNoFolderOpenedMessage();
     }
   }
 
   async reload(): Promise<void> {
-    this.utils.hasWorkspaceAnyFolder()
+    utils.hasWorkspaceAnyFolder()
       ? await this.workspace.index(ActionTrigger.Reload)
-      : this.utils.printNoFolderOpenedMessage();
+      : utils.printNoFolderOpenedMessage();
   }
 
   async startup(): Promise<void> {
@@ -76,8 +77,8 @@ class ExtensionController {
   private initComponents(): void {
     this.cache = new Cache(this.extensionContext);
     this.config = new Config(this.cache);
-    this.utils = new Utils(this.config);
-    this.workspace = new Workspace(this.cache, this.utils, this.config);
+    // this.utils = new Utils(this.config);
+    this.workspace = new Workspace(this.cache, this.config);
     this.quickPick = new QuickPick(this.config);
   }
 

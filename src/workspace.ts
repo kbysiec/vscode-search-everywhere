@@ -7,9 +7,11 @@ import DataService from "./dataService";
 import ActionTrigger from "./enum/actionTrigger";
 import ActionType from "./enum/actionType";
 import DetailedActionType from "./enum/detailedActionType";
+import ExcludeMode from "./enum/excludeMode";
 import Action from "./interface/action";
 import QuickPickItem from "./interface/quickPickItem";
-import Utils from "./utils";
+import { utils } from "./utils";
+// import Utils from "./utils";
 import WorkspaceCommon from "./workspaceCommon";
 import WorkspaceEventsEmitter from "./workspaceEventsEmitter";
 import WorkspaceRemover from "./workspaceRemover";
@@ -28,11 +30,7 @@ class Workspace {
   private remover!: WorkspaceRemover;
   private updater!: WorkspaceUpdater;
 
-  constructor(
-    private cache: Cache,
-    private utils: Utils,
-    private config: Config
-  ) {
+  constructor(private cache: Cache, private config: Config) {
     this.initComponents();
   }
 
@@ -70,20 +68,21 @@ class Workspace {
   }
 
   private initComponents(): void {
-    this.dataService = new DataService(this.utils, this.config);
-    this.dataConverter = new DataConverter(this.utils, this.config);
-    this.actionProcessor = new ActionProcessor(this.utils);
+    utils.setWorkspaceFoldersCommonPath();
+    this.dataService = new DataService(this.config);
+    this.dataConverter = new DataConverter(this.config);
+    this.actionProcessor = new ActionProcessor();
     this.events = new WorkspaceEventsEmitter();
 
     this.common = new WorkspaceCommon(
       this.cache,
-      this.utils,
       this.dataService,
       this.dataConverter,
-      this.actionProcessor
+      this.actionProcessor,
+      this.config
     );
     this.remover = new WorkspaceRemover(this.common, this.cache);
-    this.updater = new WorkspaceUpdater(this.common, this.cache, this.utils);
+    this.updater = new WorkspaceUpdater(this.common, this.cache);
   }
 
   private reloadComponents() {
@@ -95,11 +94,11 @@ class Workspace {
     event: vscode.ConfigurationChangeEvent
   ): Promise<void> => {
     this.cache.clearConfig();
-    if (this.utils.shouldReindexOnConfigurationChange(event)) {
+    if (this.shouldReindexOnConfigurationChange(event)) {
       this.reloadComponents();
       this.events.onWillReindexOnConfigurationChangeEventEmitter.fire();
       await this.index(ActionTrigger.ConfigurationChange);
-    } else if (this.utils.isDebounceConfigurationToggled(event)) {
+    } else if (utils.isDebounceConfigurationToggled(event)) {
       this.events.onDidDebounceConfigToggleEventEmitter.fire();
     }
   };
@@ -107,7 +106,7 @@ class Workspace {
   private handleDidChangeWorkspaceFolders = async (
     event: vscode.WorkspaceFoldersChangeEvent
   ): Promise<void> => {
-    this.utils.hasWorkspaceChanged(event) &&
+    utils.hasWorkspaceChanged(event) &&
       (await this.index(ActionTrigger.WorkspaceFoldersChange));
   };
 
@@ -142,7 +141,7 @@ class Workspace {
     this.dataService.clearCachedUris();
 
     const firstFile = event.files[0];
-    const actionType = this.utils.isDirectory(firstFile.oldUri)
+    const actionType = utils.isDirectory(firstFile.oldUri)
       ? DetailedActionType.RenameOrMoveDirectory
       : DetailedActionType.RenameOrMoveFile;
 
@@ -179,7 +178,7 @@ class Workspace {
     this.dataService.clearCachedUris();
 
     const uri = event.files[0];
-    const actionType = this.utils.isDirectory(uri)
+    const actionType = utils.isDirectory(uri)
       ? DetailedActionType.CreateNewDirectory
       : DetailedActionType.CreateNewFile;
 
@@ -195,7 +194,7 @@ class Workspace {
     this.dataService.clearCachedUris();
 
     const uri = event.files[0];
-    const actionType = this.utils.isDirectory(uri)
+    const actionType = utils.isDirectory(uri)
       ? DetailedActionType.RemoveDirectory
       : DetailedActionType.RemoveFile;
 
@@ -218,6 +217,29 @@ class Workspace {
   private handleWillActionProcessorExecuteAction = (action: Action) => {
     this.events.onWillExecuteActionEventEmitter.fire(action);
   };
+
+  private readonly defaultSection = "searchEverywhere";
+  private shouldReindexOnConfigurationChange(
+    event: vscode.ConfigurationChangeEvent
+  ): boolean {
+    const excludeMode = this.config.getExcludeMode();
+    const excluded: string[] = [
+      "shouldDisplayNotificationInStatusBar",
+      "shouldInitOnStartup",
+      "shouldHighlightSymbol",
+      "shouldUseDebounce",
+    ].map((config: string) => `${this.defaultSection}.${config}`);
+
+    return (
+      (event.affectsConfiguration("searchEverywhere") &&
+        !excluded.some((config: string) =>
+          event.affectsConfiguration(config)
+        )) ||
+      (excludeMode === ExcludeMode.FilesAndSearch &&
+        (event.affectsConfiguration("files.exclude") ||
+          event.affectsConfiguration("search.exclude")))
+    );
+  }
 }
 
 export default Workspace;

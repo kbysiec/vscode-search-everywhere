@@ -1,7 +1,8 @@
 import * as vscode from "vscode";
-import Action from "./interface/action";
 import ActionType from "./enum/actionType";
-import Utils from "./utils";
+import Action from "./interface/action";
+import { utils } from "./utils";
+// import Utils from "./utils";
 
 class ActionProcessor {
   private actionId: number = 0;
@@ -9,23 +10,20 @@ class ActionProcessor {
   private queue: Action[] = [];
   private previousAction: Action | undefined = undefined;
 
-  private onDidProcessingEventEmitter: vscode.EventEmitter<
-    void
-  > = new vscode.EventEmitter();
-  private onWillProcessingEventEmitter: vscode.EventEmitter<
-    void
-  > = new vscode.EventEmitter();
-  private onWillExecuteActionEventEmitter: vscode.EventEmitter<
-    Action
-  > = new vscode.EventEmitter();
-  readonly onDidProcessing: vscode.Event<void> = this
-    .onDidProcessingEventEmitter.event;
-  readonly onWillProcessing: vscode.Event<void> = this
-    .onWillProcessingEventEmitter.event;
-  readonly onWillExecuteAction: vscode.Event<Action> = this
-    .onWillExecuteActionEventEmitter.event;
+  private onDidProcessingEventEmitter: vscode.EventEmitter<void> =
+    new vscode.EventEmitter();
+  private onWillProcessingEventEmitter: vscode.EventEmitter<void> =
+    new vscode.EventEmitter();
+  private onWillExecuteActionEventEmitter: vscode.EventEmitter<Action> =
+    new vscode.EventEmitter();
+  readonly onDidProcessing: vscode.Event<void> =
+    this.onDidProcessingEventEmitter.event;
+  readonly onWillProcessing: vscode.Event<void> =
+    this.onWillProcessingEventEmitter.event;
+  readonly onWillExecuteAction: vscode.Event<Action> =
+    this.onWillExecuteActionEventEmitter.event;
 
-  constructor(private utils: Utils) {}
+  constructor() {}
 
   async register(action: Action): Promise<void> {
     this.add(action);
@@ -107,7 +105,7 @@ class ActionProcessor {
     if (this.isPreviousActionRebuildType()) {
       this.queue = [];
     } else if (this.isActionArrayNotEmpty(actions)) {
-      const last = this.utils.getLastFromArray(
+      const last = utils.getLastFromArray(
         this.queue,
         (action: Action) => action.type === actionType
       );
@@ -126,7 +124,7 @@ class ActionProcessor {
   }
 
   private reduceUpdateRemoveAction(actionType: ActionType, actions: Action[]) {
-    const groupedActions = this.utils.groupBy(
+    const groupedActions = utils.groupBy(
       actions,
       (action: Action) => action.uri!.fsPath
     );
@@ -139,7 +137,7 @@ class ActionProcessor {
     actionsByFsPath: Action[],
     fsPath: string
   ) {
-    const lastAction: Action = this.utils.getLastFromArray(
+    const lastAction: Action = utils.getLastFromArray(
       this.queue,
       (action: Action) =>
         action.type === actionType && action.uri!.fsPath === fsPath

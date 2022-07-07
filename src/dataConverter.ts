@@ -5,7 +5,8 @@ import Item from "./interface/item";
 import ItemsFilterPhrases from "./interface/itemsFilterPhrases";
 import QuickPickItem from "./interface/quickPickItem";
 import WorkspaceData from "./interface/workspaceData";
-import Utils from "./utils";
+import { utils } from "./utils";
+// import Utils from "./utils";
 
 class DataConverter {
   isCancelled!: boolean;
@@ -14,7 +15,7 @@ class DataConverter {
   private shouldUseItemsFilterPhrases!: boolean;
   private itemsFilterPhrases!: ItemsFilterPhrases;
 
-  constructor(private utils: Utils, private config: Config) {
+  constructor(private config: Config) {
     this.setCancelled(false);
     this.fetchConfig();
   }
@@ -66,7 +67,7 @@ class DataConverter {
     uri: vscode.Uri,
     symbol: vscode.DocumentSymbol
   ): QuickPickItem {
-    const splitter = this.utils.getSplitter();
+    const splitter = utils.getSplitter();
     const symbolName = symbol.name.split(splitter);
     const parent = symbolName.length === 2 ? symbolName[0] : "";
     const name = symbolName.length === 2 ? symbolName[1] : symbol.name;
@@ -111,7 +112,7 @@ class DataConverter {
 
   private mapUriToQpItem(uri: vscode.Uri): QuickPickItem {
     const symbolKind = 0;
-    const name = this.utils.getNameFromUri(uri);
+    const name = utils.getNameFromUri(uri);
     const icon = this.icons[symbolKind] ? `$(${this.icons[symbolKind]})` : "";
     const label = icon ? `${icon}  ${name}` : name;
     const start = new vscode.Position(0, 0);
@@ -153,7 +154,7 @@ class DataConverter {
         end,
       },
       label,
-      detail: this.utils.normalizeUriPath(uri.fsPath),
+      detail: utils.normalizeUriPath(uri.fsPath),
       description,
     } as QuickPickItem;
   }

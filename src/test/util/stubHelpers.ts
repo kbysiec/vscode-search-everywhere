@@ -23,11 +23,13 @@ interface RestoreStubbedMultipleConfig {
 }
 
 export const stubMultiple = (
-  configList: StubMultipleConfig[]
+  configList: StubMultipleConfig[],
+  overridenSandox?: sinon.SinonSandbox
 ): sinon.SinonStub<any[], any>[] => {
+  const sandbox = overridenSandox || sinon;
   const stubs: sinon.SinonStub<any[], any>[] = [];
   configList.forEach((config: StubMultipleConfig) => {
-    let stub = sinon.stub(config.object, config.method);
+    let stub = sandbox.stub(config.object, config.method);
 
     if (config.customReturns) {
       config.returns &&

@@ -7,7 +7,7 @@ import DataConverter from "../../dataConverter";
 import DataService from "../../dataService";
 import PatternProvider from "../../patternProvider";
 import QuickPick from "../../quickPick";
-import Utils from "../../utils";
+// import Utils from "../../utils";
 import WorkspaceCommon from "../../workspaceCommon";
 import WorkspaceRemover from "../../workspaceRemover";
 import { getConfiguration, getExtensionContext } from "./mockFactory";
@@ -19,12 +19,12 @@ export function getCacheStub(): Cache {
   return cacheStubTemp as Cache;
 }
 
-export function getUtilsStub(): Utils {
-  const utilsStubTemp: any = createStubInstance(Utils);
-  utilsStubTemp.config = getConfigStub();
+// export function getUtilsStub(): Utils {
+//   const utilsStubTemp: any = createStubInstance(Utils);
+//   utilsStubTemp.config = getConfigStub();
 
-  return utilsStubTemp as Utils;
-}
+//   return utilsStubTemp as Utils;
+// }
 
 export function getConfigStub(): Config {
   const configStub: any = createStubInstance(Config);
@@ -36,7 +36,7 @@ export function getConfigStub(): Config {
 
 export function getDataServiceStub(): DataService {
   const dataServiceStub: any = createStubInstance(DataService);
-  dataServiceStub.utils = getUtilsStub();
+  // dataServiceStub.utils = getUtilsStub();
   dataServiceStub.config = getConfigStub();
   dataServiceStub.patternProvider = getPatternProviderStub();
 
@@ -45,7 +45,7 @@ export function getDataServiceStub(): DataService {
 
 export function getDataConverterStub(): DataConverter {
   const dataConverterStub: any = createStubInstance(DataConverter);
-  dataConverterStub.utils = getUtilsStub();
+  // dataConverterStub.utils = getUtilsStub();
   dataConverterStub.config = getConfigStub();
 
   return dataConverterStub as DataConverter;
@@ -53,7 +53,7 @@ export function getDataConverterStub(): DataConverter {
 
 export function getActionProcessorStub(): ActionProcessor {
   const actionProcessorStub: any = createStubInstance(ActionProcessor);
-  actionProcessorStub.utils = getUtilsStub();
+  // actionProcessorStub.utils = getUtilsStub();
 
   return actionProcessorStub as ActionProcessor;
 }
@@ -76,7 +76,7 @@ export function getWorkspaceRemoverStub(): WorkspaceRemover {
   workspaceRemoverStubTemp.common = getWorkspaceCommonStub();
   workspaceRemoverStubTemp.dataService = getDataServiceStub();
   workspaceRemoverStubTemp.cache = getCacheStub();
-  workspaceRemoverStubTemp.utils = getUtilsStub();
+  // workspaceRemoverStubTemp.utils = getUtilsStub();
 
   return workspaceRemoverStubTemp as WorkspaceRemover;
 }

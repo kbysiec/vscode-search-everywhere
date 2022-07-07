@@ -4,7 +4,8 @@ import Item from "./interface/item";
 import ItemsFilter from "./interface/itemsFilter";
 import WorkspaceData from "./interface/workspaceData";
 import PatternProvider from "./patternProvider";
-import Utils from "./utils";
+import { utils } from "./utils";
+// import Utils from "./utils";
 
 class DataService {
   isCancelled!: boolean;
@@ -19,7 +20,7 @@ class DataService {
   readonly onDidItemIndexed: vscode.Event<number> =
     this.onDidItemIndexedEventEmitter.event;
 
-  constructor(private utils: Utils, private config: Config) {
+  constructor(private config: Config) {
     this.setCancelled(false);
     this.fetchConfig();
   }
@@ -33,7 +34,7 @@ class DataService {
   }
 
   async fetchData(uris?: vscode.Uri[]): Promise<WorkspaceData> {
-    const workspaceData: WorkspaceData = this.utils.createWorkspaceData();
+    const workspaceData: WorkspaceData = utils.createWorkspaceData();
     const uriItems = await this.getUris(uris);
 
     await this.includeSymbols(workspaceData, uriItems);
@@ -71,7 +72,7 @@ class DataService {
     try {
       return await vscode.workspace.findFiles(includePatterns, excludePatterns);
     } catch (error) {
-      this.utils.printErrorMessage(error as Error);
+      utils.printErrorMessage(error as Error);
       return Promise.resolve([]);
     }
   }
@@ -93,7 +94,7 @@ class DataService {
   ): Promise<void> {
     for (let i = 0; i < uris.length; i++) {
       if (this.isCancelled) {
-        this.utils.clearWorkspaceData(workspaceData);
+        utils.clearWorkspaceData(workspaceData);
         break;
       }
 
@@ -114,7 +115,7 @@ class DataService {
 
     do {
       symbolsForUri = await this.getSymbolsForUri(uri);
-      !!counter && (await this.utils.sleep(120));
+      !!counter && (await utils.sleep(120));
       counter++;
     } while (symbolsForUri === undefined && counter < maxCounter);
 
@@ -141,7 +142,7 @@ class DataService {
     for (let i = 0; i < validUris.length; i++) {
       const uri = validUris[i];
       if (this.isCancelled) {
-        this.utils.clearWorkspaceData(workspaceData);
+        utils.clearWorkspaceData(workspaceData);
         break;
       }
       this.addUriToWorkspaceData(workspaceData, uri);
@@ -235,7 +236,7 @@ class DataService {
     symbol: vscode.DocumentSymbol,
     parentName?: string
   ) {
-    const splitter = this.utils.getSplitter();
+    const splitter = utils.getSplitter();
     if (parentName) {
       parentName = parentName.split(splitter)[0];
       symbol.name = `${parentName}${splitter}${symbol.name}`;
