@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import ActionProcessor from "./actionProcessor";
 import { clearConfig } from "./cache";
-import Config from "./config";
+import { getExcludeMode } from "./config";
 import DataConverter from "./dataConverter";
 import DataService from "./dataService";
 import ActionTrigger from "./enum/actionTrigger";
@@ -29,7 +29,7 @@ class Workspace {
   private remover!: WorkspaceRemover;
   private updater!: WorkspaceUpdater;
 
-  constructor(private config: Config) {
+  constructor() {
     this.initComponents();
   }
 
@@ -68,16 +68,15 @@ class Workspace {
 
   private initComponents(): void {
     utils.setWorkspaceFoldersCommonPath();
-    this.dataService = new DataService(this.config);
-    this.dataConverter = new DataConverter(this.config);
+    this.dataService = new DataService();
+    this.dataConverter = new DataConverter();
     this.actionProcessor = new ActionProcessor();
     this.events = new WorkspaceEventsEmitter();
 
     this.common = new WorkspaceCommon(
       this.dataService,
       this.dataConverter,
-      this.actionProcessor,
-      this.config
+      this.actionProcessor
     );
     this.remover = new WorkspaceRemover(this.common);
     this.updater = new WorkspaceUpdater(this.common);
@@ -220,7 +219,7 @@ class Workspace {
   private shouldReindexOnConfigurationChange(
     event: vscode.ConfigurationChangeEvent
   ): boolean {
-    const excludeMode = this.config.getExcludeMode();
+    const excludeMode = getExcludeMode();
     const excluded: string[] = [
       "shouldDisplayNotificationInStatusBar",
       "shouldInitOnStartup",

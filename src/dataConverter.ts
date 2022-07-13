@@ -1,5 +1,9 @@
 import * as vscode from "vscode";
-import Config from "./config";
+import {
+  getIcons,
+  getItemsFilterPhrases,
+  shouldUseItemsFilterPhrases,
+} from "./config";
 import Icons from "./interface/icons";
 import Item from "./interface/item";
 import ItemsFilterPhrases from "./interface/itemsFilterPhrases";
@@ -14,7 +18,7 @@ class DataConverter {
   private shouldUseItemsFilterPhrases!: boolean;
   private itemsFilterPhrases!: ItemsFilterPhrases;
 
-  constructor(private config: Config) {
+  constructor() {
     this.setCancelled(false);
     this.fetchConfig();
   }
@@ -159,10 +163,9 @@ class DataConverter {
   }
 
   private fetchConfig() {
-    this.icons = this.config.getIcons();
-    this.shouldUseItemsFilterPhrases =
-      this.config.shouldUseItemsFilterPhrases();
-    this.itemsFilterPhrases = this.config.getItemsFilterPhrases();
+    this.icons = getIcons();
+    this.shouldUseItemsFilterPhrases = shouldUseItemsFilterPhrases();
+    this.itemsFilterPhrases = getItemsFilterPhrases();
   }
 
   private setCancelled(value: boolean) {

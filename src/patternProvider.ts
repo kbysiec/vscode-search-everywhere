@@ -1,5 +1,10 @@
 import * as vscode from "vscode";
-import Config from "./config";
+import {
+  getExclude,
+  getExcludeMode,
+  getFilesAndSearchExclude,
+  getInclude,
+} from "./config";
 import ExcludeMode from "./enum/excludeMode";
 
 class PatternProvider {
@@ -13,7 +18,7 @@ class PatternProvider {
   private gitignoreExcludePatterns!: string[];
   private fallbackExcludePatterns = this.extensionExcludePatterns;
 
-  constructor(private config: Config) {
+  constructor() {
     this.fetchConfig();
   }
 
@@ -96,10 +101,10 @@ class PatternProvider {
   }
 
   private fetchConfig() {
-    this.excludeMode = this.config.getExcludeMode();
-    this.includePatterns = this.config.getInclude();
-    this.extensionExcludePatterns = this.config.getExclude();
-    this.filesAndSearchExcludePatterns = this.config.getFilesAndSearchExclude();
+    this.excludeMode = getExcludeMode();
+    this.includePatterns = getInclude();
+    this.extensionExcludePatterns = getExclude();
+    this.filesAndSearchExcludePatterns = getFilesAndSearchExclude();
     this.gitignoreExcludePatterns = [];
   }
 }

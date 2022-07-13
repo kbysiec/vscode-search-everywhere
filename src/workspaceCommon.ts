@@ -2,7 +2,7 @@ import { performance } from "perf_hooks";
 import * as vscode from "vscode";
 import ActionProcessor from "./actionProcessor";
 import { clear, getData, updateData } from "./cache";
-import Config from "./config";
+import { shouldDisplayNotificationInStatusBar } from "./config";
 import DataConverter from "./dataConverter";
 import DataService from "./dataService";
 import ActionType from "./enum/actionType";
@@ -19,8 +19,7 @@ class WorkspaceCommon {
   constructor(
     private dataService: DataService,
     private dataConverter: DataConverter,
-    private actionProcessor: ActionProcessor,
-    private config: Config
+    private actionProcessor: ActionProcessor
   ) {}
 
   getData(): QuickPickItem[] {
@@ -182,13 +181,13 @@ class WorkspaceCommon {
   }
 
   private getNotificationLocation(): vscode.ProgressLocation {
-    return this.config.shouldDisplayNotificationInStatusBar()
+    return shouldDisplayNotificationInStatusBar()
       ? vscode.ProgressLocation.Window
       : vscode.ProgressLocation.Notification;
   }
 
   private getNotificationTitle(): string {
-    return this.config.shouldDisplayNotificationInStatusBar()
+    return shouldDisplayNotificationInStatusBar()
       ? "Indexing..."
       : "Indexing workspace files and symbols...";
   }

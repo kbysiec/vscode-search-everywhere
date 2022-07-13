@@ -1,26 +1,16 @@
 import * as sinon from "sinon";
 import * as vscode from "vscode";
 import ActionProcessor from "../../actionProcessor";
-import Config from "../../config";
 import DataConverter from "../../dataConverter";
 import DataService from "../../dataService";
 import PatternProvider from "../../patternProvider";
 import QuickPick from "../../quickPick";
 import WorkspaceCommon from "../../workspaceCommon";
 import WorkspaceRemover from "../../workspaceRemover";
-import { getConfiguration } from "./mockFactory";
 import { createStubInstance } from "./stubbedClass";
-
-export function getConfigStub(): Config {
-  const configStub: any = createStubInstance(Config);
-  configStub.default = getConfiguration().searchEverywhere;
-
-  return configStub as Config;
-}
 
 export function getDataServiceStub(): DataService {
   const dataServiceStub: any = createStubInstance(DataService);
-  dataServiceStub.config = getConfigStub();
   dataServiceStub.patternProvider = getPatternProviderStub();
 
   return dataServiceStub as DataService;
@@ -28,7 +18,6 @@ export function getDataServiceStub(): DataService {
 
 export function getDataConverterStub(): DataConverter {
   const dataConverterStub: any = createStubInstance(DataConverter);
-  dataConverterStub.config = getConfigStub();
 
   return dataConverterStub as DataConverter;
 }
@@ -66,7 +55,6 @@ export function getQuickPickStub(): QuickPick {
 
 export function getPatternProviderStub(): PatternProvider {
   const patternProviderTemp: any = createStubInstance(PatternProvider);
-  patternProviderTemp.config = getConfigStub();
   return patternProviderTemp as PatternProvider;
 }
 

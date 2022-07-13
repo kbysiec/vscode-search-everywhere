@@ -1,5 +1,11 @@
 import * as vscode from "vscode";
-import Config from "./config";
+import {
+  getHelpPhrase,
+  getItemsFilterPhrases,
+  shouldHighlightSymbol,
+  shouldUseDebounce,
+  shouldUseItemsFilterPhrases,
+} from "./config";
 import ItemsFilterPhrases from "./interface/itemsFilterPhrases";
 import QuickPickItem from "./interface/quickPickItem";
 const debounce = require("debounce");
@@ -14,7 +20,7 @@ class QuickPick {
 
   private onDidChangeValueEventListeners: vscode.Disposable[];
 
-  constructor(private config: Config) {
+  constructor() {
     this.items = [];
     this.onDidChangeValueEventListeners = [];
 
@@ -87,7 +93,7 @@ class QuickPick {
   }
 
   private registerOnDidChangeValueEventListeners(): void {
-    this.config.shouldUseDebounce()
+    shouldUseDebounce()
       ? this.registerOnDidChangeValueWithDebounceEventListeners()
       : this.registerOnDidChangeValueWithoutDebounceEventListeners();
   }
@@ -140,7 +146,7 @@ class QuickPick {
   private selectQpItem(editor: vscode.TextEditor, qpItem: QuickPickItem): void {
     editor.selection = this.getSelectionForQpItem(
       qpItem,
-      this.config.shouldHighlightSymbol()
+      shouldHighlightSymbol()
     );
 
     editor.revealRange(
@@ -192,10 +198,9 @@ class QuickPick {
   }
 
   private fetchConfig(): void {
-    this.shouldUseItemsFilterPhrases =
-      this.config.shouldUseItemsFilterPhrases();
-    this.helpPhrase = this.config.getHelpPhrase();
-    this.itemsFilterPhrases = this.config.getItemsFilterPhrases();
+    this.shouldUseItemsFilterPhrases = shouldUseItemsFilterPhrases();
+    this.helpPhrase = getHelpPhrase();
+    this.itemsFilterPhrases = getItemsFilterPhrases();
   }
 
   private fetchHelpData(): void {

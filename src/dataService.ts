@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import Config from "./config";
+import { getItemsFilter } from "./config";
 import Item from "./interface/item";
 import ItemsFilter from "./interface/itemsFilter";
 import WorkspaceData from "./interface/workspaceData";
@@ -19,7 +19,7 @@ class DataService {
   readonly onDidItemIndexed: vscode.Event<number> =
     this.onDidItemIndexedEventEmitter.event;
 
-  constructor(private config: Config) {
+  constructor() {
     this.setCancelled(false);
     this.fetchConfig();
   }
@@ -321,8 +321,8 @@ class DataService {
   }
 
   private fetchConfig() {
-    this.itemsFilter = this.config.getItemsFilter();
-    this.patternProvider = new PatternProvider(this.config);
+    this.itemsFilter = getItemsFilter();
+    this.patternProvider = new PatternProvider();
   }
 
   private setCancelled(value: boolean) {
