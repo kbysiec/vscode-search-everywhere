@@ -63,80 +63,6 @@ describe("Utils", () => {
     });
   });
 
-  // describe("shouldReindexOnConfigurationChange", () => {
-  //   it(`1: should return true if extension configuration has changed
-  //     and is not excluded from refreshing`, () => {
-  //     setups.shouldReindexOnConfigurationChange1();
-
-  //     assert.equal(
-  //       utils.shouldReindexOnConfigurationChange(
-  //         getConfigurationChangeEvent(true, true, false)
-  //       ),
-  //       true
-  //     );
-  //   });
-
-  //   it(`2: should return false if extension configuration has changed
-  //     but is excluded from refreshing`, () => {
-  //     setups.shouldReindexOnConfigurationChange2();
-
-  //     assert.equal(
-  //       utils.shouldReindexOnConfigurationChange(
-  //         getConfigurationChangeEvent(false)
-  //       ),
-  //       false
-  //     );
-  //   });
-
-  //   it("3: should return false if extension configuration has not changed", () => {
-  //     setups.shouldReindexOnConfigurationChange3();
-
-  //     assert.equal(
-  //       utils.shouldReindexOnConfigurationChange(
-  //         getConfigurationChangeEvent(false)
-  //       ),
-  //       false
-  //     );
-  //   });
-
-  //   it(`4: should return true if exclude mode is set to 'files and search',
-  //     configuration has changed and files.exclude has changed`, () => {
-  //     setups.shouldReindexOnConfigurationChange4();
-
-  //     assert.equal(
-  //       utils.shouldReindexOnConfigurationChange(
-  //         getConfigurationChangeEvent(
-  //           false,
-  //           false,
-  //           true,
-  //           ExcludeMode.FilesAndSearch,
-  //           true
-  //         )
-  //       ),
-  //       true
-  //     );
-  //   });
-
-  //   it(`5: should return true if exclude mode is set to 'files and search',
-  //     configuration has changed and search.exclude has changed`, () => {
-  //     setups.shouldReindexOnConfigurationChange5();
-
-  //     assert.equal(
-  //       utils.shouldReindexOnConfigurationChange(
-  //         getConfigurationChangeEvent(
-  //           false,
-  //           false,
-  //           true,
-  //           ExcludeMode.FilesAndSearch,
-  //           false,
-  //           true
-  //         )
-  //       ),
-  //       true
-  //     );
-  //   });
-  // });
-
   describe("isDebounceConfigurationToggled", () => {
     it(`1: should return true if extension configuration
       related to debounce setting has changed`, () => {
@@ -235,46 +161,6 @@ describe("Utils", () => {
       );
     });
   });
-
-  // describe("getNotificationLocation", () => {
-  //   it(`1: should return vscode.ProgressLocation.Window
-  //     if shouldDisplayNotificationInStatusBar is true`, () => {
-  //     setups.getNotificationLocation1();
-
-  //     assert.equal(
-  //       utils.getNotificationLocation(),
-  //       vscode.ProgressLocation.Window
-  //     );
-  //   });
-
-  //   it(`2: should return vscode.ProgressLocation.Window
-  //     if shouldDisplayNotificationInStatusBar is false`, () => {
-  //     setups.getNotificationLocation2();
-
-  //     assert.equal(
-  //       utils.getNotificationLocation(),
-  //       vscode.ProgressLocation.Notification
-  //     );
-  //   });
-  // });
-
-  // describe("getNotificationTitle", () => {
-  //   it(`1: should return string 'Indexing...'
-  //     if shouldDisplayNotificationInStatusBar is true`, () => {
-  //     setups.getNotificationTitle1();
-  //     assert.equal(utils.getNotificationTitle(), "Indexing...");
-  //   });
-
-  //   it(`2: should return string 'Indexing workspace files and symbols...'
-  //     if shouldDisplayNotificationInStatusBar is false`, () => {
-  //     setups.getNotificationTitle2();
-
-  //     assert.equal(
-  //       utils.getNotificationTitle(),
-  //       "Indexing workspace files and symbols..."
-  //     );
-  //   });
-  // });
 
   describe("sleep", () => {
     it("1: should be fulfilled", async () => {

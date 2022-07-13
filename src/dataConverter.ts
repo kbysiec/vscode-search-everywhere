@@ -6,7 +6,6 @@ import ItemsFilterPhrases from "./interface/itemsFilterPhrases";
 import QuickPickItem from "./interface/quickPickItem";
 import WorkspaceData from "./interface/workspaceData";
 import { utils } from "./utils";
-// import Utils from "./utils";
 
 class DataConverter {
   isCancelled!: boolean;

@@ -2,7 +2,6 @@ import * as vscode from "vscode";
 import ActionType from "./enum/actionType";
 import Action from "./interface/action";
 import { utils } from "./utils";
-// import Utils from "./utils";
 
 class ActionProcessor {
   private actionId: number = 0;

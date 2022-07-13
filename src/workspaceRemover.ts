@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import { updateData } from "./cache";
-// import Cache from "./cache";
 import DetailedActionType from "./enum/detailedActionType";
 import QuickPickItem from "./interface/quickPickItem";
 import WorkspaceCommon from "./workspaceCommon";

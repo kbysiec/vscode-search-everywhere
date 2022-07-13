@@ -5,7 +5,6 @@ import ItemsFilter from "./interface/itemsFilter";
 import WorkspaceData from "./interface/workspaceData";
 import PatternProvider from "./patternProvider";
 import { utils } from "./utils";
-// import Utils from "./utils";
 
 class DataService {
   isCancelled!: boolean;

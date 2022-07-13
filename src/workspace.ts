@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import ActionProcessor from "./actionProcessor";
 import { clearConfig } from "./cache";
-// import Cache from "./cache";
 import Config from "./config";
 import DataConverter from "./dataConverter";
 import DataService from "./dataService";
@@ -12,7 +11,6 @@ import ExcludeMode from "./enum/excludeMode";
 import Action from "./interface/action";
 import QuickPickItem from "./interface/quickPickItem";
 import { utils } from "./utils";
-// import Utils from "./utils";
 import WorkspaceCommon from "./workspaceCommon";
 import WorkspaceEventsEmitter from "./workspaceEventsEmitter";
 import WorkspaceRemover from "./workspaceRemover";

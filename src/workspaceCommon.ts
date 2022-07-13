@@ -2,7 +2,6 @@ import { performance } from "perf_hooks";
 import * as vscode from "vscode";
 import ActionProcessor from "./actionProcessor";
 import { clear, getData, updateData } from "./cache";
-// import Cache from "./cache";
 import Config from "./config";
 import DataConverter from "./dataConverter";
 import DataService from "./dataService";
@@ -11,7 +10,6 @@ import Action from "./interface/action";
 import QuickPickItem from "./interface/quickPickItem";
 import WorkspaceData from "./interface/workspaceData";
 import { utils } from "./utils";
-// import Utils from "./utils";
 
 class WorkspaceCommon {
   fileKind: number = 0;
