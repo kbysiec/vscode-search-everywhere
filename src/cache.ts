@@ -1,53 +1,48 @@
 import * as vscode from "vscode";
-import QuickPickItem from "./interface/quickPickItem";
 import { appConfig } from "./appConfig";
+import QuickPickItem from "./interface/quickPickItem";
 
-class Cache {
-  constructor(private extensionContext: vscode.ExtensionContext) {}
+let extensionContext: vscode.ExtensionContext;
 
-  getData(): QuickPickItem[] | undefined {
-    const data: any = this.extensionContext.workspaceState.get(
-      appConfig.dataCacheKey
-    );
-
-    return data && data.length ? data : [];
-  }
-
-  updateData(data: QuickPickItem[]): void {
-    this.extensionContext.workspaceState.update(appConfig.dataCacheKey, data);
-  }
-
-  getConfigByKey<T>(key: string): T | undefined {
-    const cache: any = this.extensionContext.workspaceState.get(
-      appConfig.configCacheKey
-    );
-
-    return cache ? cache[key] : undefined;
-  }
-
-  updateConfigByKey<T>(key: string, value: T): void {
-    let cache: any =
-      this.extensionContext.workspaceState.get(appConfig.configCacheKey) || {};
-    cache[key] = value;
-
-    this.extensionContext.workspaceState.update(
-      appConfig.configCacheKey,
-      cache
-    );
-  }
-
-  clear(): void {
-    this.clearData();
-    this.clearConfig();
-  }
-
-  clearConfig(): void {
-    this.extensionContext.workspaceState.update(appConfig.configCacheKey, {});
-  }
-
-  private clearData(): void {
-    this.extensionContext.workspaceState.update(appConfig.dataCacheKey, []);
-  }
+export function initCache(context: vscode.ExtensionContext) {
+  extensionContext = context;
 }
 
-export default Cache;
+export function getData(): QuickPickItem[] | undefined {
+  const data: any = extensionContext.workspaceState.get(appConfig.dataCacheKey);
+
+  return data && data.length ? data : [];
+}
+
+export function updateData(data: QuickPickItem[]): void {
+  extensionContext.workspaceState.update(appConfig.dataCacheKey, data);
+}
+
+export function getConfigByKey<T>(key: string): T | undefined {
+  const cache: any = extensionContext.workspaceState.get(
+    appConfig.configCacheKey
+  );
+
+  return cache ? cache[key] : undefined;
+}
+
+export function updateConfigByKey<T>(key: string, value: T): void {
+  let cache: any =
+    extensionContext.workspaceState.get(appConfig.configCacheKey) || {};
+  cache[key] = value;
+
+  extensionContext.workspaceState.update(appConfig.configCacheKey, cache);
+}
+
+export function clear(): void {
+  clearData();
+  clearConfig();
+}
+
+export function clearConfig(): void {
+  extensionContext.workspaceState.update(appConfig.configCacheKey, {});
+}
+
+function clearData(): void {
+  extensionContext.workspaceState.update(appConfig.dataCacheKey, []);
+}

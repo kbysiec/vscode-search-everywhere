@@ -1,82 +1,111 @@
-import * as vscode from "vscode";
 import * as sinon from "sinon";
 import { appConfig } from "../../appConfig";
+import * as mock from "../mock/cache.mock";
+import { getExtensionContext } from "../util/mockFactory";
 import { getQpItems } from "../util/qpItemMockFactory";
 import { stubMultiple } from "../util/stubHelpers";
-import * as mock from "../mock/cache.mock";
 
-export const getTestSetups = (context: vscode.ExtensionContext) => {
-  let updateStub: sinon.SinonStub;
+export const getTestSetups = () => {
+  const context = getExtensionContext();
+  const sandbox = sinon.createSandbox();
 
   return {
-    beforeEach: () => {
-      stubMultiple([
-        {
-          object: appConfig,
-          method: "dataCacheKey",
-          returns: "cache",
-          isNotMethod: true,
-        },
-        {
-          object: appConfig,
-          method: "configCacheKey",
-          returns: "config",
-          isNotMethod: true,
-        },
-      ]);
+    before: () => {
+      stubMultiple(
+        [
+          {
+            object: appConfig,
+            method: "dataCacheKey",
+            returns: "data",
+            isNotMethod: true,
+          },
+          {
+            object: appConfig,
+            method: "configCacheKey",
+            returns: "config",
+            isNotMethod: true,
+          },
+        ],
+        sandbox
+      );
 
-      updateStub = sinon.stub();
-      context.workspaceState.update = updateStub;
-
-      return updateStub;
+      return context;
+    },
+    afterEach: () => {
+      sandbox.restore();
     },
     getData1: () => {
       const qpItems = getQpItems();
-      stubMultiple([
-        {
-          object: context.workspaceState,
-          method: "get",
-          returns: qpItems,
-        },
-      ]);
+      stubMultiple(
+        [
+          {
+            object: context.workspaceState,
+            method: "get",
+            returns: qpItems,
+          },
+        ],
+        sandbox
+      );
 
       return qpItems;
     },
     getData2: () => {
-      stubMultiple([
-        {
-          object: context.workspaceState,
-          method: "get",
-          returns: undefined,
-        },
-      ]);
+      stubMultiple(
+        [
+          {
+            object: context.workspaceState,
+            method: "get",
+            returns: undefined,
+          },
+        ],
+        sandbox
+      );
 
       return [];
     },
     updateData1: () => {
-      return getQpItems();
+      const stubs = stubMultiple(
+        [
+          {
+            object: context.workspaceState,
+            method: "update",
+          },
+        ],
+        sandbox
+      );
+
+      return {
+        stubs,
+        qpItems: getQpItems(),
+      };
     },
     getConfigByKey1: () => {
       const key = "searchEverywhere.exclude";
-      stubMultiple([
-        {
-          object: context.workspaceState,
-          method: "get",
-          returns: { [key]: mock.configuration[key] },
-        },
-      ]);
+      stubMultiple(
+        [
+          {
+            object: context.workspaceState,
+            method: "get",
+            returns: { [key]: mock.configuration[key] },
+          },
+        ],
+        sandbox
+      );
 
       return key;
     },
     getConfigByKey2: () => {
       const key = "searchEverywhere.exclude";
-      stubMultiple([
-        {
-          object: context.workspaceState,
-          method: "get",
-          returns: undefined,
-        },
-      ]);
+      stubMultiple(
+        [
+          {
+            object: context.workspaceState,
+            method: "get",
+            returns: undefined,
+          },
+        ],
+        sandbox
+      );
 
       return key;
     },
@@ -87,28 +116,64 @@ export const getTestSetups = (context: vscode.ExtensionContext) => {
         ...{ [key]: mock.newExcludePatterns },
       };
 
-      stubMultiple([
-        {
-          object: context.workspaceState,
-          method: "get",
-          returns: mock.configuration,
-        },
-      ]);
+      const stubs = stubMultiple(
+        [
+          {
+            object: context.workspaceState,
+            method: "update",
+          },
+          {
+            object: context.workspaceState,
+            method: "get",
+            returns: mock.configuration,
+          },
+        ],
+        sandbox
+      );
 
-      return { key, newConfig };
+      return { stubs, key, newConfig };
     },
     updateConfigByKey2: () => {
       const key = "searchEverywhere.exclude";
 
-      stubMultiple([
-        {
-          object: context.workspaceState,
-          method: "get",
-          returns: undefined,
-        },
-      ]);
+      const stubs = stubMultiple(
+        [
+          {
+            object: context.workspaceState,
+            method: "update",
+          },
+          {
+            object: context.workspaceState,
+            method: "get",
+            returns: undefined,
+          },
+        ],
+        sandbox
+      );
 
-      return key;
+      return { stubs, key };
+    },
+    clear1: () => {
+      return stubMultiple(
+        [
+          {
+            object: context.workspaceState,
+            method: "update",
+          },
+        ],
+        sandbox
+      );
+    },
+    clearConfig1: () => {
+      return stubMultiple(
+        [
+          {
+            object: context.workspaceState,
+            method: "update",
+          },
+        ],
+        sandbox
+      );
     },
   };
 };

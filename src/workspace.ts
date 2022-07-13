@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import ActionProcessor from "./actionProcessor";
-import Cache from "./cache";
+import { clearConfig } from "./cache";
+// import Cache from "./cache";
 import Config from "./config";
 import DataConverter from "./dataConverter";
 import DataService from "./dataService";
@@ -30,7 +31,7 @@ class Workspace {
   private remover!: WorkspaceRemover;
   private updater!: WorkspaceUpdater;
 
-  constructor(private cache: Cache, private config: Config) {
+  constructor(private config: Config) {
     this.initComponents();
   }
 
@@ -75,14 +76,13 @@ class Workspace {
     this.events = new WorkspaceEventsEmitter();
 
     this.common = new WorkspaceCommon(
-      this.cache,
       this.dataService,
       this.dataConverter,
       this.actionProcessor,
       this.config
     );
-    this.remover = new WorkspaceRemover(this.common, this.cache);
-    this.updater = new WorkspaceUpdater(this.common, this.cache);
+    this.remover = new WorkspaceRemover(this.common);
+    this.updater = new WorkspaceUpdater(this.common);
   }
 
   private reloadComponents() {
@@ -93,7 +93,7 @@ class Workspace {
   private handleDidChangeConfiguration = async (
     event: vscode.ConfigurationChangeEvent
   ): Promise<void> => {
-    this.cache.clearConfig();
+    clearConfig();
     if (this.shouldReindexOnConfigurationChange(event)) {
       this.reloadComponents();
       this.events.onWillReindexOnConfigurationChangeEventEmitter.fire();

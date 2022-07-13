@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import Cache from "./cache";
+import { getConfigByKey, updateConfigByKey } from "./cache";
 import ConfigKey from "./enum/configKey";
 import ExcludeMode from "./enum/excludeMode";
 import Icons from "./interface/icons";
@@ -27,7 +27,7 @@ class Config {
   };
   private readonly defaultSection = "searchEverywhere";
 
-  constructor(private cache: Cache) {}
+  constructor() {}
 
   shouldDisplayNotificationInStatusBar(): boolean {
     return this.get(
@@ -124,10 +124,10 @@ class Config {
     const cacheKey = `${
       customSection ? customSection : this.defaultSection
     }.${key}`;
-    let value = this.cache.getConfigByKey<T>(cacheKey);
+    let value = getConfigByKey<T>(cacheKey);
     if (!value) {
       value = this.getConfigurationByKey<T>(key, defaultValue, customSection);
-      this.cache.updateConfigByKey(cacheKey, value);
+      updateConfigByKey(cacheKey, value);
     }
     return value as T;
   }

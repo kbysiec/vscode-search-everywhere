@@ -1,7 +1,8 @@
 import { performance } from "perf_hooks";
 import * as vscode from "vscode";
 import ActionProcessor from "./actionProcessor";
-import Cache from "./cache";
+import { clear, getData, updateData } from "./cache";
+// import Cache from "./cache";
 import Config from "./config";
 import DataConverter from "./dataConverter";
 import DataService from "./dataService";
@@ -18,7 +19,6 @@ class WorkspaceCommon {
   currentProgressValue: number = 0;
 
   constructor(
-    private cache: Cache,
     private dataService: DataService,
     private dataConverter: DataConverter,
     private actionProcessor: ActionProcessor,
@@ -26,7 +26,7 @@ class WorkspaceCommon {
   ) {}
 
   getData(): QuickPickItem[] {
-    return this.cache.getData() || [];
+    return getData() || [];
   }
 
   async index(comment: string): Promise<void> {
@@ -127,10 +127,10 @@ class WorkspaceCommon {
   }
 
   private async indexWorkspace(): Promise<WorkspaceData> {
-    this.cache.clear();
+    clear();
     const data = await this.dataService.fetchData();
     const qpData = this.dataConverter.convertToQpData(data);
-    this.cache.updateData(qpData);
+    updateData(qpData);
     return data;
   }
 

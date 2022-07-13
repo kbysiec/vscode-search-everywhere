@@ -1,11 +1,12 @@
 import * as vscode from "vscode";
-import Cache from "./cache";
+import { updateData } from "./cache";
+// import Cache from "./cache";
 import DetailedActionType from "./enum/detailedActionType";
 import QuickPickItem from "./interface/quickPickItem";
 import WorkspaceCommon from "./workspaceCommon";
 
 class WorkspaceRemover {
-  constructor(private common: WorkspaceCommon, private cache: Cache) {}
+  constructor(private common: WorkspaceCommon) {}
 
   removeFromCacheByPath(
     uri: vscode.Uri,
@@ -33,7 +34,7 @@ class WorkspaceRemover {
       ),
     };
     data = removeFnByDetailedActionType[detailedActionType]();
-    this.cache.updateData(data);
+    updateData(data);
   }
 
   private removeUri(data: QuickPickItem[], uri: vscode.Uri): QuickPickItem[] {

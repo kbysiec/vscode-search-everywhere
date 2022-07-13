@@ -1,7 +1,7 @@
 import * as sinon from "sinon";
 import * as vscode from "vscode";
 import ActionProcessor from "../../actionProcessor";
-import Cache from "../../cache";
+// import Cache from "../../cache";
 import Config from "../../config";
 import DataConverter from "../../dataConverter";
 import DataService from "../../dataService";
@@ -10,14 +10,14 @@ import QuickPick from "../../quickPick";
 // import Utils from "../../utils";
 import WorkspaceCommon from "../../workspaceCommon";
 import WorkspaceRemover from "../../workspaceRemover";
-import { getConfiguration, getExtensionContext } from "./mockFactory";
+import { getConfiguration } from "./mockFactory";
 import { createStubInstance } from "./stubbedClass";
 
-export function getCacheStub(): Cache {
-  const cacheStubTemp: any = createStubInstance(Cache);
-  cacheStubTemp.extensionContext = getExtensionContext();
-  return cacheStubTemp as Cache;
-}
+// export function getCacheStub(): Cache {
+//   const cacheStubTemp: any = createStubInstance(Cache);
+//   cacheStubTemp.extensionContext = getExtensionContext();
+//   return cacheStubTemp as Cache;
+// }
 
 // export function getUtilsStub(): Utils {
 //   const utilsStubTemp: any = createStubInstance(Utils);
@@ -28,7 +28,7 @@ export function getCacheStub(): Cache {
 
 export function getConfigStub(): Config {
   const configStub: any = createStubInstance(Config);
-  configStub.cache = getCacheStub();
+  // configStub.cache = getCacheStub();
   configStub.default = getConfiguration().searchEverywhere;
 
   return configStub as Config;
@@ -60,7 +60,7 @@ export function getActionProcessorStub(): ActionProcessor {
 
 export function getWorkspaceCommonStub(): WorkspaceCommon {
   const workspaceCommonStubTemp: any = createStubInstance(WorkspaceCommon);
-  workspaceCommonStubTemp.cache = getCacheStub();
+  // workspaceCommonStubTemp.cache = getCacheStub();
   workspaceCommonStubTemp.dataService = getDataServiceStub();
   workspaceCommonStubTemp.dataConverter = getDataConverterStub();
   workspaceCommonStubTemp.actionProcessor = getActionProcessorStub();
@@ -75,7 +75,7 @@ export function getWorkspaceRemoverStub(): WorkspaceRemover {
   const workspaceRemoverStubTemp: any = createStubInstance(WorkspaceRemover);
   workspaceRemoverStubTemp.common = getWorkspaceCommonStub();
   workspaceRemoverStubTemp.dataService = getDataServiceStub();
-  workspaceRemoverStubTemp.cache = getCacheStub();
+  // workspaceRemoverStubTemp.cache = getCacheStub();
   // workspaceRemoverStubTemp.utils = getUtilsStub();
 
   return workspaceRemoverStubTemp as WorkspaceRemover;
