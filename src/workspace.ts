@@ -12,15 +12,19 @@ import Action from "./interface/action";
 import QuickPickItem from "./interface/quickPickItem";
 import { utils } from "./utils";
 import WorkspaceCommon from "./workspaceCommon";
-import WorkspaceEventsEmitter from "./workspaceEventsEmitter";
+import {
+  onDidDebounceConfigToggleEventEmitter,
+  onDidProcessingEventEmitter,
+  onWillExecuteActionEventEmitter,
+  onWillProcessingEventEmitter,
+  onWillReindexOnConfigurationChangeEventEmitter,
+} from "./workspaceEventsEmitter";
 import WorkspaceRemover from "./workspaceRemover";
 import WorkspaceUpdater from "./workspaceUpdater";
 
 const debounce = require("debounce");
 
 class Workspace {
-  events!: WorkspaceEventsEmitter;
-
   private dataService!: DataService;
   private dataConverter!: DataConverter;
   private actionProcessor!: ActionProcessor;
@@ -71,7 +75,6 @@ class Workspace {
     this.dataService = new DataService();
     this.dataConverter = new DataConverter();
     this.actionProcessor = new ActionProcessor();
-    this.events = new WorkspaceEventsEmitter();
 
     this.common = new WorkspaceCommon(
       this.dataService,
@@ -93,10 +96,10 @@ class Workspace {
     clearConfig();
     if (this.shouldReindexOnConfigurationChange(event)) {
       this.reloadComponents();
-      this.events.onWillReindexOnConfigurationChangeEventEmitter.fire();
+      onWillReindexOnConfigurationChangeEventEmitter.fire();
       await this.index(ActionTrigger.ConfigurationChange);
     } else if (utils.isDebounceConfigurationToggled(event)) {
-      this.events.onDidDebounceConfigToggleEventEmitter.fire();
+      onDidDebounceConfigToggleEventEmitter.fire();
     }
   };
 
@@ -204,15 +207,15 @@ class Workspace {
   };
 
   private handleWillActionProcessorProcessing = () => {
-    this.events.onWillProcessingEventEmitter.fire();
+    onWillProcessingEventEmitter.fire();
   };
 
   private handleDidActionProcessorProcessing = () => {
-    this.events.onDidProcessingEventEmitter.fire();
+    onDidProcessingEventEmitter.fire();
   };
 
   private handleWillActionProcessorExecuteAction = (action: Action) => {
-    this.events.onWillExecuteActionEventEmitter.fire(action);
+    onWillExecuteActionEventEmitter.fire(action);
   };
 
   private readonly defaultSection = "searchEverywhere";

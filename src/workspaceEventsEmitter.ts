@@ -1,32 +1,23 @@
 import * as vscode from "vscode";
 import Action from "./interface/action";
 
-class WorkspaceEventsEmitter {
-  onWillProcessingEventEmitter: vscode.EventEmitter<
-    void
-  > = new vscode.EventEmitter();
-  onDidProcessingEventEmitter: vscode.EventEmitter<
-    void
-  > = new vscode.EventEmitter();
-  onWillExecuteActionEventEmitter: vscode.EventEmitter<
-    Action
-  > = new vscode.EventEmitter();
-  onDidDebounceConfigToggleEventEmitter: vscode.EventEmitter<
-    void
-  > = new vscode.EventEmitter();
-  onWillReindexOnConfigurationChangeEventEmitter: vscode.EventEmitter<
-    void
-  > = new vscode.EventEmitter();
-  readonly onWillProcessing: vscode.Event<void> = this
-    .onWillProcessingEventEmitter.event;
-  readonly onDidProcessing: vscode.Event<void> = this
-    .onDidProcessingEventEmitter.event;
-  readonly onWillExecuteAction: vscode.Event<Action> = this
-    .onWillExecuteActionEventEmitter.event;
-  readonly onDidDebounceConfigToggle: vscode.Event<void> = this
-    .onDidDebounceConfigToggleEventEmitter.event;
-  readonly onWillReindexOnConfigurationChange: vscode.Event<void> = this
-    .onWillReindexOnConfigurationChangeEventEmitter.event;
-}
-
-export default WorkspaceEventsEmitter;
+export const onWillProcessingEventEmitter: vscode.EventEmitter<void> =
+  new vscode.EventEmitter();
+export const onDidProcessingEventEmitter: vscode.EventEmitter<void> =
+  new vscode.EventEmitter();
+export const onWillExecuteActionEventEmitter: vscode.EventEmitter<Action> =
+  new vscode.EventEmitter();
+export const onDidDebounceConfigToggleEventEmitter: vscode.EventEmitter<void> =
+  new vscode.EventEmitter();
+export const onWillReindexOnConfigurationChangeEventEmitter: vscode.EventEmitter<void> =
+  new vscode.EventEmitter();
+export const onWillProcessing: vscode.Event<void> =
+  onWillProcessingEventEmitter.event;
+export const onDidProcessing: vscode.Event<void> =
+  onDidProcessingEventEmitter.event;
+export const onWillExecuteAction: vscode.Event<Action> =
+  onWillExecuteActionEventEmitter.event;
+export const onDidDebounceConfigToggle: vscode.Event<void> =
+  onDidDebounceConfigToggleEventEmitter.event;
+export const onWillReindexOnConfigurationChange: vscode.Event<void> =
+  onWillReindexOnConfigurationChangeEventEmitter.event;

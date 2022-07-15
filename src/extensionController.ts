@@ -7,6 +7,13 @@ import Action from "./interface/action";
 import QuickPick from "./quickPick";
 import { utils } from "./utils";
 import Workspace from "./workspace";
+import {
+  onDidDebounceConfigToggle,
+  onDidProcessing,
+  onWillExecuteAction,
+  onWillProcessing,
+  onWillReindexOnConfigurationChange,
+} from "./workspaceEventsEmitter";
 
 class ExtensionController {
   private workspace!: Workspace;
@@ -75,13 +82,11 @@ class ExtensionController {
   }
 
   private registerEventListeners() {
-    this.workspace.events.onWillProcessing(this.handleWillProcessing);
-    this.workspace.events.onDidProcessing(this.handleDidProcessing);
-    this.workspace.events.onWillExecuteAction(this.handleWillExecuteAction);
-    this.workspace.events.onDidDebounceConfigToggle(
-      this.handleDidDebounceConfigToggle
-    );
-    this.workspace.events.onWillReindexOnConfigurationChange(
+    onWillProcessing(this.handleWillProcessing);
+    onDidProcessing(this.handleDidProcessing);
+    onWillExecuteAction(this.handleWillExecuteAction);
+    onDidDebounceConfigToggle(this.handleDidDebounceConfigToggle);
+    onWillReindexOnConfigurationChange(
       this.handleWillReindexOnConfigurationChange
     );
   }
