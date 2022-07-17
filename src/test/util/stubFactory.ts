@@ -3,7 +3,6 @@ import * as vscode from "vscode";
 import ActionProcessor from "../../actionProcessor";
 import DataConverter from "../../dataConverter";
 import DataService from "../../dataService";
-import PatternProvider from "../../patternProvider";
 import QuickPick from "../../quickPick";
 import WorkspaceCommon from "../../workspaceCommon";
 import WorkspaceRemover from "../../workspaceRemover";
@@ -11,7 +10,6 @@ import { createStubInstance } from "./stubbedClass";
 
 export function getDataServiceStub(): DataService {
   const dataServiceStub: any = createStubInstance(DataService);
-  dataServiceStub.patternProvider = getPatternProviderStub();
 
   return dataServiceStub as DataService;
 }
@@ -51,11 +49,6 @@ export function getWorkspaceRemoverStub(): WorkspaceRemover {
 export function getQuickPickStub(): QuickPick {
   const quickPickStubTemp: any = createStubInstance(QuickPick);
   return quickPickStubTemp as QuickPick;
-}
-
-export function getPatternProviderStub(): PatternProvider {
-  const patternProviderTemp: any = createStubInstance(PatternProvider);
-  return patternProviderTemp as PatternProvider;
 }
 
 export function getTextEditorStub(

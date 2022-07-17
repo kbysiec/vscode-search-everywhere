@@ -3,14 +3,13 @@ import { getItemsFilter } from "./config";
 import Item from "./interface/item";
 import ItemsFilter from "./interface/itemsFilter";
 import WorkspaceData from "./interface/workspaceData";
-import PatternProvider from "./patternProvider";
+import { patternProvider } from "./patternProvider";
 import { utils } from "./utils";
 
 class DataService {
   isCancelled!: boolean;
 
   private itemsFilter!: ItemsFilter;
-  private patternProvider!: PatternProvider;
 
   private uris: vscode.Uri[] | null = null;
 
@@ -64,10 +63,8 @@ class DataService {
   private async fetchUris(
     shouldClearGitignoreExcludePatterns: boolean = true
   ): Promise<vscode.Uri[]> {
-    const includePatterns = this.patternProvider.getIncludePatterns();
-    const excludePatterns = await this.patternProvider.getExcludePatterns(
-      shouldClearGitignoreExcludePatterns
-    );
+    const includePatterns = patternProvider.getIncludePatterns();
+    const excludePatterns = await patternProvider.getExcludePatterns();
     try {
       return await vscode.workspace.findFiles(includePatterns, excludePatterns);
     } catch (error) {
@@ -320,9 +317,9 @@ class DataService {
     );
   }
 
-  private fetchConfig() {
+  private async fetchConfig() {
     this.itemsFilter = getItemsFilter();
-    this.patternProvider = new PatternProvider();
+    await patternProvider.fetchConfig();
   }
 
   private setCancelled(value: boolean) {

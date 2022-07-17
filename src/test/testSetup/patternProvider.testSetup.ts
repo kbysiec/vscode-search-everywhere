@@ -1,281 +1,396 @@
+import * as sinon from "sinon";
 import * as vscode from "vscode";
+import * as config from "../../config";
 import ExcludeMode from "../../enum/excludeMode";
-import PatternProvider from "../../patternProvider";
+import { patternProvider } from "../../patternProvider";
 import { getItems } from "../util/itemMockFactory";
 import { getTextDocumentStub } from "../util/stubFactory";
-import { restoreStubbedMultiple, stubMultiple } from "../util/stubHelpers";
+import { stubMultiple } from "../util/stubHelpers";
 
-export const getTestSetups = (patternProvider: PatternProvider) => {
-  const patternProviderAny = patternProvider as any;
+export const getTestSetups = () => {
+  const sandbox = sinon.createSandbox();
 
   return {
+    afterEach: () => {
+      sandbox.restore();
+    },
     getIncludePatterns1: () => {
       const patterns = "**/*.{js,ts}";
-      stubMultiple([
-        {
-          object: patternProviderAny,
-          method: "includePatterns",
-          returns: patterns,
-          isNotMethod: true,
-        },
-      ]);
+      stubMultiple(
+        [
+          {
+            object: patternProvider,
+            method: "getIncludePatterns",
+            returns: patterns,
+          },
+        ],
+        sandbox
+      );
 
       return patterns;
     },
     getExcludePatterns1: () => {
       const patterns = ["**/.history/**", "**/.vscode/**"];
       const expected = `{${patterns.join(",")}}`;
-      stubMultiple([
-        {
-          object: patternProviderAny,
-          method: "excludeMode",
-          returns: ExcludeMode.SearchEverywhere,
-          isNotMethod: true,
-        },
-        {
-          object: patternProviderAny,
-          method: "extensionExcludePatterns",
-          returns: patterns,
-          isNotMethod: true,
-        },
-      ]);
+      stubMultiple(
+        [
+          {
+            object: patternProvider,
+            method: "getExcludeMode",
+            returns: ExcludeMode.SearchEverywhere,
+          },
+          {
+            object: patternProvider,
+            method: "getExtensionExcludePatterns",
+            returns: patterns,
+          },
+        ],
+        sandbox
+      );
 
       return expected;
     },
     getExcludePatterns2: () => {
       const patterns = ["**/.history/**", "**/.vscode/**"];
       const expected = `{${patterns.join(",")}}`;
-      stubMultiple([
-        {
-          object: patternProviderAny,
-          method: "excludeMode",
-          returns: ExcludeMode.FilesAndSearch,
-          isNotMethod: true,
-        },
-        {
-          object: patternProviderAny,
-          method: "filesAndSearchExcludePatterns",
-          returns: patterns,
-          isNotMethod: true,
-        },
-      ]);
+      stubMultiple(
+        [
+          {
+            object: patternProvider,
+            method: "getExcludeMode",
+            returns: ExcludeMode.FilesAndSearch,
+          },
+          {
+            object: patternProvider,
+            method: "getFilesAndSearchExcludePatterns",
+            returns: patterns,
+          },
+        ],
+        sandbox
+      );
 
       return expected;
     },
     getExcludePatterns3: () => {
       const patterns = ["**/.history/**", "**/.vscode/**"];
       const expected = `{${patterns.join(",")}}`;
-      stubMultiple([
-        {
-          object: patternProviderAny,
-          method: "excludeMode",
-          returns: ExcludeMode.Gitignore,
-          isNotMethod: true,
-        },
-        {
-          object: patternProviderAny,
-          method: "gitignoreExcludePatterns",
-          returns: patterns,
-          isNotMethod: true,
-        },
-      ]);
+      stubMultiple(
+        [
+          {
+            object: patternProvider,
+            method: "getExcludeMode",
+            returns: ExcludeMode.Gitignore,
+          },
+          {
+            object: patternProvider,
+            method: "getGitignoreExcludePatterns",
+            returns: patterns,
+          },
+        ],
+        sandbox
+      );
 
       return expected;
     },
-
     getExcludePatterns4: () => {
-      const patterns = ["dist", "out", ".vscode", ".history"];
+      const patterns = ["**/.history/**", "**/.vscode/**"];
       const expected = `{${patterns.join(",")}}`;
-      const textDocument = getTextDocumentStub();
-
-      restoreStubbedMultiple([
-        {
-          object: vscode.workspace,
-          method: "findFiles",
-        },
-      ]);
-
-      stubMultiple([
-        {
-          object: patternProviderAny,
-          method: "excludeMode",
-          returns: ExcludeMode.Gitignore,
-          isNotMethod: true,
-        },
-        {
-          object: vscode.workspace,
-          method: "findFiles",
-          returns: getItems(1),
-        },
-        {
-          object: textDocument,
-          method: "getText",
-          returns:
-            "# Project\ndist\nout\n\n# IDE config files\n\n.vscode\n.history\n\n",
-        },
-        {
-          object: vscode.workspace,
-          method: "openTextDocument",
-          returns: textDocument,
-        },
-      ]);
+      stubMultiple(
+        [
+          {
+            object: patternProvider,
+            method: "getExcludeMode",
+            returns: ExcludeMode.SearchEverywhere,
+          },
+          {
+            object: patternProvider,
+            method: "getExtensionExcludePatterns",
+            returns: patterns,
+          },
+        ],
+        sandbox
+      );
 
       return expected;
     },
     getExcludePatterns5: () => {
-      const patterns = [".vscode", ".history"];
-      const expected = `{${patterns.join(",")}}`;
-      const textDocument = getTextDocumentStub();
-
-      restoreStubbedMultiple([
-        {
-          object: vscode.workspace,
-          method: "findFiles",
-        },
-        {
-          object: vscode.workspace,
-          method: "openTextDocument",
-        },
-      ]);
-
-      stubMultiple([
-        {
-          object: patternProviderAny,
-          method: "excludeMode",
-          returns: ExcludeMode.Gitignore,
-          isNotMethod: true,
-        },
-        {
-          object: vscode.workspace,
-          method: "findFiles",
-          returns: [],
-        },
-        {
-          object: textDocument,
-          method: "getText",
-          returns:
-            "# Project\ndist\nout\n\n# IDE config files\n\n.vscode\n.history\n\n",
-        },
-        {
-          object: vscode.workspace,
-          method: "openTextDocument",
-          returns: textDocument,
-        },
-        {
-          object: patternProviderAny,
-          method: "fallbackExcludePatterns",
-          returns: patterns,
-          isNotMethod: true,
-        },
-      ]);
+      const patterns = ["**/.history/**"];
+      const expected = "**/.history/**";
+      stubMultiple(
+        [
+          {
+            object: patternProvider,
+            method: "getExcludeMode",
+            returns: ExcludeMode.SearchEverywhere,
+          },
+          {
+            object: patternProvider,
+            method: "getExtensionExcludePatterns",
+            returns: patterns,
+          },
+        ],
+        sandbox
+      );
 
       return expected;
     },
     getExcludePatterns6: () => {
-      const patterns = [".vscode", ".history"];
-      const expected = `{${patterns.join(",")}}`;
-      const textDocument = getTextDocumentStub();
-
-      restoreStubbedMultiple([
-        {
-          object: vscode.workspace,
-          method: "findFiles",
-        },
-        {
-          object: vscode.workspace,
-          method: "openTextDocument",
-        },
-      ]);
-
-      stubMultiple([
-        {
-          object: patternProviderAny,
-          method: "excludeMode",
-          returns: ExcludeMode.Gitignore,
-          isNotMethod: true,
-        },
-        {
-          object: vscode.workspace,
-          method: "findFiles",
-          returns: getItems(1),
-        },
-        {
-          object: textDocument,
-          method: "getText",
-          returns: "",
-        },
-        {
-          object: vscode.workspace,
-          method: "openTextDocument",
-          returns: textDocument,
-        },
-        {
-          object: patternProviderAny,
-          method: "fallbackExcludePatterns",
-          returns: patterns,
-          isNotMethod: true,
-        },
-      ]);
-
-      return expected;
-    },
-    getExcludePatterns7: () => {
-      const patterns = ["**/.history/**", "**/.vscode/**"];
-      const expected = `{${patterns.join(",")}}`;
-      stubMultiple([
-        {
-          object: patternProviderAny,
-          method: "excludeMode",
-          returns: ExcludeMode.SearchEverywhere,
-          isNotMethod: true,
-        },
-        {
-          object: patternProviderAny,
-          method: "extensionExcludePatterns",
-          returns: patterns,
-          isNotMethod: true,
-        },
-      ]);
-
-      return expected;
-    },
-    getExcludePatterns8: () => {
-      const patterns = ["**/.history/**"];
-      const expected = "**/.history/**";
-      stubMultiple([
-        {
-          object: patternProviderAny,
-          method: "excludeMode",
-          returns: ExcludeMode.SearchEverywhere,
-          isNotMethod: true,
-        },
-        {
-          object: patternProviderAny,
-          method: "extensionExcludePatterns",
-          returns: patterns,
-          isNotMethod: true,
-        },
-      ]);
-
-      return expected;
-    },
-    getExcludePatterns9: () => {
       const expected = "";
-      stubMultiple([
-        {
-          object: patternProviderAny,
-          method: "excludeMode",
-          returns: ExcludeMode.SearchEverywhere,
-          isNotMethod: true,
-        },
-        {
-          object: patternProviderAny,
-          method: "extensionExcludePatterns",
-          returns: [],
-          isNotMethod: true,
-        },
-      ]);
+      stubMultiple(
+        [
+          {
+            object: patternProvider,
+            method: "getExcludeMode",
+            returns: ExcludeMode.SearchEverywhere,
+          },
+          {
+            object: patternProvider,
+            method: "getExtensionExcludePatterns",
+            returns: [],
+          },
+        ],
+        sandbox
+      );
 
+      return expected;
+    },
+    fetchConfig1: () => {
+      const expected = ExcludeMode.Gitignore;
+      stubMultiple(
+        [
+          {
+            object: config,
+            method: "getExcludeMode",
+            returns: expected,
+          },
+          {
+            object: config,
+            method: "getInclude",
+          },
+          {
+            object: config,
+            method: "getExclude",
+          },
+          {
+            object: config,
+            method: "getFilesAndSearchExclude",
+          },
+          {
+            object: vscode.workspace,
+            method: "findFiles",
+            returns: [],
+          },
+        ],
+        sandbox
+      );
+      return expected;
+    },
+    fetchConfig2: () => {
+      const expected = "**/*.{js,ts}";
+      stubMultiple(
+        [
+          {
+            object: config,
+            method: "getExcludeMode",
+          },
+          {
+            object: config,
+            method: "getInclude",
+            returns: expected,
+          },
+          {
+            object: config,
+            method: "getExclude",
+          },
+          {
+            object: config,
+            method: "getFilesAndSearchExclude",
+          },
+          {
+            object: vscode.workspace,
+            method: "findFiles",
+            returns: [],
+          },
+        ],
+        sandbox
+      );
+      return expected;
+    },
+    fetchConfig3: () => {
+      const expected = ["**/.history/**", "**/.vscode/**"];
+      stubMultiple(
+        [
+          {
+            object: config,
+            method: "getExcludeMode",
+          },
+          {
+            object: config,
+            method: "getInclude",
+          },
+          {
+            object: config,
+            method: "getExclude",
+            returns: expected,
+          },
+          {
+            object: config,
+            method: "getFilesAndSearchExclude",
+          },
+          {
+            object: vscode.workspace,
+            method: "findFiles",
+            returns: [],
+          },
+        ],
+        sandbox
+      );
+      return expected;
+    },
+    fetchConfig4: () => {
+      const expected = ["**/.history/**", "**/.vscode/**"];
+      stubMultiple(
+        [
+          {
+            object: config,
+            method: "getExcludeMode",
+          },
+          {
+            object: config,
+            method: "getInclude",
+          },
+          {
+            object: config,
+            method: "getExclude",
+          },
+          {
+            object: config,
+            method: "getFilesAndSearchExclude",
+            returns: expected,
+          },
+          {
+            object: vscode.workspace,
+            method: "findFiles",
+            returns: [],
+          },
+        ],
+        sandbox
+      );
+      return expected;
+    },
+    fetchConfig5: () => {
+      const textDocument = getTextDocumentStub();
+      const expected = ["dist", "out", ".vscode", ".history"];
+      stubMultiple(
+        [
+          {
+            object: config,
+            method: "getExcludeMode",
+          },
+          {
+            object: config,
+            method: "getInclude",
+          },
+          {
+            object: config,
+            method: "getExclude",
+          },
+          {
+            object: config,
+            method: "getFilesAndSearchExclude",
+          },
+          {
+            object: vscode.workspace,
+            method: "findFiles",
+            returns: getItems(1),
+          },
+          {
+            object: vscode.workspace,
+            method: "openTextDocument",
+            returns: textDocument,
+          },
+          {
+            object: textDocument,
+            method: "getText",
+            returns:
+              "# Project\ndist\nout\n\n# IDE config files\n\n.vscode\n.history\n\n",
+          },
+        ],
+        sandbox
+      );
+      return expected;
+    },
+    fetchConfig6: () => {
+      const expected = ["**/.history/**", "**/.vscode/**"];
+      stubMultiple(
+        [
+          {
+            object: config,
+            method: "getExcludeMode",
+          },
+          {
+            object: config,
+            method: "getInclude",
+          },
+          {
+            object: config,
+            method: "getExclude",
+            returns: expected,
+          },
+          {
+            object: config,
+            method: "getFilesAndSearchExclude",
+          },
+          {
+            object: vscode.workspace,
+            method: "findFiles",
+            returns: [],
+          },
+        ],
+        sandbox
+      );
+      return expected;
+    },
+    fetchConfig7: () => {
+      const textDocument = getTextDocumentStub();
+      const expected = ["**/.history/**", "**/.vscode/**"];
+      stubMultiple(
+        [
+          {
+            object: config,
+            method: "getExcludeMode",
+          },
+          {
+            object: config,
+            method: "getInclude",
+          },
+          {
+            object: config,
+            method: "getExclude",
+            returns: expected,
+          },
+          {
+            object: config,
+            method: "getFilesAndSearchExclude",
+          },
+          {
+            object: vscode.workspace,
+            method: "findFiles",
+            returns: getItems(1),
+          },
+          {
+            object: vscode.workspace,
+            method: "openTextDocument",
+            returns: textDocument,
+          },
+          {
+            object: textDocument,
+            method: "getText",
+            returns: "",
+          },
+        ],
+        sandbox
+      );
       return expected;
     },
   };
