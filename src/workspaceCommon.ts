@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import ActionProcessor from "./actionProcessor";
 import { clear, getData, updateData } from "./cache";
 import { shouldDisplayNotificationInStatusBar } from "./config";
-import DataConverter from "./dataConverter";
+import { dataConverter } from "./dataConverter";
 import DataService from "./dataService";
 import ActionType from "./enum/actionType";
 import Action from "./interface/action";
@@ -18,7 +18,6 @@ class WorkspaceCommon {
 
   constructor(
     private dataService: DataService,
-    private dataConverter: DataConverter,
     private actionProcessor: ActionProcessor
   ) {}
 
@@ -66,12 +65,12 @@ class WorkspaceCommon {
 
   async downloadData(uris?: vscode.Uri[]): Promise<QuickPickItem[]> {
     const data = await this.dataService.fetchData(uris);
-    return this.dataConverter.convertToQpData(data);
+    return dataConverter.convertToQpData(data);
   }
 
   cancelIndexing(): void {
     this.dataService.cancel();
-    this.dataConverter.cancel();
+    dataConverter.cancel();
   }
 
   private async indexWithProgressTask(
@@ -126,7 +125,7 @@ class WorkspaceCommon {
   private async indexWorkspace(): Promise<WorkspaceData> {
     clear();
     const data = await this.dataService.fetchData();
-    const qpData = this.dataConverter.convertToQpData(data);
+    const qpData = dataConverter.convertToQpData(data);
     updateData(qpData);
     return data;
   }

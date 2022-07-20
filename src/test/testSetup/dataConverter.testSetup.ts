@@ -1,80 +1,70 @@
+import * as sinon from "sinon";
 import * as vscode from "vscode";
-import DataConverter from "../../dataConverter";
+import * as config from "../../config";
+import { dataConverter } from "../../dataConverter";
 import Icons from "../../interface/icons";
 import ItemsFilterPhrases from "../../interface/itemsFilterPhrases";
-import { getConfiguration, getWorkspaceData } from "../util/mockFactory";
-import { stubMultiple, restoreStubbedMultiple } from "../util/stubHelpers";
 import { mocks } from "../mock/dataConverter.mock";
+import { getConfiguration, getWorkspaceData } from "../util/mockFactory";
+import { stubMultiple } from "../util/stubHelpers";
 
-export const getTestSetups = (dataConverter: DataConverter) => {
-  const dataConverterAny = dataConverter as any;
-
-  const stubConfig = (
-    icons: Icons = {},
-    shouldUseItemsFilterPhrases: boolean = false,
-    itemsFilterPhrases: ItemsFilterPhrases = {},
-    workspaceFolders: vscode.WorkspaceFolder[] | null = mocks.workspaceFolders
-  ) => {
-    stubMultiple([
+const stubConfig = (
+  sandbox: sinon.SinonSandbox,
+  icons: Icons = {},
+  shouldUseItemsFilterPhrases: boolean = false,
+  itemsFilterPhrases: ItemsFilterPhrases = {},
+  workspaceFolders: vscode.WorkspaceFolder[] | null = mocks.workspaceFolders
+) => {
+  stubMultiple(
+    [
       {
-        object: dataConverterAny,
-        method: "icons",
+        object: dataConverter,
+        method: "getIcons",
         returns: icons,
-        isNotMethod: true,
       },
       {
-        object: dataConverterAny,
-        method: "shouldUseItemsFilterPhrases",
+        object: dataConverter,
+        method: "getShouldUseItemsFilterPhrases",
         returns: shouldUseItemsFilterPhrases,
-        isNotMethod: true,
       },
       {
-        object: dataConverterAny,
-        method: "itemsFilterPhrases",
+        object: dataConverter,
+        method: "getItemsFilterPhrases",
         returns: itemsFilterPhrases,
-        isNotMethod: true,
       },
       {
         object: vscode.workspace,
         method: "workspaceFolders",
         returns: workspaceFolders,
         isNotMethod: true,
-        returnsIsUndefined: !workspaceFolders,
+        returnsIsUndefined: !!workspaceFolders,
       },
-    ]);
-  };
+    ],
+    sandbox
+  );
+};
+
+export const getTestSetups = () => {
+  const sandbox = sinon.createSandbox();
 
   return {
+    afterEach: () => {
+      sandbox.restore();
+    },
     reload1: () => {
-      return stubMultiple([
-        { object: dataConverterAny, method: "fetchConfig" },
-      ]);
+      return stubMultiple(
+        [{ object: dataConverter, method: "fetchConfig" }],
+        sandbox
+      );
     },
     cancel1: () => {
-      return stubMultiple([
-        { object: dataConverterAny, method: "setCancelled" },
-      ]);
+      return stubMultiple(
+        [{ object: dataConverter, method: "setCancelled" }],
+        sandbox
+      );
     },
     convertToQpData1: () => {
-      restoreStubbedMultiple([
-        {
-          object: dataConverterAny.utils,
-          method: "getSplitter",
-        },
-        {
-          object: dataConverterAny.utils,
-          method: "getNameFromUri",
-        },
-        {
-          object: dataConverterAny.utils,
-          method: "normalizeUriPath",
-        },
-        {
-          object: dataConverterAny.utils,
-          method: "getWorkspaceFoldersPaths",
-        },
-      ]);
-      stubConfig();
+      stubConfig(sandbox);
 
       const { workspaceData, qpItems } = mocks.convertToQpData1();
 
@@ -84,26 +74,9 @@ export const getTestSetups = (dataConverter: DataConverter) => {
       };
     },
     convertToQpData2: () => {
-      restoreStubbedMultiple([
-        {
-          object: dataConverterAny.utils,
-          method: "getSplitter",
-        },
-        {
-          object: dataConverterAny.utils,
-          method: "getNameFromUri",
-        },
-        {
-          object: dataConverterAny.utils,
-          method: "normalizeUriPath",
-        },
-        {
-          object: dataConverterAny.utils,
-          method: "getWorkspaceFoldersPaths",
-        },
-      ]);
       const configuration = getConfiguration().searchEverywhere;
       stubConfig(
+        sandbox,
         configuration.icons,
         true,
         configuration.itemsFilterPhrases,
@@ -124,14 +97,16 @@ export const getTestSetups = (dataConverter: DataConverter) => {
       };
     },
     convertToQpData4: () => {
-      stubMultiple([
-        {
-          object: dataConverterAny,
-          method: "isCancelled",
-          returns: true,
-          isNotMethod: true,
-        },
-      ]);
+      stubMultiple(
+        [
+          {
+            object: dataConverter,
+            method: "getIsCancelled",
+            returns: true,
+          },
+        ],
+        sandbox
+      );
 
       const { workspaceData } = mocks.convertToQpData4();
 
@@ -139,6 +114,75 @@ export const getTestSetups = (dataConverter: DataConverter) => {
         workspaceData,
         qpItems: [],
       };
+    },
+    fetchConfig1: () => {
+      const configuration = getConfiguration().searchEverywhere;
+      const expected = configuration.icons;
+      stubMultiple(
+        [
+          {
+            object: config,
+            method: "getIcons",
+            returns: expected,
+          },
+          {
+            object: config,
+            method: "shouldUseItemsFilterPhrases",
+          },
+          {
+            object: config,
+            method: "getItemsFilterPhrases",
+          },
+        ],
+        sandbox
+      );
+      return expected;
+    },
+    fetchConfig2: () => {
+      const configuration = getConfiguration().searchEverywhere;
+      const expected = configuration.shouldUseItemsFilterPhrases;
+      stubMultiple(
+        [
+          {
+            object: config,
+            method: "shouldUseItemsFilterPhrases",
+            returns: expected,
+          },
+          {
+            object: config,
+            method: "getIcons",
+          },
+          {
+            object: config,
+            method: "getItemsFilterPhrases",
+          },
+        ],
+        sandbox
+      );
+      return expected;
+    },
+    fetchConfig3: () => {
+      const configuration = getConfiguration().searchEverywhere;
+      const expected = configuration.itemsFilterPhrases;
+      stubMultiple(
+        [
+          {
+            object: config,
+            method: "getItemsFilterPhrases",
+            returns: expected,
+          },
+          {
+            object: config,
+            method: "shouldUseItemsFilterPhrases",
+          },
+          {
+            object: config,
+            method: "getIcons",
+          },
+        ],
+        sandbox
+      );
+      return expected;
     },
   };
 };

@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import ActionProcessor from "./actionProcessor";
 import { clearConfig } from "./cache";
 import { getExcludeMode } from "./config";
-import DataConverter from "./dataConverter";
+import { dataConverter } from "./dataConverter";
 import DataService from "./dataService";
 import ActionTrigger from "./enum/actionTrigger";
 import ActionType from "./enum/actionType";
@@ -26,7 +26,6 @@ const debounce = require("debounce");
 
 class Workspace {
   private dataService!: DataService;
-  private dataConverter!: DataConverter;
   private actionProcessor!: ActionProcessor;
 
   private common!: WorkspaceCommon;
@@ -73,20 +72,16 @@ class Workspace {
   private initComponents(): void {
     utils.setWorkspaceFoldersCommonPath();
     this.dataService = new DataService();
-    this.dataConverter = new DataConverter();
+    dataConverter.fetchConfig();
     this.actionProcessor = new ActionProcessor();
 
-    this.common = new WorkspaceCommon(
-      this.dataService,
-      this.dataConverter,
-      this.actionProcessor
-    );
+    this.common = new WorkspaceCommon(this.dataService, this.actionProcessor);
     this.remover = new WorkspaceRemover(this.common);
     this.updater = new WorkspaceUpdater(this.common);
   }
 
   private reloadComponents() {
-    this.dataConverter.reload();
+    dataConverter.reload();
     this.dataService.reload();
   }
 

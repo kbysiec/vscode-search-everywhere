@@ -1,7 +1,6 @@
 import * as sinon from "sinon";
 import * as vscode from "vscode";
 import ActionProcessor from "../../actionProcessor";
-import DataConverter from "../../dataConverter";
 import DataService from "../../dataService";
 import QuickPick from "../../quickPick";
 import WorkspaceCommon from "../../workspaceCommon";
@@ -14,12 +13,6 @@ export function getDataServiceStub(): DataService {
   return dataServiceStub as DataService;
 }
 
-export function getDataConverterStub(): DataConverter {
-  const dataConverterStub: any = createStubInstance(DataConverter);
-
-  return dataConverterStub as DataConverter;
-}
-
 export function getActionProcessorStub(): ActionProcessor {
   const actionProcessorStub: any = createStubInstance(ActionProcessor);
 
@@ -29,7 +22,6 @@ export function getActionProcessorStub(): ActionProcessor {
 export function getWorkspaceCommonStub(): WorkspaceCommon {
   const workspaceCommonStubTemp: any = createStubInstance(WorkspaceCommon);
   workspaceCommonStubTemp.dataService = getDataServiceStub();
-  workspaceCommonStubTemp.dataConverter = getDataConverterStub();
   workspaceCommonStubTemp.actionProcessor = getActionProcessorStub();
   workspaceCommonStubTemp.urisForDirectoryPathUpdate = null;
   workspaceCommonStubTemp.directoryUriBeforePathUpdate = null;
