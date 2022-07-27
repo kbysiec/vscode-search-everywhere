@@ -1,6 +1,6 @@
 import { performance } from "perf_hooks";
 import * as vscode from "vscode";
-import ActionProcessor from "./actionProcessor";
+import { actionProcessor } from "./actionProcessor";
 import { clear, getData, updateData } from "./cache";
 import { shouldDisplayNotificationInStatusBar } from "./config";
 import { dataConverter } from "./dataConverter";
@@ -16,10 +16,7 @@ class WorkspaceCommon {
   progressStep: number = 0;
   currentProgressValue: number = 0;
 
-  constructor(
-    private dataService: DataService,
-    private actionProcessor: ActionProcessor
-  ) {}
+  constructor(private dataService: DataService) {}
 
   getData(): QuickPickItem[] {
     return getData() || [];
@@ -60,7 +57,7 @@ class WorkspaceCommon {
       comment,
       uri,
     };
-    await this.actionProcessor.register(action);
+    await actionProcessor.register(action);
   }
 
   async downloadData(uris?: vscode.Uri[]): Promise<QuickPickItem[]> {

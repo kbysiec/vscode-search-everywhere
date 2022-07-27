@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import ActionProcessor from "./actionProcessor";
+import { actionProcessor } from "./actionProcessor";
 import { clearConfig } from "./cache";
 import { getExcludeMode } from "./config";
 import { dataConverter } from "./dataConverter";
@@ -26,7 +26,6 @@ const debounce = require("debounce");
 
 class Workspace {
   private dataService!: DataService;
-  private actionProcessor!: ActionProcessor;
 
   private common!: WorkspaceCommon;
   private remover!: WorkspaceRemover;
@@ -54,13 +53,9 @@ class Workspace {
     vscode.workspace.onDidCreateFiles(this.handleDidCreateFiles);
     vscode.workspace.onDidDeleteFiles(this.handleDidDeleteFiles);
 
-    this.actionProcessor.onDidProcessing(
-      this.handleDidActionProcessorProcessing
-    );
-    this.actionProcessor.onWillProcessing(
-      this.handleWillActionProcessorProcessing
-    );
-    this.actionProcessor.onWillExecuteAction(
+    actionProcessor.onDidProcessing(this.handleDidActionProcessorProcessing);
+    actionProcessor.onWillProcessing(this.handleWillActionProcessorProcessing);
+    actionProcessor.onWillExecuteAction(
       this.handleWillActionProcessorExecuteAction
     );
   }
@@ -73,9 +68,8 @@ class Workspace {
     utils.setWorkspaceFoldersCommonPath();
     this.dataService = new DataService();
     dataConverter.fetchConfig();
-    this.actionProcessor = new ActionProcessor();
 
-    this.common = new WorkspaceCommon(this.dataService, this.actionProcessor);
+    this.common = new WorkspaceCommon(this.dataService);
     this.remover = new WorkspaceRemover(this.common);
     this.updater = new WorkspaceUpdater(this.common);
   }
