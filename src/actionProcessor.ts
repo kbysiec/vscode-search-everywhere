@@ -1,4 +1,8 @@
-import * as vscode from "vscode";
+import {
+  onDidProcessingEventEmitter,
+  onWillExecuteActionEventEmitter,
+  onWillProcessingEventEmitter,
+} from "./actionProcessorEventsEmitter";
 import ActionType from "./enum/actionType";
 import Action from "./interface/action";
 import { utils } from "./utils";
@@ -159,17 +163,6 @@ async function register(action: Action): Promise<void> {
   await processIfIsNotBusy();
 }
 
-export const onDidProcessingEventEmitter: vscode.EventEmitter<void> =
-  new vscode.EventEmitter();
-export const onWillProcessingEventEmitter: vscode.EventEmitter<void> =
-  new vscode.EventEmitter();
-export const onWillExecuteActionEventEmitter: vscode.EventEmitter<Action> =
-  new vscode.EventEmitter();
-
-const onDidProcessing = onDidProcessingEventEmitter.event;
-const onWillProcessing = onWillProcessingEventEmitter.event;
-const onWillExecuteAction = onWillExecuteActionEventEmitter.event;
-
 function getActionId() {
   return actionId;
 }
@@ -189,7 +182,4 @@ export const actionProcessor = {
   add,
   process,
   register,
-  onDidProcessing,
-  onWillProcessing,
-  onWillExecuteAction,
 };

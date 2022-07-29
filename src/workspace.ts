@@ -1,5 +1,9 @@
 import * as vscode from "vscode";
-import { actionProcessor } from "./actionProcessor";
+import {
+  onDidProcessing,
+  onWillExecuteAction,
+  onWillProcessing,
+} from "./actionProcessorEventsEmitter";
 import { clearConfig } from "./cache";
 import { getExcludeMode } from "./config";
 import { dataConverter } from "./dataConverter";
@@ -53,11 +57,9 @@ class Workspace {
     vscode.workspace.onDidCreateFiles(this.handleDidCreateFiles);
     vscode.workspace.onDidDeleteFiles(this.handleDidDeleteFiles);
 
-    actionProcessor.onDidProcessing(this.handleDidActionProcessorProcessing);
-    actionProcessor.onWillProcessing(this.handleWillActionProcessorProcessing);
-    actionProcessor.onWillExecuteAction(
-      this.handleWillActionProcessorExecuteAction
-    );
+    onDidProcessing(this.handleDidActionProcessorProcessing);
+    onWillProcessing(this.handleWillActionProcessorProcessing);
+    onWillExecuteAction(this.handleWillActionProcessorExecuteAction);
   }
 
   getData(): QuickPickItem[] {
