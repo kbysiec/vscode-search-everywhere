@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
 import {
-  getExclude as fetchExclude,
-  getExcludeMode as fetchExcludeMode,
-  getFilesAndSearchExclude as fetchFilesAndSearchExclude,
-  getInclude as fetchInclude,
+  fetchExclude,
+  fetchExcludeMode,
+  fetchFilesAndSearchExclude,
+  fetchInclude,
 } from "./config";
 import ExcludeMode from "./enum/excludeMode";
 

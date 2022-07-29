@@ -2,7 +2,7 @@ import { performance } from "perf_hooks";
 import * as vscode from "vscode";
 import { actionProcessor } from "./actionProcessor";
 import { clear, getData, updateData } from "./cache";
-import { shouldDisplayNotificationInStatusBar } from "./config";
+import { fetchShouldDisplayNotificationInStatusBar } from "./config";
 import { dataConverter } from "./dataConverter";
 import DataService from "./dataService";
 import ActionType from "./enum/actionType";
@@ -177,13 +177,13 @@ class WorkspaceCommon {
   }
 
   private getNotificationLocation(): vscode.ProgressLocation {
-    return shouldDisplayNotificationInStatusBar()
+    return fetchShouldDisplayNotificationInStatusBar()
       ? vscode.ProgressLocation.Window
       : vscode.ProgressLocation.Notification;
   }
 
   private getNotificationTitle(): string {
-    return shouldDisplayNotificationInStatusBar()
+    return fetchShouldDisplayNotificationInStatusBar()
       ? "Indexing..."
       : "Indexing workspace files and symbols...";
   }

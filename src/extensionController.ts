@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { initCache } from "./cache";
-import { shouldInitOnStartup } from "./config";
+import { fetchShouldInitOnStartup } from "./config";
 import ActionTrigger from "./enum/actionTrigger";
 import ActionType from "./enum/actionType";
 import Action from "./interface/action";
@@ -42,7 +42,7 @@ class ExtensionController {
   }
 
   async startup(): Promise<void> {
-    shouldInitOnStartup() &&
+    fetchShouldInitOnStartup() &&
       (await this.workspace.index(ActionTrigger.Startup));
   }
 
@@ -72,7 +72,7 @@ class ExtensionController {
   }
 
   private shouldIndexOnQuickPickOpen() {
-    return !shouldInitOnStartup() && !this.quickPick.isInitialized();
+    return !fetchShouldInitOnStartup() && !this.quickPick.isInitialized();
   }
 
   private initComponents(): void {

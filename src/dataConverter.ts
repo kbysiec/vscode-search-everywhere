@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import {
-  getIcons as fetchIcons,
-  getItemsFilterPhrases as fetchItemsFilterPhrases,
-  shouldUseItemsFilterPhrases as fetchShouldUseItemsFilterPhrases,
+  fetchIcons,
+  fetchItemsFilterPhrases,
+  fetchShouldUseItemsFilterPhrases,
 } from "./config";
 import Icons from "./interface/icons";
 import Item from "./interface/item";

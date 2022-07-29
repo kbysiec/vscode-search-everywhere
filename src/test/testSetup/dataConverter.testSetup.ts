@@ -122,16 +122,16 @@ export const getTestSetups = () => {
         [
           {
             object: config,
-            method: "getIcons",
+            method: "fetchIcons",
             returns: expected,
           },
           {
             object: config,
-            method: "shouldUseItemsFilterPhrases",
+            method: "fetchShouldUseItemsFilterPhrases",
           },
           {
             object: config,
-            method: "getItemsFilterPhrases",
+            method: "fetchItemsFilterPhrases",
           },
         ],
         sandbox
@@ -145,16 +145,16 @@ export const getTestSetups = () => {
         [
           {
             object: config,
-            method: "shouldUseItemsFilterPhrases",
+            method: "fetchShouldUseItemsFilterPhrases",
             returns: expected,
           },
           {
             object: config,
-            method: "getIcons",
+            method: "fetchIcons",
           },
           {
             object: config,
-            method: "getItemsFilterPhrases",
+            method: "fetchItemsFilterPhrases",
           },
         ],
         sandbox
@@ -168,16 +168,16 @@ export const getTestSetups = () => {
         [
           {
             object: config,
-            method: "getItemsFilterPhrases",
+            method: "fetchItemsFilterPhrases",
             returns: expected,
           },
           {
             object: config,
-            method: "shouldUseItemsFilterPhrases",
+            method: "fetchShouldUseItemsFilterPhrases",
           },
           {
             object: config,
-            method: "getIcons",
+            method: "fetchIcons",
           },
         ],
         sandbox

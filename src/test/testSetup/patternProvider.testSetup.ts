@@ -160,20 +160,20 @@ export const getTestSetups = () => {
         [
           {
             object: config,
-            method: "getExcludeMode",
+            method: "fetchExcludeMode",
             returns: expected,
           },
           {
             object: config,
-            method: "getInclude",
+            method: "fetchInclude",
           },
           {
             object: config,
-            method: "getExclude",
+            method: "fetchExclude",
           },
           {
             object: config,
-            method: "getFilesAndSearchExclude",
+            method: "fetchFilesAndSearchExclude",
           },
           {
             object: vscode.workspace,
@@ -191,20 +191,20 @@ export const getTestSetups = () => {
         [
           {
             object: config,
-            method: "getExcludeMode",
+            method: "fetchExcludeMode",
           },
           {
             object: config,
-            method: "getInclude",
+            method: "fetchInclude",
             returns: expected,
           },
           {
             object: config,
-            method: "getExclude",
+            method: "fetchExclude",
           },
           {
             object: config,
-            method: "getFilesAndSearchExclude",
+            method: "fetchFilesAndSearchExclude",
           },
           {
             object: vscode.workspace,
@@ -222,20 +222,20 @@ export const getTestSetups = () => {
         [
           {
             object: config,
-            method: "getExcludeMode",
+            method: "fetchExcludeMode",
           },
           {
             object: config,
-            method: "getInclude",
+            method: "fetchInclude",
           },
           {
             object: config,
-            method: "getExclude",
+            method: "fetchExclude",
             returns: expected,
           },
           {
             object: config,
-            method: "getFilesAndSearchExclude",
+            method: "fetchFilesAndSearchExclude",
           },
           {
             object: vscode.workspace,
@@ -253,19 +253,19 @@ export const getTestSetups = () => {
         [
           {
             object: config,
-            method: "getExcludeMode",
+            method: "fetchExcludeMode",
           },
           {
             object: config,
-            method: "getInclude",
+            method: "fetchInclude",
           },
           {
             object: config,
-            method: "getExclude",
+            method: "fetchExclude",
           },
           {
             object: config,
-            method: "getFilesAndSearchExclude",
+            method: "fetchFilesAndSearchExclude",
             returns: expected,
           },
           {
@@ -285,19 +285,19 @@ export const getTestSetups = () => {
         [
           {
             object: config,
-            method: "getExcludeMode",
+            method: "fetchExcludeMode",
           },
           {
             object: config,
-            method: "getInclude",
+            method: "fetchInclude",
           },
           {
             object: config,
-            method: "getExclude",
+            method: "fetchExclude",
           },
           {
             object: config,
-            method: "getFilesAndSearchExclude",
+            method: "fetchFilesAndSearchExclude",
           },
           {
             object: vscode.workspace,
@@ -326,20 +326,20 @@ export const getTestSetups = () => {
         [
           {
             object: config,
-            method: "getExcludeMode",
+            method: "fetchExcludeMode",
           },
           {
             object: config,
-            method: "getInclude",
+            method: "fetchInclude",
           },
           {
             object: config,
-            method: "getExclude",
+            method: "fetchExclude",
             returns: expected,
           },
           {
             object: config,
-            method: "getFilesAndSearchExclude",
+            method: "fetchFilesAndSearchExclude",
           },
           {
             object: vscode.workspace,
@@ -358,20 +358,20 @@ export const getTestSetups = () => {
         [
           {
             object: config,
-            method: "getExcludeMode",
+            method: "fetchExcludeMode",
           },
           {
             object: config,
-            method: "getInclude",
+            method: "fetchInclude",
           },
           {
             object: config,
-            method: "getExclude",
+            method: "fetchExclude",
             returns: expected,
           },
           {
             object: config,
-            method: "getFilesAndSearchExclude",
+            method: "fetchFilesAndSearchExclude",
           },
           {
             object: vscode.workspace,

@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getItemsFilter } from "./config";
+import { fetchItemsFilter } from "./config";
 import Item from "./interface/item";
 import ItemsFilter from "./interface/itemsFilter";
 import WorkspaceData from "./interface/workspaceData";
@@ -318,7 +318,7 @@ class DataService {
   }
 
   private async fetchConfig() {
-    this.itemsFilter = getItemsFilter();
+    this.itemsFilter = fetchItemsFilter();
     await patternProvider.fetchConfig();
   }
 

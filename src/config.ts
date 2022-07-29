@@ -95,57 +95,57 @@ function getConfiguration<T>(section: string, defaultValue: T): T {
   return config.get<T>(section, defaultValue);
 }
 
-export function shouldDisplayNotificationInStatusBar(): boolean {
+export function fetchShouldDisplayNotificationInStatusBar(): boolean {
   return get(
     keys.shouldDisplayNotificationInStatusBar.name,
     keys.shouldDisplayNotificationInStatusBar.value
   );
 }
 
-export function shouldInitOnStartup(): boolean {
+export function fetchShouldInitOnStartup(): boolean {
   return get(keys.shouldInitOnStartup.name, keys.shouldInitOnStartup.value);
 }
 
-export function shouldHighlightSymbol(): boolean {
+export function fetchShouldHighlightSymbol(): boolean {
   return get(keys.shouldHighlightSymbol.name, keys.shouldHighlightSymbol.value);
 }
 
-export function shouldUseDebounce(): boolean {
+export function fetchShouldUseDebounce(): boolean {
   return get(keys.shouldUseDebounce.name, keys.shouldUseDebounce.value);
 }
 
-export function getIcons(): Icons {
+export function fetchIcons(): Icons {
   return get(keys.icons.name, keys.icons.value);
 }
 
-export function getItemsFilter(): ItemsFilter {
+export function fetchItemsFilter(): ItemsFilter {
   return get(keys.itemsFilter.name, keys.itemsFilter.value);
 }
 
-export function shouldUseItemsFilterPhrases(): boolean {
+export function fetchShouldUseItemsFilterPhrases(): boolean {
   return get(
     keys.shouldUseItemsFilterPhrases.name,
     keys.shouldUseItemsFilterPhrases.value
   );
 }
 
-export function getItemsFilterPhrases(): ItemsFilterPhrases {
+export function fetchItemsFilterPhrases(): ItemsFilterPhrases {
   return get(keys.itemsFilterPhrases.name, keys.itemsFilterPhrases.value);
 }
 
-export function getHelpPhrase(): string {
+export function fetchHelpPhrase(): string {
   return get(keys.helpPhrase.name, keys.helpPhrase.value);
 }
 
-export function getExclude(): string[] {
+export function fetchExclude(): string[] {
   return get(keys.exclude.name, keys.exclude.value);
 }
 
-export function getInclude(): string {
+export function fetchInclude(): string {
   return get(keys.include.name, keys.include.value);
 }
 
-export function getFilesAndSearchExclude(): string[] {
+export function fetchFilesAndSearchExclude(): string[] {
   let excludePatterns: Array<string> = [];
   const filesExcludePatterns = getFilesExclude();
   const searchExcludePatterns = getSearchExclude();
@@ -162,6 +162,6 @@ export function getFilesAndSearchExclude(): string[] {
   return excludePatterns;
 }
 
-export function getExcludeMode(): ExcludeMode {
+export function fetchExcludeMode(): ExcludeMode {
   return get(keys.excludeMode.name, keys.excludeMode.value);
 }

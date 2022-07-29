@@ -21,7 +21,7 @@ describe("Config", () => {
       const key = "shouldDisplayNotificationInStatusBar";
 
       assert.equal(
-        config.shouldDisplayNotificationInStatusBar(),
+        config.fetchShouldDisplayNotificationInStatusBar(),
         configuration[section][key]
       );
     });
@@ -32,7 +32,10 @@ describe("Config", () => {
       const section = "searchEverywhere";
       const key = "shouldInitOnStartup";
 
-      assert.equal(config.shouldInitOnStartup(), configuration[section][key]);
+      assert.equal(
+        config.fetchShouldInitOnStartup(),
+        configuration[section][key]
+      );
     });
   });
 
@@ -41,7 +44,10 @@ describe("Config", () => {
       const section = "searchEverywhere";
       const key = "shouldHighlightSymbol";
 
-      assert.equal(config.shouldHighlightSymbol(), configuration[section][key]);
+      assert.equal(
+        config.fetchShouldHighlightSymbol(),
+        configuration[section][key]
+      );
     });
   });
 
@@ -50,7 +56,10 @@ describe("Config", () => {
       const section = "searchEverywhere";
       const key = "shouldUseDebounce";
 
-      assert.equal(config.shouldUseDebounce(), configuration[section][key]);
+      assert.equal(
+        config.fetchShouldUseDebounce(),
+        configuration[section][key]
+      );
     });
   });
 
@@ -59,7 +68,7 @@ describe("Config", () => {
       const section = "searchEverywhere";
       const key = "icons";
 
-      assert.equal(config.getIcons(), configuration[section][key]);
+      assert.equal(config.fetchIcons(), configuration[section][key]);
     });
   });
 
@@ -68,7 +77,7 @@ describe("Config", () => {
       const section = "searchEverywhere";
       const key = "itemsFilter";
 
-      assert.equal(config.getItemsFilter(), configuration[section][key]);
+      assert.equal(config.fetchItemsFilter(), configuration[section][key]);
     });
   });
 
@@ -78,7 +87,7 @@ describe("Config", () => {
       const key = "shouldUseItemsFilterPhrases";
 
       assert.equal(
-        config.shouldUseItemsFilterPhrases(),
+        config.fetchShouldUseItemsFilterPhrases(),
         configuration[section][key]
       );
     });
@@ -89,7 +98,7 @@ describe("Config", () => {
       const section = "searchEverywhere";
       const key = "helpPhrase";
 
-      assert.equal(config.getHelpPhrase(), configuration[section][key]);
+      assert.equal(config.fetchHelpPhrase(), configuration[section][key]);
     });
   });
 
@@ -98,7 +107,10 @@ describe("Config", () => {
       const section = "searchEverywhere";
       const key = "itemsFilterPhrases";
 
-      assert.equal(config.getItemsFilterPhrases(), configuration[section][key]);
+      assert.equal(
+        config.fetchItemsFilterPhrases(),
+        configuration[section][key]
+      );
     });
   });
 
@@ -107,7 +119,7 @@ describe("Config", () => {
       const section = "searchEverywhere";
       const key = "exclude";
 
-      assert.equal(config.getExclude(), configuration[section][key]);
+      assert.equal(config.fetchExclude(), configuration[section][key]);
     });
 
     it(`2: should return array of exclude patterns
@@ -116,7 +128,7 @@ describe("Config", () => {
       const key = "exclude";
       const [getConfigurationStub] = setups.getExclude2(section, key);
 
-      assert.deepEqual(config.getExclude(), configuration[section][key]);
+      assert.deepEqual(config.fetchExclude(), configuration[section][key]);
       assert.equal(getConfigurationStub.calledOnce, false);
     });
   });
@@ -126,13 +138,13 @@ describe("Config", () => {
       const section = "searchEverywhere";
       const key = "include";
 
-      assert.equal(config.getInclude(), configuration[section][key]);
+      assert.equal(config.fetchInclude(), configuration[section][key]);
     });
   });
 
   describe("getFilesAndSearchExclude", () => {
     it("1: should return array of exclude patterns from configuration", () => {
-      assert.deepEqual(config.getFilesAndSearchExclude(), [
+      assert.deepEqual(config.fetchFilesAndSearchExclude(), [
         "**/.git",
         "**/search_exclude/**",
       ]);
@@ -144,7 +156,7 @@ describe("Config", () => {
       const section = "searchEverywhere";
       const key = "excludeMode";
 
-      assert.equal(config.getExcludeMode(), configuration[section][key]);
+      assert.equal(config.fetchExcludeMode(), configuration[section][key]);
     });
   });
 });

@@ -1,10 +1,10 @@
 import * as vscode from "vscode";
 import {
-  getHelpPhrase,
-  getItemsFilterPhrases,
-  shouldHighlightSymbol,
-  shouldUseDebounce,
-  shouldUseItemsFilterPhrases,
+  fetchHelpPhrase,
+  fetchItemsFilterPhrases,
+  fetchShouldHighlightSymbol,
+  fetchShouldUseDebounce,
+  fetchShouldUseItemsFilterPhrases,
 } from "./config";
 import ItemsFilterPhrases from "./interface/itemsFilterPhrases";
 import QuickPickItem from "./interface/quickPickItem";
@@ -93,7 +93,7 @@ class QuickPick {
   }
 
   private registerOnDidChangeValueEventListeners(): void {
-    shouldUseDebounce()
+    fetchShouldUseDebounce()
       ? this.registerOnDidChangeValueWithDebounceEventListeners()
       : this.registerOnDidChangeValueWithoutDebounceEventListeners();
   }
@@ -146,7 +146,7 @@ class QuickPick {
   private selectQpItem(editor: vscode.TextEditor, qpItem: QuickPickItem): void {
     editor.selection = this.getSelectionForQpItem(
       qpItem,
-      shouldHighlightSymbol()
+      fetchShouldHighlightSymbol()
     );
 
     editor.revealRange(
@@ -198,9 +198,9 @@ class QuickPick {
   }
 
   private fetchConfig(): void {
-    this.shouldUseItemsFilterPhrases = shouldUseItemsFilterPhrases();
-    this.helpPhrase = getHelpPhrase();
-    this.itemsFilterPhrases = getItemsFilterPhrases();
+    this.shouldUseItemsFilterPhrases = fetchShouldUseItemsFilterPhrases();
+    this.helpPhrase = fetchHelpPhrase();
+    this.itemsFilterPhrases = fetchItemsFilterPhrases();
   }
 
   private fetchHelpData(): void {

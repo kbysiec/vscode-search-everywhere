@@ -5,7 +5,7 @@ import {
   onWillProcessing,
 } from "./actionProcessorEventsEmitter";
 import { clearConfig } from "./cache";
-import { getExcludeMode } from "./config";
+import { fetchExcludeMode } from "./config";
 import { dataConverter } from "./dataConverter";
 import DataService from "./dataService";
 import ActionTrigger from "./enum/actionTrigger";
@@ -213,7 +213,7 @@ class Workspace {
   private shouldReindexOnConfigurationChange(
     event: vscode.ConfigurationChangeEvent
   ): boolean {
-    const excludeMode = getExcludeMode();
+    const excludeMode = fetchExcludeMode();
     const excluded: string[] = [
       "shouldDisplayNotificationInStatusBar",
       "shouldInitOnStartup",
