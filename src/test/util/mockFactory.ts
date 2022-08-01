@@ -33,9 +33,9 @@ export const getConfiguration = (): { [key: string]: any } => {
       shouldHighlightSymbol: true,
       icons: { 0: "fake-icon", 1: "another-fake-icon" },
       itemsFilter: {
-        allowedKinds: [],
+        allowedKinds: [1, 2, 3],
         ignoredKinds: [],
-        ignoredNames: [],
+        ignoredNames: ["demo"],
       },
       itemsFilterPhrases: {
         "0": "$$",

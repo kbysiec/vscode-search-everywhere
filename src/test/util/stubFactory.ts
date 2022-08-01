@@ -1,20 +1,12 @@
 import * as sinon from "sinon";
 import * as vscode from "vscode";
-import DataService from "../../dataService";
 import QuickPick from "../../quickPick";
 import WorkspaceCommon from "../../workspaceCommon";
 import WorkspaceRemover from "../../workspaceRemover";
 import { createStubInstance } from "./stubbedClass";
 
-export function getDataServiceStub(): DataService {
-  const dataServiceStub: any = createStubInstance(DataService);
-
-  return dataServiceStub as DataService;
-}
-
 export function getWorkspaceCommonStub(): WorkspaceCommon {
   const workspaceCommonStubTemp: any = createStubInstance(WorkspaceCommon);
-  workspaceCommonStubTemp.dataService = getDataServiceStub();
   workspaceCommonStubTemp.urisForDirectoryPathUpdate = null;
   workspaceCommonStubTemp.directoryUriBeforePathUpdate = null;
   workspaceCommonStubTemp.directoryUriAfterPathUpdate = null;
@@ -25,7 +17,6 @@ export function getWorkspaceCommonStub(): WorkspaceCommon {
 export function getWorkspaceRemoverStub(): WorkspaceRemover {
   const workspaceRemoverStubTemp: any = createStubInstance(WorkspaceRemover);
   workspaceRemoverStubTemp.common = getWorkspaceCommonStub();
-  workspaceRemoverStubTemp.dataService = getDataServiceStub();
 
   return workspaceRemoverStubTemp as WorkspaceRemover;
 }

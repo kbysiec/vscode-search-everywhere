@@ -7,7 +7,7 @@ import {
 import { clearConfig } from "./cache";
 import { fetchExcludeMode } from "./config";
 import { dataConverter } from "./dataConverter";
-import DataService from "./dataService";
+import { dataService } from "./dataService";
 import ActionTrigger from "./enum/actionTrigger";
 import ActionType from "./enum/actionType";
 import DetailedActionType from "./enum/detailedActionType";
@@ -29,8 +29,6 @@ import WorkspaceUpdater from "./workspaceUpdater";
 const debounce = require("debounce");
 
 class Workspace {
-  private dataService!: DataService;
-
   private common!: WorkspaceCommon;
   private remover!: WorkspaceRemover;
   private updater!: WorkspaceUpdater;
@@ -66,19 +64,19 @@ class Workspace {
     return this.common.getData();
   }
 
-  private initComponents(): void {
+  private async initComponents() {
     utils.setWorkspaceFoldersCommonPath();
-    this.dataService = new DataService();
+    await dataService.fetchConfig();
     dataConverter.fetchConfig();
 
-    this.common = new WorkspaceCommon(this.dataService);
+    this.common = new WorkspaceCommon();
     this.remover = new WorkspaceRemover(this.common);
     this.updater = new WorkspaceUpdater(this.common);
   }
 
   private reloadComponents() {
     dataConverter.reload();
-    this.dataService.reload();
+    dataService.reload();
   }
 
   private handleDidChangeConfiguration = async (
@@ -105,8 +103,10 @@ class Workspace {
     event: vscode.TextDocumentChangeEvent
   ) => {
     const uri = event.document.uri;
-    const isUriExistingInWorkspace =
-      await this.dataService.isUriExistingInWorkspace(uri, true);
+    const isUriExistingInWorkspace = await dataService.isUriExistingInWorkspace(
+      uri,
+      true
+    );
     const hasContentChanged = event.contentChanges.length;
 
     const actionType = DetailedActionType.TextChange;
@@ -129,7 +129,7 @@ class Workspace {
   };
 
   private handleDidRenameFiles = async (event: vscode.FileRenameEvent) => {
-    this.dataService.clearCachedUris();
+    dataService.clearCachedUris();
 
     const firstFile = event.files[0];
     const actionType = utils.isDirectory(firstFile.oldUri)
@@ -166,7 +166,7 @@ class Workspace {
   };
 
   private handleDidCreateFiles = async (event: vscode.FileCreateEvent) => {
-    this.dataService.clearCachedUris();
+    dataService.clearCachedUris();
 
     const uri = event.files[0];
     const actionType = utils.isDirectory(uri)
@@ -182,7 +182,7 @@ class Workspace {
   };
 
   private handleDidDeleteFiles = async (event: vscode.FileDeleteEvent) => {
-    this.dataService.clearCachedUris();
+    dataService.clearCachedUris();
 
     const uri = event.files[0];
     const actionType = utils.isDirectory(uri)

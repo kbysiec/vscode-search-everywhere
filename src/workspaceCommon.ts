@@ -4,7 +4,8 @@ import { actionProcessor } from "./actionProcessor";
 import { clear, getData, updateData } from "./cache";
 import { fetchShouldDisplayNotificationInStatusBar } from "./config";
 import { dataConverter } from "./dataConverter";
-import DataService from "./dataService";
+import { dataService } from "./dataService";
+import { onDidItemIndexed } from "./dataServiceEventsEmitter";
 import ActionType from "./enum/actionType";
 import Action from "./interface/action";
 import QuickPickItem from "./interface/quickPickItem";
@@ -16,14 +17,14 @@ class WorkspaceCommon {
   progressStep: number = 0;
   currentProgressValue: number = 0;
 
-  constructor(private dataService: DataService) {}
+  constructor() {}
 
   getData(): QuickPickItem[] {
     return getData() || [];
   }
 
   async index(comment: string): Promise<void> {
-    this.dataService.clearCachedUris();
+    dataService.clearCachedUris();
 
     await this.registerAction(
       ActionType.Rebuild,
@@ -61,12 +62,12 @@ class WorkspaceCommon {
   }
 
   async downloadData(uris?: vscode.Uri[]): Promise<QuickPickItem[]> {
-    const data = await this.dataService.fetchData(uris);
+    const data = await dataService.fetchData(uris);
     return dataConverter.convertToQpData(data);
   }
 
   cancelIndexing(): void {
-    this.dataService.cancel();
+    dataService.cancel();
     dataConverter.cancel();
   }
 
@@ -82,7 +83,7 @@ class WorkspaceCommon {
         this.handleCancellationRequested.bind(this)
       );
 
-    const handleDidItemIndexedSubscription = this.dataService.onDidItemIndexed(
+    const handleDidItemIndexedSubscription = onDidItemIndexed(
       this.handleDidItemIndexed.bind(this, progress)
     );
 
@@ -121,7 +122,7 @@ class WorkspaceCommon {
 
   private async indexWorkspace(): Promise<WorkspaceData> {
     clear();
-    const data = await this.dataService.fetchData();
+    const data = await dataService.fetchData();
     const qpData = dataConverter.convertToQpData(data);
     updateData(qpData);
     return data;
