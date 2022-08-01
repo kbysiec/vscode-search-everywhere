@@ -1,311 +1,315 @@
+import * as sinon from "sinon";
 import * as vscode from "vscode";
-import WorkspaceCommon from "../../workspaceCommon";
-import { getDirectory, getItem } from "../util/itemMockFactory";
+import { actionProcessor } from "../../actionProcessor";
+import * as cache from "../../cache";
+import * as config from "../../config";
+import { dataConverter } from "../../dataConverter";
+import { dataService } from "../../dataService";
+import * as dataServiceEventsEmitter from "../../dataServiceEventsEmitter";
+import { patternProvider } from "../../patternProvider";
+import { utils } from "../../utils";
+import { getSubscription, getWorkspaceData } from "../util/mockFactory";
 import { getQpItems } from "../util/qpItemMockFactory";
-import { restoreStubbedMultiple, stubMultiple } from "../util/stubHelpers";
+import { stubMultiple } from "../util/stubHelpers";
 
-export const getTestSetups = (workspaceCommon: WorkspaceCommon) => {
-  const workspaceCommonAny = workspaceCommon as any;
+export const getTestSetups = () => {
+  const sandbox = sinon.createSandbox();
 
   return {
+    afterEach: () => {
+      sandbox.restore();
+    },
     getData1: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceCommonAny.cache,
-          method: "getData",
-        },
-      ]);
-
-      return stubMultiple([
-        {
-          object: workspaceCommonAny.cache,
-          method: "getData",
-          returns: getQpItems(),
-        },
-      ]);
+      return stubMultiple(
+        [
+          {
+            object: cache,
+            method: "getData",
+            returns: getQpItems(),
+          },
+        ],
+        sandbox
+      );
     },
     getData2: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceCommonAny.cache,
-          method: "getData",
-        },
-      ]);
-
-      return stubMultiple([
-        {
-          object: workspaceCommonAny.cache,
-          method: "getData",
-          returns: undefined,
-        },
-      ]);
-    },
-    wasDirectoryRenamed1: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceCommonAny.utils,
-          method: "getNameFromUri",
-        },
-        {
-          object: workspaceCommonAny.dataService.patternProvider,
-          method: "getExcludePatterns",
-        },
-      ]);
-
-      return stubMultiple([
-        {
-          object: workspaceCommonAny,
-          method: "directoryUriBeforePathUpdate",
-          returns: getDirectory("./fake/"),
-          isNotMethod: true,
-        },
-        {
-          object: workspaceCommonAny,
-          method: "directoryUriAfterPathUpdate",
-          returns: getItem(),
-          isNotMethod: true,
-        },
-        {
-          object: workspaceCommonAny.dataService.patternProvider,
-          method: "getExcludePatterns",
-          returns: Promise.resolve(["**/.history/**", "**/.vscode/**"]),
-        },
-      ]);
-    },
-    wasDirectoryRenamed2: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceCommonAny.utils,
-          method: "getNameFromUri",
-        },
-        {
-          object: workspaceCommonAny.dataService.patternProvider,
-          method: "getExcludePatterns",
-        },
-      ]);
-
-      return stubMultiple([
-        {
-          object: workspaceCommonAny,
-          method: "directoryUriBeforePathUpdate",
-          returns: getItem(),
-          isNotMethod: true,
-        },
-        {
-          object: workspaceCommonAny,
-          method: "directoryUriAfterPathUpdate",
-          returns: getItem(),
-          isNotMethod: true,
-        },
-        {
-          object: workspaceCommonAny.dataService.patternProvider,
-          method: "getExcludePatterns",
-          returns: Promise.resolve(["**/.history/**", "**/.vscode/**"]),
-        },
-      ]);
-    },
-    wasDirectoryRenamed3: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceCommonAny.utils,
-          method: "getNameFromUri",
-        },
-        {
-          object: workspaceCommonAny.dataService.patternProvider,
-          method: "getExcludePatterns",
-        },
-      ]);
-
-      return stubMultiple([
-        {
-          object: workspaceCommonAny,
-          method: "directoryUriBeforePathUpdate",
-          returns: getItem(),
-          isNotMethod: true,
-        },
-        {
-          object: workspaceCommonAny,
-          method: "directoryUriAfterPathUpdate",
-          returns: null,
-          isNotMethod: true,
-        },
-        {
-          object: workspaceCommonAny.dataService.patternProvider,
-          method: "getExcludePatterns",
-          returns: Promise.resolve(["**/.history/**", "**/.vscode/**"]),
-        },
-      ]);
-    },
-    wasDirectoryRenamed4: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceCommonAny.utils,
-          method: "getNameFromUri",
-        },
-        {
-          object: workspaceCommonAny.dataService.patternProvider,
-          method: "getExcludePatterns",
-        },
-      ]);
-
-      return stubMultiple([
-        {
-          object: workspaceCommonAny,
-          method: "directoryUriBeforePathUpdate",
-          returns: getItem(),
-          isNotMethod: true,
-        },
-        {
-          object: workspaceCommonAny,
-          method: "directoryUriAfterPathUpdate",
-          returns: undefined,
-          isNotMethod: true,
-        },
-        {
-          object: workspaceCommonAny.dataService.patternProvider,
-          method: "getExcludePatterns",
-          returns: Promise.resolve(["**/.history/**", "**/.vscode/**"]),
-        },
-      ]);
+      return stubMultiple(
+        [
+          {
+            object: cache,
+            method: "getData",
+            returns: undefined,
+          },
+        ],
+        sandbox
+      );
     },
     index1: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceCommonAny.actionProcessor,
-          method: "register",
-        },
-        {
-          object: workspaceCommonAny.dataService.patternProvider,
-          method: "getExcludePatterns",
-        },
-      ]);
-
-      return stubMultiple([
-        {
-          object: workspaceCommonAny.actionProcessor,
-          method: "register",
-        },
-        {
-          object: workspaceCommonAny.dataService.patternProvider,
-          method: "getExcludePatterns",
-          returns: Promise.resolve(["**/.history/**", "**/.vscode/**"]),
-        },
-      ]);
+      return stubMultiple(
+        [
+          {
+            object: actionProcessor,
+            method: "register",
+          },
+          {
+            object: patternProvider,
+            method: "getExcludePatterns",
+            returns: Promise.resolve(["**/.history/**", "**/.vscode/**"]),
+          },
+        ],
+        sandbox
+      );
     },
     indexWithProgress1: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceCommonAny.utils,
-          method: "hasWorkspaceAnyFolder",
-        },
-        {
-          object: workspaceCommonAny.dataService.patternProvider,
-          method: "getExcludePatterns",
-        },
-      ]);
-
-      return stubMultiple([
-        {
-          object: vscode.window,
-          method: "withProgress",
-        },
-        {
-          object: workspaceCommonAny.utils,
-          method: "hasWorkspaceAnyFolder",
-          returns: true,
-        },
-        {
-          object: workspaceCommonAny.dataService.patternProvider,
-          method: "getExcludePatterns",
-          returns: Promise.resolve(["**/.history/**", "**/.vscode/**"]),
-        },
-      ]);
+      return stubMultiple(
+        [
+          {
+            object: vscode.window,
+            method: "withProgress",
+          },
+          {
+            object: utils,
+            method: "hasWorkspaceAnyFolder",
+            returns: true,
+          },
+          {
+            object: patternProvider,
+            method: "getExcludePatterns",
+            returns: Promise.resolve(["**/.history/**", "**/.vscode/**"]),
+          },
+        ],
+        sandbox
+      );
     },
     indexWithProgress2: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceCommonAny.utils,
-          method: "hasWorkspaceAnyFolder",
-        },
-        {
-          object: workspaceCommonAny.utils,
-          method: "printNoFolderOpenedMessage",
-        },
-      ]);
-
-      return stubMultiple([
-        {
-          object: workspaceCommonAny.utils,
-          method: "printNoFolderOpenedMessage",
-        },
-        {
-          object: workspaceCommonAny.utils,
-          method: "hasWorkspaceAnyFolder",
-          returns: false,
-        },
-      ]);
+      return stubMultiple(
+        [
+          {
+            object: utils,
+            method: "printNoFolderOpenedMessage",
+          },
+          {
+            object: utils,
+            method: "hasWorkspaceAnyFolder",
+            returns: false,
+          },
+        ],
+        sandbox
+      );
     },
     registerAction1: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceCommonAny.actionProcessor,
-          method: "register",
-        },
-      ]);
-
-      return stubMultiple([
-        {
-          object: workspaceCommonAny.actionProcessor,
-          method: "register",
-        },
-      ]);
+      return stubMultiple(
+        [
+          {
+            object: actionProcessor,
+            method: "register",
+          },
+        ],
+        sandbox
+      );
     },
     downloadData1: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceCommonAny.dataService,
-          method: "fetchData",
-        },
-        {
-          object: workspaceCommonAny.dataConverter,
-          method: "convertToQpData",
-        },
-      ]);
-
-      stubMultiple([
-        {
-          object: workspaceCommonAny.dataService,
-          method: "fetchData",
-        },
-        {
-          object: workspaceCommonAny.dataConverter,
-          method: "convertToQpData",
-          returns: getQpItems(),
-        },
-      ]);
+      stubMultiple(
+        [
+          {
+            object: dataService,
+            method: "fetchData",
+          },
+          {
+            object: dataConverter,
+            method: "convertToQpData",
+            returns: getQpItems(),
+          },
+        ],
+        sandbox
+      );
     },
     cancelIndexing1: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceCommonAny.dataService,
-          method: "cancel",
-        },
-        {
-          object: workspaceCommonAny.dataConverter,
-          method: "cancel",
-        },
-      ]);
+      return stubMultiple(
+        [
+          {
+            object: dataService,
+            method: "cancel",
+          },
+          {
+            object: dataConverter,
+            method: "cancel",
+          },
+        ],
+        sandbox
+      );
+    },
+    getNotificationLocation1: () => {
+      return stubMultiple(
+        [
+          {
+            object: config,
+            method: "fetchShouldDisplayNotificationInStatusBar",
+            returns: true,
+          },
+        ],
+        sandbox
+      );
+    },
+    getNotificationLocation2: () => {
+      stubMultiple(
+        [
+          {
+            object: config,
+            method: "fetchShouldDisplayNotificationInStatusBar",
+            returns: false,
+          },
+        ],
+        sandbox
+      );
+    },
+    getNotificationTitle1: () => {
+      return stubMultiple(
+        [
+          {
+            object: config,
+            method: "fetchShouldDisplayNotificationInStatusBar",
+            returns: false,
+          },
+        ],
+        sandbox
+      );
+    },
+    getNotificationTitle2: () => {
+      stubMultiple(
+        [
+          {
+            object: config,
+            method: "fetchShouldDisplayNotificationInStatusBar",
+            returns: true,
+          },
+        ],
+        sandbox
+      );
+    },
+    indexWithProgressTask1: () => {
+      const onDidItemIndexedSubscription = getSubscription();
 
-      return stubMultiple([
-        {
-          object: workspaceCommonAny.dataService,
-          method: "cancel",
-        },
-        {
-          object: workspaceCommonAny.dataConverter,
-          method: "cancel",
-        },
-      ]);
+      const stubs = stubMultiple(
+        [
+          {
+            object: dataServiceEventsEmitter,
+            method: "onDidItemIndexed",
+            returns: onDidItemIndexedSubscription,
+          },
+          {
+            object: dataService,
+            method: "fetchData",
+            returns: getWorkspaceData(),
+          },
+          {
+            object: cache,
+            method: "updateData",
+          },
+        ],
+        sandbox
+      );
+
+      return {
+        onDidItemIndexedSubscription,
+        stubs,
+      };
+    },
+    indexWithProgressTask2: () => {
+      const onDidItemIndexedSubscription = getSubscription();
+
+      return stubMultiple(
+        [
+          {
+            object: utils,
+            method: "sleep",
+          },
+          {
+            object: utils,
+            method: "printStatsMessage",
+          },
+          {
+            object: dataServiceEventsEmitter,
+            method: "onDidItemIndexed",
+            returns: onDidItemIndexedSubscription,
+          },
+          {
+            object: dataService,
+            method: "fetchData",
+            returns: getWorkspaceData(),
+          },
+          {
+            object: cache,
+            method: "updateData",
+          },
+        ],
+        sandbox
+      );
+    },
+    indexWithProgressTask3: () => {
+      const onDidItemIndexedSubscription = getSubscription();
+
+      return stubMultiple(
+        [
+          {
+            object: utils,
+            method: "printStatsMessage",
+          },
+          {
+            object: utils,
+            method: "sleep",
+          },
+          {
+            object: dataServiceEventsEmitter,
+            method: "onDidItemIndexed",
+            returns: onDidItemIndexedSubscription,
+          },
+          {
+            object: dataService,
+            method: "fetchData",
+            returns: getWorkspaceData(),
+          },
+          {
+            object: cache,
+            method: "updateData",
+          },
+        ],
+        sandbox
+      );
+    },
+    indexWithProgressTask4: () => {
+      const onDidItemIndexedSubscription = getSubscription();
+
+      return stubMultiple(
+        [
+          {
+            object: dataService,
+            method: "fetchData",
+            returns: getWorkspaceData(),
+          },
+          {
+            object: dataConverter,
+            method: "convertToQpData",
+          },
+          {
+            object: utils,
+            method: "printStatsMessage",
+          },
+          {
+            object: utils,
+            method: "sleep",
+          },
+          {
+            object: dataServiceEventsEmitter,
+            method: "onDidItemIndexed",
+            returns: onDidItemIndexedSubscription,
+          },
+          {
+            object: cache,
+            method: "updateData",
+          },
+        ],
+        sandbox
+      );
     },
   };
 };

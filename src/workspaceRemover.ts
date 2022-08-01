@@ -2,16 +2,14 @@ import * as vscode from "vscode";
 import { updateData } from "./cache";
 import DetailedActionType from "./enum/detailedActionType";
 import QuickPickItem from "./interface/quickPickItem";
-import WorkspaceCommon from "./workspaceCommon";
+import { workspaceCommon as common } from "./workspaceCommon";
 
 class WorkspaceRemover {
-  constructor(private common: WorkspaceCommon) {}
-
   removeFromCacheByPath(
     uri: vscode.Uri,
     detailedActionType: DetailedActionType
   ) {
-    let data = this.common.getData();
+    let data = common.getData();
 
     const removeFnByDetailedActionType: { [key: string]: Function } = {
       [DetailedActionType.RenameOrMoveFile]: this.removeUri.bind(

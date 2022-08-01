@@ -1,22 +1,11 @@
 import * as sinon from "sinon";
 import * as vscode from "vscode";
 import QuickPick from "../../quickPick";
-import WorkspaceCommon from "../../workspaceCommon";
 import WorkspaceRemover from "../../workspaceRemover";
 import { createStubInstance } from "./stubbedClass";
 
-export function getWorkspaceCommonStub(): WorkspaceCommon {
-  const workspaceCommonStubTemp: any = createStubInstance(WorkspaceCommon);
-  workspaceCommonStubTemp.urisForDirectoryPathUpdate = null;
-  workspaceCommonStubTemp.directoryUriBeforePathUpdate = null;
-  workspaceCommonStubTemp.directoryUriAfterPathUpdate = null;
-
-  return workspaceCommonStubTemp as WorkspaceCommon;
-}
-
 export function getWorkspaceRemoverStub(): WorkspaceRemover {
   const workspaceRemoverStubTemp: any = createStubInstance(WorkspaceRemover);
-  workspaceRemoverStubTemp.common = getWorkspaceCommonStub();
 
   return workspaceRemoverStubTemp as WorkspaceRemover;
 }

@@ -1,138 +1,215 @@
-// import { assert } from "chai";
-// import ActionProcessor from "../../actionProcessor";
-// import Cache from "../../cache";
-// import Config from "../../config";
-// import DataConverter from "../../dataConverter";
-// import DataService from "../../dataService";
-// import ActionType from "../../enum/actionType";
-// // import Utils from "../../utils";
-// import WorkspaceCommon from "../../workspaceCommon";
-// import { getTestSetups } from "../testSetup/workspaceCommon.testSetup";
-// import { getQpItems } from "../util/qpItemMockFactory";
-// import {
-//   getActionProcessorStub,
-//   getCacheStub,
-//   getConfigStub,
-//   getDataConverterStub,
-//   getDataServiceStub,
-// } from "../util/stubFactory";
+import { assert } from "chai";
+import * as vscode from "vscode";
+import ActionType from "../../enum/actionType";
+import { workspaceCommon } from "../../workspaceCommon";
+import { getTestSetups } from "../testSetup/workspaceCommon.testSetup";
+import { getProgress } from "../util/mockFactory";
+import { getQpItems } from "../util/qpItemMockFactory";
 
-// describe("WorkspaceCommon", () => {
-//   let cacheStub: Cache = getCacheStub();
-//   // let utilsStub: Utils = getUtilsStub();
-//   let dataServiceStub: DataService = getDataServiceStub();
-//   let dataConverterStub: DataConverter = getDataConverterStub();
-//   let actionProcessorStub: ActionProcessor = getActionProcessorStub();
-//   let configStub: Config = getConfigStub();
-//   let workspaceCommon: WorkspaceCommon = new WorkspaceCommon(
-//     cacheStub,
-//     dataServiceStub,
-//     dataConverterStub,
-//     actionProcessorStub,
-//     configStub
-//   );
-//   let setups = getTestSetups(workspaceCommon);
+type SetupsType = ReturnType<typeof getTestSetups>;
 
-//   beforeEach(() => {
-//     cacheStub = getCacheStub();
-//     // utilsStub = getUtilsStub();
-//     dataServiceStub = getDataServiceStub();
-//     dataConverterStub = getDataConverterStub();
-//     actionProcessorStub = getActionProcessorStub();
-//     configStub = getConfigStub();
-//     workspaceCommon = new WorkspaceCommon(
-//       cacheStub,
-//       dataServiceStub,
-//       dataConverterStub,
-//       actionProcessorStub,
-//       configStub
-//     );
-//     setups = getTestSetups(workspaceCommon);
-//   });
+describe("WorkspaceCommon", () => {
+  let setups: SetupsType;
 
-//   describe("getData", () => {
-//     it("1: should cache.getData method be invoked", () => {
-//       setups.getData1();
+  before(() => {
+    setups = getTestSetups();
+  });
+  afterEach(() => setups.afterEach());
 
-//       assert.deepEqual(workspaceCommon.getData(), getQpItems());
-//     });
+  describe("getData", () => {
+    it("1: should cache.getData method be invoked", () => {
+      setups.getData1();
 
-//     it("2: should return empty array if cache.getData method returns undefined", () => {
-//       setups.getData2();
+      assert.deepEqual(workspaceCommon.getData(), getQpItems());
+    });
 
-//       assert.deepEqual(workspaceCommon.getData(), []);
-//     });
-//   });
+    it("2: should return empty array if cache.getData method returns undefined", () => {
+      setups.getData2();
 
-//   describe("index", () => {
-//     it(`1: should registerAction method be invoked
-//           which register rebuild action`, async () => {
-//       const [registerStub] = setups.index1();
-//       await workspaceCommon.index("test comment");
+      assert.deepEqual(workspaceCommon.getData(), []);
+    });
+  });
 
-//       assert.equal(registerStub.calledOnce, true);
-//       assert.equal(registerStub.args[0][0].type, ActionType.Rebuild);
-//     });
-//   });
+  describe("index", () => {
+    it(`1: should registerAction method be invoked
+          which register rebuild action`, async () => {
+      const [registerStub] = setups.index1();
+      await workspaceCommon.index("test comment");
 
-//   describe("indexWithProgress", () => {
-//     it(`1: should vscode.window.withProgress method be invoked
-//           if workspace has opened at least one folder`, async () => {
-//       const [withProgressStub] = setups.indexWithProgress1();
+      assert.equal(registerStub.calledOnce, true);
+      assert.equal(registerStub.args[0][0].type, ActionType.Rebuild);
+    });
+  });
 
-//       await workspaceCommon.indexWithProgress();
-//       assert.equal(withProgressStub.calledOnce, true);
-//     });
+  describe("indexWithProgress", () => {
+    it(`1: should vscode.window.withProgress method be invoked
+          if workspace has opened at least one folder`, async () => {
+      const [withProgressStub] = setups.indexWithProgress1();
 
-//     it(`2: should printNoFolderOpenedMessage method be invoked
-//           if workspace does not has opened at least one folder`, async () => {
-//       const [printNoFolderOpenedMessageStub] = setups.indexWithProgress2();
+      await workspaceCommon.indexWithProgress();
+      assert.equal(withProgressStub.calledOnce, true);
+    });
 
-//       await workspaceCommon.indexWithProgress();
-//       assert.equal(printNoFolderOpenedMessageStub.calledOnce, true);
-//     });
-//   });
+    it(`2: should printNoFolderOpenedMessage method be invoked
+          if workspace does not has opened at least one folder`, async () => {
+      const [printNoFolderOpenedMessageStub] = setups.indexWithProgress2();
 
-//   describe("registerAction", () => {
-//     it("1: should actionProcessor.register method be invoked", async () => {
-//       const [registerStub] = setups.registerAction1();
+      await workspaceCommon.indexWithProgress();
+      assert.equal(printNoFolderOpenedMessageStub.calledOnce, true);
+    });
+  });
 
-//       await workspaceCommon.registerAction(
-//         ActionType.Rebuild,
-//         () => {},
-//         "test comment"
-//       );
+  describe("registerAction", () => {
+    it("1: should actionProcessor.register method be invoked", async () => {
+      const [registerStub] = setups.registerAction1();
 
-//       assert.equal(registerStub.calledOnce, true);
-//       assert.equal(registerStub.args[0][0].type, ActionType.Rebuild);
-//     });
-//   });
+      await workspaceCommon.registerAction(
+        ActionType.Rebuild,
+        () => {},
+        "test comment"
+      );
 
-//   describe("downloadData", () => {
-//     it("1: should return data for quick pick", async () => {
-//       setups.downloadData1();
+      assert.equal(registerStub.calledOnce, true);
+      assert.equal(registerStub.args[0][0].type, ActionType.Rebuild);
+    });
+  });
 
-//       assert.deepEqual(await workspaceCommon.downloadData(), getQpItems());
-//     });
-//   });
+  describe("downloadData", () => {
+    it("1: should return data for quick pick", async () => {
+      setups.downloadData1();
 
-//   describe("cancelIndexing", () => {
-//     it("1: should dataService.cancel and dataConverter.cancel methods be invoked", () => {
-//       const [dataServiceCancelStub, dataConverterCancelStub] =
-//         setups.cancelIndexing1();
+      assert.deepEqual(await workspaceCommon.downloadData(), getQpItems());
+    });
+  });
 
-//       workspaceCommon.cancelIndexing();
-//       assert.deepEqual(dataServiceCancelStub.calledOnce, true);
-//       assert.deepEqual(dataConverterCancelStub.calledOnce, true);
-//     });
-//   });
+  describe("cancelIndexing", () => {
+    it("1: should dataService.cancel and dataConverter.cancel methods be invoked", () => {
+      const [dataServiceCancelStub, dataConverterCancelStub] =
+        setups.cancelIndexing1();
 
-//   describe("handleCancellationRequested", () => {
-//     it("1: should cancelIndexing method be invoked", () => {
-//       const [cancelIndexingStub] = setups.cancelIndexing1();
+      workspaceCommon.cancelIndexing();
+      assert.deepEqual(dataServiceCancelStub.calledOnce, true);
+      assert.deepEqual(dataConverterCancelStub.calledOnce, true);
+    });
+  });
 
-//       (workspaceCommon as any).handleCancellationRequested();
-//       assert.deepEqual(cancelIndexingStub.calledOnce, true);
-//     });
-//   });
-// });
+  describe("handleCancellationRequested", () => {
+    it("1: should cancelIndexing method be invoked", () => {
+      const [cancelIndexingStub] = setups.cancelIndexing1();
+
+      (workspaceCommon as any).handleCancellationRequested();
+      assert.deepEqual(cancelIndexingStub.calledOnce, true);
+    });
+  });
+
+  describe("getNotificationLocation", () => {
+    it("1: should return Window as the location for messages", () => {
+      setups.getNotificationLocation1();
+
+      assert.equal(
+        workspaceCommon.getNotificationLocation(),
+        vscode.ProgressLocation.Window
+      );
+    });
+
+    it("2: should return Notification as the location for messages", () => {
+      setups.getNotificationLocation2();
+
+      assert.equal(
+        workspaceCommon.getNotificationLocation(),
+        vscode.ProgressLocation.Notification
+      );
+    });
+  });
+
+  describe("getNotificationTitle", () => {
+    it("1: should return long title", () => {
+      setups.getNotificationTitle1();
+
+      assert.equal(
+        workspaceCommon.getNotificationTitle(),
+        "Indexing workspace files and symbols..."
+      );
+    });
+
+    it("2: should return short title", () => {
+      setups.getNotificationTitle2();
+
+      assert.equal(workspaceCommon.getNotificationTitle(), "Indexing...");
+    });
+  });
+
+  describe("indexWithProgressTask", () => {
+    it("1: should existing onDidItemIndexed subscription be disposed", async () => {
+      const {
+        onDidItemIndexedSubscription,
+        stubs: [onDidItemIndexedStub],
+      } = setups.indexWithProgressTask1();
+      const cancellationTokenSource = new vscode.CancellationTokenSource();
+
+      await workspaceCommon.indexWithProgressTask(
+        getProgress(),
+        cancellationTokenSource.token
+      );
+
+      assert.equal(onDidItemIndexedStub.calledOnce, true);
+      assert.equal(onDidItemIndexedSubscription.dispose.calledOnce, true);
+    });
+
+    it("2: should utils.sleep method be invoked", async () => {
+      const [sleepStub] = setups.indexWithProgressTask2();
+      const cancellationTokenSource = new vscode.CancellationTokenSource();
+
+      await workspaceCommon.indexWithProgressTask(
+        getProgress(),
+        cancellationTokenSource.token
+      );
+
+      assert.equal(sleepStub.calledOnce, true);
+    });
+
+    it("3: should print stats message be printed after indexing", async () => {
+      const [printStatsMessageStub] = setups.indexWithProgressTask3();
+      const cancellationTokenSource = new vscode.CancellationTokenSource();
+
+      await workspaceCommon.indexWithProgressTask(
+        getProgress(),
+        cancellationTokenSource.token
+      );
+
+      assert.equal(printStatsMessageStub.calledOnce, true);
+    });
+
+    it("4: should dataService.fetchData and dataConverter.convertToQpData methods be invoked", async () => {
+      const [fetchDataStub, convertToQpDataStub] =
+        setups.indexWithProgressTask4();
+      const cancellationTokenSource = new vscode.CancellationTokenSource();
+
+      await workspaceCommon.indexWithProgressTask(
+        getProgress(),
+        cancellationTokenSource.token
+      );
+
+      assert.equal(fetchDataStub.calledOnce, true);
+      assert.equal(convertToQpDataStub.calledOnce, true);
+    });
+  });
+
+  describe("handleDidItemIndexed", () => {
+    it("1: should calculate progress step if doesn't exit", () => {
+      workspaceCommon.handleDidItemIndexed(getProgress(), 5);
+
+      assert.equal(workspaceCommon.getProgressStep(), 20);
+    });
+
+    it("2: should report current progress", () => {
+      const progress = getProgress(40);
+      workspaceCommon.handleDidItemIndexed(progress, 5);
+
+      assert.equal(
+        progress.report.calledOnceWith({ increment: 20, message: " 40%" }),
+        true
+      );
+    });
+  });
+});

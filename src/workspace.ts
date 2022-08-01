@@ -15,7 +15,7 @@ import ExcludeMode from "./enum/excludeMode";
 import Action from "./interface/action";
 import QuickPickItem from "./interface/quickPickItem";
 import { utils } from "./utils";
-import WorkspaceCommon from "./workspaceCommon";
+import { workspaceCommon as common } from "./workspaceCommon";
 import {
   onDidDebounceConfigToggleEventEmitter,
   onDidProcessingEventEmitter,
@@ -29,7 +29,6 @@ import WorkspaceUpdater from "./workspaceUpdater";
 const debounce = require("debounce");
 
 class Workspace {
-  private common!: WorkspaceCommon;
   private remover!: WorkspaceRemover;
   private updater!: WorkspaceUpdater;
 
@@ -38,7 +37,7 @@ class Workspace {
   }
 
   async index(indexActionType: ActionTrigger): Promise<void> {
-    await this.common.index(indexActionType);
+    await common.index(indexActionType);
   }
 
   registerEventListeners(): void {
@@ -61,7 +60,7 @@ class Workspace {
   }
 
   getData(): QuickPickItem[] {
-    return this.common.getData();
+    return common.getData();
   }
 
   private async initComponents() {
@@ -69,9 +68,8 @@ class Workspace {
     await dataService.fetchConfig();
     dataConverter.fetchConfig();
 
-    this.common = new WorkspaceCommon();
-    this.remover = new WorkspaceRemover(this.common);
-    this.updater = new WorkspaceUpdater(this.common);
+    this.remover = new WorkspaceRemover();
+    this.updater = new WorkspaceUpdater();
   }
 
   private reloadComponents() {
@@ -112,14 +110,14 @@ class Workspace {
     const actionType = DetailedActionType.TextChange;
 
     if (isUriExistingInWorkspace && hasContentChanged) {
-      await this.common.registerAction(
+      await common.registerAction(
         ActionType.Remove,
         this.remover.removeFromCacheByPath.bind(this.remover, uri, actionType),
         ActionTrigger.DidChangeTextDocument,
         uri
       );
 
-      await this.common.registerAction(
+      await common.registerAction(
         ActionType.Update,
         this.updater.updateCacheByPath.bind(this.updater, uri, actionType),
         ActionTrigger.DidChangeTextDocument,
@@ -139,7 +137,7 @@ class Workspace {
     for (let i = 0; i < event.files.length; i++) {
       const file = event.files[i];
 
-      await this.common.registerAction(
+      await common.registerAction(
         ActionType.Update,
         this.updater.updateCacheByPath.bind(
           this.updater,
@@ -152,7 +150,7 @@ class Workspace {
       );
 
       actionType === DetailedActionType.RenameOrMoveFile &&
-        (await this.common.registerAction(
+        (await common.registerAction(
           ActionType.Remove,
           this.remover.removeFromCacheByPath.bind(
             this.remover,
@@ -173,7 +171,7 @@ class Workspace {
       ? DetailedActionType.CreateNewDirectory
       : DetailedActionType.CreateNewFile;
 
-    await this.common.registerAction(
+    await common.registerAction(
       ActionType.Update,
       this.updater.updateCacheByPath.bind(this.updater, uri, actionType),
       ActionTrigger.DidCreateFiles,
@@ -189,7 +187,7 @@ class Workspace {
       ? DetailedActionType.RemoveDirectory
       : DetailedActionType.RemoveFile;
 
-    await this.common.registerAction(
+    await common.registerAction(
       ActionType.Remove,
       this.remover.removeFromCacheByPath.bind(this.remover, uri, actionType),
       ActionTrigger.DidDeleteFiles,

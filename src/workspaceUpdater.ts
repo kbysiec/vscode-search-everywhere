@@ -3,11 +3,9 @@ import { updateData } from "./cache";
 import DetailedActionType from "./enum/detailedActionType";
 import QuickPickItem from "./interface/quickPickItem";
 import { utils } from "./utils";
-import WorkspaceCommon from "./workspaceCommon";
+import { workspaceCommon as common } from "./workspaceCommon";
 
 class WorkspaceUpdater {
-  constructor(private common: WorkspaceCommon) {}
-
   async updateCacheByPath(
     uri: vscode.Uri,
     detailedActionType: DetailedActionType,
@@ -29,18 +27,18 @@ class WorkspaceUpdater {
       updateFn && (await updateFn());
     } catch (error) {
       utils.printErrorMessage(error as Error);
-      await this.common.index("on error catch");
+      await common.index("on error catch");
     }
   }
 
   private async updateUri(uri: vscode.Uri) {
-    const dataForUri = await this.common.downloadData([uri]);
+    const dataForUri = await common.downloadData([uri]);
     const data = this.mergeWithDataFromCache(dataForUri);
     updateData(data);
   }
 
   private updateFolder(uri: vscode.Uri, oldUri: vscode.Uri) {
-    const data = this.common.getData();
+    const data = common.getData();
     const updatedData = utils.updateQpItemsWithNewDirectoryPath(
       data,
       oldUri!,
@@ -50,7 +48,7 @@ class WorkspaceUpdater {
   }
 
   private mergeWithDataFromCache(data: QuickPickItem[]): QuickPickItem[] {
-    const dataFromCache = this.common.getData();
+    const dataFromCache = common.getData();
     return dataFromCache.concat(data);
   }
 }
