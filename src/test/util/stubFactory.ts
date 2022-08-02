@@ -1,14 +1,7 @@
 import * as sinon from "sinon";
 import * as vscode from "vscode";
 import QuickPick from "../../quickPick";
-import WorkspaceRemover from "../../workspaceRemover";
 import { createStubInstance } from "./stubbedClass";
-
-export function getWorkspaceRemoverStub(): WorkspaceRemover {
-  const workspaceRemoverStubTemp: any = createStubInstance(WorkspaceRemover);
-
-  return workspaceRemoverStubTemp as WorkspaceRemover;
-}
 
 export function getQuickPickStub(): QuickPick {
   const quickPickStubTemp: any = createStubInstance(QuickPick);

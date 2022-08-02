@@ -23,13 +23,12 @@ import {
   onWillProcessingEventEmitter,
   onWillReindexOnConfigurationChangeEventEmitter,
 } from "./workspaceEventsEmitter";
-import WorkspaceRemover from "./workspaceRemover";
+import { removeFromCacheByPath } from "./workspaceRemover";
 import WorkspaceUpdater from "./workspaceUpdater";
 
 const debounce = require("debounce");
 
 class Workspace {
-  private remover!: WorkspaceRemover;
   private updater!: WorkspaceUpdater;
 
   constructor() {
@@ -68,7 +67,6 @@ class Workspace {
     await dataService.fetchConfig();
     dataConverter.fetchConfig();
 
-    this.remover = new WorkspaceRemover();
     this.updater = new WorkspaceUpdater();
   }
 
@@ -112,7 +110,7 @@ class Workspace {
     if (isUriExistingInWorkspace && hasContentChanged) {
       await common.registerAction(
         ActionType.Remove,
-        this.remover.removeFromCacheByPath.bind(this.remover, uri, actionType),
+        removeFromCacheByPath.bind(null, uri, actionType),
         ActionTrigger.DidChangeTextDocument,
         uri
       );
@@ -152,11 +150,7 @@ class Workspace {
       actionType === DetailedActionType.RenameOrMoveFile &&
         (await common.registerAction(
           ActionType.Remove,
-          this.remover.removeFromCacheByPath.bind(
-            this.remover,
-            file.oldUri,
-            actionType
-          ),
+          removeFromCacheByPath.bind(null, file.oldUri, actionType),
           ActionTrigger.DidRenameFiles,
           file.oldUri
         ));
@@ -189,7 +183,7 @@ class Workspace {
 
     await common.registerAction(
       ActionType.Remove,
-      this.remover.removeFromCacheByPath.bind(this.remover, uri, actionType),
+      removeFromCacheByPath.bind(null, uri, actionType),
       ActionTrigger.DidDeleteFiles,
       uri
     );

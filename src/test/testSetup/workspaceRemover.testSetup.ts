@@ -1,130 +1,95 @@
-import WorkspaceRemover from "../../workspaceRemover";
+import * as sinon from "sinon";
+import * as cache from "../../cache";
+import { workspaceCommon as common } from "../../workspaceCommon";
 import { getQpItems } from "../util/qpItemMockFactory";
-import { restoreStubbedMultiple, stubMultiple } from "../util/stubHelpers";
+import { stubMultiple } from "../util/stubHelpers";
 
-export const getTestSetups = (workspaceRemover: WorkspaceRemover) => {
-  const workspaceRemoverAny = workspaceRemover as any;
+export const getTestSetups = () => {
+  const sandbox = sinon.createSandbox();
 
   return {
+    afterEach: () => {
+      sandbox.restore();
+    },
     removeFromCacheByPath1: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceRemoverAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceRemoverAny.common,
-          method: "getData",
-        },
-      ]);
-
-      return stubMultiple([
-        {
-          object: workspaceRemoverAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceRemoverAny.common,
-          method: "getData",
-          returns: getQpItems(),
-        },
-      ]);
+      return stubMultiple(
+        [
+          {
+            object: cache,
+            method: "updateData",
+          },
+          {
+            object: common,
+            method: "getData",
+            returns: getQpItems(),
+          },
+        ],
+        sandbox
+      );
     },
     removeFromCacheByPath2: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceRemoverAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceRemoverAny.common,
-          method: "getData",
-        },
-      ]);
-
-      return stubMultiple([
-        {
-          object: workspaceRemoverAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceRemoverAny.common,
-          method: "getData",
-          returns: getQpItems(),
-        },
-      ]);
+      return stubMultiple(
+        [
+          {
+            object: cache,
+            method: "updateData",
+          },
+          {
+            object: common,
+            method: "getData",
+            returns: getQpItems(),
+          },
+        ],
+        sandbox
+      );
     },
     removeFromCacheByPath3: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceRemoverAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceRemoverAny.common,
-          method: "getData",
-        },
-      ]);
-
-      return stubMultiple([
-        {
-          object: workspaceRemoverAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceRemoverAny.common,
-          method: "getData",
-          returns: getQpItems(),
-        },
-      ]);
+      return stubMultiple(
+        [
+          {
+            object: cache,
+            method: "updateData",
+          },
+          {
+            object: common,
+            method: "getData",
+            returns: getQpItems(),
+          },
+        ],
+        sandbox
+      );
     },
     removeFromCacheByPath4: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceRemoverAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceRemoverAny.common,
-          method: "getData",
-        },
-      ]);
-
-      return stubMultiple([
-        {
-          object: workspaceRemoverAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceRemoverAny.common,
-          method: "getData",
-          returns: getQpItems(),
-        },
-      ]);
+      return stubMultiple(
+        [
+          {
+            object: cache,
+            method: "updateData",
+          },
+          {
+            object: common,
+            method: "getData",
+            returns: getQpItems(),
+          },
+        ],
+        sandbox
+      );
     },
     removeFromCacheByPath5: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceRemoverAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceRemoverAny.common,
-          method: "getData",
-        },
-      ]);
-
-      return stubMultiple([
-        {
-          object: workspaceRemoverAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceRemoverAny.common,
-          method: "getData",
-          returns: getQpItems(),
-        },
-      ]);
+      return stubMultiple(
+        [
+          {
+            object: cache,
+            method: "updateData",
+          },
+          {
+            object: common,
+            method: "getData",
+            returns: getQpItems(),
+          },
+        ],
+        sandbox
+      );
     },
   };
 };

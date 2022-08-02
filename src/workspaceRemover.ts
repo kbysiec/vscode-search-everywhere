@@ -4,47 +4,35 @@ import DetailedActionType from "./enum/detailedActionType";
 import QuickPickItem from "./interface/quickPickItem";
 import { workspaceCommon as common } from "./workspaceCommon";
 
-class WorkspaceRemover {
-  removeFromCacheByPath(
-    uri: vscode.Uri,
-    detailedActionType: DetailedActionType
-  ) {
-    let data = common.getData();
-
-    const removeFnByDetailedActionType: { [key: string]: Function } = {
-      [DetailedActionType.RenameOrMoveFile]: this.removeUri.bind(
-        this,
-        data,
-        uri
-      ),
-      [DetailedActionType.RemoveFile]: this.removeUri.bind(this, data, uri),
-      [DetailedActionType.TextChange]: this.removeUri.bind(this, data, uri),
-      [DetailedActionType.RemoveDirectory]: this.removeFolder.bind(
-        this,
-        data,
-        uri
-      ),
-      [DetailedActionType.RenameOrMoveDirectory]: this.removeFolder.bind(
-        this,
-        data,
-        uri
-      ),
-    };
-    data = removeFnByDetailedActionType[detailedActionType]();
-    updateData(data);
-  }
-
-  private removeUri(data: QuickPickItem[], uri: vscode.Uri): QuickPickItem[] {
-    return data.filter(
-      (qpItem: QuickPickItem) => qpItem.uri.fsPath !== uri.fsPath
-    );
-  }
-
-  private removeFolder(data: QuickPickItem[], uri: vscode.Uri) {
-    return data.filter((qpItem: QuickPickItem) => {
-      return !qpItem.uri.fsPath.includes(uri.fsPath);
-    });
-  }
+function removeUri(data: QuickPickItem[], uri: vscode.Uri): QuickPickItem[] {
+  return data.filter(
+    (qpItem: QuickPickItem) => qpItem.uri.fsPath !== uri.fsPath
+  );
 }
 
-export default WorkspaceRemover;
+function removeFolder(data: QuickPickItem[], uri: vscode.Uri) {
+  return data.filter((qpItem: QuickPickItem) => {
+    return !qpItem.uri.fsPath.includes(uri.fsPath);
+  });
+}
+
+export function removeFromCacheByPath(
+  uri: vscode.Uri,
+  detailedActionType: DetailedActionType
+) {
+  let data = common.getData();
+
+  const removeFnByDetailedActionType: { [key: string]: Function } = {
+    [DetailedActionType.RenameOrMoveFile]: removeUri.bind(null, data, uri),
+    [DetailedActionType.RemoveFile]: removeUri.bind(null, data, uri),
+    [DetailedActionType.TextChange]: removeUri.bind(null, data, uri),
+    [DetailedActionType.RemoveDirectory]: removeFolder.bind(null, data, uri),
+    [DetailedActionType.RenameOrMoveDirectory]: removeFolder.bind(
+      null,
+      data,
+      uri
+    ),
+  };
+  data = removeFnByDetailedActionType[detailedActionType]();
+  updateData(data);
+}
