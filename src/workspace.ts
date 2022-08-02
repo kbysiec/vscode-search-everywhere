@@ -24,13 +24,11 @@ import {
   onWillReindexOnConfigurationChangeEventEmitter,
 } from "./workspaceEventsEmitter";
 import { removeFromCacheByPath } from "./workspaceRemover";
-import WorkspaceUpdater from "./workspaceUpdater";
+import { updateCacheByPath } from "./workspaceUpdater";
 
 const debounce = require("debounce");
 
 class Workspace {
-  private updater!: WorkspaceUpdater;
-
   constructor() {
     this.initComponents();
   }
@@ -66,8 +64,6 @@ class Workspace {
     utils.setWorkspaceFoldersCommonPath();
     await dataService.fetchConfig();
     dataConverter.fetchConfig();
-
-    this.updater = new WorkspaceUpdater();
   }
 
   private reloadComponents() {
@@ -117,7 +113,7 @@ class Workspace {
 
       await common.registerAction(
         ActionType.Update,
-        this.updater.updateCacheByPath.bind(this.updater, uri, actionType),
+        updateCacheByPath.bind(null, uri, actionType),
         ActionTrigger.DidChangeTextDocument,
         uri
       );
@@ -137,12 +133,7 @@ class Workspace {
 
       await common.registerAction(
         ActionType.Update,
-        this.updater.updateCacheByPath.bind(
-          this.updater,
-          file.newUri,
-          actionType,
-          file.oldUri
-        ),
+        updateCacheByPath.bind(null, file.newUri, actionType, file.oldUri),
         ActionTrigger.DidRenameFiles,
         file.newUri
       );
@@ -167,7 +158,7 @@ class Workspace {
 
     await common.registerAction(
       ActionType.Update,
-      this.updater.updateCacheByPath.bind(this.updater, uri, actionType),
+      updateCacheByPath.bind(null, uri, actionType),
       ActionTrigger.DidCreateFiles,
       uri
     );

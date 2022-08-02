@@ -1,170 +1,120 @@
-import WorkspaceUpdater from "../../workspaceUpdater";
+import * as sinon from "sinon";
+import * as cache from "../../cache";
+import { utils } from "../../utils";
+import { workspaceCommon as common } from "../../workspaceCommon";
 import {
   getQpItem,
   getQpItems,
   getQpItemsSymbolAndUri,
 } from "../util/qpItemMockFactory";
-import { restoreStubbedMultiple, stubMultiple } from "../util/stubHelpers";
+import { stubMultiple } from "../util/stubHelpers";
 
-export const getTestSetups = (workspaceUpdater: WorkspaceUpdater) => {
-  const workspaceUpdaterAny = workspaceUpdater as any;
+export const getTestSetups = () => {
+  const sandbox = sinon.createSandbox();
 
   return {
+    afterEach: () => {
+      sandbox.restore();
+    },
     updateCacheByPath1: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceUpdaterAny.common,
-          method: "index",
-        },
-        {
-          object: workspaceUpdaterAny.common,
-          method: "downloadData",
-        },
-      ]);
-
-      return stubMultiple([
-        {
-          object: workspaceUpdaterAny.common,
-          method: "index",
-        },
-        {
-          object: workspaceUpdaterAny.common,
-          method: "downloadData",
-          throws: new Error("test error"),
-        },
-      ]);
+      return stubMultiple(
+        [
+          {
+            object: common,
+            method: "index",
+          },
+          {
+            object: common,
+            method: "downloadData",
+            throws: new Error("test error"),
+          },
+        ],
+        sandbox
+      );
     },
     updateCacheByPath2: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceUpdaterAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceUpdaterAny.common,
-          method: "downloadData",
-        },
-        {
-          object: workspaceUpdaterAny.common,
-          method: "getData",
-        },
-      ]);
-
-      return stubMultiple([
-        {
-          object: workspaceUpdaterAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceUpdaterAny.common,
-          method: "downloadData",
-          returns: Promise.resolve(getQpItemsSymbolAndUri("./fake-new/")),
-        },
-        {
-          object: workspaceUpdaterAny.common,
-          method: "getData",
-          returns: [],
-        },
-      ]);
+      return stubMultiple(
+        [
+          {
+            object: cache,
+            method: "updateData",
+          },
+          {
+            object: common,
+            method: "downloadData",
+            returns: Promise.resolve(getQpItemsSymbolAndUri("./fake-new/")),
+          },
+          {
+            object: common,
+            method: "getData",
+            returns: [],
+          },
+        ],
+        sandbox
+      );
     },
     updateCacheByPath3: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceUpdaterAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceUpdaterAny.common,
-          method: "downloadData",
-        },
-        {
-          object: workspaceUpdaterAny.common,
-          method: "getData",
-        },
-      ]);
-
-      return stubMultiple([
-        {
-          object: workspaceUpdaterAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceUpdaterAny.common,
-          method: "downloadData",
-          returns: Promise.resolve(getQpItem()),
-        },
-        {
-          object: workspaceUpdaterAny.common,
-          method: "getData",
-          returns: [],
-        },
-      ]);
+      return stubMultiple(
+        [
+          {
+            object: cache,
+            method: "updateData",
+          },
+          {
+            object: common,
+            method: "downloadData",
+            returns: Promise.resolve(getQpItem()),
+          },
+          {
+            object: common,
+            method: "getData",
+            returns: [],
+          },
+        ],
+        sandbox
+      );
     },
     updateCacheByPath4: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceUpdaterAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceUpdaterAny.common,
-          method: "downloadData",
-        },
-        {
-          object: workspaceUpdaterAny.common,
-          method: "getData",
-        },
-      ]);
-
-      return stubMultiple([
-        {
-          object: workspaceUpdaterAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceUpdaterAny.common,
-          method: "downloadData",
-          returns: Promise.resolve(getQpItem()),
-        },
-        {
-          object: workspaceUpdaterAny.common,
-          method: "getData",
-          returns: [],
-        },
-      ]);
+      return stubMultiple(
+        [
+          {
+            object: cache,
+            method: "updateData",
+          },
+          {
+            object: common,
+            method: "downloadData",
+            returns: Promise.resolve(getQpItem()),
+          },
+          {
+            object: common,
+            method: "getData",
+            returns: [],
+          },
+        ],
+        sandbox
+      );
     },
     updateCacheByPath5: () => {
-      restoreStubbedMultiple([
-        {
-          object: workspaceUpdaterAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceUpdaterAny.common,
-          method: "getData",
-        },
-        {
-          object: workspaceUpdaterAny.utils,
-          method: "updateQpItemsWithNewDirectoryPath",
-        },
-      ]);
-
-      return stubMultiple([
-        {
-          object: workspaceUpdaterAny.cache,
-          method: "updateData",
-        },
-        {
-          object: workspaceUpdaterAny.common,
-          method: "getData",
-          returns: getQpItems(),
-        },
-        {
-          object: workspaceUpdaterAny.utils,
-          method: "updateQpItemsWithNewDirectoryPath",
-          returns: getQpItems(2, "./fake-new/"),
-        },
-      ]);
+      return stubMultiple(
+        [
+          {
+            object: cache,
+            method: "updateData",
+          },
+          {
+            object: common,
+            method: "getData",
+            returns: getQpItems(),
+          },
+          {
+            object: utils,
+            method: "updateQpItemsWithNewDirectoryPath",
+            returns: getQpItems(2, "./fake-new/"),
+          },
+        ],
+        sandbox
+      );
     },
   };
 };
