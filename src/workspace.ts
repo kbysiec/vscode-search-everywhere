@@ -28,192 +28,200 @@ import { updateCacheByPath } from "./workspaceUpdater";
 
 const debounce = require("debounce");
 
-class Workspace {
-  constructor() {
-    this.initComponents();
-  }
+function reloadComponents() {
+  dataConverter.reload();
+  dataService.reload();
+}
 
-  async index(indexActionType: ActionTrigger): Promise<void> {
-    await common.index(indexActionType);
+async function handleDidChangeConfiguration(
+  event: vscode.ConfigurationChangeEvent
+) {
+  clearConfig();
+  if (workspace.shouldReindexOnConfigurationChange(event)) {
+    reloadComponents();
+    onWillReindexOnConfigurationChangeEventEmitter.fire();
+    await workspace.index(ActionTrigger.ConfigurationChange);
+  } else if (utils.isDebounceConfigurationToggled(event)) {
+    onDidDebounceConfigToggleEventEmitter.fire();
   }
+}
 
-  registerEventListeners(): void {
-    vscode.workspace.onDidChangeConfiguration(
-      debounce(this.handleDidChangeConfiguration, 250)
+async function handleDidChangeWorkspaceFolders(
+  event: vscode.WorkspaceFoldersChangeEvent
+) {
+  utils.hasWorkspaceChanged(event) &&
+    (await workspace.index(ActionTrigger.WorkspaceFoldersChange));
+}
+
+async function handleDidChangeTextDocument(
+  event: vscode.TextDocumentChangeEvent
+) {
+  const uri = event.document.uri;
+  const isUriExistingInWorkspace = await dataService.isUriExistingInWorkspace(
+    uri,
+    true
+  );
+  const hasContentChanged = event.contentChanges.length;
+
+  const actionType = DetailedActionType.TextChange;
+
+  if (isUriExistingInWorkspace && hasContentChanged) {
+    await common.registerAction(
+      ActionType.Remove,
+      removeFromCacheByPath.bind(null, uri, actionType),
+      ActionTrigger.DidChangeTextDocument,
+      uri
     );
-    vscode.workspace.onDidChangeWorkspaceFolders(
-      debounce(this.handleDidChangeWorkspaceFolders, 250)
-    );
-    vscode.workspace.onDidChangeTextDocument(
-      debounce(this.handleDidChangeTextDocument, 700)
-    );
-    vscode.workspace.onDidRenameFiles(this.handleDidRenameFiles);
-    vscode.workspace.onDidCreateFiles(this.handleDidCreateFiles);
-    vscode.workspace.onDidDeleteFiles(this.handleDidDeleteFiles);
-
-    onDidProcessing(this.handleDidActionProcessorProcessing);
-    onWillProcessing(this.handleWillActionProcessorProcessing);
-    onWillExecuteAction(this.handleWillActionProcessorExecuteAction);
-  }
-
-  getData(): QuickPickItem[] {
-    return common.getData();
-  }
-
-  private async initComponents() {
-    utils.setWorkspaceFoldersCommonPath();
-    await dataService.fetchConfig();
-    dataConverter.fetchConfig();
-  }
-
-  private reloadComponents() {
-    dataConverter.reload();
-    dataService.reload();
-  }
-
-  private handleDidChangeConfiguration = async (
-    event: vscode.ConfigurationChangeEvent
-  ): Promise<void> => {
-    clearConfig();
-    if (this.shouldReindexOnConfigurationChange(event)) {
-      this.reloadComponents();
-      onWillReindexOnConfigurationChangeEventEmitter.fire();
-      await this.index(ActionTrigger.ConfigurationChange);
-    } else if (utils.isDebounceConfigurationToggled(event)) {
-      onDidDebounceConfigToggleEventEmitter.fire();
-    }
-  };
-
-  private handleDidChangeWorkspaceFolders = async (
-    event: vscode.WorkspaceFoldersChangeEvent
-  ): Promise<void> => {
-    utils.hasWorkspaceChanged(event) &&
-      (await this.index(ActionTrigger.WorkspaceFoldersChange));
-  };
-
-  private handleDidChangeTextDocument = async (
-    event: vscode.TextDocumentChangeEvent
-  ) => {
-    const uri = event.document.uri;
-    const isUriExistingInWorkspace = await dataService.isUriExistingInWorkspace(
-      uri,
-      true
-    );
-    const hasContentChanged = event.contentChanges.length;
-
-    const actionType = DetailedActionType.TextChange;
-
-    if (isUriExistingInWorkspace && hasContentChanged) {
-      await common.registerAction(
-        ActionType.Remove,
-        removeFromCacheByPath.bind(null, uri, actionType),
-        ActionTrigger.DidChangeTextDocument,
-        uri
-      );
-
-      await common.registerAction(
-        ActionType.Update,
-        updateCacheByPath.bind(null, uri, actionType),
-        ActionTrigger.DidChangeTextDocument,
-        uri
-      );
-    }
-  };
-
-  private handleDidRenameFiles = async (event: vscode.FileRenameEvent) => {
-    dataService.clearCachedUris();
-
-    const firstFile = event.files[0];
-    const actionType = utils.isDirectory(firstFile.oldUri)
-      ? DetailedActionType.RenameOrMoveDirectory
-      : DetailedActionType.RenameOrMoveFile;
-
-    for (let i = 0; i < event.files.length; i++) {
-      const file = event.files[i];
-
-      await common.registerAction(
-        ActionType.Update,
-        updateCacheByPath.bind(null, file.newUri, actionType, file.oldUri),
-        ActionTrigger.DidRenameFiles,
-        file.newUri
-      );
-
-      actionType === DetailedActionType.RenameOrMoveFile &&
-        (await common.registerAction(
-          ActionType.Remove,
-          removeFromCacheByPath.bind(null, file.oldUri, actionType),
-          ActionTrigger.DidRenameFiles,
-          file.oldUri
-        ));
-    }
-  };
-
-  private handleDidCreateFiles = async (event: vscode.FileCreateEvent) => {
-    dataService.clearCachedUris();
-
-    const uri = event.files[0];
-    const actionType = utils.isDirectory(uri)
-      ? DetailedActionType.CreateNewDirectory
-      : DetailedActionType.CreateNewFile;
 
     await common.registerAction(
       ActionType.Update,
       updateCacheByPath.bind(null, uri, actionType),
-      ActionTrigger.DidCreateFiles,
+      ActionTrigger.DidChangeTextDocument,
       uri
-    );
-  };
-
-  private handleDidDeleteFiles = async (event: vscode.FileDeleteEvent) => {
-    dataService.clearCachedUris();
-
-    const uri = event.files[0];
-    const actionType = utils.isDirectory(uri)
-      ? DetailedActionType.RemoveDirectory
-      : DetailedActionType.RemoveFile;
-
-    await common.registerAction(
-      ActionType.Remove,
-      removeFromCacheByPath.bind(null, uri, actionType),
-      ActionTrigger.DidDeleteFiles,
-      uri
-    );
-  };
-
-  private handleWillActionProcessorProcessing = () => {
-    onWillProcessingEventEmitter.fire();
-  };
-
-  private handleDidActionProcessorProcessing = () => {
-    onDidProcessingEventEmitter.fire();
-  };
-
-  private handleWillActionProcessorExecuteAction = (action: Action) => {
-    onWillExecuteActionEventEmitter.fire(action);
-  };
-
-  private readonly defaultSection = "searchEverywhere";
-  private shouldReindexOnConfigurationChange(
-    event: vscode.ConfigurationChangeEvent
-  ): boolean {
-    const excludeMode = fetchExcludeMode();
-    const excluded: string[] = [
-      "shouldDisplayNotificationInStatusBar",
-      "shouldInitOnStartup",
-      "shouldHighlightSymbol",
-      "shouldUseDebounce",
-    ].map((config: string) => `${this.defaultSection}.${config}`);
-
-    return (
-      (event.affectsConfiguration("searchEverywhere") &&
-        !excluded.some((config: string) =>
-          event.affectsConfiguration(config)
-        )) ||
-      (excludeMode === ExcludeMode.FilesAndSearch &&
-        (event.affectsConfiguration("files.exclude") ||
-          event.affectsConfiguration("search.exclude")))
     );
   }
 }
 
-export default Workspace;
+async function handleDidRenameFiles(event: vscode.FileRenameEvent) {
+  dataService.clearCachedUris();
+
+  const firstFile = event.files[0];
+  const actionType = utils.isDirectory(firstFile.oldUri)
+    ? DetailedActionType.RenameOrMoveDirectory
+    : DetailedActionType.RenameOrMoveFile;
+
+  for (let i = 0; i < event.files.length; i++) {
+    const file = event.files[i];
+
+    await common.registerAction(
+      ActionType.Update,
+      updateCacheByPath.bind(null, file.newUri, actionType, file.oldUri),
+      ActionTrigger.DidRenameFiles,
+      file.newUri
+    );
+
+    actionType === DetailedActionType.RenameOrMoveFile &&
+      (await common.registerAction(
+        ActionType.Remove,
+        removeFromCacheByPath.bind(null, file.oldUri, actionType),
+        ActionTrigger.DidRenameFiles,
+        file.oldUri
+      ));
+  }
+}
+
+async function handleDidCreateFiles(event: vscode.FileCreateEvent) {
+  dataService.clearCachedUris();
+
+  const uri = event.files[0];
+  const actionType = utils.isDirectory(uri)
+    ? DetailedActionType.CreateNewDirectory
+    : DetailedActionType.CreateNewFile;
+
+  await common.registerAction(
+    ActionType.Update,
+    updateCacheByPath.bind(null, uri, actionType),
+    ActionTrigger.DidCreateFiles,
+    uri
+  );
+}
+
+async function handleDidDeleteFiles(event: vscode.FileDeleteEvent) {
+  dataService.clearCachedUris();
+
+  const uri = event.files[0];
+  const actionType = utils.isDirectory(uri)
+    ? DetailedActionType.RemoveDirectory
+    : DetailedActionType.RemoveFile;
+
+  await common.registerAction(
+    ActionType.Remove,
+    removeFromCacheByPath.bind(null, uri, actionType),
+    ActionTrigger.DidDeleteFiles,
+    uri
+  );
+}
+
+function handleWillActionProcessorProcessing() {
+  onWillProcessingEventEmitter.fire();
+}
+
+function handleDidActionProcessorProcessing() {
+  onDidProcessingEventEmitter.fire();
+}
+
+function handleWillActionProcessorExecuteAction(action: Action) {
+  onWillExecuteActionEventEmitter.fire(action);
+}
+
+function shouldReindexOnConfigurationChange(
+  event: vscode.ConfigurationChangeEvent
+): boolean {
+  const excludeMode = fetchExcludeMode();
+  const excluded: string[] = [
+    "shouldDisplayNotificationInStatusBar",
+    "shouldInitOnStartup",
+    "shouldHighlightSymbol",
+    "shouldUseDebounce",
+  ].map((config: string) => `${defaultSection}.${config}`);
+
+  return (
+    (event.affectsConfiguration("searchEverywhere") &&
+      !excluded.some((config: string) => event.affectsConfiguration(config))) ||
+    (excludeMode === ExcludeMode.FilesAndSearch &&
+      (event.affectsConfiguration("files.exclude") ||
+        event.affectsConfiguration("search.exclude")))
+  );
+}
+
+async function init() {
+  utils.setWorkspaceFoldersCommonPath();
+  await dataService.fetchConfig();
+  dataConverter.fetchConfig();
+}
+
+async function index(indexActionType: ActionTrigger): Promise<void> {
+  await common.index(indexActionType);
+}
+
+function registerEventListeners(): void {
+  vscode.workspace.onDidChangeConfiguration(
+    debounce(handleDidChangeConfiguration, 250)
+  );
+  vscode.workspace.onDidChangeWorkspaceFolders(
+    debounce(handleDidChangeWorkspaceFolders, 250)
+  );
+  vscode.workspace.onDidChangeTextDocument(
+    debounce(handleDidChangeTextDocument, 700)
+  );
+  vscode.workspace.onDidRenameFiles(handleDidRenameFiles);
+  vscode.workspace.onDidCreateFiles(handleDidCreateFiles);
+  vscode.workspace.onDidDeleteFiles(handleDidDeleteFiles);
+
+  onDidProcessing(handleDidActionProcessorProcessing);
+  onWillProcessing(handleWillActionProcessorProcessing);
+  onWillExecuteAction(handleWillActionProcessorExecuteAction);
+}
+
+function getData(): QuickPickItem[] {
+  return common.getData();
+}
+
+const defaultSection = "searchEverywhere";
+
+export const workspace = {
+  init,
+  index,
+  registerEventListeners,
+  getData,
+  shouldReindexOnConfigurationChange,
+  handleDidChangeConfiguration,
+  handleDidChangeWorkspaceFolders,
+  handleDidChangeTextDocument,
+  handleDidRenameFiles,
+  handleDidCreateFiles,
+  handleDidDeleteFiles,
+  handleWillActionProcessorProcessing,
+  handleDidActionProcessorProcessing,
+  handleWillActionProcessorExecuteAction,
+};

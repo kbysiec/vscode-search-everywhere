@@ -6,7 +6,7 @@ import ActionType from "./enum/actionType";
 import Action from "./interface/action";
 import QuickPick from "./quickPick";
 import { utils } from "./utils";
-import Workspace from "./workspace";
+import { workspace } from "./workspace";
 import {
   onDidDebounceConfigToggle,
   onDidProcessing,
@@ -16,19 +16,18 @@ import {
 } from "./workspaceEventsEmitter";
 
 class ExtensionController {
-  private workspace!: Workspace;
   private quickPick!: QuickPick;
 
   constructor(private extensionContext: vscode.ExtensionContext) {
     this.initComponents();
-    this.workspace.registerEventListeners();
+    workspace.registerEventListeners();
     this.registerEventListeners();
   }
 
   async search(): Promise<void> {
     if (utils.hasWorkspaceAnyFolder()) {
       this.shouldIndexOnQuickPickOpen() &&
-        (await this.workspace.index(ActionTrigger.Search));
+        (await workspace.index(ActionTrigger.Search));
       this.quickPick.isInitialized() && this.loadItemsAndShowQuickPick();
     } else {
       utils.printNoFolderOpenedMessage();
@@ -37,13 +36,13 @@ class ExtensionController {
 
   async reload(): Promise<void> {
     utils.hasWorkspaceAnyFolder()
-      ? await this.workspace.index(ActionTrigger.Reload)
+      ? await workspace.index(ActionTrigger.Reload)
       : utils.printNoFolderOpenedMessage();
   }
 
   async startup(): Promise<void> {
     fetchShouldInitOnStartup() &&
-      (await this.workspace.index(ActionTrigger.Startup));
+      (await workspace.index(ActionTrigger.Startup));
   }
 
   private loadItemsAndShowQuickPick() {
@@ -52,7 +51,7 @@ class ExtensionController {
   }
 
   private async setQuickPickData(): Promise<void> {
-    const data = await this.workspace.getData();
+    const data = await workspace.getData();
     this.quickPick.setItems(data);
   }
 
@@ -77,7 +76,7 @@ class ExtensionController {
 
   private initComponents(): void {
     initCache(this.extensionContext);
-    this.workspace = new Workspace();
+    workspace.init();
     this.quickPick = new QuickPick();
   }
 
