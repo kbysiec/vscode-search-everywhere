@@ -1,6 +1,5 @@
 import ExtensionController from "../../extensionController";
 import { getQpItems } from "../util/qpItemMockFactory";
-import { getQuickPickStub } from "../util/stubFactory";
 import { restoreStubbedMultiple, stubMultiple } from "../util/stubHelpers";
 
 export const getTestSetups = (extensionController: ExtensionController) => {
@@ -234,14 +233,14 @@ export const getTestSetups = (extensionController: ExtensionController) => {
     },
 
     handleDidProcessing2: () => {
-      stubMultiple([
-        {
-          object: extensionControllerAny,
-          method: "quickPick",
-          returns: getQuickPickStub(),
-          isNotMethod: true,
-        },
-      ]);
+      // stubMultiple([
+      //   {
+      //     object: extensionControllerAny,
+      //     method: "quickPick",
+      //     returns: getQuickPickStub(),
+      //     isNotMethod: true,
+      //   },
+      // ]);
 
       restoreStubbedMultiple([
         {

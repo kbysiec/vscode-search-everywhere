@@ -15,6 +15,7 @@ interface StubMultipleConfig {
   throws?: any;
   customReturns?: boolean;
   returnsIsUndefined?: boolean;
+  callsFake?: any;
 }
 
 interface RestoreStubbedMultipleConfig {
@@ -31,7 +32,9 @@ export const stubMultiple = (
   configList.forEach((config: StubMultipleConfig) => {
     let stub = sandbox.stub(config.object, config.method);
 
-    if (config.customReturns) {
+    if (config.callsFake) {
+      !config.isNotMethod && stub.returns(config.returns);
+    } else if (config.customReturns) {
       config.returns &&
         config.returns.length &&
         config.returns.forEach(stubOnSpecificCall.bind(null, config, stub));
@@ -44,6 +47,7 @@ export const stubMultiple = (
     }
 
     config.throws && stub.throws(config.throws);
+    config.callsFake && !config.isNotMethod && stub.callsFake(config.callsFake);
 
     stubs.push(stub);
   });

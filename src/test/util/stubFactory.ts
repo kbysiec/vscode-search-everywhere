@@ -1,12 +1,6 @@
 import * as sinon from "sinon";
 import * as vscode from "vscode";
-import QuickPick from "../../quickPick";
 import { createStubInstance } from "./stubbedClass";
-
-export function getQuickPickStub(): QuickPick {
-  const quickPickStubTemp: any = createStubInstance(QuickPick);
-  return quickPickStubTemp as QuickPick;
-}
 
 export function getTextEditorStub(
   isUntitled: boolean = true

@@ -10,227 +10,326 @@ import ItemsFilterPhrases from "./interface/itemsFilterPhrases";
 import QuickPickItem from "./interface/quickPickItem";
 const debounce = require("debounce");
 
-class QuickPick {
-  private quickPick!: vscode.QuickPick<QuickPickItem>;
-  private items: QuickPickItem[];
-  private shouldUseItemsFilterPhrases!: boolean;
-  private helpPhrase!: string;
-  private itemsFilterPhrases!: ItemsFilterPhrases;
-  private helpItems!: QuickPickItem[];
-
-  private onDidChangeValueEventListeners: vscode.Disposable[];
-
-  constructor() {
-    this.items = [];
-    this.onDidChangeValueEventListeners = [];
-
-    this.fetchConfig();
-    this.fetchHelpData();
-  }
-
-  init(): void {
-    this.quickPick = vscode.window.createQuickPick();
-    this.quickPick.matchOnDetail = true;
-    this.quickPick.matchOnDescription = true;
-
-    this.quickPick.onDidHide(this.handleDidHide);
-    this.quickPick.onDidAccept(this.handleDidAccept);
-    this.quickPick.onDidChangeValue(this.handleDidChangeValue);
-    this.registerOnDidChangeValueEventListeners();
-  }
-
-  reloadOnDidChangeValueEventListener(): void {
-    this.disposeOnDidChangeValueEventListeners();
-    this.registerOnDidChangeValueEventListeners();
-  }
-
-  reload(): void {
-    this.fetchConfig();
-    this.fetchHelpData();
-  }
-
-  isInitialized(): boolean {
-    return !!this.quickPick;
-  }
-
-  show(): void {
-    this.quickPick.show();
-  }
-
-  loadItems(loadHelp: boolean = false): void {
-    this.quickPick.items = loadHelp ? this.helpItems : this.items;
-  }
-
-  setItems(items: QuickPickItem[]): void {
-    this.items = items;
-  }
-
-  showLoading(value: boolean): void {
-    this.quickPick.busy = value;
-  }
-
-  setText(text: string): void {
-    this.quickPick.value = text;
-  }
-
-  setPlaceholder(isBusy: boolean): void {
-    this.quickPick.placeholder = isBusy
-      ? "Please wait, loading..."
-      : this.shouldUseItemsFilterPhrases
-      ? `${
-          this.helpPhrase
-            ? `Type ${this.helpPhrase} for help or start typing file or symbol name...`
-            : `Help phrase not set. Start typing file or symbol name...`
-        }`
-      : "Start typing file or symbol name...";
-  }
-
-  private disposeOnDidChangeValueEventListeners(): void {
-    this.onDidChangeValueEventListeners.forEach(
-      (eventListener: vscode.Disposable) => eventListener.dispose()
-    );
-    this.onDidChangeValueEventListeners = [];
-  }
-
-  private registerOnDidChangeValueEventListeners(): void {
-    fetchShouldUseDebounce()
-      ? this.registerOnDidChangeValueWithDebounceEventListeners()
-      : this.registerOnDidChangeValueWithoutDebounceEventListeners();
-  }
-
-  private registerOnDidChangeValueWithDebounceEventListeners(): void {
-    const onDidChangeValueClearingEventListener =
-      this.quickPick.onDidChangeValue(this.handleDidChangeValueClearing);
-    const onDidChangeValueEventListener = this.quickPick.onDidChangeValue(
-      debounce(this.handleDidChangeValue, 400)
-    );
-
-    this.onDidChangeValueEventListeners.push(
-      onDidChangeValueClearingEventListener
-    );
-    this.onDidChangeValueEventListeners.push(onDidChangeValueEventListener);
-  }
-
-  private registerOnDidChangeValueWithoutDebounceEventListeners(): void {
-    const onDidChangeValueEventListener = this.quickPick.onDidChangeValue(
-      debounce(this.handleDidChangeValue, 400)
-    );
-
-    this.onDidChangeValueEventListeners.push(onDidChangeValueEventListener);
-  }
-
-  private async openSelected(qpItem: QuickPickItem): Promise<void> {
-    this.shouldLoadItemsForFilterPhrase(qpItem)
-      ? this.loadItemsForFilterPhrase(qpItem)
-      : await this.openItem(qpItem);
-  }
-
-  private shouldLoadItemsForFilterPhrase(qpItem: QuickPickItem): boolean {
-    return this.shouldUseItemsFilterPhrases && !!qpItem.isHelp;
-  }
-
-  private loadItemsForFilterPhrase(qpItem: QuickPickItem): void {
-    const filterPhrase = this.itemsFilterPhrases[qpItem.symbolKind];
-    this.setText(filterPhrase);
-    this.loadItems();
-  }
-
-  private async openItem(qpItem: QuickPickItem): Promise<void> {
-    const document = await vscode.workspace.openTextDocument(
-      qpItem.uri!.scheme === "file" ? (qpItem.uri!.fsPath as any) : qpItem.uri
-    );
-    const editor = await vscode.window.showTextDocument(document);
-    this.selectQpItem(editor, qpItem);
-  }
-
-  private selectQpItem(editor: vscode.TextEditor, qpItem: QuickPickItem): void {
-    editor.selection = this.getSelectionForQpItem(
-      qpItem,
-      fetchShouldHighlightSymbol()
-    );
-
-    editor.revealRange(
-      qpItem.range as vscode.Range,
-      vscode.TextEditorRevealType.Default
-    );
-  }
-
-  private getSelectionForQpItem(
-    qpItem: QuickPickItem,
-    shouldHighlightSymbol: boolean
-  ): vscode.Selection {
-    const { range } = qpItem;
-    const start = new vscode.Position(
-      range!.start.line,
-      range!.start.character
-    );
-    const end = new vscode.Position(range!.end.line, range!.end.character);
-
-    return shouldHighlightSymbol
-      ? new vscode.Selection(start, end)
-      : new vscode.Selection(start, start);
-  }
-
-  private getHelpItems(): QuickPickItem[] {
-    const items: QuickPickItem[] = [];
-    for (const kind in this.itemsFilterPhrases) {
-      const filterPhrase = this.itemsFilterPhrases[kind];
-      const item: QuickPickItem = this.getHelpItemForKind(kind, filterPhrase);
-      items.push(item);
-    }
-    return items;
-  }
-
-  private getHelpItemForKind(
-    symbolKind: string,
-    itemFilterPhrase: string
-  ): QuickPickItem {
-    return {
-      label: `${
-        this.helpPhrase
-      } Type ${itemFilterPhrase} for limit results to ${
-        vscode.SymbolKind[parseInt(symbolKind)]
-      } only`,
-      symbolKind: Number(symbolKind),
-      isHelp: true,
-      uri: vscode.Uri.parse("#"),
-    } as QuickPickItem;
-  }
-
-  private fetchConfig(): void {
-    this.shouldUseItemsFilterPhrases = fetchShouldUseItemsFilterPhrases();
-    this.helpPhrase = fetchHelpPhrase();
-    this.itemsFilterPhrases = fetchItemsFilterPhrases();
-  }
-
-  private fetchHelpData(): void {
-    this.helpItems = this.getHelpItems();
-  }
-
-  private handleDidChangeValueClearing = (): void => {
-    this.quickPick.items = [];
-  };
-
-  private handleDidChangeValue = (text: string): void => {
-    this.shouldLoadHelpItems(text) ? this.loadItems(true) : this.loadItems();
-  };
-
-  private shouldLoadHelpItems(text: string): boolean {
-    return (
-      this.shouldUseItemsFilterPhrases &&
-      !!this.helpPhrase &&
-      text === this.helpPhrase
-    );
-  }
-
-  private handleDidAccept = async (): Promise<void> => {
-    const selectedItem = this.quickPick.selectedItems[0];
-    selectedItem && (await this.openSelected(selectedItem));
-  };
-
-  private handleDidHide = (): void => {
-    this.setText("");
-  };
+function disposeOnDidChangeValueEventListeners(): void {
+  quickPick
+    .getOnDidChangeValueEventListeners()
+    .forEach((eventListener: vscode.Disposable) => eventListener.dispose());
+  quickPick.setOnDidChangeValueEventListeners([]);
 }
 
-export default QuickPick;
+function registerOnDidChangeValueEventListeners(): void {
+  fetchShouldUseDebounce()
+    ? registerOnDidChangeValueWithDebounceEventListeners()
+    : registerOnDidChangeValueWithoutDebounceEventListeners();
+}
+
+function registerOnDidChangeValueWithDebounceEventListeners(): void {
+  const control = quickPick.getControl();
+  const onDidChangeValueClearingEventListener = control.onDidChangeValue(
+    handleDidChangeValueClearing
+  );
+  const onDidChangeValueEventListener = control.onDidChangeValue(
+    debounce(handleDidChangeValue, 400)
+  );
+
+  const onDidChangeValueEventListeners =
+    quickPick.getOnDidChangeValueEventListeners();
+  onDidChangeValueEventListeners.push(onDidChangeValueClearingEventListener);
+
+  onDidChangeValueEventListeners.push(onDidChangeValueEventListener);
+}
+
+function registerOnDidChangeValueWithoutDebounceEventListeners(): void {
+  const control = quickPick.getControl();
+  const onDidChangeValueEventListener = control.onDidChangeValue(
+    debounce(handleDidChangeValue, 400)
+  );
+
+  quickPick
+    .getOnDidChangeValueEventListeners()
+    .push(onDidChangeValueEventListener);
+}
+
+async function openSelected(qpItem: QuickPickItem): Promise<void> {
+  shouldLoadItemsForFilterPhrase(qpItem)
+    ? loadItemsForFilterPhrase(qpItem)
+    : await openItem(qpItem);
+}
+
+function shouldLoadItemsForFilterPhrase(qpItem: QuickPickItem): boolean {
+  return quickPick.getShouldUseItemsFilterPhrases() && !!qpItem.isHelp;
+}
+
+function loadItemsForFilterPhrase(qpItem: QuickPickItem): void {
+  const itemsFilterPhrases = quickPick.getItemsFilterPhrases();
+  const filterPhrase = itemsFilterPhrases[qpItem.symbolKind];
+  quickPick.setText(filterPhrase);
+  quickPick.loadItems();
+}
+
+async function openItem(qpItem: QuickPickItem): Promise<void> {
+  const document = await vscode.workspace.openTextDocument(
+    qpItem.uri!.scheme === "file" ? (qpItem.uri!.fsPath as any) : qpItem.uri
+  );
+  const editor = await vscode.window.showTextDocument(document);
+  selectQpItem(editor, qpItem);
+}
+
+function selectQpItem(editor: vscode.TextEditor, qpItem: QuickPickItem): void {
+  editor.selection = getSelectionForQpItem(
+    qpItem,
+    fetchShouldHighlightSymbol()
+  );
+
+  editor.revealRange(
+    qpItem.range as vscode.Range,
+    vscode.TextEditorRevealType.Default
+  );
+}
+
+function getSelectionForQpItem(
+  qpItem: QuickPickItem,
+  shouldHighlightSymbol: boolean
+): vscode.Selection {
+  const { range } = qpItem;
+  const start = new vscode.Position(range!.start.line, range!.start.character);
+  const end = new vscode.Position(range!.end.line, range!.end.character);
+
+  return shouldHighlightSymbol
+    ? new vscode.Selection(start, end)
+    : new vscode.Selection(start, start);
+}
+
+function getHelpItems(): QuickPickItem[] {
+  const items: QuickPickItem[] = [];
+  const itemsFilterPhrases = quickPick.getItemsFilterPhrases();
+  for (const kind in itemsFilterPhrases) {
+    const filterPhrase = itemsFilterPhrases[kind];
+    const item: QuickPickItem = getHelpItemForKind(kind, filterPhrase);
+    items.push(item);
+  }
+  return items;
+}
+
+function getHelpItemForKind(
+  symbolKind: string,
+  itemFilterPhrase: string
+): QuickPickItem {
+  return {
+    label: `${quickPick.getHelpPhrase()} Type ${itemFilterPhrase} for limit results to ${
+      vscode.SymbolKind[parseInt(symbolKind)]
+    } only`,
+    symbolKind: Number(symbolKind),
+    isHelp: true,
+    uri: vscode.Uri.parse("#"),
+  } as QuickPickItem;
+}
+
+function fetchConfig(): void {
+  const shouldUseItemsFilterPhrases = fetchShouldUseItemsFilterPhrases();
+  setShouldUseItemsFilterPhrases(shouldUseItemsFilterPhrases);
+
+  const helpPhrase = fetchHelpPhrase();
+  setHelpPhrase(helpPhrase);
+
+  const itemsFilterPhrases = fetchItemsFilterPhrases();
+  setItemsFilterPhrases(itemsFilterPhrases);
+}
+
+function fetchHelpData(): void {
+  const helpItems = getHelpItems();
+  setHelpItems(helpItems);
+}
+
+function handleDidChangeValueClearing() {
+  const control = quickPick.getControl();
+  control.items = [];
+}
+
+function handleDidChangeValue(text: string) {
+  shouldLoadHelpItems(text) ? quickPick.loadItems(true) : quickPick.loadItems();
+}
+
+function shouldLoadHelpItems(text: string): boolean {
+  const helpPhrase = quickPick.getHelpPhrase();
+  return (
+    quickPick.getShouldUseItemsFilterPhrases() &&
+    !!helpPhrase &&
+    text === helpPhrase
+  );
+}
+
+async function handleDidAccept() {
+  const control = quickPick.getControl();
+  const selectedItem = control.selectedItems[0];
+  selectedItem && (await openSelected(selectedItem));
+}
+
+function handleDidHide() {
+  quickPick.setText("");
+}
+
+function init(): void {
+  const control = vscode.window.createQuickPick<QuickPickItem>();
+  setControl(control);
+  control.matchOnDetail = true;
+  control.matchOnDescription = true;
+
+  quickPick.fetchConfig();
+  fetchHelpData();
+
+  registerEventListeners();
+}
+
+function registerEventListeners() {
+  const control = quickPick.getControl();
+  control.onDidHide(handleDidHide);
+  control.onDidAccept(handleDidAccept);
+  control.onDidChangeValue(handleDidChangeValue);
+
+  registerOnDidChangeValueEventListeners();
+}
+
+function reloadOnDidChangeValueEventListener(): void {
+  disposeOnDidChangeValueEventListeners();
+  registerOnDidChangeValueEventListeners();
+}
+
+function reload(): void {
+  quickPick.fetchConfig();
+  fetchHelpData();
+}
+
+function isInitialized(): boolean {
+  return !!quickPick.getControl();
+}
+
+function show(): void {
+  const control = quickPick.getControl();
+  control.show();
+}
+
+function loadItems(loadHelp: boolean = false): void {
+  const control = quickPick.getControl();
+  control.items = loadHelp
+    ? quickPick.getHelpItemsProp()
+    : quickPick.getItems();
+}
+
+function showLoading(value: boolean): void {
+  const control = quickPick.getControl();
+  control.busy = value;
+}
+
+function setText(text: string): void {
+  const control = quickPick.getControl();
+  control.value = text;
+}
+
+function setPlaceholder(isBusy: boolean): void {
+  const control = quickPick.getControl();
+  const helpPhrase = quickPick.getHelpPhrase();
+  control.placeholder = isBusy
+    ? "Please wait, loading..."
+    : quickPick.getShouldUseItemsFilterPhrases()
+    ? `${
+        helpPhrase
+          ? `Type ${helpPhrase} for help or start typing file or symbol name...`
+          : `Help phrase not set. Start typing file or symbol name...`
+      }`
+    : "Start typing file or symbol name...";
+}
+
+let control: vscode.QuickPick<QuickPickItem>;
+let items: QuickPickItem[] = [];
+let shouldUseItemsFilterPhrases: boolean;
+let helpPhrase: string;
+let itemsFilterPhrases: ItemsFilterPhrases;
+let helpItems: QuickPickItem[];
+let onDidChangeValueEventListeners: vscode.Disposable[] = [];
+
+function getControl() {
+  return control;
+}
+
+function setControl(newControl: vscode.QuickPick<QuickPickItem>) {
+  control = newControl;
+}
+
+function getItems() {
+  return items;
+}
+
+function setItems(newItems: QuickPickItem[]): void {
+  items = newItems;
+}
+
+function getShouldUseItemsFilterPhrases() {
+  return shouldUseItemsFilterPhrases;
+}
+
+function setShouldUseItemsFilterPhrases(
+  newShouldUseItemsFilterPhrases: boolean
+) {
+  shouldUseItemsFilterPhrases = newShouldUseItemsFilterPhrases;
+}
+
+function getHelpPhrase() {
+  return helpPhrase;
+}
+
+function setHelpPhrase(newHelpPhrase: string) {
+  helpPhrase = newHelpPhrase;
+}
+
+function getItemsFilterPhrases() {
+  return itemsFilterPhrases;
+}
+
+function setItemsFilterPhrases(newItemsFilterPhrases: ItemsFilterPhrases) {
+  itemsFilterPhrases = newItemsFilterPhrases;
+}
+
+function getHelpItemsProp() {
+  return helpItems;
+}
+
+function setHelpItems(newHelpItems: QuickPickItem[]) {
+  helpItems = newHelpItems;
+}
+
+function getOnDidChangeValueEventListeners() {
+  return onDidChangeValueEventListeners;
+}
+
+function setOnDidChangeValueEventListeners(
+  newOnDidChangeValueEventListeners: vscode.Disposable[]
+) {
+  onDidChangeValueEventListeners = newOnDidChangeValueEventListeners;
+}
+
+export const quickPick = {
+  getControl,
+  getItems,
+  setItems,
+  getShouldUseItemsFilterPhrases,
+  getHelpPhrase,
+  getItemsFilterPhrases,
+  getHelpItemsProp,
+  getOnDidChangeValueEventListeners,
+  setOnDidChangeValueEventListeners,
+  init,
+  reloadOnDidChangeValueEventListener,
+  reload,
+  isInitialized,
+  show,
+  loadItems,
+  showLoading,
+  setText,
+  setPlaceholder,
+  fetchConfig,
+  handleDidChangeValueClearing,
+  handleDidChangeValue,
+  handleDidAccept,
+  handleDidHide,
+};

@@ -4,7 +4,7 @@ import { fetchShouldInitOnStartup } from "./config";
 import ActionTrigger from "./enum/actionTrigger";
 import ActionType from "./enum/actionType";
 import Action from "./interface/action";
-import QuickPick from "./quickPick";
+import { quickPick } from "./quickPick";
 import { utils } from "./utils";
 import { workspace } from "./workspace";
 import {
@@ -16,8 +16,6 @@ import {
 } from "./workspaceEventsEmitter";
 
 class ExtensionController {
-  private quickPick!: QuickPick;
-
   constructor(private extensionContext: vscode.ExtensionContext) {
     this.initComponents();
     workspace.registerEventListeners();
@@ -28,7 +26,7 @@ class ExtensionController {
     if (utils.hasWorkspaceAnyFolder()) {
       this.shouldIndexOnQuickPickOpen() &&
         (await workspace.index(ActionTrigger.Search));
-      this.quickPick.isInitialized() && this.loadItemsAndShowQuickPick();
+      quickPick.isInitialized() && this.loadItemsAndShowQuickPick();
     } else {
       utils.printNoFolderOpenedMessage();
     }
@@ -46,38 +44,38 @@ class ExtensionController {
   }
 
   private loadItemsAndShowQuickPick() {
-    this.quickPick.loadItems();
-    this.quickPick.show();
+    quickPick.loadItems();
+    quickPick.show();
   }
 
   private async setQuickPickData(): Promise<void> {
     const data = await workspace.getData();
-    this.quickPick.setItems(data);
+    quickPick.setItems(data);
   }
 
   private setBusy(isBusy: boolean) {
-    if (this.quickPick.isInitialized()) {
+    if (quickPick.isInitialized()) {
       this.setQuickPickLoading(isBusy);
       this.setQuickPickPlaceholder(isBusy);
     }
   }
 
   private setQuickPickLoading(isBusy: boolean) {
-    this.quickPick.showLoading(isBusy);
+    quickPick.showLoading(isBusy);
   }
 
   private setQuickPickPlaceholder(isBusy: boolean) {
-    this.quickPick.setPlaceholder(isBusy);
+    quickPick.setPlaceholder(isBusy);
   }
 
   private shouldIndexOnQuickPickOpen() {
-    return !fetchShouldInitOnStartup() && !this.quickPick.isInitialized();
+    return !fetchShouldInitOnStartup() && !quickPick.isInitialized();
   }
 
   private initComponents(): void {
     initCache(this.extensionContext);
     workspace.init();
-    this.quickPick = new QuickPick();
+    // this.quickPick = new QuickPick();
   }
 
   private registerEventListeners() {
@@ -92,31 +90,31 @@ class ExtensionController {
 
   private handleWillProcessing = () => {
     this.setBusy(true);
-    !this.quickPick.isInitialized() && this.quickPick.init();
+    !quickPick.isInitialized() && quickPick.init();
   };
 
   private handleDidProcessing = async () => {
     await this.setQuickPickData();
 
-    this.quickPick.loadItems();
+    quickPick.loadItems();
     this.setBusy(false);
   };
 
   private handleWillExecuteAction = (action: Action) => {
     if (action.type === ActionType.Rebuild) {
-      this.quickPick.setItems([]);
-      this.quickPick.loadItems();
+      quickPick.setItems([]);
+      quickPick.loadItems();
     }
   };
 
   private handleDidDebounceConfigToggle = () => {
     this.setBusy(true);
-    this.quickPick.reloadOnDidChangeValueEventListener();
+    quickPick.reloadOnDidChangeValueEventListener();
     this.setBusy(false);
   };
 
   private handleWillReindexOnConfigurationChange = () => {
-    this.quickPick.reload();
+    quickPick.reload();
   };
 }
 
