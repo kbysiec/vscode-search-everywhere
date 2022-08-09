@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import ExtensionController from "../../extensionController";
+import { extensionController } from "../../extensionController";
 import { stubMultiple } from "../util/stubHelpers";
 
-export const getTestSetups = (extensionController: ExtensionController) => {
+export const getTestSetups = () => {
   return {
     activate1: () => {
       return stubMultiple([

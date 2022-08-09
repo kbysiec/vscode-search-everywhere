@@ -1,309 +1,575 @@
-import ExtensionController from "../../extensionController";
+import * as sinon from "sinon";
+import * as cache from "../../cache";
+import * as config from "../../config";
+import { extensionController } from "../../extensionController";
+import { patternProvider } from "../../patternProvider";
+import { quickPick } from "../../quickPick";
+import { utils } from "../../utils";
+import { workspace } from "../../workspace";
+import * as workspaceEventsEmitter from "../../workspaceEventsEmitter";
+import { getExtensionContext } from "../util/mockFactory";
 import { getQpItems } from "../util/qpItemMockFactory";
-import { restoreStubbedMultiple, stubMultiple } from "../util/stubHelpers";
+import { stubMultiple } from "../util/stubHelpers";
 
-export const getTestSetups = (extensionController: ExtensionController) => {
-  const extensionControllerAny = extensionController as any;
+export function stubComponents(sandbox: sinon.SinonSandbox) {
+  return stubMultiple(
+    [
+      {
+        object: cache,
+        method: "initCache",
+      },
+      {
+        object: workspace,
+        method: "init",
+      },
+      {
+        object: workspace,
+        method: "registerEventListeners",
+      },
+      {
+        object: workspaceEventsEmitter,
+        method: "onWillProcessing",
+      },
+      {
+        object: workspaceEventsEmitter,
+        method: "onDidProcessing",
+      },
+      {
+        object: workspaceEventsEmitter,
+        method: "onWillExecuteAction",
+      },
+      {
+        object: workspaceEventsEmitter,
+        method: "onDidDebounceConfigToggle",
+      },
+      {
+        object: workspaceEventsEmitter,
+        method: "onWillReindexOnConfigurationChange",
+      },
+    ],
+    sandbox
+  );
+}
+
+export const getTestSetups = () => {
+  const sandbox = sinon.createSandbox();
+
   return {
+    afterEach: () => {
+      sandbox.restore();
+    },
+    init1: () => {
+      stubMultiple(
+        [
+          {
+            object: cache,
+            method: "initCache",
+          },
+          {
+            object: workspace,
+            method: "init",
+          },
+          {
+            object: workspace,
+            method: "registerEventListeners",
+          },
+          {
+            object: workspaceEventsEmitter,
+            method: "onWillProcessing",
+          },
+          {
+            object: workspaceEventsEmitter,
+            method: "onDidProcessing",
+          },
+          {
+            object: workspaceEventsEmitter,
+            method: "onWillExecuteAction",
+          },
+          {
+            object: workspaceEventsEmitter,
+            method: "onDidDebounceConfigToggle",
+          },
+          {
+            object: workspaceEventsEmitter,
+            method: "onWillReindexOnConfigurationChange",
+          },
+        ],
+        sandbox
+      );
+      return getExtensionContext();
+    },
+    init2: () => {
+      return stubMultiple(
+        [
+          {
+            object: cache,
+            method: "initCache",
+          },
+          {
+            object: workspace,
+            method: "init",
+          },
+          {
+            object: workspace,
+            method: "registerEventListeners",
+          },
+          {
+            object: workspaceEventsEmitter,
+            method: "onWillProcessing",
+          },
+          {
+            object: workspaceEventsEmitter,
+            method: "onDidProcessing",
+          },
+          {
+            object: workspaceEventsEmitter,
+            method: "onWillExecuteAction",
+          },
+          {
+            object: workspaceEventsEmitter,
+            method: "onDidDebounceConfigToggle",
+          },
+          {
+            object: workspaceEventsEmitter,
+            method: "onWillReindexOnConfigurationChange",
+          },
+        ],
+        sandbox
+      );
+    },
+    init3: () => {
+      return stubMultiple(
+        [
+          {
+            object: workspace,
+            method: "init",
+          },
+          {
+            object: cache,
+            method: "initCache",
+          },
+          {
+            object: workspace,
+            method: "registerEventListeners",
+          },
+          {
+            object: workspaceEventsEmitter,
+            method: "onWillProcessing",
+          },
+          {
+            object: workspaceEventsEmitter,
+            method: "onDidProcessing",
+          },
+          {
+            object: workspaceEventsEmitter,
+            method: "onWillExecuteAction",
+          },
+          {
+            object: workspaceEventsEmitter,
+            method: "onDidDebounceConfigToggle",
+          },
+          {
+            object: workspaceEventsEmitter,
+            method: "onWillReindexOnConfigurationChange",
+          },
+        ],
+        sandbox
+      );
+    },
+    init4: () => {
+      return stubMultiple(
+        [
+          {
+            object: workspaceEventsEmitter,
+            method: "onWillProcessing",
+          },
+          {
+            object: workspaceEventsEmitter,
+            method: "onDidProcessing",
+          },
+          {
+            object: workspaceEventsEmitter,
+            method: "onWillExecuteAction",
+          },
+          {
+            object: workspaceEventsEmitter,
+            method: "onDidDebounceConfigToggle",
+          },
+          {
+            object: workspaceEventsEmitter,
+            method: "onWillReindexOnConfigurationChange",
+          },
+          {
+            object: workspace,
+            method: "init",
+          },
+          {
+            object: cache,
+            method: "initCache",
+          },
+          {
+            object: workspace,
+            method: "registerEventListeners",
+          },
+        ],
+        sandbox
+      );
+    },
     search1: () => {
-      return stubMultiple([
-        {
-          object: extensionControllerAny.quickPick,
-          method: "show",
-        },
-        {
-          object: extensionControllerAny.utils,
-          method: "printNoFolderOpenedMessage",
-        },
-        {
-          object: extensionControllerAny.utils,
-          method: "hasWorkspaceAnyFolder",
-          returns: false,
-        },
-      ]);
+      stubComponents(sandbox);
+      return stubMultiple(
+        [
+          {
+            object: quickPick,
+            method: "show",
+          },
+          {
+            object: utils,
+            method: "printNoFolderOpenedMessage",
+          },
+          {
+            object: utils,
+            method: "hasWorkspaceAnyFolder",
+            returns: false,
+          },
+        ],
+        sandbox
+      );
     },
     search2: () => {
-      return stubMultiple([
-        {
-          object: extensionControllerAny.workspace,
-          method: "index",
-        },
-        {
-          object: extensionControllerAny.utils,
-          method: "hasWorkspaceAnyFolder",
-          returns: true,
-        },
-        {
-          object: extensionControllerAny,
-          method: "shouldIndexOnQuickPickOpen",
-          returns: true,
-        },
-      ]);
+      stubComponents(sandbox);
+      return stubMultiple(
+        [
+          {
+            object: workspace,
+            method: "index",
+          },
+          {
+            object: utils,
+            method: "hasWorkspaceAnyFolder",
+            returns: true,
+          },
+          {
+            object: extensionController,
+            method: "shouldIndexOnQuickPickOpen",
+            returns: true,
+          },
+        ],
+        sandbox
+      );
     },
     search3: () => {
-      return stubMultiple([
-        {
-          object: extensionControllerAny.workspace,
-          method: "index",
-        },
-        {
-          object: extensionControllerAny.utils,
-          method: "hasWorkspaceAnyFolder",
-          returns: true,
-        },
-        {
-          object: extensionControllerAny,
-          method: "shouldIndexOnQuickPickOpen",
-          returns: false,
-        },
-      ]);
+      stubComponents(sandbox);
+      return stubMultiple(
+        [
+          {
+            object: workspace,
+            method: "index",
+          },
+          {
+            object: utils,
+            method: "hasWorkspaceAnyFolder",
+            returns: true,
+          },
+          {
+            object: extensionController,
+            method: "shouldIndexOnQuickPickOpen",
+            returns: false,
+          },
+        ],
+        sandbox
+      );
     },
     search4: () => {
-      return stubMultiple([
-        {
-          object: extensionControllerAny.quickPick,
-          method: "loadItems",
-        },
-        {
-          object: extensionControllerAny.quickPick,
-          method: "show",
-        },
-        {
-          object: extensionControllerAny.utils,
-          method: "hasWorkspaceAnyFolder",
-          returns: true,
-        },
-        {
-          object: extensionControllerAny.quickPick,
-          method: "isInitialized",
-          returns: true,
-        },
-      ]);
+      stubComponents(sandbox);
+      return stubMultiple(
+        [
+          {
+            object: quickPick,
+            method: "loadItems",
+          },
+          {
+            object: quickPick,
+            method: "show",
+          },
+          {
+            object: utils,
+            method: "hasWorkspaceAnyFolder",
+            returns: true,
+          },
+          {
+            object: quickPick,
+            method: "isInitialized",
+            returns: true,
+          },
+        ],
+        sandbox
+      );
     },
     search5: () => {
-      return stubMultiple([
-        {
-          object: extensionControllerAny.quickPick,
-          method: "loadItems",
-        },
-        {
-          object: extensionControllerAny.quickPick,
-          method: "show",
-        },
-        {
-          object: extensionControllerAny.utils,
-          method: "hasWorkspaceAnyFolder",
-          returns: true,
-        },
-        {
-          object: extensionControllerAny.quickPick,
-          method: "isInitialized",
-          returns: false,
-        },
-        {
-          object: extensionControllerAny.workspace.dataService.patternProvider,
-          method: "getExcludePatterns",
-          returns: Promise.resolve(["**/.history/**", "**/.vscode/**"]),
-        },
-      ]);
+      stubComponents(sandbox);
+      return stubMultiple(
+        [
+          {
+            object: quickPick,
+            method: "loadItems",
+          },
+          {
+            object: quickPick,
+            method: "show",
+          },
+          {
+            object: utils,
+            method: "hasWorkspaceAnyFolder",
+            returns: true,
+          },
+          {
+            object: quickPick,
+            method: "isInitialized",
+            returns: false,
+          },
+          {
+            object: patternProvider,
+            method: "getExcludePatterns",
+            returns: Promise.resolve(["**/.history/**", "**/.vscode/**"]),
+          },
+        ],
+        sandbox
+      );
     },
     reload1: () => {
-      return stubMultiple([
-        {
-          object: extensionControllerAny.utils,
-          method: "printNoFolderOpenedMessage",
-        },
-        {
-          object: extensionControllerAny.utils,
-          method: "hasWorkspaceAnyFolder",
-          returns: false,
-        },
-      ]);
+      stubComponents(sandbox);
+      return stubMultiple(
+        [
+          {
+            object: utils,
+            method: "printNoFolderOpenedMessage",
+          },
+          {
+            object: utils,
+            method: "hasWorkspaceAnyFolder",
+            returns: false,
+          },
+        ],
+        sandbox
+      );
     },
     reload2: () => {
-      return stubMultiple([
-        {
-          object: extensionControllerAny.workspace,
-          method: "index",
-        },
-        {
-          object: extensionControllerAny.utils,
-          method: "hasWorkspaceAnyFolder",
-          returns: true,
-        },
-      ]);
+      stubComponents(sandbox);
+      return stubMultiple(
+        [
+          {
+            object: workspace,
+            method: "index",
+          },
+          {
+            object: utils,
+            method: "hasWorkspaceAnyFolder",
+            returns: true,
+          },
+        ],
+        sandbox
+      );
     },
     startup1: () => {
-      return stubMultiple([
-        {
-          object: extensionControllerAny.workspace,
-          method: "index",
-        },
-        {
-          object: extensionControllerAny.config,
-          method: "shouldInitOnStartup",
-          returns: true,
-        },
-      ]);
+      stubComponents(sandbox);
+      return stubMultiple(
+        [
+          {
+            object: workspace,
+            method: "index",
+          },
+          {
+            object: config,
+            method: "fetchShouldInitOnStartup",
+            returns: true,
+          },
+        ],
+        sandbox
+      );
     },
     startup2: () => {
-      return stubMultiple([
-        {
-          object: extensionControllerAny.workspace,
-          method: "index",
-        },
-        {
-          object: extensionControllerAny.config,
-          method: "shouldInitOnStartup",
-          returns: false,
-        },
-      ]);
+      stubComponents(sandbox);
+      return stubMultiple(
+        [
+          {
+            object: workspace,
+            method: "index",
+          },
+          {
+            object: config,
+            method: "fetchShouldInitOnStartup",
+            returns: false,
+          },
+        ],
+        sandbox
+      );
     },
     handleWillProcessing1: () => {
-      return stubMultiple([
-        {
-          object: extensionControllerAny.quickPick,
-          method: "showLoading",
-        },
-        {
-          object: extensionControllerAny.quickPick,
-          method: "setPlaceholder",
-        },
-        {
-          object: extensionControllerAny.quickPick,
-          method: "isInitialized",
-          returns: true,
-        },
-      ]);
+      stubComponents(sandbox);
+      return stubMultiple(
+        [
+          {
+            object: quickPick,
+            method: "showLoading",
+          },
+          {
+            object: quickPick,
+            method: "setPlaceholder",
+          },
+          {
+            object: quickPick,
+            method: "isInitialized",
+            returns: true,
+          },
+        ],
+        sandbox
+      );
     },
     handleWillProcessing2: () => {
-      return stubMultiple([
-        {
-          object: extensionControllerAny.quickPick,
-          method: "showLoading",
-        },
-        {
-          object: extensionControllerAny.quickPick,
-          method: "setPlaceholder",
-        },
-        {
-          object: extensionControllerAny.quickPick,
-          method: "isInitialized",
-          returns: false,
-        },
-      ]);
+      stubComponents(sandbox);
+      return stubMultiple(
+        [
+          {
+            object: quickPick,
+            method: "showLoading",
+          },
+          {
+            object: quickPick,
+            method: "setPlaceholder",
+          },
+          {
+            object: quickPick,
+            method: "isInitialized",
+            returns: false,
+          },
+        ],
+        sandbox
+      );
     },
     handleWillProcessing3: () => {
-      return stubMultiple([
-        {
-          object: extensionControllerAny.quickPick,
-          method: "init",
-        },
-        {
-          object: extensionControllerAny.quickPick,
-          method: "isInitialized",
-          returns: false,
-        },
-      ]);
+      stubComponents(sandbox);
+      return stubMultiple(
+        [
+          {
+            object: quickPick,
+            method: "init",
+          },
+          {
+            object: quickPick,
+            method: "isInitialized",
+            returns: false,
+          },
+        ],
+        sandbox
+      );
     },
     handleDidProcessing1: () => {
-      return stubMultiple([
-        {
-          object: extensionControllerAny,
-          method: "setQuickPickData",
-        },
-        {
-          object: extensionControllerAny.quickPick,
-          method: "init",
-        },
-        {
-          object: extensionControllerAny.quickPick,
-          method: "loadItems",
-        },
-        {
-          object: extensionControllerAny,
-          method: "setBusy",
-        },
-        {
-          object: extensionControllerAny.quickPick,
-          method: "isInitialized",
-          returns: true,
-        },
-      ]);
+      stubComponents(sandbox);
+      return stubMultiple(
+        [
+          {
+            object: extensionController,
+            method: "setQuickPickData",
+          },
+          {
+            object: quickPick,
+            method: "init",
+          },
+          {
+            object: quickPick,
+            method: "loadItems",
+          },
+          {
+            object: extensionController,
+            method: "setBusy",
+          },
+          {
+            object: quickPick,
+            method: "isInitialized",
+            returns: true,
+          },
+        ],
+        sandbox
+      );
     },
 
     handleDidProcessing2: () => {
-      // stubMultiple([
-      //   {
-      //     object: extensionControllerAny,
-      //     method: "quickPick",
-      //     returns: getQuickPickStub(),
-      //     isNotMethod: true,
-      //   },
-      // ]);
-
-      restoreStubbedMultiple([
-        {
-          object: extensionControllerAny.quickPick,
-          method: "setItems",
-        },
-      ]);
-
-      return stubMultiple([
-        {
-          object: extensionControllerAny.quickPick,
-          method: "setItems",
-        },
-        {
-          object: extensionControllerAny.workspace,
-          method: "getData",
-          returns: Promise.resolve(getQpItems()),
-        },
-      ]);
+      stubComponents(sandbox);
+      return stubMultiple(
+        [
+          {
+            object: quickPick,
+            method: "setItems",
+          },
+          {
+            object: workspace,
+            method: "getData",
+            returns: Promise.resolve(getQpItems()),
+          },
+        ],
+        sandbox
+      );
     },
     handleWillExecuteAction1: () => {
-      return stubMultiple([
-        {
-          object: extensionControllerAny.quickPick,
-          method: "setItems",
-        },
-        {
-          object: extensionControllerAny.quickPick,
-          method: "loadItems",
-        },
-      ]);
+      stubComponents(sandbox);
+      return stubMultiple(
+        [
+          {
+            object: quickPick,
+            method: "setItems",
+          },
+          {
+            object: quickPick,
+            method: "loadItems",
+          },
+        ],
+        sandbox
+      );
     },
     handleWillExecuteAction2: () => {
-      return stubMultiple([
-        {
-          object: extensionControllerAny.quickPick,
-          method: "setItems",
-        },
-        {
-          object: extensionControllerAny.quickPick,
-          method: "loadItems",
-        },
-      ]);
+      stubComponents(sandbox);
+      return stubMultiple(
+        [
+          {
+            object: quickPick,
+            method: "setItems",
+          },
+          {
+            object: quickPick,
+            method: "loadItems",
+          },
+        ],
+        sandbox
+      );
     },
     handleDidDebounceConfigToggle1: () => {
-      return stubMultiple([
-        {
-          object: extensionControllerAny,
-          method: "setBusy",
-        },
-        {
-          object: extensionControllerAny.quickPick,
-          method: "reloadOnDidChangeValueEventListener",
-        },
-      ]);
+      stubComponents(sandbox);
+      return stubMultiple(
+        [
+          {
+            object: extensionController,
+            method: "setBusy",
+          },
+          {
+            object: quickPick,
+            method: "reloadOnDidChangeValueEventListener",
+          },
+        ],
+        sandbox
+      );
     },
     handleWillReindexOnConfigurationChange1: () => {
-      return stubMultiple([
-        {
-          object: extensionControllerAny.quickPick,
-          method: "reload",
-        },
-      ]);
+      stubComponents(sandbox);
+      return stubMultiple(
+        [
+          {
+            object: quickPick,
+            method: "reload",
+          },
+        ],
+        sandbox
+      );
     },
   };
 };

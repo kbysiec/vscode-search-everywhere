@@ -178,6 +178,7 @@ async function init() {
   utils.setWorkspaceFoldersCommonPath();
   await dataService.fetchConfig();
   dataConverter.fetchConfig();
+  workspace.registerEventListeners();
 }
 
 async function index(indexActionType: ActionTrigger): Promise<void> {

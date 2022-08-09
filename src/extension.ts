@@ -1,11 +1,11 @@
 import * as vscode from "vscode";
-import ExtensionController from "./extensionController";
+import { extensionController } from "./extensionController";
 
-export async function search(extensionController: ExtensionController) {
+export async function search() {
   await extensionController.search();
 }
 
-export async function reload(extensionController: ExtensionController) {
+export async function reload() {
   await extensionController.reload();
 }
 
@@ -16,9 +16,7 @@ export function deactivate() {
 export async function activate(context: vscode.ExtensionContext) {
   console.log('Extension "vscode-search-everywhere" has been activated.');
 
-  const extensionController: ExtensionController = new ExtensionController(
-    context
-  );
+  extensionController.init(context);
 
   context.subscriptions.push(
     vscode.commands.registerCommand(
