@@ -21,6 +21,14 @@ export const getTestSetups = () => {
             method: "getConfiguration",
             returns: getVscodeConfiguration(configuration),
           },
+          {
+            object: cache,
+            method: "getConfigByKey",
+          },
+          {
+            object: cache,
+            method: "updateConfigByKey",
+          },
         ],
         sandbox
       );
@@ -29,7 +37,7 @@ export const getTestSetups = () => {
       sandbox.restore();
     },
     getExclude2: (section: string, key: string) => {
-      getConfigurationStub.restore();
+      sandbox.restore();
       return stubMultiple(
         [
           {
