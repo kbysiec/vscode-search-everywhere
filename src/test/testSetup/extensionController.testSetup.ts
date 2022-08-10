@@ -254,6 +254,10 @@ export const getTestSetups = () => {
             method: "shouldIndexOnQuickPickOpen",
             returns: true,
           },
+          {
+            object: quickPick,
+            method: "isInitialized",
+          },
         ],
         sandbox
       );
@@ -275,6 +279,10 @@ export const getTestSetups = () => {
             object: extensionController,
             method: "shouldIndexOnQuickPickOpen",
             returns: false,
+          },
+          {
+            object: quickPick,
+            method: "isInitialized",
           },
         ],
         sandbox
@@ -301,6 +309,10 @@ export const getTestSetups = () => {
             object: quickPick,
             method: "isInitialized",
             returns: true,
+          },
+          {
+            object: config,
+            method: "fetchShouldInitOnStartup",
           },
         ],
         sandbox
@@ -332,6 +344,14 @@ export const getTestSetups = () => {
             object: patternProvider,
             method: "getExcludePatterns",
             returns: Promise.resolve(["**/.history/**", "**/.vscode/**"]),
+          },
+          {
+            object: config,
+            method: "fetchShouldInitOnStartup",
+          },
+          {
+            object: workspace,
+            method: "index",
           },
         ],
         sandbox
@@ -440,8 +460,16 @@ export const getTestSetups = () => {
           },
           {
             object: quickPick,
+            method: "fetchConfig",
+          },
+          {
+            object: quickPick,
             method: "isInitialized",
             returns: false,
+          },
+          {
+            object: quickPick,
+            method: "init",
           },
         ],
         sandbox
@@ -493,7 +521,6 @@ export const getTestSetups = () => {
         sandbox
       );
     },
-
     handleDidProcessing2: () => {
       stubComponents(sandbox);
       return stubMultiple(
@@ -506,6 +533,14 @@ export const getTestSetups = () => {
             object: workspace,
             method: "getData",
             returns: Promise.resolve(getQpItems()),
+          },
+          {
+            object: quickPick,
+            method: "loadItems",
+          },
+          {
+            object: quickPick,
+            method: "isInitialized",
           },
         ],
         sandbox
