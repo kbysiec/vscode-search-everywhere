@@ -127,6 +127,7 @@ describe("QuickPick", () => {
 
   describe("showLoading", () => {
     it("1: should vscode.quickPick.busy property be set", () => {
+      setups.showLoading1();
       quickPick.showLoading(true);
 
       assert.equal(quickPick.getControl().busy, true);
@@ -135,6 +136,7 @@ describe("QuickPick", () => {
 
   describe("setText", () => {
     it("1: should text be set", () => {
+      setups.setText1();
       const text = "test text";
       quickPick.setText(text);
 
@@ -144,6 +146,7 @@ describe("QuickPick", () => {
 
   describe("setPlaceholder", () => {
     it("1: should set placeholder to loading text", () => {
+      setups.setPlaceholder1();
       quickPick.setPlaceholder(true);
       assert.equal(
         quickPick.getControl().placeholder,
@@ -241,6 +244,7 @@ describe("QuickPick", () => {
 
   describe("handleDidHide", () => {
     it("1: should setText method be invoked with empty string as argument", () => {
+      setups.handleDidHide1();
       quickPick.handleDidHide();
 
       assert.equal(quickPick.getControl().value, "");

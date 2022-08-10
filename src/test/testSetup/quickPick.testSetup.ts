@@ -13,6 +13,20 @@ import {
 import { getTextEditorStub } from "../util/stubFactory";
 import { stubMultiple } from "../util/stubHelpers";
 
+function stubControl(sandbox: sinon.SinonSandbox) {
+  const quickPickInner = vscode.window.createQuickPick<vscode.QuickPickItem>();
+  stubMultiple(
+    [
+      {
+        object: quickPick,
+        method: "getControl",
+        returns: quickPickInner,
+      },
+    ],
+    sandbox
+  );
+}
+
 export const getTestSetups = () => {
   const sandbox = sinon.createSandbox();
 
@@ -29,6 +43,22 @@ export const getTestSetups = () => {
             object: vscode.window,
             method: "createQuickPick",
             returns: quickPickInner,
+          },
+          {
+            object: config,
+            method: "fetchShouldUseItemsFilterPhrases",
+          },
+          {
+            object: config,
+            method: "fetchHelpPhrase",
+          },
+          {
+            object: config,
+            method: "fetchItemsFilterPhrases",
+          },
+          {
+            object: config,
+            method: "fetchShouldUseDebounce",
           },
         ],
         sandbox
@@ -54,6 +84,18 @@ export const getTestSetups = () => {
             method: "getOnDidChangeValueEventListeners",
             returns: [],
           },
+          {
+            object: config,
+            method: "fetchShouldUseItemsFilterPhrases",
+          },
+          {
+            object: config,
+            method: "fetchHelpPhrase",
+          },
+          {
+            object: config,
+            method: "fetchItemsFilterPhrases",
+          },
         ],
         sandbox
       );
@@ -77,6 +119,18 @@ export const getTestSetups = () => {
             object: quickPick,
             method: "getOnDidChangeValueEventListeners",
             returns: [],
+          },
+          {
+            object: config,
+            method: "fetchShouldUseItemsFilterPhrases",
+          },
+          {
+            object: config,
+            method: "fetchHelpPhrase",
+          },
+          {
+            object: config,
+            method: "fetchItemsFilterPhrases",
           },
         ],
         sandbox
@@ -183,6 +237,7 @@ export const getTestSetups = () => {
       );
     },
     loadItems1: () => {
+      stubControl(sandbox);
       const items = getQpItems();
       stubMultiple(
         [
@@ -198,6 +253,7 @@ export const getTestSetups = () => {
       return items;
     },
     loadItems2: () => {
+      stubControl(sandbox);
       const helpItems = getQpHelpItems();
       stubMultiple(
         [
@@ -212,7 +268,17 @@ export const getTestSetups = () => {
 
       return helpItems;
     },
+    showLoading1: () => {
+      stubControl(sandbox);
+    },
+    setText1: () => {
+      stubControl(sandbox);
+    },
+    setPlaceholder1: () => {
+      stubControl(sandbox);
+    },
     setPlaceholder2: () => {
+      stubControl(sandbox);
       stubMultiple(
         [
           {
@@ -225,6 +291,7 @@ export const getTestSetups = () => {
       );
     },
     setPlaceholder3: () => {
+      stubControl(sandbox);
       stubMultiple(
         [
           {
@@ -242,6 +309,7 @@ export const getTestSetups = () => {
       );
     },
     setPlaceholder4: () => {
+      stubControl(sandbox);
       stubMultiple(
         [
           {
@@ -259,6 +327,7 @@ export const getTestSetups = () => {
       );
     },
     reloadOnDidChangeValueEventListener1: () => {
+      stubControl(sandbox);
       let listeners: vscode.Disposable[] = [];
       stubMultiple(
         [
@@ -286,6 +355,7 @@ export const getTestSetups = () => {
       return listeners;
     },
     reloadOnDidChangeValueEventListener2: () => {
+      stubControl(sandbox);
       let listeners: vscode.Disposable[] = [];
       stubMultiple(
         [
@@ -313,6 +383,7 @@ export const getTestSetups = () => {
       return listeners;
     },
     handleDidChangeValueClearing1: () => {
+      stubControl(sandbox);
       stubMultiple(
         [
           {
@@ -386,6 +457,10 @@ export const getTestSetups = () => {
             method: "selectedItems",
             returns: [getQpItem()],
             isNotMethod: true,
+          },
+          {
+            object: config,
+            method: "fetchShouldHighlightSymbol",
           },
         ],
         sandbox
@@ -465,6 +540,9 @@ export const getTestSetups = () => {
         ],
         sandbox
       );
+    },
+    handleDidHide1: () => {
+      stubControl(sandbox);
     },
   };
 };
