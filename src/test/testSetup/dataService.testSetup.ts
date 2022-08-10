@@ -38,6 +38,16 @@ const stubConfig = (
         method: "getExcludePatterns",
         returns: Promise.resolve(["**/.history/**", "**/.vscode/**"]),
       },
+      {
+        object: patternProvider,
+        method: "getIncludePatterns",
+        returns: Promise.resolve(["**/**/*"]),
+      },
+      {
+        object: utils,
+        method: "getSplitter",
+        returns: "§&§",
+      },
     ],
     sandbox
   );
@@ -68,15 +78,6 @@ const stubFetchingItems = (sandbox: sinon.SinonSandbox) => {
 
 export const getTestSetups = () => {
   const sandbox = sinon.createSandbox();
-
-  // const restoreFetchingItemsStubs = () => {
-  //   restoreStubbedMultiple([
-  //     { object: utils, method: "createWorkspaceData" },
-  //     { object: vscode.workspace, method: "findFiles" },
-  //     { object: vscode.commands, method: "executeCommand" },
-  //   ], sandbox);
-  // };
-
   return {
     afterEach: () => {
       sandbox.restore();
@@ -94,34 +95,18 @@ export const getTestSetups = () => {
       );
     },
     fetchData1: () => {
-      // restoreStubbedMultiple([
-      //   { object: utils, method: "createWorkspaceData" },
-      // ], sandbox);
       stubConfig(sandbox);
       stubFetchingItems(sandbox);
     },
     fetchData2: () => {
-      // restoreFetchingItemsStubs();
       stubConfig(sandbox);
       stubFetchingItems(sandbox);
     },
     fetchData3: () => {
-      // restoreFetchingItemsStubs();
       stubConfig(sandbox);
       stubFetchingItems(sandbox);
     },
     fetchData4: () => {
-      // restoreStubbedMultiple([
-      //   { object: utils, method: "printErrorMessage" },
-      //   {
-      //     object: vscode.workspace,
-      //     method: "findFiles",
-      //   },
-      //   {
-      //     object: vscode.commands,
-      //     method: "executeCommand",
-      //   },
-      // ], sandbox);
       stubConfig(sandbox);
       return stubMultiple(
         [
@@ -138,18 +123,19 @@ export const getTestSetups = () => {
             object: vscode.commands,
             method: "executeCommand",
           },
+          {
+            object: utils,
+            method: "createWorkspaceData",
+          },
         ],
         sandbox
       );
     },
     fetchData5: () => {
-      // restoreFetchingItemsStubs();
       stubConfig(sandbox);
       stubFetchingItems(sandbox);
     },
     fetchData6: () => {
-      // restoreFetchingItemsStubs();
-      // restoreStubbedMultiple([{ object: utils, method: "sleep" }], sandbox);
       stubConfig(sandbox);
       return stubMultiple(
         [
@@ -182,12 +168,16 @@ export const getTestSetups = () => {
       );
     },
     fetchData7: () => {
-      // restoreFetchingItemsStubs();
       stubConfig(sandbox, undefined, true);
+      stubMultiple([
+        {
+          object: utils,
+          method: "clearWorkspaceData",
+        },
+      ]);
       stubFetchingItems(sandbox);
     },
     fetchData8: () => {
-      // restoreFetchingItemsStubs();
       stubConfig(sandbox, getItemsFilter([0]));
       stubMultiple(
         [
@@ -213,7 +203,6 @@ export const getTestSetups = () => {
       );
     },
     fetchData9: () => {
-      // restoreFetchingItemsStubs();
       stubConfig(sandbox, getItemsFilter([], [0]));
       stubMultiple(
         [
@@ -237,7 +226,6 @@ export const getTestSetups = () => {
       );
     },
     fetchData10: () => {
-      // restoreFetchingItemsStubs();
       stubConfig(sandbox, getItemsFilter([], [], ["fake"]));
       stubMultiple(
         [
@@ -265,7 +253,6 @@ export const getTestSetups = () => {
       );
     },
     fetchData11: () => {
-      // restoreFetchingItemsStubs();
       stubConfig(sandbox);
 
       const workspaceDataItems = [
