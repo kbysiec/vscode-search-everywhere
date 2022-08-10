@@ -17,7 +17,58 @@ export const getTestSetups = () => {
     },
     activate1: () => {
       return stubMultiple(
-        [{ object: vscode.commands, method: "registerCommand" }],
+        [
+          {
+            object: vscode.commands,
+            method: "registerCommand",
+          },
+          {
+            object: extensionController,
+            method: "init",
+          },
+          {
+            object: extensionController,
+            method: "startup",
+          },
+        ],
+        sandbox
+      );
+    },
+    activate2: () => {
+      return stubMultiple(
+        [
+          {
+            object: extensionController,
+            method: "init",
+          },
+          {
+            object: vscode.commands,
+            method: "registerCommand",
+          },
+          {
+            object: extensionController,
+            method: "startup",
+          },
+        ],
+        sandbox
+      );
+    },
+    activate3: () => {
+      return stubMultiple(
+        [
+          {
+            object: extensionController,
+            method: "startup",
+          },
+          {
+            object: extensionController,
+            method: "init",
+          },
+          {
+            object: vscode.commands,
+            method: "registerCommand",
+          },
+        ],
         sandbox
       );
     },

@@ -23,6 +23,20 @@ describe("extension", () => {
 
       assert.equal(registerCommandStub.calledTwice, true);
     });
+
+    it("2: should extensionController.init method be invoked", async () => {
+      const [initStub] = setups.activate2();
+      await extension.activate(context);
+
+      assert.equal(initStub.calledOnce, true);
+    });
+
+    it("3: should extensionController.startup method be invoked", async () => {
+      const [startupStub] = setups.activate2();
+      await extension.activate(context);
+
+      assert.equal(startupStub.calledOnce, true);
+    });
   });
 
   describe("deactivate", () => {
