@@ -4,6 +4,7 @@ import * as config from "../../config";
 import { dataConverter } from "../../dataConverter";
 import Icons from "../../interface/icons";
 import ItemsFilterPhrases from "../../interface/itemsFilterPhrases";
+import { utils } from "../../utils";
 import { mocks } from "../mock/dataConverter.mock";
 import { getConfiguration, getWorkspaceData } from "../util/mockFactory";
 import { stubMultiple } from "../util/stubHelpers";
@@ -65,6 +66,26 @@ export const getTestSetups = () => {
     },
     convertToQpData1: () => {
       stubConfig(sandbox);
+      stubMultiple(
+        [
+          {
+            object: utils,
+            method: "getNameFromUri",
+            returns: "fake-1.ts",
+          },
+          {
+            object: utils,
+            method: "normalizeUriPath",
+            returns: "/./fake/fake-1.ts",
+          },
+          {
+            object: utils,
+            method: "getSplitter",
+            returns: "§&§",
+          },
+        ],
+        sandbox
+      );
 
       const { workspaceData, qpItems } = mocks.convertToQpData1();
 
@@ -81,6 +102,26 @@ export const getTestSetups = () => {
         true,
         configuration.itemsFilterPhrases,
         null
+      );
+      stubMultiple(
+        [
+          {
+            object: utils,
+            method: "getNameFromUri",
+            returns: "fake-1.ts",
+          },
+          {
+            object: utils,
+            method: "normalizeUriPath",
+            returns: "/./fake/fake-1.ts",
+          },
+          {
+            object: utils,
+            method: "getSplitter",
+            returns: "§&§",
+          },
+        ],
+        sandbox
       );
 
       const { workspaceData, qpItems } = mocks.convertToQpData2();
