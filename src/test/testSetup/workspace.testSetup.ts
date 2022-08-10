@@ -204,6 +204,30 @@ export const getTestSetups = () => {
             method: "shouldReindexOnConfigurationChange",
             returns: true,
           },
+          {
+            object: cache,
+            method: "clearConfig",
+          },
+          {
+            object: dataConverter,
+            method: "fetchConfig",
+          },
+          {
+            object: dataConverter,
+            method: "reload",
+          },
+          {
+            object: dataService,
+            method: "fetchConfig",
+          },
+          {
+            object: dataService,
+            method: "reload",
+          },
+          {
+            object: config,
+            method: "fetchExcludeMode",
+          },
         ],
         sandbox
       );
@@ -228,6 +252,10 @@ export const getTestSetups = () => {
             method: "onDidDebounceConfigToggleEventEmitter",
             returns: eventEmitter,
             isNotMethod: true,
+          },
+          {
+            object: cache,
+            method: "clearConfig",
           },
         ],
         sandbox
@@ -256,6 +284,10 @@ export const getTestSetups = () => {
             method: "isDebounceConfigurationToggled",
             returns: false,
           },
+          {
+            object: cache,
+            method: "clearConfig",
+          },
         ],
         sandbox
       );
@@ -266,6 +298,14 @@ export const getTestSetups = () => {
           {
             object: cache,
             method: "clearConfig",
+          },
+          {
+            object: config,
+            method: "fetchExcludeMode",
+          },
+          {
+            object: utils,
+            method: "isDebounceConfigurationToggled",
           },
         ],
         sandbox
@@ -363,6 +403,10 @@ export const getTestSetups = () => {
             method: "isDirectory",
             returns: false,
           },
+          {
+            object: dataService,
+            method: "clearCachedUris",
+          },
         ],
         sandbox
       );
@@ -378,6 +422,10 @@ export const getTestSetups = () => {
             object: utils,
             method: "isDirectory",
             returns: true,
+          },
+          {
+            object: dataService,
+            method: "clearCachedUris",
           },
         ],
         sandbox
@@ -395,6 +443,10 @@ export const getTestSetups = () => {
             method: "isDirectory",
             returns: false,
           },
+          {
+            object: dataService,
+            method: "clearCachedUris",
+          },
         ],
         sandbox
       );
@@ -410,6 +462,10 @@ export const getTestSetups = () => {
             object: utils,
             method: "isDirectory",
             returns: true,
+          },
+          {
+            object: dataService,
+            method: "clearCachedUris",
           },
         ],
         sandbox
@@ -427,6 +483,10 @@ export const getTestSetups = () => {
             method: "isDirectory",
             returns: false,
           },
+          {
+            object: dataService,
+            method: "clearCachedUris",
+          },
         ],
         sandbox
       );
@@ -442,6 +502,10 @@ export const getTestSetups = () => {
             object: utils,
             method: "isDirectory",
             returns: true,
+          },
+          {
+            object: dataService,
+            method: "clearCachedUris",
           },
         ],
         sandbox
