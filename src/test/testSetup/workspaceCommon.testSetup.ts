@@ -55,6 +55,10 @@ export const getTestSetups = () => {
             method: "getExcludePatterns",
             returns: Promise.resolve(["**/.history/**", "**/.vscode/**"]),
           },
+          {
+            object: dataService,
+            method: "clearCachedUris",
+          },
         ],
         sandbox
       );
@@ -75,6 +79,10 @@ export const getTestSetups = () => {
             object: patternProvider,
             method: "getExcludePatterns",
             returns: Promise.resolve(["**/.history/**", "**/.vscode/**"]),
+          },
+          {
+            object: config,
+            method: "fetchShouldDisplayNotificationInStatusBar",
           },
         ],
         sandbox
@@ -205,6 +213,26 @@ export const getTestSetups = () => {
             object: cache,
             method: "updateData",
           },
+          {
+            object: cache,
+            method: "clear",
+          },
+          {
+            object: dataConverter,
+            method: "convertToQpData",
+          },
+          {
+            object: utils,
+            method: "convertMsToSec",
+          },
+          {
+            object: utils,
+            method: "printStatsMessage",
+          },
+          {
+            object: utils,
+            method: "sleep",
+          },
         ],
         sandbox
       );
@@ -241,6 +269,18 @@ export const getTestSetups = () => {
             object: cache,
             method: "updateData",
           },
+          {
+            object: cache,
+            method: "clear",
+          },
+          {
+            object: dataConverter,
+            method: "convertToQpData",
+          },
+          {
+            object: utils,
+            method: "convertMsToSec",
+          },
         ],
         sandbox
       );
@@ -271,6 +311,18 @@ export const getTestSetups = () => {
           {
             object: cache,
             method: "updateData",
+          },
+          {
+            object: cache,
+            method: "clear",
+          },
+          {
+            object: dataConverter,
+            method: "convertToQpData",
+          },
+          {
+            object: utils,
+            method: "convertMsToSec",
           },
         ],
         sandbox
@@ -306,6 +358,14 @@ export const getTestSetups = () => {
           {
             object: cache,
             method: "updateData",
+          },
+          {
+            object: cache,
+            method: "clear",
+          },
+          {
+            object: utils,
+            method: "convertMsToSec",
           },
         ],
         sandbox
