@@ -1,9 +1,8 @@
 import { assert } from "chai";
 import * as sinon from "sinon";
 import { actionProcessor } from "../../actionProcessor";
-import { getAction } from "../util/mockFactory";
-// import Utils from "../../utils";
 import { getTestSetups } from "../testSetup/actionProcessor.testSetup";
+import { getAction } from "../util/mockFactory";
 
 type SetupsType = ReturnType<typeof getTestSetups>;
 
@@ -32,7 +31,6 @@ describe("ActionProcessor", () => {
 
     it("3: should not process method be invoked if action processor is busy", async () => {
       const [processStub] = setups.register3();
-      const x = actionProcessor.getIsBusy();
       await actionProcessor.register(getAction());
 
       assert.equal(processStub.calledOnce, false);

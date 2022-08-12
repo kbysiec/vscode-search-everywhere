@@ -88,7 +88,7 @@ function reduceByActionType(actionType: ActionType) {
 function reduceRebuildAction(actionType: ActionType, actions: Action[]) {
   if (isPreviousActionRebuildType()) {
     actionProcessor.queue = [];
-  } else if (isActionArrayNotEmpty(actions)) {
+  } else if (ifActionArrayContainsRebuildType(actions)) {
     const last = utils.getLastFromArray(
       actionProcessor.queue,
       (action: Action) => action.type === actionType
@@ -102,8 +102,8 @@ function isPreviousActionRebuildType(): boolean {
   return !!previousAction && previousAction.type === ActionType.Rebuild;
 }
 
-function isActionArrayNotEmpty(actions: Action[]): boolean {
-  return actions.length > 0;
+function ifActionArrayContainsRebuildType(actions: Action[]): boolean {
+  return actions.some((action) => action.type === ActionType.Rebuild);
 }
 
 function reduceUpdateRemoveAction(actionType: ActionType, actions: Action[]) {
