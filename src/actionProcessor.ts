@@ -13,7 +13,6 @@ function add(action: Action): void {
 }
 
 function assignId(action: Action): void {
-  // action.id = actionProcessor.actionId++;
   const actionId = getActionId();
   action.id = actionId;
   setActionId(actionId + 1);

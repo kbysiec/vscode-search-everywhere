@@ -182,7 +182,6 @@ function normalizeUriPath(path: string): string {
 
   if (utils.hasWorkspaceMoreThanOneFolder()) {
     normalizedPath = normalizedPath.replace(
-      // utils.workspaceFoldersCommonPath,
       utils.getWorkspaceFoldersCommonPathProp(),
       ""
     );
