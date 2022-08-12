@@ -28,6 +28,10 @@ export const getTestSetups = () => {
             method: "downloadData",
             throws: new Error("test error"),
           },
+          {
+            object: utils,
+            method: "printErrorMessage",
+          },
         ],
         sandbox
       );

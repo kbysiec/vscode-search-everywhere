@@ -72,15 +72,5 @@ describe("WorkspaceUpdater", () => {
       assert.equal(updateDataStub.calledOnce, true);
       assert.deepEqual(updateDataStub.args[0][0], getQpItems(2, "./fake-new/"));
     });
-    // it(`5: should remove old data for given uri and get
-    //       new data if file was moved to another directory`, async () => {
-    //   const [updateDataStub] = setups.updateCacheByPath5();
-    //   await workspaceUpdater.updateCacheByPath(getItem());
-    //   assert.equal(updateDataStub.calledOnce, true);
-    //   assert.deepEqual(
-    //     updateDataStub.args[0][0],
-    //     getQpItemsSymbolAndUriExt("./fake-new/")
-    //   );
-    // });
   });
 });
