@@ -37,6 +37,8 @@ async function includeSymbols(
   workspaceData: WorkspaceData,
   uris: vscode.Uri[]
 ): Promise<void> {
+  const fetchSymbolsForUriPromises = [];
+
   for (let i = 0; i < uris.length; i++) {
     if (dataService.getIsCancelled()) {
       utils.clearWorkspaceData(workspaceData);
@@ -44,11 +46,16 @@ async function includeSymbols(
     }
 
     const uri = uris[i];
-    let symbolsForUri = await tryToGetSymbolsForUri(uri);
-    addSymbolsForUriToWorkspaceData(workspaceData, uri, symbolsForUri);
+    fetchSymbolsForUriPromises.push(
+      (async () => {
+        let symbolsForUri = await tryToGetSymbolsForUri(uri);
+        addSymbolsForUriToWorkspaceData(workspaceData, uri, symbolsForUri);
 
-    onDidItemIndexedEventEmitter.fire(uris.length);
+        onDidItemIndexedEventEmitter.fire(uris.length);
+      })()
+    );
   }
+  await Promise.all(fetchSymbolsForUriPromises);
 }
 
 async function tryToGetSymbolsForUri(
