@@ -1,13 +1,13 @@
 import { assert } from "chai";
+import { controller } from "../../controller";
 import ActionType from "../../enum/actionType";
-import { extensionController } from "../../extensionController";
-import { getTestSetups } from "../testSetup/extensionController.testSetup";
+import { getTestSetups } from "../testSetup/controller.testSetup";
 import { getAction, getExtensionContext } from "../util/mockFactory";
 import { getQpItems } from "../util/qpItemMockFactory";
 
 type SetupsType = ReturnType<typeof getTestSetups>;
 
-describe("ExtensionController", () => {
+describe("controller", () => {
   let setups: SetupsType;
 
   before(() => {
@@ -18,21 +18,21 @@ describe("ExtensionController", () => {
   describe("init", () => {
     it("1: should set extensionContext", () => {
       const extensionContext = setups.init1();
-      extensionController.init(extensionContext);
+      controller.init(extensionContext);
 
-      assert.equal(extensionContext, extensionController.getExtensionContext());
+      assert.equal(extensionContext, controller.getExtensionContext());
     });
 
     it("2: should init cache", () => {
       const [initCacheStub] = setups.init2();
-      extensionController.init(getExtensionContext());
+      controller.init(getExtensionContext());
 
       assert.equal(initCacheStub.calledOnce, true);
     });
 
     it("3: should init workspace", () => {
       const [initWorkspaceStub] = setups.init3();
-      extensionController.init(getExtensionContext());
+      controller.init(getExtensionContext());
 
       assert.equal(initWorkspaceStub.calledOnce, true);
     });
@@ -45,7 +45,7 @@ describe("ExtensionController", () => {
         onDidDebounceConfigToggleStub,
         onWillReindexOnConfigurationChangeStub,
       ] = setups.init4();
-      extensionController.init(getExtensionContext());
+      controller.init(getExtensionContext());
 
       assert.equal(onWillProcessingStub.calledOnce, true);
       assert.equal(onDidProcessingStub.calledOnce, true);
@@ -59,7 +59,7 @@ describe("ExtensionController", () => {
     it(`1: should display notification if workspace contains does not contain
       any folder opened`, async () => {
       const [showStub, printNoFolderOpenedMessageStub] = setups.search1();
-      await extensionController.search();
+      await controller.search();
 
       assert.equal(showStub.calledOnce, false);
       assert.equal(printNoFolderOpenedMessageStub.calledOnce, true);
@@ -68,7 +68,7 @@ describe("ExtensionController", () => {
     it(`2: should workspace.index method be invoked
       if shouldIndexOnQuickPickOpen method returns true`, async () => {
       const [indexStub] = setups.search2();
-      await extensionController.search();
+      await controller.search();
 
       assert.equal(indexStub.calledOnce, true);
     });
@@ -76,7 +76,7 @@ describe("ExtensionController", () => {
     it(`3: should workspace.index method not be invoked
       if shouldIndexOnQuickPickOpen method returns false`, async () => {
       const [indexStub] = setups.search3();
-      await extensionController.search();
+      await controller.search();
 
       assert.equal(indexStub.calledOnce, false);
     });
@@ -84,7 +84,7 @@ describe("ExtensionController", () => {
     it(`4: should quickPick.show and quickPick.loadItems methods be invoked
       if quickPick is initialized`, async () => {
       const [loadItemsStub, showStub] = setups.search4();
-      await extensionController.search();
+      await controller.search();
 
       assert.equal(loadItemsStub.calledOnce, true);
       assert.equal(showStub.calledOnce, true);
@@ -93,7 +93,7 @@ describe("ExtensionController", () => {
     it(`5: should quickPick.show and quickPick.loadItems methods not be invoked
       if quickPick is not initialized`, async () => {
       const [loadItemsStub, showStub] = setups.search5();
-      await extensionController.search();
+      await controller.search();
 
       assert.equal(loadItemsStub.calledOnce, false);
       assert.equal(showStub.calledOnce, false);
@@ -104,14 +104,14 @@ describe("ExtensionController", () => {
     it(`1: should display notification if workspace contains does not contain
       any folder opened`, async () => {
       const [printNoFolderOpenedMessageStub] = setups.reload1();
-      await extensionController.reload();
+      await controller.reload();
 
       assert.equal(printNoFolderOpenedMessageStub.calledOnce, true);
     });
 
     it("2: should workspace.index method be invoked", async () => {
       const [indexStub] = setups.reload2();
-      await extensionController.reload();
+      await controller.reload();
 
       assert.equal(indexStub.calledOnce, true);
     });
@@ -120,14 +120,14 @@ describe("ExtensionController", () => {
   describe("startup", () => {
     it("1: should workspace.index method be invoked if shouldInitOnStartup method returns true", async () => {
       const [indexStub] = setups.startup1();
-      await extensionController.startup();
+      await controller.startup();
 
       assert.equal(indexStub.calledOnce, true);
     });
 
     it("2: should do nothing if shouldInitOnStartup method returns false", async () => {
       const [indexStub] = setups.startup2();
-      await extensionController.startup();
+      await controller.startup();
 
       assert.equal(indexStub.calledOnce, false);
     });
@@ -138,7 +138,7 @@ describe("ExtensionController", () => {
       methods be invoked with true as parameter`, () => {
       const [showLoadingStub, setPlaceholderStub] =
         setups.handleWillProcessing1();
-      extensionController.handleWillProcessing();
+      controller.handleWillProcessing();
 
       assert.equal(showLoadingStub.calledWith(true), true);
       assert.equal(setPlaceholderStub.calledWith(true), true);
@@ -148,7 +148,7 @@ describe("ExtensionController", () => {
     methods not be invoked`, () => {
       const [showLoadingStub, setPlaceholderStub] =
         setups.handleWillProcessing2();
-      extensionController.handleWillProcessing();
+      controller.handleWillProcessing();
 
       assert.equal(showLoadingStub.calledWith(false), false);
       assert.equal(setPlaceholderStub.calledWith(false), false);
@@ -156,7 +156,7 @@ describe("ExtensionController", () => {
 
     it(`3: should quickPick.init method be invoked if quickPick is not initialized`, async () => {
       const [initStub] = setups.handleWillProcessing3();
-      await extensionController.handleWillProcessing();
+      await controller.handleWillProcessing();
 
       assert.equal(initStub.calledOnce, true);
     });
@@ -168,7 +168,7 @@ describe("ExtensionController", () => {
       const [setQuickPickDataStub, initStub, loadItemsStub, setBusyStub] =
         setups.handleDidProcessing1();
 
-      await extensionController.handleDidProcessing();
+      await controller.handleDidProcessing();
 
       assert.equal(setQuickPickDataStub.calledOnce, true);
       assert.equal(initStub.calledOnce, false);
@@ -179,7 +179,7 @@ describe("ExtensionController", () => {
     it(`2: should quickPick.setItems method be invoked with
       data from workspace.getData method as a parameter`, async () => {
       const [setItemsStub] = setups.handleDidProcessing2();
-      await extensionController.handleDidProcessing();
+      await controller.handleDidProcessing();
 
       assert.equal(setItemsStub.calledWith(getQpItems()), true);
     });
@@ -189,9 +189,7 @@ describe("ExtensionController", () => {
     it(`1: should quickPick.setItems be invoked with empty array
       if action type is rebuild`, async () => {
       const [setItemsStub, loadItemsStub] = setups.handleWillExecuteAction1();
-      extensionController.handleWillExecuteAction(
-        getAction(ActionType.Rebuild)
-      );
+      controller.handleWillExecuteAction(getAction(ActionType.Rebuild));
 
       assert.equal(setItemsStub.calledWith([]), true);
       assert.equal(loadItemsStub.calledOnce, true);
@@ -199,7 +197,7 @@ describe("ExtensionController", () => {
 
     it("2: should do nothing if action type is different than rebuild", async () => {
       const [setItemsStub, loadItemsStub] = setups.handleWillExecuteAction2();
-      extensionController.handleWillExecuteAction(getAction(ActionType.Update));
+      controller.handleWillExecuteAction(getAction(ActionType.Update));
 
       assert.equal(setItemsStub.calledOnce, false);
       assert.equal(loadItemsStub.calledOnce, false);
@@ -211,7 +209,7 @@ describe("ExtensionController", () => {
       const [setBusyStub, reloadOnDidChangeValueEventListenerStub] =
         setups.handleDidDebounceConfigToggle1();
 
-      extensionController.handleDidDebounceConfigToggle();
+      controller.handleDidDebounceConfigToggle();
 
       assert.equal(setBusyStub.calledWith(true), true);
       assert.equal(reloadOnDidChangeValueEventListenerStub.calledOnce, true);
@@ -222,7 +220,7 @@ describe("ExtensionController", () => {
   describe("handleWillReindexOnConfigurationChange", () => {
     it("1: should quickPick.reload method be invoked", () => {
       const [reloadStub] = setups.handleWillReindexOnConfigurationChange1();
-      extensionController.handleWillReindexOnConfigurationChange();
+      controller.handleWillReindexOnConfigurationChange();
 
       assert.equal(reloadStub.calledOnce, true);
     });

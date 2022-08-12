@@ -24,14 +24,14 @@ describe("extension", () => {
       assert.equal(registerCommandStub.calledTwice, true);
     });
 
-    it("2: should extensionController.init method be invoked", async () => {
+    it("2: should controller.init method be invoked", async () => {
       const [initStub] = setups.activate2();
       await extension.activate(context);
 
       assert.equal(initStub.calledOnce, true);
     });
 
-    it("3: should extensionController.startup method be invoked", async () => {
+    it("3: should controller.startup method be invoked", async () => {
       const [startupStub] = setups.activate2();
       await extension.activate(context);
 
@@ -49,7 +49,7 @@ describe("extension", () => {
   });
 
   describe("search", () => {
-    it("1: should extensionController.search method be invoked", () => {
+    it("1: should controller.search method be invoked", () => {
       const [searchStub] = setups.search1();
       extension.search();
 
@@ -58,7 +58,7 @@ describe("extension", () => {
   });
 
   describe("reload", () => {
-    it("1: should extensionController.reload method be invoked", () => {
+    it("1: should controller.reload method be invoked", () => {
       const [reloadStub] = setups.reload1();
       extension.reload();
 

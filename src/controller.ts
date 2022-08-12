@@ -45,15 +45,15 @@ function shouldIndexOnQuickPickOpen() {
 }
 
 function handleWillProcessing() {
-  extensionController.setBusy(true);
+  controller.setBusy(true);
   !quickPick.isInitialized() && quickPick.init();
 }
 
 async function handleDidProcessing() {
-  await extensionController.setQuickPickData();
+  await controller.setQuickPickData();
 
   quickPick.loadItems();
-  extensionController.setBusy(false);
+  controller.setBusy(false);
 }
 
 function handleWillExecuteAction(action: Action) {
@@ -64,9 +64,9 @@ function handleWillExecuteAction(action: Action) {
 }
 
 function handleDidDebounceConfigToggle() {
-  extensionController.setBusy(true);
+  controller.setBusy(true);
   quickPick.reloadOnDidChangeValueEventListener();
-  extensionController.setBusy(false);
+  controller.setBusy(false);
 }
 
 function handleWillReindexOnConfigurationChange() {
@@ -75,7 +75,7 @@ function handleWillReindexOnConfigurationChange() {
 
 async function search(): Promise<void> {
   if (utils.hasWorkspaceAnyFolder()) {
-    extensionController.shouldIndexOnQuickPickOpen() &&
+    controller.shouldIndexOnQuickPickOpen() &&
       (await workspace.index(ActionTrigger.Search));
     quickPick.isInitialized() && loadItemsAndShowQuickPick();
   } else {
@@ -113,12 +113,12 @@ function registerWorkspaceEventListeners() {
 
 function init(newExtensionContext: vscode.ExtensionContext) {
   setExtensionContext(newExtensionContext);
-  initCache(extensionController.getExtensionContext());
+  initCache(controller.getExtensionContext());
   workspace.init();
   registerWorkspaceEventListeners();
 }
 
-export const extensionController = {
+export const controller = {
   shouldIndexOnQuickPickOpen,
   setQuickPickData,
   setBusy,

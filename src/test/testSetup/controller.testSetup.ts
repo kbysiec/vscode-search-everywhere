@@ -1,7 +1,7 @@
 import * as sinon from "sinon";
 import * as cache from "../../cache";
 import * as config from "../../config";
-import { extensionController } from "../../extensionController";
+import { controller } from "../../controller";
 import { patternProvider } from "../../patternProvider";
 import { quickPick } from "../../quickPick";
 import { utils } from "../../utils";
@@ -250,7 +250,7 @@ export const getTestSetups = () => {
             returns: true,
           },
           {
-            object: extensionController,
+            object: controller,
             method: "shouldIndexOnQuickPickOpen",
             returns: true,
           },
@@ -276,7 +276,7 @@ export const getTestSetups = () => {
             returns: true,
           },
           {
-            object: extensionController,
+            object: controller,
             method: "shouldIndexOnQuickPickOpen",
             returns: false,
           },
@@ -497,7 +497,7 @@ export const getTestSetups = () => {
       return stubMultiple(
         [
           {
-            object: extensionController,
+            object: controller,
             method: "setQuickPickData",
           },
           {
@@ -509,7 +509,7 @@ export const getTestSetups = () => {
             method: "loadItems",
           },
           {
-            object: extensionController,
+            object: controller,
             method: "setBusy",
           },
           {
@@ -583,7 +583,7 @@ export const getTestSetups = () => {
       return stubMultiple(
         [
           {
-            object: extensionController,
+            object: controller,
             method: "setBusy",
           },
           {

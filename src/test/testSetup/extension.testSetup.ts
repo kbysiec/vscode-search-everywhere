@@ -1,6 +1,6 @@
 import * as sinon from "sinon";
 import * as vscode from "vscode";
-import { extensionController } from "../../extensionController";
+import { controller } from "../../controller";
 import { getExtensionContext } from "../util/mockFactory";
 import { stubMultiple } from "../util/stubHelpers";
 
@@ -23,11 +23,11 @@ export const getTestSetups = () => {
             method: "registerCommand",
           },
           {
-            object: extensionController,
+            object: controller,
             method: "init",
           },
           {
-            object: extensionController,
+            object: controller,
             method: "startup",
           },
         ],
@@ -38,7 +38,7 @@ export const getTestSetups = () => {
       return stubMultiple(
         [
           {
-            object: extensionController,
+            object: controller,
             method: "init",
           },
           {
@@ -46,7 +46,7 @@ export const getTestSetups = () => {
             method: "registerCommand",
           },
           {
-            object: extensionController,
+            object: controller,
             method: "startup",
           },
         ],
@@ -57,11 +57,11 @@ export const getTestSetups = () => {
       return stubMultiple(
         [
           {
-            object: extensionController,
+            object: controller,
             method: "startup",
           },
           {
-            object: extensionController,
+            object: controller,
             method: "init",
           },
           {
@@ -76,16 +76,10 @@ export const getTestSetups = () => {
       return stubMultiple([{ object: console, method: "log" }], sandbox);
     },
     search1: () => {
-      return stubMultiple(
-        [{ object: extensionController, method: "search" }],
-        sandbox
-      );
+      return stubMultiple([{ object: controller, method: "search" }], sandbox);
     },
     reload1: () => {
-      return stubMultiple(
-        [{ object: extensionController, method: "reload" }],
-        sandbox
-      );
+      return stubMultiple([{ object: controller, method: "reload" }], sandbox);
     },
   };
 };

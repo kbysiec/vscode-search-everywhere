@@ -1,12 +1,12 @@
 import * as vscode from "vscode";
-import { extensionController } from "./extensionController";
+import { controller } from "./controller";
 
 export async function search() {
-  await extensionController.search();
+  await controller.search();
 }
 
 export async function reload() {
-  await extensionController.reload();
+  await controller.reload();
 }
 
 export function deactivate() {
@@ -16,18 +16,18 @@ export function deactivate() {
 export async function activate(context: vscode.ExtensionContext) {
   console.log('Extension "vscode-search-everywhere" has been activated.');
 
-  extensionController.init(context);
+  controller.init(context);
 
   context.subscriptions.push(
     vscode.commands.registerCommand(
       "searchEverywhere.search",
-      search.bind(null, extensionController)
+      search.bind(null, controller)
     ),
     vscode.commands.registerCommand(
       "searchEverywhere.reload",
-      reload.bind(null, extensionController)
+      reload.bind(null, controller)
     )
   );
 
-  await extensionController.startup();
+  await controller.startup();
 }
