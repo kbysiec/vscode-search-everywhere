@@ -169,12 +169,15 @@ export const getTestSetups = () => {
     },
     fetchData7: () => {
       stubConfig(sandbox, undefined, true);
-      stubMultiple([
-        {
-          object: utils,
-          method: "clearWorkspaceData",
-        },
-      ]);
+      stubMultiple(
+        [
+          {
+            object: utils,
+            method: "clearWorkspaceData",
+          },
+        ],
+        sandbox
+      );
       stubFetchingItems(sandbox);
     },
     fetchData8: () => {
