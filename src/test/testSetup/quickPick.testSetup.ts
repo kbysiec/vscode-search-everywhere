@@ -259,7 +259,7 @@ export const getTestSetups = () => {
         [
           {
             object: quickPick,
-            method: "getHelpItemsProp",
+            method: "getHelpItems",
             returns: helpItems,
           },
         ],

@@ -75,7 +75,7 @@ describe("QuickPick", () => {
       const qpHelpItems = setups.reload2();
       quickPick.reload();
 
-      assert.deepEqual(quickPick.getHelpItemsProp(), qpHelpItems);
+      assert.deepEqual(quickPick.getHelpItems(), qpHelpItems);
     });
   });
 

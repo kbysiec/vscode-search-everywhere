@@ -100,7 +100,7 @@ function getSelectionForQpItem(
     : new vscode.Selection(start, start);
 }
 
-function getHelpItems(): QuickPickItem[] {
+function collectHelpItems(): QuickPickItem[] {
   const items: QuickPickItem[] = [];
   const itemsFilterPhrases = quickPick.getItemsFilterPhrases();
   for (const kind in itemsFilterPhrases) {
@@ -137,7 +137,7 @@ function fetchConfig(): void {
 }
 
 function fetchHelpData(): void {
-  const helpItems = getHelpItems();
+  const helpItems = collectHelpItems();
   setHelpItems(helpItems);
 }
 
@@ -211,9 +211,7 @@ function show(): void {
 
 function loadItems(loadHelp: boolean = false): void {
   const control = quickPick.getControl();
-  control.items = loadHelp
-    ? quickPick.getHelpItemsProp()
-    : quickPick.getItems();
+  control.items = loadHelp ? quickPick.getHelpItems() : quickPick.getItems();
 }
 
 function showLoading(value: boolean): void {
@@ -290,7 +288,7 @@ function setItemsFilterPhrases(newItemsFilterPhrases: ItemsFilterPhrases) {
   itemsFilterPhrases = newItemsFilterPhrases;
 }
 
-function getHelpItemsProp() {
+function getHelpItems() {
   return helpItems;
 }
 
@@ -315,7 +313,7 @@ export const quickPick = {
   getShouldUseItemsFilterPhrases,
   getHelpPhrase,
   getItemsFilterPhrases,
-  getHelpItemsProp,
+  getHelpItems,
   getOnDidChangeValueEventListeners,
   setOnDidChangeValueEventListeners,
   init,
