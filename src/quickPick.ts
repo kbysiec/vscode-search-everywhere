@@ -3,11 +3,13 @@ import {
   fetchHelpPhrase,
   fetchItemsFilterPhrases,
   fetchShouldHighlightSymbol,
+  fetchShouldItemsBeSorted,
   fetchShouldUseDebounce,
   fetchShouldUseItemsFilterPhrases,
 } from "./config";
 import ItemsFilterPhrases from "./interface/itemsFilterPhrases";
 import QuickPickItem from "./interface/quickPickItem";
+import { utils } from "./utils";
 const debounce = require("debounce");
 
 function disposeOnDidChangeValueEventListeners(): void {
@@ -134,6 +136,15 @@ function fetchConfig(): void {
 
   const itemsFilterPhrases = fetchItemsFilterPhrases();
   setItemsFilterPhrases(itemsFilterPhrases);
+
+  const shouldItemsBeSorted = fetchShouldItemsBeSorted();
+  setShouldItemsBeSorted(shouldItemsBeSorted);
+}
+
+function reloadSortingSettings() {
+  const shouldItemsBeSorted = fetchShouldItemsBeSorted();
+  setShouldItemsBeSorted(shouldItemsBeSorted);
+  toggleKeepingSeparatorsVisibleOnFiltering();
 }
 
 function fetchHelpData(): void {
@@ -147,7 +158,7 @@ function handleDidChangeValueClearing() {
 }
 
 function handleDidChangeValue(text: string) {
-  shouldLoadHelpItems(text) ? quickPick.loadItems(true) : quickPick.loadItems();
+  shouldLoadHelpItems(text) ? quickPick.loadHelpItems() : quickPick.loadItems();
 }
 
 function shouldLoadHelpItems(text: string): boolean {
@@ -177,8 +188,16 @@ function init(): void {
 
   quickPick.fetchConfig();
   fetchHelpData();
-
+  toggleKeepingSeparatorsVisibleOnFiltering();
   registerEventListeners();
+}
+
+function toggleKeepingSeparatorsVisibleOnFiltering() {
+  const shouldItemsBeSorted = quickPick.getShouldItemsBeSorted();
+  const control = quickPick.getControl();
+
+  // necessary hack to keep separators visible on filtering
+  (control as any).sortByLabel = !shouldItemsBeSorted;
 }
 
 function registerEventListeners() {
@@ -209,9 +228,55 @@ function show(): void {
   control.show();
 }
 
-function loadItems(loadHelp: boolean = false): void {
+function loadItems() {
+  quickPick.getShouldItemsBeSorted() ? loadSortedItems() : loadUnsortedItems();
+}
+
+function loadUnsortedItems(): void {
   const control = quickPick.getControl();
-  control.items = loadHelp ? quickPick.getHelpItems() : quickPick.getItems();
+  control.items = quickPick.getItems();
+}
+
+function loadSortedItems(): void {
+  const control = quickPick.getControl();
+  const items = [...quickPick.getItems()];
+  items.sort((firstItem, secondItem) => {
+    if (firstItem.symbolKind > secondItem.symbolKind) {
+      return 1;
+    }
+    if (firstItem.symbolKind < secondItem.symbolKind) {
+      return -1;
+    }
+    return 0;
+  });
+
+  const itemsWithSeparators = addSeparatorItemForEachSymbolKind(items);
+  control.items = itemsWithSeparators;
+}
+
+function loadHelpItems() {
+  const control = quickPick.getControl();
+  control.items = quickPick.getHelpItems();
+}
+
+function addSeparatorItemForEachSymbolKind(items: QuickPickItem[]) {
+  const sortedItems = utils.groupBy(items, (item: QuickPickItem) =>
+    item.symbolKind.toString()
+  );
+  const sortedItemsEntries = sortedItems.entries();
+
+  for (const entry of sortedItemsEntries) {
+    const symbolKind = parseInt(entry[0]);
+    const items = entry[1];
+    items.unshift({
+      label: `${vscode.SymbolKind[symbolKind]}`,
+      kind: vscode.QuickPickItemKind.Separator,
+      symbolKind: vscode.QuickPickItemKind.Separator,
+      uri: vscode.Uri.parse("#"),
+    });
+  }
+
+  return Array.from(sortedItems.values()).flat();
 }
 
 function showLoading(value: boolean): void {
@@ -242,6 +307,7 @@ let control: vscode.QuickPick<QuickPickItem>;
 let items: QuickPickItem[] = [];
 let shouldUseItemsFilterPhrases: boolean;
 let helpPhrase: string;
+let shouldItemsBeSorted: boolean;
 let itemsFilterPhrases: ItemsFilterPhrases;
 let helpItems: QuickPickItem[];
 let onDidChangeValueEventListeners: vscode.Disposable[] = [];
@@ -280,6 +346,14 @@ function setHelpPhrase(newHelpPhrase: string) {
   helpPhrase = newHelpPhrase;
 }
 
+function getShouldItemsBeSorted() {
+  return shouldItemsBeSorted;
+}
+
+function setShouldItemsBeSorted(newshouldItemsBeSorted: boolean) {
+  shouldItemsBeSorted = newshouldItemsBeSorted;
+}
+
 function getItemsFilterPhrases() {
   return itemsFilterPhrases;
 }
@@ -312,16 +386,22 @@ export const quickPick = {
   setItems,
   getShouldUseItemsFilterPhrases,
   getHelpPhrase,
+  getShouldItemsBeSorted,
+  toggleKeepingSeparatorsVisibleOnFiltering,
   getItemsFilterPhrases,
   getHelpItems,
   getOnDidChangeValueEventListeners,
   setOnDidChangeValueEventListeners,
   init,
   reloadOnDidChangeValueEventListener,
+  reloadSortingSettings,
   reload,
   isInitialized,
   show,
   loadItems,
+  loadHelpItems,
+  // loadUnsortedItems,
+  // loadSortedItems,
   showLoading,
   setText,
   setPlaceholder,

@@ -11,7 +11,7 @@
     "url": "https://github.com/kbysiec"
   },
   "engines": {
-    "vscode": "^1.43.0"
+    "vscode": "^1.64.0"
   },
   "categories": [
     "Other"
@@ -113,6 +113,11 @@
           "default": "?",
           "description": "A phrase that should invoke help."
         },
+        "searchEverywhere.shouldItemsBeSorted": {
+          "type": "boolean",
+          "default": true,
+          "description": "Ability to decide wheather items should be sorted."
+        },
         "searchEverywhere.exclude": {
           "type": "array",
           "default": [
@@ -186,7 +191,7 @@
     "@types/mocha": "^7.0.2",
     "@types/node": "^13.9.2",
     "@types/sinon": "^7.5.2",
-    "@types/vscode": "^1.43.0",
+    "@types/vscode": "1.64.0",
     "chai": "^4.2.0",
     "decache": "^4.5.1",
     "glob": "^7.1.6",

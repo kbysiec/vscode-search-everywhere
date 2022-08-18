@@ -47,6 +47,10 @@ const keys = {
     name: "helpPhrase",
     value: "?",
   },
+  shouldItemsBeSorted: {
+    name: "shouldItemsBeSorted",
+    value: true,
+  },
   exclude: {
     name: "exclude",
     value: [] as string[],
@@ -135,6 +139,10 @@ export function fetchItemsFilterPhrases(): ItemsFilterPhrases {
 
 export function fetchHelpPhrase(): string {
   return get(keys.helpPhrase.name, keys.helpPhrase.value);
+}
+
+export function fetchShouldItemsBeSorted(): boolean {
+  return get(keys.shouldItemsBeSorted.name, keys.shouldItemsBeSorted.value);
 }
 
 export function fetchExclude(): string[] {

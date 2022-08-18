@@ -40,6 +40,7 @@ export function getTextEditorStub(
     revealRange: () => {},
     show: sinon.stub(),
     hide: sinon.stub(),
+    viewColumn: undefined,
   } as vscode.TextEditor;
 }
 

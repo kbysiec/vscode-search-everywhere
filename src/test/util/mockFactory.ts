@@ -12,17 +12,32 @@ export const getExtensionContext = (): vscode.ExtensionContext => {
     workspaceState: {
       get: () => {},
       update: () => Promise.resolve(),
+      keys: () => [] as readonly string[],
     },
     globalState: {
       get: () => {},
       update: () => Promise.resolve(),
+      keys: () => [] as readonly string[],
+      setKeysForSync: (keys: string[]) => {},
     },
     extensionPath: "",
     storagePath: "",
     globalStoragePath: "",
     logPath: "",
+    secrets: {
+      get: () => Promise.resolve(),
+      store: () => Promise.resolve(),
+      delete: () => Promise.resolve(),
+    },
+    extensionUri: undefined,
+    storageUri: undefined,
+    globalStorageUri: undefined,
+    logUri: undefined,
+    environmentVariableCollection: undefined,
+    extensionMode: undefined,
+    extension: undefined,
     asAbsolutePath: (relativePath: string) => relativePath,
-  } as vscode.ExtensionContext;
+  } as unknown as vscode.ExtensionContext;
 };
 
 export const getConfiguration = (): { [key: string]: any } => {

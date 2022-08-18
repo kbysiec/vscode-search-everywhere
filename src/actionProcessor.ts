@@ -42,7 +42,7 @@ async function processEachAction() {
     reduce();
     const action = getNextActionFromQueue();
     setPreviousAction(action);
-    onWillExecuteActionEventEmitter.fire(action);
+    action && onWillExecuteActionEventEmitter.fire(action);
     action && (await action.fn());
   }
 }

@@ -18,6 +18,7 @@ import { utils } from "./utils";
 import { workspaceCommon as common } from "./workspaceCommon";
 import {
   onDidDebounceConfigToggleEventEmitter,
+  onDidGroupingConfigToggleEventEmitter,
   onDidProcessingEventEmitter,
   onWillExecuteActionEventEmitter,
   onWillProcessingEventEmitter,
@@ -43,6 +44,8 @@ async function handleDidChangeConfiguration(
     await workspace.index(ActionTrigger.ConfigurationChange);
   } else if (utils.isDebounceConfigurationToggled(event)) {
     onDidDebounceConfigToggleEventEmitter.fire();
+  } else if (utils.isSortingConfigurationToggled(event)) {
+    onDidGroupingConfigToggleEventEmitter.fire();
   }
 }
 
@@ -163,6 +166,7 @@ function shouldReindexOnConfigurationChange(
     "shouldInitOnStartup",
     "shouldHighlightSymbol",
     "shouldUseDebounce",
+    "shouldItemsBeSorted",
   ].map((config: string) => `${defaultSection}.${config}`);
 
   return (

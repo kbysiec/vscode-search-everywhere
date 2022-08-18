@@ -246,6 +246,11 @@ export const getTestSetups = () => {
             method: "getItems",
             returns: items,
           },
+          {
+            object: quickPick,
+            method: "getShouldItemsBeSorted",
+            returns: false,
+          },
         ],
         sandbox
       );
@@ -253,6 +258,65 @@ export const getTestSetups = () => {
       return items;
     },
     loadItems2: () => {
+      stubControl(sandbox);
+      const items = [
+        getQpItem(undefined, undefined, undefined, undefined, undefined, 1),
+        getQpItem(undefined, 2),
+        getQpItem(undefined, 3, undefined, undefined, undefined, 4),
+        getQpItem(undefined, 4, undefined, undefined, undefined, 0),
+      ];
+      items.unshift();
+
+      stubMultiple(
+        [
+          {
+            object: quickPick,
+            method: "getItems",
+            returns: items,
+          },
+          {
+            object: quickPick,
+            method: "getShouldItemsBeSorted",
+            returns: true,
+          },
+        ],
+        sandbox
+      );
+
+      const separatorItems = {
+        file: {
+          label: "File",
+          kind: vscode.QuickPickItemKind.Separator,
+          symbolKind: vscode.QuickPickItemKind.Separator,
+          uri: vscode.Uri.parse("#"),
+        },
+        module: {
+          label: "Module",
+          kind: vscode.QuickPickItemKind.Separator,
+          symbolKind: vscode.QuickPickItemKind.Separator,
+          uri: vscode.Uri.parse("#"),
+        },
+        class: {
+          label: "Class",
+          kind: vscode.QuickPickItemKind.Separator,
+          symbolKind: vscode.QuickPickItemKind.Separator,
+          uri: vscode.Uri.parse("#"),
+        },
+      };
+
+      const itemsWithSeparator = [
+        separatorItems.file as any,
+        getQpItem(undefined, 2),
+        getQpItem(undefined, 4),
+        separatorItems.module as any,
+        getQpItem(undefined, undefined, undefined, undefined, undefined, 1),
+        separatorItems.class as any,
+        getQpItem(undefined, 3, undefined, undefined, undefined, 4),
+      ];
+
+      return itemsWithSeparator;
+    },
+    loadHelpItems1: () => {
       stubControl(sandbox);
       const helpItems = getQpHelpItems();
       stubMultiple(
@@ -411,7 +475,7 @@ export const getTestSetups = () => {
         [
           {
             object: quickPick,
-            method: "loadItems",
+            method: "loadHelpItems",
           },
           {
             object: quickPick,

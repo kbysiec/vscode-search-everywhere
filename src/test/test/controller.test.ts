@@ -81,7 +81,7 @@ describe("controller", () => {
       assert.equal(indexStub.calledOnce, false);
     });
 
-    it(`4: should quickPick.show and quickPick.loadItems methods be invoked
+    it(`4: should quickPick.show and quickPick.loadUnsortedItems methods be invoked
       if quickPick is initialized`, async () => {
       const [loadItemsStub, showStub] = setups.search4();
       await controller.search();
@@ -90,7 +90,7 @@ describe("controller", () => {
       assert.equal(showStub.calledOnce, true);
     });
 
-    it(`5: should quickPick.show and quickPick.loadItems methods not be invoked
+    it(`5: should quickPick.show and quickPick.loadUnsortedItems methods not be invoked
       if quickPick is not initialized`, async () => {
       const [loadItemsStub, showStub] = setups.search5();
       await controller.search();

@@ -9,12 +9,12 @@ export const getQpItem = (
   suffix: string | number = 1,
   differentStartAndEnd: boolean = false,
   withIcon: boolean = false,
-  withFilterPhrase: boolean = false
+  withFilterPhrase: boolean = false,
+  symbolKind: number = 0
 ): QuickPickItem => {
   const configuration = getConfiguration().searchEverywhere;
   const icons = configuration.icons;
   const itemsFilterPhrases = configuration.itemsFilterPhrases;
-  const symbolKind = 0;
   const qpItem = {
     label: `${withIcon ? `$(${icons[symbolKind]})  ` : ""}fake-${
       suffix ? `${suffix}` : ""

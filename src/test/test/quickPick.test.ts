@@ -102,16 +102,25 @@ describe("QuickPick", () => {
   });
 
   describe("loadItems", () => {
-    it("1: should items be loaded", () => {
+    it("1: should unsorted items be loaded", () => {
       const items = setups.loadItems1();
       quickPick.loadItems();
 
       assert.deepEqual(quickPick.getControl().items, items);
     });
 
-    it("2: should help items be loaded", () => {
-      const helpItems = setups.loadItems2();
-      quickPick.loadItems(true);
+    it("2: should sorted items be loaded", () => {
+      const items = setups.loadItems2();
+      quickPick.loadItems();
+
+      assert.deepEqual(quickPick.getControl().items, items);
+    });
+  });
+
+  describe("loadHelpItems", () => {
+    it("1: should help items be loaded", () => {
+      const helpItems = setups.loadHelpItems1();
+      quickPick.loadHelpItems();
 
       assert.deepEqual(quickPick.getControl().items, helpItems);
     });

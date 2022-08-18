@@ -53,6 +53,12 @@ function isDebounceConfigurationToggled(
   return event.affectsConfiguration("searchEverywhere.shouldUseDebounce");
 }
 
+function isSortingConfigurationToggled(
+  event: vscode.ConfigurationChangeEvent
+): boolean {
+  return event.affectsConfiguration("searchEverywhere.shouldItemsBeSorted");
+}
+
 function printNoFolderOpenedMessage(): void {
   vscode.window.showInformationMessage(
     "Workspace doesn't contain any folder opened"
@@ -237,6 +243,7 @@ export const utils = {
   hasWorkspaceMoreThanOneFolder,
   hasWorkspaceChanged,
   isDebounceConfigurationToggled,
+  isSortingConfigurationToggled,
   printNoFolderOpenedMessage,
   printErrorMessage,
   printStatsMessage,

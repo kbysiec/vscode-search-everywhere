@@ -85,6 +85,26 @@ describe("Utils", () => {
     });
   });
 
+  describe("isSortingConfigurationToggled", () => {
+    it(`1: should return true if extension configuration
+      related to sorting setting has changed`, () => {
+      assert.equal(
+        utils.isSortingConfigurationToggled(
+          getConfigurationChangeEvent(true, false)
+        ),
+        true
+      );
+    });
+
+    it(`2: should return false if extension configuration
+      related to debounce setting has not changed`, () => {
+      assert.equal(
+        utils.isSortingConfigurationToggled(getConfigurationChangeEvent(false)),
+        false
+      );
+    });
+  });
+
   describe("printNoFolderOpenedMessage", () => {
     it("1: should display notification", async () => {
       const [showInformationMessageStub] = setups.printNoFolderOpenedMessage1();

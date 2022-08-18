@@ -53,6 +53,7 @@ export const getTextDocumentChangeEvent = (
   const textDocumentChangeEvent = {
     document: getTextDocumentStub(),
     contentChanges: [],
+    reason: undefined,
   };
   shouldContentBeChanged &&
     (textDocumentChangeEvent as any).contentChanges.push("test change");
