@@ -69,9 +69,12 @@ function loadItemsForFilterPhrase(qpItem: QuickPickItem): void {
 }
 
 async function openItem(qpItem: QuickPickItem): Promise<void> {
-  const document = await vscode.workspace.openTextDocument(
-    qpItem.uri!.scheme === "file" ? (qpItem.uri!.fsPath as any) : qpItem.uri
-  );
+  const uriOrFileName =
+    qpItem.uri!.scheme === "file" ? qpItem.uri!.fsPath : qpItem.uri;
+  const document =
+    uriOrFileName instanceof vscode.Uri
+      ? await vscode.workspace.openTextDocument(uriOrFileName)
+      : await vscode.workspace.openTextDocument(uriOrFileName);
   const editor = await vscode.window.showTextDocument(document);
   selectQpItem(editor, qpItem);
 }
