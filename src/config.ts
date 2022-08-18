@@ -1,9 +1,6 @@
 import * as vscode from "vscode";
 import { getConfigByKey, updateConfigByKey } from "./cache";
-import ExcludeMode from "./enum/excludeMode";
-import Icons from "./interface/icons";
-import ItemsFilter from "./interface/itemsFilter";
-import ItemsFilterPhrases from "./interface/itemsFilterPhrases";
+import { ExcludeMode, Icons, ItemsFilter, ItemsFilterPhrases } from "./types";
 
 const defaultSection = "searchEverywhere";
 const keys = {

@@ -1,9 +1,8 @@
 import * as sinon from "sinon";
-import Action from "src/interface/action";
 import * as vscode from "vscode";
 import { actionProcessor } from "../../actionProcessor";
 import * as actionProcessorEventsEmitter from "../../actionProcessorEventsEmitter";
-import ActionType from "../../enum/actionType";
+import { Action, ActionType } from "../../types";
 import { utils } from "../../utils";
 import { getAction, getActions, getEventEmitter } from "../util/mockFactory";
 import { stubMultiple } from "../util/stubHelpers";

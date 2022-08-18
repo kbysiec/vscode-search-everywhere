@@ -1,8 +1,6 @@
 import { assert, expect } from "chai";
 import * as sinon from "sinon";
-import ActionType from "../../enum/actionType";
-import Action from "../../interface/action";
-import IndexStats from "../../interface/indexStats";
+import { Action, ActionType, IndexStats } from "../../types";
 import { utils } from "../../utils";
 import { getTestSetups } from "../testSetup/utils.testSetup";
 import {

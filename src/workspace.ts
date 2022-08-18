@@ -8,12 +8,14 @@ import { clearConfig } from "./cache";
 import { fetchExcludeMode } from "./config";
 import { dataConverter } from "./dataConverter";
 import { dataService } from "./dataService";
-import ActionTrigger from "./enum/actionTrigger";
-import ActionType from "./enum/actionType";
-import DetailedActionType from "./enum/detailedActionType";
-import ExcludeMode from "./enum/excludeMode";
-import Action from "./interface/action";
-import QuickPickItem from "./interface/quickPickItem";
+import {
+  Action,
+  ActionTrigger,
+  ActionType,
+  DetailedActionType,
+  ExcludeMode,
+  QuickPickItem,
+} from "./types";
 import { utils } from "./utils";
 import { workspaceCommon as common } from "./workspaceCommon";
 import {

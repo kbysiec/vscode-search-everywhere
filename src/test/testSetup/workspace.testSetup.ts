@@ -5,7 +5,7 @@ import * as cache from "../../cache";
 import * as config from "../../config";
 import { dataConverter } from "../../dataConverter";
 import { dataService } from "../../dataService";
-import ExcludeMode from "../../enum/excludeMode";
+import { ExcludeMode } from "../../types";
 import { utils } from "../../utils";
 import { workspace } from "../../workspace";
 import { workspaceCommon as common } from "../../workspaceCommon";

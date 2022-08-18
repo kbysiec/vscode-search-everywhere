@@ -1,5 +1,5 @@
 import { assert } from "chai";
-import DetailedActionType from "../../enum/detailedActionType";
+import { DetailedActionType } from "../../types";
 import * as workspaceUpdater from "../../workspaceUpdater";
 import { getTestSetups } from "../testSetup/workspaceUpdater.testSetup";
 import { getDirectory, getItem } from "../util/itemMockFactory";

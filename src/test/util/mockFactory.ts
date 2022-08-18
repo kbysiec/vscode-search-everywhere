@@ -1,10 +1,12 @@
 import * as sinon from "sinon";
 import * as vscode from "vscode";
-import ActionType from "../../enum/actionType";
-import ExcludeMode from "../../enum/excludeMode";
-import Action from "../../interface/action";
-import Item from "../../interface/item";
-import WorkspaceData from "../../interface/workspaceData";
+import {
+  Action,
+  ActionType,
+  ExcludeMode,
+  Item,
+  WorkspaceData,
+} from "../../types";
 
 export const getExtensionContext = (): vscode.ExtensionContext => {
   return {

@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import { updateData } from "./cache";
-import DetailedActionType from "./enum/detailedActionType";
-import QuickPickItem from "./interface/quickPickItem";
+import { DetailedActionType, QuickPickItem } from "./types";
 import { workspaceCommon as common } from "./workspaceCommon";
 
 function removeUri(data: QuickPickItem[], uri: vscode.Uri): QuickPickItem[] {

@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import QuickPickItem from "../../interface/quickPickItem";
+import { QuickPickItem } from "../../types";
 import { getWorkspaceData } from "../util/mockFactory";
 
 export const itemUntitledUri = vscode.Uri.file("./fake/fake-1.ts");

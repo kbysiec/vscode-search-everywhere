@@ -4,11 +4,13 @@ import {
   fetchItemsFilterPhrases,
   fetchShouldUseItemsFilterPhrases,
 } from "./config";
-import Icons from "./interface/icons";
-import Item from "./interface/item";
-import ItemsFilterPhrases from "./interface/itemsFilterPhrases";
-import QuickPickItem from "./interface/quickPickItem";
-import WorkspaceData from "./interface/workspaceData";
+import {
+  Icons,
+  Item,
+  ItemsFilterPhrases,
+  QuickPickItem,
+  WorkspaceData,
+} from "./types";
 import { utils } from "./utils";
 
 function getItemFilterPhraseForKind(symbolKind: number): string {

@@ -1,10 +1,8 @@
 import * as vscode from "vscode";
 import { fetchItemsFilter } from "./config";
 import { onDidItemIndexedEventEmitter } from "./dataServiceEventsEmitter";
-import Item from "./interface/item";
-import ItemsFilter from "./interface/itemsFilter";
-import WorkspaceData from "./interface/workspaceData";
 import { patternProvider } from "./patternProvider";
+import { Item, ItemsFilter, WorkspaceData } from "./types";
 import { utils } from "./utils";
 
 async function fetchUris(): Promise<vscode.Uri[]> {

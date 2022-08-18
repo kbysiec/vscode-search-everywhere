@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { appConfig } from "./appConfig";
-import QuickPickItem from "./interface/quickPickItem";
+import { QuickPickItem } from "./types";
 
 let extensionContext: vscode.ExtensionContext;
 

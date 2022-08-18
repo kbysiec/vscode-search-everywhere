@@ -1,8 +1,5 @@
 import * as vscode from "vscode";
-import IndexStats from "./interface/indexStats";
-import Item from "./interface/item";
-import QuickPickItem from "./interface/quickPickItem";
-import WorkspaceData from "./interface/workspaceData";
+import { IndexStats, Item, QuickPickItem, WorkspaceData } from "./types";
 
 function getWorkspaceFoldersPaths(): string[] {
   return (

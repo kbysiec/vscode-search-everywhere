@@ -1,7 +1,5 @@
 import { assert } from "chai";
-import ActionTrigger from "../../enum/actionTrigger";
-import ActionType from "../../enum/actionType";
-import ExcludeMode from "../../enum/excludeMode";
+import { ActionTrigger, ActionType, ExcludeMode } from "../../types";
 import { workspace } from "../../workspace";
 import { getTestSetups } from "../testSetup/workspace.testSetup";
 import {

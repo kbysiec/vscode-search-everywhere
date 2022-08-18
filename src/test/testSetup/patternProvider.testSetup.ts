@@ -1,8 +1,8 @@
 import * as sinon from "sinon";
 import * as vscode from "vscode";
 import * as config from "../../config";
-import ExcludeMode from "../../enum/excludeMode";
 import { patternProvider } from "../../patternProvider";
+import { ExcludeMode } from "../../types";
 import { getItems } from "../util/itemMockFactory";
 import { getTextDocumentStub } from "../util/stubFactory";
 import { stubMultiple } from "../util/stubHelpers";

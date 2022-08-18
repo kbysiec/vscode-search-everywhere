@@ -1,10 +1,8 @@
 import * as vscode from "vscode";
 import { initCache } from "./cache";
 import { fetchShouldInitOnStartup } from "./config";
-import ActionTrigger from "./enum/actionTrigger";
-import ActionType from "./enum/actionType";
-import Action from "./interface/action";
 import { quickPick } from "./quickPick";
+import { Action, ActionTrigger, ActionType } from "./types";
 import { utils } from "./utils";
 import { workspace } from "./workspace";
 import {

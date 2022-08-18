@@ -7,8 +7,7 @@ import {
   fetchShouldUseDebounce,
   fetchShouldUseItemsFilterPhrases,
 } from "./config";
-import ItemsFilterPhrases from "./interface/itemsFilterPhrases";
-import QuickPickItem from "./interface/quickPickItem";
+import { ItemsFilterPhrases, QuickPickItem } from "./types";
 import { utils } from "./utils";
 const debounce = require("debounce");
 
@@ -400,8 +399,6 @@ export const quickPick = {
   show,
   loadItems,
   loadHelpItems,
-  // loadUnsortedItems,
-  // loadSortedItems,
   showLoading,
   setText,
   setPlaceholder,

@@ -3,8 +3,7 @@ import {
   onWillExecuteActionEventEmitter,
   onWillProcessingEventEmitter,
 } from "./actionProcessorEventsEmitter";
-import ActionType from "./enum/actionType";
-import Action from "./interface/action";
+import { Action, ActionType } from "./types";
 import { utils } from "./utils";
 
 function add(action: Action): void {

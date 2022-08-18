@@ -1,6 +1,6 @@
 import { assert } from "chai";
 import * as vscode from "vscode";
-import ActionType from "../../enum/actionType";
+import { ActionType } from "../../types";
 import { workspaceCommon } from "../../workspaceCommon";
 import { getTestSetups } from "../testSetup/workspaceCommon.testSetup";
 import { getProgress } from "../util/mockFactory";

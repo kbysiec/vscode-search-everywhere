@@ -5,7 +5,7 @@ import {
   fetchFilesAndSearchExclude,
   fetchInclude,
 } from "./config";
-import ExcludeMode from "./enum/excludeMode";
+import { ExcludeMode } from "./types";
 
 const endLineRegex = /[^\r\n]+/g;
 const gitignoreFilePattern = "**/.gitignore";

@@ -1,6 +1,6 @@
 import { assert } from "chai";
 import { controller } from "../../controller";
-import ActionType from "../../enum/actionType";
+import { ActionType } from "../../types";
 import { getTestSetups } from "../testSetup/controller.testSetup";
 import { getAction, getExtensionContext } from "../util/mockFactory";
 import { getQpItems } from "../util/qpItemMockFactory";

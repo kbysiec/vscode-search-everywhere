@@ -1,6 +1,6 @@
 import * as sinon from "sinon";
 import * as vscode from "vscode";
-import ExcludeMode from "../../enum/excludeMode";
+import { ExcludeMode } from "../../types";
 import { getTextDocumentStub } from "./stubFactory";
 
 export const getWorkspaceFoldersChangeEvent = (flag: boolean) => {

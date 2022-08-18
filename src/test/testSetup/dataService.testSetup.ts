@@ -2,8 +2,8 @@ import * as sinon from "sinon";
 import * as vscode from "vscode";
 import * as config from "../../config";
 import { dataService } from "../../dataService";
-import ItemsFilter from "../../interface/itemsFilter";
 import { patternProvider } from "../../patternProvider";
+import { ItemsFilter } from "../../types";
 import { utils } from "../../utils";
 import {
   getDocumentSymbolItemSingleLineArray,

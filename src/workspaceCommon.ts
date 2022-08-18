@@ -6,10 +6,7 @@ import { fetchShouldDisplayNotificationInStatusBar } from "./config";
 import { dataConverter } from "./dataConverter";
 import { dataService } from "./dataService";
 import { onDidItemIndexed } from "./dataServiceEventsEmitter";
-import ActionType from "./enum/actionType";
-import Action from "./interface/action";
-import QuickPickItem from "./interface/quickPickItem";
-import WorkspaceData from "./interface/workspaceData";
+import { Action, ActionType, QuickPickItem, WorkspaceData } from "./types";
 import { utils } from "./utils";
 
 function getData(): QuickPickItem[] {
@@ -159,11 +156,7 @@ function reportCurrentProgress(
 ): void {
   progress.report({
     increment: workspaceCommon.getProgressStep(),
-    message: ` ${
-      (progress as any).value
-        ? `${Math.round(workspaceCommon.getCurrentProgressValue())}%`
-        : ""
-    }`,
+    message: ` ${`${Math.round(workspaceCommon.getCurrentProgressValue())}%`}`,
   });
 }
 
