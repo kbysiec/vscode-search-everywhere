@@ -16,28 +16,28 @@ describe("controller", () => {
   afterEach(() => setups.afterEach());
 
   describe("init", () => {
-    it("1: should set extensionContext", () => {
+    it("1: should set extensionContext", async () => {
       const extensionContext = setups.init1();
-      controller.init(extensionContext);
+      await controller.init(extensionContext);
 
       assert.equal(extensionContext, controller.getExtensionContext());
     });
 
-    it("2: should init cache", () => {
+    it("2: should init cache", async () => {
       const [initCacheStub] = setups.init2();
-      controller.init(getExtensionContext());
+      await controller.init(getExtensionContext());
 
       assert.equal(initCacheStub.calledOnce, true);
     });
 
-    it("3: should init workspace", () => {
+    it("3: should init workspace", async () => {
       const [initWorkspaceStub] = setups.init3();
-      controller.init(getExtensionContext());
+      await controller.init(getExtensionContext());
 
       assert.equal(initWorkspaceStub.calledOnce, true);
     });
 
-    it("4: should register event listeners", () => {
+    it("4: should register event listeners", async () => {
       const [
         onWillProcessingStub,
         onDidProcessingStub,
@@ -45,7 +45,7 @@ describe("controller", () => {
         onDidDebounceConfigToggleStub,
         onWillReindexOnConfigurationChangeStub,
       ] = setups.init4();
-      controller.init(getExtensionContext());
+      await controller.init(getExtensionContext());
 
       assert.equal(onWillProcessingStub.calledOnce, true);
       assert.equal(onDidProcessingStub.calledOnce, true);

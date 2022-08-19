@@ -117,10 +117,10 @@ function registerWorkspaceEventListeners() {
   onWillReindexOnConfigurationChange(handleWillReindexOnConfigurationChange);
 }
 
-function init(newExtensionContext: vscode.ExtensionContext) {
+async function init(newExtensionContext: vscode.ExtensionContext) {
   setExtensionContext(newExtensionContext);
   initCache(controller.getExtensionContext());
-  workspace.init();
+  await workspace.init();
   registerWorkspaceEventListeners();
 }
 
