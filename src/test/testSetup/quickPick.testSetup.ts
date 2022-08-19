@@ -608,5 +608,17 @@ export const getTestSetups = () => {
     handleDidHide1: () => {
       stubControl(sandbox);
     },
+    handleDidTriggerItemButton1: () => {
+      stubControl(sandbox);
+      return stubMultiple(
+        [
+          {
+            object: quickPick,
+            method: "openItem",
+          },
+        ],
+        sandbox
+      );
+    },
   };
 };

@@ -1,7 +1,10 @@
 import { assert } from "chai";
 import { quickPick } from "../../quickPick";
 import { getTestSetups } from "../testSetup/quickPick.testSetup";
-import { getQuickPickOnDidChangeValueEventListeners } from "../util/eventMockFactory";
+import {
+  getQuickPickItemButtonEvent,
+  getQuickPickOnDidChangeValueEventListeners,
+} from "../util/eventMockFactory";
 import { getQpItems } from "../util/qpItemMockFactory";
 
 type SetupsType = ReturnType<typeof getTestSetups>;
@@ -257,6 +260,15 @@ describe("QuickPick", () => {
       quickPick.handleDidHide();
 
       assert.equal(quickPick.getControl().value, "");
+    });
+  });
+
+  describe("handleDidTriggerItemButton", () => {
+    it("1: should openItem method be invoked", async () => {
+      const [openItemStub] = setups.handleDidTriggerItemButton1();
+      await quickPick.handleDidTriggerItemButton(getQuickPickItemButtonEvent());
+
+      assert.equal(openItemStub.calledOnce, true);
     });
   });
 });

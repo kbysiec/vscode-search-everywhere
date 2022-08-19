@@ -130,6 +130,12 @@ function createQuickPickItem(
     label,
     detail: utils.normalizeUriPath(uri.fsPath),
     description,
+    buttons: [
+      {
+        iconPath: new vscode.ThemeIcon("open-preview"),
+        tooltip: "Open to the side",
+      },
+    ],
   } as QuickPickItem;
 }
 

@@ -54,7 +54,7 @@ function registerOnDidChangeValueWithoutDebounceEventListeners(): void {
 async function openSelected(qpItem: QuickPickItem): Promise<void> {
   shouldLoadItemsForFilterPhrase(qpItem)
     ? loadItemsForFilterPhrase(qpItem)
-    : await openItem(qpItem);
+    : await quickPick.openItem(qpItem);
 }
 
 function shouldLoadItemsForFilterPhrase(qpItem: QuickPickItem): boolean {
@@ -68,14 +68,17 @@ function loadItemsForFilterPhrase(qpItem: QuickPickItem): void {
   quickPick.loadItems();
 }
 
-async function openItem(qpItem: QuickPickItem): Promise<void> {
+async function openItem(
+  qpItem: QuickPickItem,
+  viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active
+): Promise<void> {
   const uriOrFileName =
     qpItem.uri!.scheme === "file" ? qpItem.uri!.fsPath : qpItem.uri;
   const document =
     uriOrFileName instanceof vscode.Uri
       ? await vscode.workspace.openTextDocument(uriOrFileName)
       : await vscode.workspace.openTextDocument(uriOrFileName);
-  const editor = await vscode.window.showTextDocument(document);
+  const editor = await vscode.window.showTextDocument(document, viewColumn);
   selectQpItem(editor, qpItem);
 }
 
@@ -182,6 +185,12 @@ function handleDidHide() {
   quickPick.setText("");
 }
 
+async function handleDidTriggerItemButton({
+  item: qpItem,
+}: vscode.QuickPickItemButtonEvent<QuickPickItem>) {
+  await quickPick.openItem(qpItem, vscode.ViewColumn.Beside);
+}
+
 function init(): void {
   const control = vscode.window.createQuickPick<QuickPickItem>();
   setControl(control);
@@ -207,6 +216,7 @@ function registerEventListeners() {
   control.onDidHide(handleDidHide);
   control.onDidAccept(handleDidAccept);
   control.onDidChangeValue(handleDidChangeValue);
+  control.onDidTriggerItemButton(handleDidTriggerItemButton);
 
   registerOnDidChangeValueEventListeners();
 }
@@ -406,8 +416,10 @@ export const quickPick = {
   setText,
   setPlaceholder,
   fetchConfig,
+  openItem,
   handleDidChangeValueClearing,
   handleDidChangeValue,
   handleDidAccept,
   handleDidHide,
+  handleDidTriggerItemButton,
 };

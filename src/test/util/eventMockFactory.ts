@@ -1,6 +1,7 @@
 import * as sinon from "sinon";
 import * as vscode from "vscode";
-import { ExcludeMode } from "../../types";
+import { ExcludeMode, QuickPickItem } from "../../types";
+import { getQpItem } from "./qpItemMockFactory";
 import { getTextDocumentStub } from "./stubFactory";
 
 export const getWorkspaceFoldersChangeEvent = (flag: boolean) => {
@@ -80,6 +81,19 @@ export const getFileRenameEvent = (isDirectory: boolean = false) => ({
         },
       ],
 });
+
+export const getQuickPickItemButtonEvent =
+  (): vscode.QuickPickItemButtonEvent<QuickPickItem> => {
+    const quickPickItemButtonEvent = {
+      button: {
+        iconPath: vscode.Uri.parse("#"),
+        tooltip: undefined,
+      },
+      item: getQpItem(),
+    };
+
+    return quickPickItemButtonEvent;
+  };
 
 export const getFileCreateEvent = () => ({
   files: [vscode.Uri.file("./#")],
