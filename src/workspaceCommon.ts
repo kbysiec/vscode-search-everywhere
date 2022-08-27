@@ -6,6 +6,7 @@ import { fetchShouldDisplayNotificationInStatusBar } from "./config";
 import { dataConverter } from "./dataConverter";
 import { dataService } from "./dataService";
 import { onDidItemIndexed } from "./dataServiceEventsEmitter";
+import { logger } from "./logger";
 import { Action, ActionType, QuickPickItem, WorkspaceData } from "./types";
 import { utils } from "./utils";
 
@@ -13,10 +14,10 @@ function getData(): QuickPickItem[] {
   return getDataFromCache() || [];
 }
 
-async function index(comment: string): Promise<void> {
+async function index(trigger: string): Promise<void> {
   dataService.clearCachedUris();
 
-  await registerAction(ActionType.Rebuild, indexWithProgress, comment);
+  await registerAction(ActionType.Rebuild, indexWithProgress, trigger);
 }
 
 async function indexWithProgress(): Promise<void> {
@@ -35,13 +36,13 @@ async function indexWithProgress(): Promise<void> {
 async function registerAction(
   type: ActionType,
   fn: Function,
-  comment: string,
+  trigger: string,
   uri?: vscode.Uri
 ): Promise<void> {
   const action: Action = {
     type,
     fn,
-    comment,
+    trigger,
     uri,
   };
   await actionProcessor.register(action);
@@ -98,11 +99,15 @@ function getTimeElapsed(start: number) {
 }
 
 function printStats(data: WorkspaceData, elapsedTime: number) {
-  utils.printStatsMessage({
+  const indexStats = {
     ElapsedTimeInSeconds: elapsedTime,
     ScannedUrisCount: data.items.size,
     IndexedItemsCount: data.count,
-  });
+  };
+
+  utils.printStatsMessage(indexStats);
+  logger.logScanTime(indexStats);
+  logger.logStructure(data);
 }
 
 async function indexWorkspace(): Promise<WorkspaceData> {

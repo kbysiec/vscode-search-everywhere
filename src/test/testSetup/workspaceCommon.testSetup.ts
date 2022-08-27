@@ -6,6 +6,7 @@ import * as config from "../../config";
 import { dataConverter } from "../../dataConverter";
 import { dataService } from "../../dataService";
 import * as dataServiceEventsEmitter from "../../dataServiceEventsEmitter";
+import { logger } from "../../logger";
 import { patternProvider } from "../../patternProvider";
 import { utils } from "../../utils";
 import { getSubscription, getWorkspaceData } from "../util/mockFactory";
@@ -195,6 +196,8 @@ export const getTestSetups = () => {
       );
     },
     indexWithProgressTask1: () => {
+      const outputChannelInner =
+        vscode.window.createOutputChannel("Search everywhere");
       const onDidItemIndexedSubscription = getSubscription();
 
       const stubs = stubMultiple(
@@ -233,6 +236,11 @@ export const getTestSetups = () => {
             object: utils,
             method: "sleep",
           },
+          {
+            object: logger,
+            method: "getChannel",
+            returns: outputChannelInner,
+          },
         ],
         sandbox
       );
@@ -243,6 +251,8 @@ export const getTestSetups = () => {
       };
     },
     indexWithProgressTask2: () => {
+      const outputChannelInner =
+        vscode.window.createOutputChannel("Search everywhere");
       const onDidItemIndexedSubscription = getSubscription();
 
       return stubMultiple(
@@ -280,12 +290,19 @@ export const getTestSetups = () => {
           {
             object: utils,
             method: "convertMsToSec",
+          },
+          {
+            object: logger,
+            method: "getChannel",
+            returns: outputChannelInner,
           },
         ],
         sandbox
       );
     },
     indexWithProgressTask3: () => {
+      const outputChannelInner =
+        vscode.window.createOutputChannel("Search everywhere");
       const onDidItemIndexedSubscription = getSubscription();
 
       return stubMultiple(
@@ -323,12 +340,19 @@ export const getTestSetups = () => {
           {
             object: utils,
             method: "convertMsToSec",
+          },
+          {
+            object: logger,
+            method: "getChannel",
+            returns: outputChannelInner,
           },
         ],
         sandbox
       );
     },
     indexWithProgressTask4: () => {
+      const outputChannelInner =
+        vscode.window.createOutputChannel("Search everywhere");
       const onDidItemIndexedSubscription = getSubscription();
 
       return stubMultiple(
@@ -366,6 +390,69 @@ export const getTestSetups = () => {
           {
             object: utils,
             method: "convertMsToSec",
+          },
+          {
+            object: logger,
+            method: "getChannel",
+            returns: outputChannelInner,
+          },
+        ],
+        sandbox
+      );
+    },
+    indexWithProgressTask5: () => {
+      const outputChannelInner =
+        vscode.window.createOutputChannel("Search everywhere");
+      const onDidItemIndexedSubscription = getSubscription();
+
+      return stubMultiple(
+        [
+          {
+            object: utils,
+            method: "printStatsMessage",
+          },
+          {
+            object: logger,
+            method: "logScanTime",
+          },
+          {
+            object: logger,
+            method: "logStructure",
+          },
+          {
+            object: dataService,
+            method: "fetchData",
+            returns: getWorkspaceData(),
+          },
+          {
+            object: dataConverter,
+            method: "convertToQpData",
+          },
+          {
+            object: utils,
+            method: "sleep",
+          },
+          {
+            object: dataServiceEventsEmitter,
+            method: "onDidItemIndexed",
+            returns: onDidItemIndexedSubscription,
+          },
+          {
+            object: cache,
+            method: "updateData",
+          },
+          {
+            object: cache,
+            method: "clear",
+          },
+          {
+            object: utils,
+            method: "convertMsToSec",
+          },
+          {
+            object: logger,
+            method: "getChannel",
+            returns: outputChannelInner,
           },
         ],
         sandbox

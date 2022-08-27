@@ -66,7 +66,7 @@ describe("WorkspaceCommon", () => {
       await workspaceCommon.registerAction(
         ActionType.Rebuild,
         () => {},
-        "test comment"
+        "test trigger"
       );
 
       assert.equal(registerStub.calledOnce, true);
@@ -192,6 +192,21 @@ describe("WorkspaceCommon", () => {
 
       assert.equal(fetchDataStub.calledOnce, true);
       assert.equal(convertToQpDataStub.calledOnce, true);
+    });
+
+    it("5: should utils.printStatsMessage, logger.logScanTime and logger.logStructure methods be invoked", async () => {
+      const [printStatsMessageStub, logScanTimeStub, logStructureMessageStub] =
+        setups.indexWithProgressTask5();
+      const cancellationTokenSource = new vscode.CancellationTokenSource();
+
+      await workspaceCommon.indexWithProgressTask(
+        getProgress(),
+        cancellationTokenSource.token
+      );
+
+      assert.equal(printStatsMessageStub.calledOnce, true);
+      assert.equal(logScanTimeStub.calledOnce, true);
+      assert.equal(logStructureMessageStub.calledOnce, true);
     });
   });
 

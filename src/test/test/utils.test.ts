@@ -1,6 +1,6 @@
 import { assert, expect } from "chai";
 import * as sinon from "sinon";
-import { Action, ActionType, IndexStats } from "../../types";
+import { Action, ActionType } from "../../types";
 import { utils } from "../../utils";
 import { getTestSetups } from "../testSetup/utils.testSetup";
 import {
@@ -8,7 +8,11 @@ import {
   getWorkspaceFoldersChangeEvent,
 } from "../util/eventMockFactory";
 import { getDirectory, getItem, getItems } from "../util/itemMockFactory";
-import { getAction, getWorkspaceData } from "../util/mockFactory";
+import {
+  getAction,
+  getIndexStats,
+  getWorkspaceData,
+} from "../util/mockFactory";
 import { getQpItem, getQpItems } from "../util/qpItemMockFactory";
 
 type SetupsType = ReturnType<typeof getTestSetups>;
@@ -124,11 +128,7 @@ describe("Utils", () => {
   describe("printStatsMessage", () => {
     it("1: should display notification with scan stats", async () => {
       const [showInformationMessageStub] = setups.printStatsMessage1();
-      const indexStats: IndexStats = {
-        ElapsedTimeInSeconds: 3,
-        ScannedUrisCount: 20,
-        IndexedItemsCount: 120,
-      };
+      const indexStats = getIndexStats();
       utils.printStatsMessage(indexStats);
 
       const calledWith = (
@@ -335,6 +335,27 @@ describe("Utils", () => {
       assert.equal(utils.convertMsToSec(2000), 2);
     });
   });
+
+  describe("getStructure", () => {
+    it("1: should return tree structure based on workspace data", () => {
+      const workspaceData = setups.getStructure1();
+      assert.equal(
+        utils.getStructure(workspaceData),
+        `{
+  "fake": {
+    "fake-1.ts": "4 items"
+  },
+  "fake-other": {
+    "fake-2.ts": "1 item"
+  },
+  "fake-another": {
+    "fake-3.ts": "0 items"
+  }
+}`
+      );
+    });
+  });
+
   describe("setWorkspaceFoldersCommonPath", () => {
     it("1: should do nothing if workspace has only one folder", () => {
       setups.setWorkspaceFoldersCommonPath1();

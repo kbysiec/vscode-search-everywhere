@@ -206,6 +206,41 @@ function convertMsToSec(timeInMs: number) {
   return Math.floor((timeInMs % (1000 * 60)) / 1000);
 }
 
+function getDataForBuildingStructure(data: WorkspaceData) {
+  const uriWithNoOfItems = Array.from(data.items).map((keyValue) => {
+    const [key, value] = keyValue;
+    let normalizedPath = utils.normalizeUriPath(key);
+    normalizedPath = normalizedPath.replace("/", "");
+    const itemsCount = value.elements.length;
+    return [normalizedPath, itemsCount] as const;
+  });
+  return new Map<string, number>(uriWithNoOfItems);
+}
+
+function buildStructure(paths: string[], normalizedData: Map<string, number>) {
+  const structure: { [key: string]: {} } = {};
+  paths.forEach(function (path) {
+    const splittedPath = path.split("/");
+    splittedPath.reduce((currentStructure, node, index) => {
+      let text: {} | string = {};
+      if (index === splittedPath.length - 1) {
+        const value = normalizedData.get(path) || 0;
+        text = `${value} ${value === 1 ? "item" : "items"}`;
+      }
+      return currentStructure[node] || (currentStructure[node] = text);
+    }, structure);
+  });
+  return structure;
+}
+
+function getStructure(data: WorkspaceData) {
+  const normalizedData = getDataForBuildingStructure(data);
+  const paths = Array.from(normalizedData.keys());
+  const structure = buildStructure(paths, normalizedData);
+
+  return JSON.stringify(structure, null, 2);
+}
+
 function setWorkspaceFoldersCommonPath() {
   if (utils.hasWorkspaceMoreThanOneFolder()) {
     const workspaceFoldersPaths = getWorkspaceFoldersPaths();
@@ -258,5 +293,6 @@ export const utils = {
   normalizeUriPath,
   isDirectory,
   convertMsToSec,
+  getStructure,
   setWorkspaceFoldersCommonPath,
 };

@@ -4,6 +4,7 @@ import {
   Action,
   ActionType,
   ExcludeMode,
+  IndexStats,
   Item,
   WorkspaceData,
 } from "../../types";
@@ -115,7 +116,7 @@ const getRandomActionType = (): ActionType => {
 
 export const getAction = (
   type?: ActionType,
-  comment: string = "test comment",
+  trigger: string = "test trigger",
   id: number = 0,
   withUri: boolean = false,
   uri: vscode.Uri = vscode.Uri.file(`./fake/fake-${id}.ts`)
@@ -123,7 +124,7 @@ export const getAction = (
   return {
     type: type || getRandomActionType(),
     fn: sinon.stub(),
-    comment,
+    trigger: trigger,
     id,
     uri: withUri ? uri : undefined,
   };
@@ -133,7 +134,7 @@ export const getActions = (
   count: number = 2,
   action?: Action,
   type?: ActionType,
-  comment?: string,
+  trigger?: string,
   withUri?: boolean,
   uri?: vscode.Uri
 ): Action[] => {
@@ -143,7 +144,7 @@ export const getActions = (
     if (action) {
       array.push(action);
     } else {
-      array.push(getAction(type, `${comment} ${i}`, i - 1, withUri, uri));
+      array.push(getAction(type, `${trigger} ${i}`, i - 1, withUri, uri));
     }
   }
   return array;
@@ -166,4 +167,14 @@ export const getItemsFilter = (
     ignoredKinds,
     ignoredNames,
   };
+};
+
+export const getIndexStats = () => {
+  const indexStats: IndexStats = {
+    ElapsedTimeInSeconds: 3,
+    ScannedUrisCount: 20,
+    IndexedItemsCount: 120,
+  };
+
+  return indexStats;
 };

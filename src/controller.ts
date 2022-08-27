@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { initCache } from "./cache";
 import { fetchShouldInitOnStartup } from "./config";
+import { logger } from "./logger";
 import { quickPick } from "./quickPick";
 import { Action, ActionTrigger, ActionType } from "./types";
 import { utils } from "./utils";
@@ -60,6 +61,7 @@ function handleWillExecuteAction(action: Action) {
     quickPick.setItems([]);
     quickPick.loadItems();
   }
+  logger.logAction(action);
 }
 
 function handleDidDebounceConfigToggle() {
@@ -118,10 +120,13 @@ function registerWorkspaceEventListeners() {
 }
 
 async function init(newExtensionContext: vscode.ExtensionContext) {
+  logger.init();
   setExtensionContext(newExtensionContext);
   initCache(controller.getExtensionContext());
   await workspace.init();
   registerWorkspaceEventListeners();
+
+  logger.log(`Extension "vscode-search-everywhere" has been activated.`);
 }
 
 export const controller = {

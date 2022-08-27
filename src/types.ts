@@ -37,7 +37,7 @@ export enum ExcludeMode {
 export interface Action {
   type: ActionType;
   fn: Function;
-  comment?: string;
+  trigger?: string;
   uri?: vscode.Uri;
   id?: number;
 }
