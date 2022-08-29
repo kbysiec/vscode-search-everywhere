@@ -403,10 +403,6 @@ export const getTestSetups = () => {
             method: "isDirectory",
             returns: false,
           },
-          {
-            object: dataService,
-            method: "clearCachedUris",
-          },
         ],
         sandbox
       );
@@ -422,10 +418,6 @@ export const getTestSetups = () => {
             object: utils,
             method: "isDirectory",
             returns: true,
-          },
-          {
-            object: dataService,
-            method: "clearCachedUris",
           },
         ],
         sandbox
@@ -443,10 +435,6 @@ export const getTestSetups = () => {
             method: "isDirectory",
             returns: false,
           },
-          {
-            object: dataService,
-            method: "clearCachedUris",
-          },
         ],
         sandbox
       );
@@ -462,10 +450,6 @@ export const getTestSetups = () => {
             object: utils,
             method: "isDirectory",
             returns: true,
-          },
-          {
-            object: dataService,
-            method: "clearCachedUris",
           },
         ],
         sandbox
@@ -483,10 +467,6 @@ export const getTestSetups = () => {
             method: "isDirectory",
             returns: false,
           },
-          {
-            object: dataService,
-            method: "clearCachedUris",
-          },
         ],
         sandbox
       );
@@ -502,10 +482,6 @@ export const getTestSetups = () => {
             object: utils,
             method: "isDirectory",
             returns: true,
-          },
-          {
-            object: dataService,
-            method: "clearCachedUris",
           },
         ],
         sandbox

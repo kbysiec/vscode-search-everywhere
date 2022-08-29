@@ -56,10 +56,6 @@ export const getTestSetups = () => {
             method: "getExcludePatterns",
             returns: Promise.resolve(["**/.history/**", "**/.vscode/**"]),
           },
-          {
-            object: dataService,
-            method: "clearCachedUris",
-          },
         ],
         sandbox
       );

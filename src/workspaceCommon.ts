@@ -15,8 +15,6 @@ function getData(): QuickPickItem[] {
 }
 
 async function index(trigger: string): Promise<void> {
-  dataService.clearCachedUris();
-
   await registerAction(ActionType.Rebuild, indexWithProgress, trigger);
 }
 

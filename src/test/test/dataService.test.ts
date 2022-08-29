@@ -115,42 +115,18 @@ describe("DataService", () => {
   });
 
   describe("isUriExistingInWorkspace", () => {
-    it(`1: should return true if uri exists in workspace
-      and cache should not be checked`, async () => {
+    it("1: should return true if uri exists in workspace", async () => {
       setups.isUriExistingInWorkspace1();
 
       const item = getItem();
       assert.equal(await dataService.isUriExistingInWorkspace(item), true);
     });
 
-    it(`2: should return false if uri does not exist in workspace
-    and cache should not be checked`, async () => {
+    it("2: should return false if uri does not exist in workspace", async () => {
       setups.isUriExistingInWorkspace2();
 
       const item = getItem("./test/path/to/workspace");
       assert.equal(await dataService.isUriExistingInWorkspace(item), false);
-    });
-
-    it(`3: should return true if uri exists in workspace, cache is checked
-      and cache is not empty`, async () => {
-      setups.isUriExistingInWorkspace3();
-
-      const item = getItem();
-      assert.equal(
-        await dataService.isUriExistingInWorkspace(item, true),
-        true
-      );
-    });
-
-    it(`4: should return true if uri exists in workspace, cache is checked
-      and cache is empty`, async () => {
-      setups.isUriExistingInWorkspace4();
-
-      const item = getItem();
-      assert.equal(
-        await dataService.isUriExistingInWorkspace(item, true),
-        true
-      );
     });
   });
 
@@ -172,16 +148,6 @@ describe("DataService", () => {
       const [patternProviderFetchConfigStub] = setups.fetchConfig2();
       dataService.fetchConfig();
       assert.equal(patternProviderFetchConfigStub.calledOnce, true);
-    });
-  });
-
-  describe("clearCachedUris", () => {
-    it("1: should return null", () => {
-      const uris = getItems();
-      dataService.setUris(uris);
-      assert.equal(dataService.getUris(), uris);
-      dataService.clearCachedUris();
-      assert.equal(dataService.getUris(), null);
     });
   });
 });

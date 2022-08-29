@@ -332,35 +332,6 @@ export const getTestSetups = () => {
         sandbox
       );
     },
-    isUriExistingInWorkspace3: () => {
-      stubMultiple(
-        [
-          {
-            object: dataService,
-            method: "getUris",
-            returns: getItems(),
-          },
-        ],
-        sandbox
-      );
-    },
-    isUriExistingInWorkspace4: () => {
-      stubMultiple(
-        [
-          {
-            object: dataService,
-            method: "fetchUris",
-            returns: Promise.resolve(getItems()),
-          },
-          {
-            object: dataService,
-            method: "getUris",
-            returns: [],
-          },
-        ],
-        sandbox
-      );
-    },
     fetchConfig1: () => {
       const configuration = getConfiguration().searchEverywhere;
       const expected = configuration.itemsFilter;

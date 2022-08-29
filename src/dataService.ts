@@ -22,15 +22,6 @@ async function getUrisOrFetchIfEmpty(
   return uris && uris.length ? uris : await dataService.fetchUris();
 }
 
-async function getCachedUris(): Promise<vscode.Uri[]> {
-  let uris = dataService.getUris();
-  if (!uris || !uris.length) {
-    uris = await dataService.fetchUris();
-    setUris(uris);
-  }
-  return uris;
-}
-
 async function includeSymbols(
   workspaceData: WorkspaceData,
   uris: vscode.Uri[]
@@ -283,21 +274,11 @@ async function fetchData(uris?: vscode.Uri[]): Promise<WorkspaceData> {
   return workspaceData;
 }
 
-async function isUriExistingInWorkspace(
-  uri: vscode.Uri,
-  checkInCache: boolean = false
-): Promise<boolean> {
-  const uris = checkInCache
-    ? await getCachedUris()
-    : await dataService.fetchUris();
-
+async function isUriExistingInWorkspace(uri: vscode.Uri): Promise<boolean> {
+  const uris = await dataService.fetchUris();
   return uris.some(
     (existingUri: vscode.Uri) => existingUri.fsPath === uri.fsPath
   );
-}
-
-function clearCachedUris(): void {
-  setUris(null);
 }
 
 async function fetchConfig() {
@@ -330,30 +311,18 @@ function getItemsFilter() {
   return itemsFilter;
 }
 
-function setUris(newUris: vscode.Uri[] | null) {
-  uris = newUris;
-}
-
-function getUris() {
-  return uris;
-}
-
 let isCancelled = false;
 let itemsFilter: ItemsFilter = {};
-let uris: vscode.Uri[] | null = null;
 
 export const dataService = {
   setIsCancelled,
   getIsCancelled,
   getItemsFilter,
-  setUris,
-  getUris,
   fetchConfig,
   reload,
   cancel,
   fetchData,
   isUriExistingInWorkspace,
-  clearCachedUris,
   fetchUris,
   getSymbolsForUri,
 };

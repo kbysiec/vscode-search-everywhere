@@ -63,8 +63,7 @@ async function handleDidChangeTextDocument(
 ) {
   const uri = event.document.uri;
   const isUriExistingInWorkspace = await dataService.isUriExistingInWorkspace(
-    uri,
-    true
+    uri
   );
   const hasContentChanged = event.contentChanges.length;
 
@@ -88,8 +87,6 @@ async function handleDidChangeTextDocument(
 }
 
 async function handleDidRenameFiles(event: vscode.FileRenameEvent) {
-  dataService.clearCachedUris();
-
   const firstFile = event.files[0];
   const actionType = utils.isDirectory(firstFile.oldUri)
     ? DetailedActionType.RenameOrMoveDirectory
@@ -116,8 +113,6 @@ async function handleDidRenameFiles(event: vscode.FileRenameEvent) {
 }
 
 async function handleDidCreateFiles(event: vscode.FileCreateEvent) {
-  dataService.clearCachedUris();
-
   const uri = event.files[0];
   const actionType = utils.isDirectory(uri)
     ? DetailedActionType.CreateNewDirectory
@@ -132,8 +127,6 @@ async function handleDidCreateFiles(event: vscode.FileCreateEvent) {
 }
 
 async function handleDidDeleteFiles(event: vscode.FileDeleteEvent) {
-  dataService.clearCachedUris();
-
   const uri = event.files[0];
   const actionType = utils.isDirectory(uri)
     ? DetailedActionType.RemoveDirectory
