@@ -15,7 +15,7 @@ describe("Config", () => {
   beforeEach(() => setups.beforeEach());
   afterEach(() => setups.afterEach());
 
-  describe("shouldDisplayNotificationInStatusBar", () => {
+  describe("fetchShouldDisplayNotificationInStatusBar", () => {
     it("1: should return boolean from configuration", () => {
       const section = "searchEverywhere";
       const key = "shouldDisplayNotificationInStatusBar";
@@ -27,7 +27,7 @@ describe("Config", () => {
     });
   });
 
-  describe("shouldInitOnStartup", () => {
+  describe("fetchShouldInitOnStartup", () => {
     it("1: should return boolean from configuration", () => {
       const section = "searchEverywhere";
       const key = "shouldInitOnStartup";
@@ -39,7 +39,7 @@ describe("Config", () => {
     });
   });
 
-  describe("shouldHighlightSymbol", () => {
+  describe("fetchShouldHighlightSymbol", () => {
     it("1: should return boolean from configuration", () => {
       const section = "searchEverywhere";
       const key = "shouldHighlightSymbol";
@@ -51,7 +51,7 @@ describe("Config", () => {
     });
   });
 
-  describe("shouldUseDebounce", () => {
+  describe("fetchShouldUseDebounce", () => {
     it("1: should return boolean from configuration", () => {
       const section = "searchEverywhere";
       const key = "shouldUseDebounce";
@@ -63,7 +63,7 @@ describe("Config", () => {
     });
   });
 
-  describe("getIcons", () => {
+  describe("fetchIcons", () => {
     it("1: should return object containing icons from configuration", () => {
       const section = "searchEverywhere";
       const key = "icons";
@@ -72,7 +72,7 @@ describe("Config", () => {
     });
   });
 
-  describe("getItemsFilter", () => {
+  describe("fetchItemsFilter", () => {
     it("1: should return object containing items filter from configuration", () => {
       const section = "searchEverywhere";
       const key = "itemsFilter";
@@ -81,7 +81,7 @@ describe("Config", () => {
     });
   });
 
-  describe("shouldUseItemsFilterPhrases", () => {
+  describe("fetchShouldUseItemsFilterPhrases", () => {
     it("1: should return boolean from configuration", () => {
       const section = "searchEverywhere";
       const key = "shouldUseItemsFilterPhrases";
@@ -93,7 +93,7 @@ describe("Config", () => {
     });
   });
 
-  describe("getHelpPhrase", () => {
+  describe("fetchHelpPhrase", () => {
     it("1: should return help phrase from configuration", () => {
       const section = "searchEverywhere";
       const key = "helpPhrase";
@@ -102,7 +102,7 @@ describe("Config", () => {
     });
   });
 
-  describe("getItemsFilterPhrases", () => {
+  describe("fetchItemsFilterPhrases", () => {
     it("1: should return object containing items filter phrases from configuration", () => {
       const section = "searchEverywhere";
       const key = "itemsFilterPhrases";
@@ -114,7 +114,7 @@ describe("Config", () => {
     });
   });
 
-  describe("getExclude", () => {
+  describe("fetchExclude", () => {
     it("1: should return array of exclude patterns from configuration", () => {
       const section = "searchEverywhere";
       const key = "exclude";
@@ -133,7 +133,7 @@ describe("Config", () => {
     });
   });
 
-  describe("getInclude", () => {
+  describe("fetchInclude", () => {
     it("1: should return array of include pattern from configuration", () => {
       const section = "searchEverywhere";
       const key = "include";
@@ -142,7 +142,7 @@ describe("Config", () => {
     });
   });
 
-  describe("getFilesAndSearchExclude", () => {
+  describe("fetchFilesAndSearchExclude", () => {
     it("1: should return array of exclude patterns from configuration", () => {
       assert.deepEqual(config.fetchFilesAndSearchExclude(), [
         "**/.git",
@@ -151,7 +151,7 @@ describe("Config", () => {
     });
   });
 
-  describe("getExcludeMode", () => {
+  describe("fetchExcludeMode", () => {
     it("1: should return exclude mode from configuration", () => {
       const section = "searchEverywhere";
       const key = "excludeMode";
