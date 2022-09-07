@@ -5,84 +5,92 @@ It allows user to easily navigate through files and symbols in the whole workspa
 
 It is the alternative for "Go to Symbol in Workspace..." - fully customizable.
 
-<br/>
-Brand new version - rewritten from scratch to be more flexible and smoother.
+
+Version 2.0.0 - rewritten with several fancy new features.
 
 ## How it works
 
-After initialization the extension indexes the whole workspace. It scans both files and all symbols for each file according to set up patterns in settings.
+The extension indexes the whole workspace. It scans both files and all symbols for each file according to set up patterns in settings. The scan can be initialized automatically on startup of Visual Studio Code or postponed till the first launch of extension.
 
-After that, it listens for any change in the workplace, e.g.
+After the scan is completed, the extension listens for any change in the workplace, e.g.
 
 * add, rename, delete function, variable or anything other in file
 * add, rename, delete, move a file between directories or even between projects in the opened workspace
 
 The above guarantees that the data is always up to date.
 
-<br/>
+
 Worth mentioning is the optimization of scanning algorithm. It queues every change and reduces not necessary actions to assure the scan is smooth and very quick.
 
-<br/>
-<br/>
+Additionally from version 2.0.0 there is a feature to scan the workspace only once and cache the results. Useful especially with the bigger projects.
+
+
+
 
 ![How it works](img/how-it-works.gif)
 
 ## Features
 
-Init on startup or first call
+* Init on startup or first call
 
-Notification placeholder
+* Notification placeholder
 
-toast
-    <br/>
-![Notification in toast](img/notification-toast.gif)
-    <br/>
+  toast
 
-status bar
-    <br/>
-![Notification in status bar](img/notification-status-bar.gif)
-    <br/>
-    <br/>
+  ![Notification in toast](img/notification-toast.gif)
 
-Debounce of search results while filtering
+  status bar
 
-enabled
-    <br/>
-![Debounce enabled](img/debounce-on.gif)
-    <br/>
+  ![Notification in status bar](img/notification-status-bar.gif)
 
-disabled
-    <br/>
-![Debounce disabled](img/debounce-off.gif)
-    <br/>
 
-Highlight of selected symbol
 
-enabled
-    <br/>
-![Highlight enabled](img/highlight-on.gif)
-    <br/>
+* Debounce of search results while filtering
 
-disabled
-    <br/>
-![Highlight disabled](img/highlight-off.gif)
-    <br/>
+  enabled
 
-Customizable icon for each item type
+  ![Debounce enabled](img/debounce-on.gif)
 
-Customizable filter phrase for each item type
-![Filter phrase](img/filter-phrases.gif)
-  <br/>
 
-Customizable items filter to reduce items set
+  disabled
 
-Customizable help phrase
+  ![Debounce disabled](img/debounce-off.gif)
 
-Customizable exclude patterns
 
-Customizable include pattern
+* Highlight of selected symbol
 
-Ability to decide whether use extension exclude patterns or "Files: Exclude" and "Search: Exclude" patterns
+  enabled
+
+  ![Highlight enabled](img/highlight-on.gif)
+
+
+  disabled
+
+  ![Highlight disabled](img/highlight-off.gif)
+
+* Customizable icon for each item type
+
+* Customizable filter phrase for each item type
+
+  ![Filter phrase](img/filter-phrases.gif)
+
+* Customizable items filter to reduce items set
+
+* Customizable help phrase
+
+* Customizable exclude patterns
+
+* Customizable include pattern
+
+* Ability to decide whether use extension exclude patterns or "Files: Exclude" and "Search: Exclude" patterns
+
+* Item icon to open it to the side
+
+* Dedicated output with logs related to triggered actions, scanned directories structure, etc.
+
+* Ability to decide whether the items should be sorted by type
+
+* Ability to cache the scanned workspaceData to as a result scan the workspace only once
 
 ## Commands
 
@@ -209,6 +217,11 @@ Default value:
 A phrase which should invoke help.
 Default value: `?`
 
+* `searchEverywhere.shouldItemsBeSorted`
+
+Ability to decide wheather items should be sorted by type.
+Default value: `true`
+
 * `searchEverywhere.exclude`
 
 An array of globs. Any file matching these globs will be excluded from indexing.
@@ -251,6 +264,11 @@ Default value:
 
 Ability to choose which exclude option should be applied. If gitignore file is not found or is empty, the extension option is used as a fallback. Available options: `search everywhere`, `files and search`, `gitignore`. To see the changes from the updated gitignore file after indexing, the reload must be done.
 Default value: `search everywhere`.
+
+* `searchEverywhere.shouldWorkspaceDataBeCached`
+
+Ability to decide if the workspace should be indexed only once. Each next startup of Visual Studio Code will collect data from cache.
+Default value: `true`
 
 ## Release Notes
 

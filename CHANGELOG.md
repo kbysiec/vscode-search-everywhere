@@ -2,6 +2,15 @@
 
 All notable changes to the "vscode-search-everywhere" extension will be documented in this file.
 
+## [2.0.0] - 2022-09-07
+- Fully rewritten from class based to function based approach
+- Test improvements
+- Minimum version of vscode set to 1.64.0
+- Feat: item icon to open it to the side
+- Feat: dedicated output with logs related to triggered actions, scanned directories structure, etc.
+- Feat: ability to decide whether the items should be sorted by type
+- Feat: ability to cache the scanned workspaceData to as a result scan the workspace only once
+
 ## [1.2.2] - 2022-02-18
 - Fixed issue related to not refreshing include patterns on configuration change
 

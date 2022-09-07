@@ -1,8 +1,8 @@
 {
   "name": "vscode-search-everywhere",
   "displayName": "Search everywhere",
-  "description": "Alternative for 'Go to symbol in workspace'. Fast and customizable files, symbols search engine",
-  "version": "1.2.2",
+  "description": "Fast and customizable files, symbols search engine. An alternative for 'Go to symbol in workspace' built-in feature.",
+  "version": "2.0.0",
   "preview": false,
   "publisher": "kbysiec",
   "author": {
@@ -116,7 +116,7 @@
         "searchEverywhere.shouldItemsBeSorted": {
           "type": "boolean",
           "default": true,
-          "description": "Ability to decide wheather items should be sorted."
+          "description": "Ability to decide wheather items should be sorted by type."
         },
         "searchEverywhere.exclude": {
           "type": "array",
@@ -162,7 +162,7 @@
         "searchEverywhere.shouldWorkspaceDataBeCached": {
           "type": "boolean",
           "default": true,
-          "description": "Should the workspace be indexed only once. Each next startup of Visual Studio Code will collect data from cache."
+          "description": "Ability to decide if the workspace should be indexed only once. Each next startup of Visual Studio Code will collect data from cache."
         }
       }
     },
