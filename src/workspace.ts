@@ -250,7 +250,21 @@ function registerEventListeners(): void {
 }
 
 function getData(): QuickPickItem[] {
-  return common.getData();
+  const data = common.getData();
+  reinitQpItemsButton(data);
+  return data;
+}
+
+function reinitQpItemsButton(data: QuickPickItem[]) {
+  data.forEach(
+    (item) =>
+      (item.buttons = [
+        {
+          iconPath: new vscode.ThemeIcon("open-preview"),
+          tooltip: "Open to the side",
+        },
+      ])
+  );
 }
 
 function addNotSavedUri(uri: vscode.Uri) {

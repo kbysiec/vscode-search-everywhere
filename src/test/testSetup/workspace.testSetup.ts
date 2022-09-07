@@ -200,7 +200,7 @@ export const getTestSetups = () => {
           {
             object: common,
             method: "getData",
-            returns: Promise.resolve(getItems()),
+            returns: getItems(),
           },
         ],
         sandbox
