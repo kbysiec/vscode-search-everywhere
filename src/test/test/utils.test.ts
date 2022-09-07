@@ -307,17 +307,17 @@ describe("Utils", () => {
   describe("normalizeUriPath", () => {
     it("1: should return uri path without workspace part if workspace has more than one folder", () => {
       const { item, qpItem } = setups.normalizeUriPath1();
-      assert.equal(utils.normalizeUriPath(item.fsPath), qpItem.uri.fsPath);
+      assert.equal(utils.normalizeUriPath(item.path), qpItem.uri.path);
     });
 
     it("2: should return uri path without workspace part if workspace has only one folder", () => {
       const { item, qpItem } = setups.normalizeUriPath2();
-      assert.equal(utils.normalizeUriPath(item.fsPath), qpItem.uri.fsPath);
+      assert.equal(utils.normalizeUriPath(item.path), qpItem.uri.path);
     });
 
     it("3: should return uri path with workspace part if workspace doesn't have any folder", () => {
       const { item, qpItem } = setups.normalizeUriPath3();
-      assert.equal(utils.normalizeUriPath(item.fsPath), qpItem.uri.fsPath);
+      assert.equal(utils.normalizeUriPath(item.path), qpItem.uri.path);
     });
   });
 

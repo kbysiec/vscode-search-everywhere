@@ -73,7 +73,7 @@ async function openItem(
   viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active
 ): Promise<void> {
   const uriOrFileName =
-    qpItem.uri!.scheme === "file" ? qpItem.uri!.fsPath : qpItem.uri;
+    qpItem.uri!.scheme === "file" ? qpItem.uri!.path : qpItem.uri;
   const document =
     uriOrFileName instanceof vscode.Uri
       ? await vscode.workspace.openTextDocument(uriOrFileName)

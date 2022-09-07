@@ -36,8 +36,8 @@ export const getQpItem = (
     },
   };
   const qpItemAny = qpItem as any;
-  qpItemAny.uri._fsPath = qpItemAny.uri.fsPath;
-  qpItemAny.detail = qpItemAny.uri.fsPath;
+  qpItemAny.uri._fsPath = qpItemAny.uri.path;
+  qpItemAny.detail = qpItemAny.uri.path;
 
   return qpItem;
 };
@@ -96,8 +96,8 @@ export const getQpItemsSymbolAndUri = (
   ];
 
   qpItemsSymbolAndUri.forEach((qpItem: any) => {
-    qpItem.uri._fsPath = qpItem.uri.fsPath;
-    qpItem.detail = qpItem.uri.fsPath;
+    qpItem.uri._fsPath = qpItem.uri.path;
+    qpItem.detail = qpItem.uri.path;
   });
 
   return qpItemsSymbolAndUri;
@@ -132,8 +132,8 @@ export const getQpItemsSymbolAndUriExt = (
   ];
 
   qpItemsSymbolAndUriExt.forEach((qpItem: any) => {
-    qpItem.uri._fsPath = qpItem.uri.fsPath;
-    qpItem.detail = qpItem.uri.fsPath;
+    qpItem.uri._fsPath = qpItem.uri.path;
+    qpItem.detail = qpItem.uri.path;
   });
 
   return qpItemsSymbolAndUriExt;
@@ -162,8 +162,8 @@ export const getQpItemDocumentSymbolSingleLine = (
   } as QuickPickItem;
 
   const qpItemAny = qpItem as any;
-  qpItemAny.uri._fsPath = qpItemAny.uri.fsPath;
-  qpItemAny.detail = qpItemAny.uri.fsPath;
+  qpItemAny.uri._fsPath = qpItemAny.uri.path;
+  qpItemAny.detail = qpItemAny.uri.path;
   return qpItem;
 };
 
@@ -182,8 +182,8 @@ export const getDocumentSymbolQpItemMultiLine = (
     },
   };
   const qpItemAny = qpItem as any;
-  qpItemAny.uri._fsPath = qpItemAny.uri.fsPath;
-  qpItemAny.detail = qpItemAny.uri.fsPath;
+  qpItemAny.uri._fsPath = qpItemAny.uri.path;
+  qpItemAny.detail = qpItemAny.uri.path;
 
   return qpItem;
 };

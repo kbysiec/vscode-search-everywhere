@@ -39,7 +39,7 @@ async function getGitignoreFile(): Promise<vscode.Uri | null> {
 }
 
 async function getGitignoreFileText(uri: vscode.Uri): Promise<string> {
-  const document = await vscode.workspace.openTextDocument(uri.fsPath);
+  const document = await vscode.workspace.openTextDocument(uri.path);
   return document.getText();
 }
 

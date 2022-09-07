@@ -97,7 +97,7 @@ export const getWorkspaceData = (items: Item[] = []): WorkspaceData => {
   let count = 0;
   const itemsMap = new Map<string, Item>();
   items.forEach((item: Item) => {
-    itemsMap.set(item.uri.fsPath, {
+    itemsMap.set(item.uri.path, {
       uri: item.uri,
       elements: item.elements,
     });

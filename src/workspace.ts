@@ -255,13 +255,13 @@ function getData(): QuickPickItem[] {
 
 function addNotSavedUri(uri: vscode.Uri) {
   const notSavedUris = workspace.getNotSavedUris();
-  notSavedUris.add(uri.fsPath);
+  notSavedUris.add(uri.path);
   updateNotSavedUriPaths(Array.from(notSavedUris));
 }
 
 function removeFromNotSavedUri(uri: vscode.Uri) {
   const notSavedUris = workspace.getNotSavedUris();
-  notSavedUris.delete(uri.fsPath);
+  notSavedUris.delete(uri.path);
   updateNotSavedUriPaths(Array.from(notSavedUris));
 }
 

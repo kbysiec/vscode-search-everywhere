@@ -16,7 +16,7 @@ export const getItem = (
   fixPrivateFsPathProperty: boolean = false
 ): vscode.Uri => {
   const item = vscode.Uri.file(`${path}fake-${suffix ? `${suffix}` : ""}.ts`);
-  fixPrivateFsPathProperty && ((item as any)._fsPath = item.fsPath);
+  fixPrivateFsPathProperty && ((item as any)._fsPath = item.path);
   return item;
 };
 

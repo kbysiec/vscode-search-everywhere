@@ -70,7 +70,7 @@ function addSymbolsForUriToWorkspaceData(
 ) {
   symbolsForUri &&
     symbolsForUri.length &&
-    workspaceData.items.set(uri.fsPath, {
+    workspaceData.items.set(uri.path, {
       uri,
       elements: symbolsForUri,
     });
@@ -91,7 +91,7 @@ function includeUris(workspaceData: WorkspaceData, uris: vscode.Uri[]): void {
 }
 
 function addUriToWorkspaceData(workspaceData: WorkspaceData, uri: vscode.Uri) {
-  const item = workspaceData.items.get(uri.fsPath);
+  const item = workspaceData.items.get(uri.path);
   if (item) {
     !ifUriExistsInArray(item.elements, uri) &&
       addUriToExistingArrayOfElements(workspaceData, uri, item);
@@ -113,7 +113,7 @@ function createItemWithArrayOfElementsForUri(
   workspaceData: WorkspaceData,
   uri: vscode.Uri
 ) {
-  workspaceData.items.set(uri.fsPath, {
+  workspaceData.items.set(uri.path, {
     uri,
     elements: [uri],
   });
@@ -127,7 +127,7 @@ function ifUriExistsInArray(
   return array.some((uriInArray: vscode.Uri | vscode.DocumentSymbol) => {
     if (!uriInArray.hasOwnProperty("range")) {
       uriInArray = uriInArray as vscode.Uri;
-      return uriInArray.fsPath === uri.fsPath;
+      return uriInArray.path === uri.path;
     }
     return false;
   });
@@ -276,9 +276,7 @@ async function fetchData(uris?: vscode.Uri[]): Promise<WorkspaceData> {
 
 async function isUriExistingInWorkspace(uri: vscode.Uri): Promise<boolean> {
   const uris = await dataService.fetchUris();
-  return uris.some(
-    (existingUri: vscode.Uri) => existingUri.fsPath === uri.fsPath
-  );
+  return uris.some((existingUri: vscode.Uri) => existingUri.path === uri.path);
 }
 
 async function fetchConfig() {

@@ -107,7 +107,7 @@ function ifActionArrayContainsRebuildType(actions: Action[]): boolean {
 function reduceUpdateRemoveAction(actionType: ActionType, actions: Action[]) {
   const groupedActions = utils.groupBy(
     actions,
-    (action: Action) => action.uri!.fsPath
+    (action: Action) => action.uri!.path
   );
 
   groupedActions.forEach(reduceByFsPath.bind(null, actionType));
@@ -121,7 +121,7 @@ function reduceByFsPath(
   const lastAction: Action = utils.getLastFromArray(
     actionProcessor.queue,
     (action: Action) =>
-      action.type === actionType && action.uri!.fsPath === fsPath
+      action.type === actionType && action.uri!.path === fsPath
   );
 
   actionProcessor.queue = actionProcessor.queue.filter(
@@ -137,7 +137,7 @@ function shouldActionRemainInQueue(
 ) {
   return (
     action.type !== actionType ||
-    action.uri!.fsPath !== fsPath ||
+    action.uri!.path !== fsPath ||
     action.id === lastAction.id
   );
 }

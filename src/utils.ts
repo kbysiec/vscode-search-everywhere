@@ -5,7 +5,7 @@ function getWorkspaceFoldersPaths(): string[] {
   return (
     (vscode.workspace.workspaceFolders &&
       vscode.workspace.workspaceFolders.map(
-        (wf: vscode.WorkspaceFolder) => wf.uri.fsPath
+        (wf: vscode.WorkspaceFolder) => wf.uri.path
       )) ||
     []
   );
@@ -101,7 +101,7 @@ function getUrisForDirectoryPathUpdate(
   return data
     .filter(
       (qpItem: QuickPickItem) =>
-        qpItem.uri.fsPath.includes(uri.fsPath) && qpItem.symbolKind === fileKind
+        qpItem.uri.path.includes(uri.path) && qpItem.symbolKind === fileKind
     )
     .map((qpItem: QuickPickItem) => qpItem.uri);
 }
@@ -156,24 +156,24 @@ function updateQpItemsWithNewDirectoryPath(
   newDirectoryUri: vscode.Uri
 ): QuickPickItem[] {
   const normalizedOldDirectoryUriPath = utils.normalizeUriPath(
-    oldDirectoryUri.fsPath
+    oldDirectoryUri.path
   );
   let normalizedNewDirectoryUriPath = utils.normalizeUriPath(
-    newDirectoryUri.fsPath
+    newDirectoryUri.path
   );
 
   return data.map((qpItem: QuickPickItem) => {
-    if (qpItem.uri.fsPath.includes(oldDirectoryUri.fsPath)) {
+    if (qpItem.uri.path.includes(oldDirectoryUri.path)) {
       qpItem.detail = qpItem.detail!.replace(
         normalizedOldDirectoryUriPath,
         normalizedNewDirectoryUriPath
       );
-      const newUriPath = qpItem.uri.fsPath.replace(
+      const newUriPath = qpItem.uri.path.replace(
         normalizedOldDirectoryUriPath,
         normalizedNewDirectoryUriPath
       );
       qpItem.uri = vscode.Uri.file(newUriPath);
-      (qpItem.uri as any)._fsPath = qpItem.uri.fsPath;
+      (qpItem.uri as any)._fsPath = qpItem.uri.path;
     }
     return qpItem;
   });

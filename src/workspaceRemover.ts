@@ -4,14 +4,12 @@ import { DetailedActionType, QuickPickItem } from "./types";
 import { workspaceCommon as common } from "./workspaceCommon";
 
 function removeUri(data: QuickPickItem[], uri: vscode.Uri): QuickPickItem[] {
-  return data.filter(
-    (qpItem: QuickPickItem) => qpItem.uri.fsPath !== uri.fsPath
-  );
+  return data.filter((qpItem: QuickPickItem) => qpItem.uri.path !== uri.path);
 }
 
 function removeFolder(data: QuickPickItem[], uri: vscode.Uri) {
   return data.filter((qpItem: QuickPickItem) => {
-    return !qpItem.uri.fsPath.includes(uri.fsPath);
+    return !qpItem.uri.path.includes(uri.path);
   });
 }
 

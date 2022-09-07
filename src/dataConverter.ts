@@ -128,7 +128,7 @@ function createQuickPickItem(
       end,
     },
     label,
-    detail: utils.normalizeUriPath(uri.fsPath),
+    detail: utils.normalizeUriPath(uri.path),
     description,
     buttons: [
       {

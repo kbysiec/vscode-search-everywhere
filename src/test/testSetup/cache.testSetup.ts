@@ -82,7 +82,7 @@ export const getTestSetups = () => {
     },
     getNotSavedUriPaths1: () => {
       const items = getItems();
-      const paths = items.map((item) => item.fsPath);
+      const paths = items.map((item) => item.path);
 
       stubMultiple(
         [
