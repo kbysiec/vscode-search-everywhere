@@ -60,6 +60,10 @@ const keys = {
     name: "excludeMode",
     value: ExcludeMode.SearchEverywhere,
   },
+  shouldWorkspaceDataBeCached: {
+    name: "shouldWorkspaceDataBeCached",
+    value: true,
+  },
 };
 
 function getConfigurationByKey<T>(
@@ -169,4 +173,11 @@ export function fetchFilesAndSearchExclude(): string[] {
 
 export function fetchExcludeMode(): ExcludeMode {
   return get(keys.excludeMode.name, keys.excludeMode.value);
+}
+
+export function fetchShouldWorkspaceDataBeCached(): boolean {
+  return get(
+    keys.shouldWorkspaceDataBeCached.name,
+    keys.shouldWorkspaceDataBeCached.value
+  );
 }

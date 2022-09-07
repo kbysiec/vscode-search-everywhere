@@ -25,6 +25,7 @@ export function removeFromCacheByPath(
     [DetailedActionType.RenameOrMoveFile]: removeUri.bind(null, data, uri),
     [DetailedActionType.RemoveFile]: removeUri.bind(null, data, uri),
     [DetailedActionType.TextChange]: removeUri.bind(null, data, uri),
+    [DetailedActionType.ReloadUnsavedUri]: removeUri.bind(null, data, uri),
     [DetailedActionType.RemoveDirectory]: removeFolder.bind(null, data, uri),
     [DetailedActionType.RenameOrMoveDirectory]: removeFolder.bind(
       null,

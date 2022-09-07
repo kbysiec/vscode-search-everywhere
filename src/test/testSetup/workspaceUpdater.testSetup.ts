@@ -120,5 +120,26 @@ export const getTestSetups = () => {
         sandbox
       );
     },
+    updateCacheByPath6: () => {
+      return stubMultiple(
+        [
+          {
+            object: cache,
+            method: "updateData",
+          },
+          {
+            object: common,
+            method: "downloadData",
+            returns: Promise.resolve(getQpItemsSymbolAndUri("./fake-new/")),
+          },
+          {
+            object: common,
+            method: "getData",
+            returns: [],
+          },
+        ],
+        sandbox
+      );
+    },
   };
 };

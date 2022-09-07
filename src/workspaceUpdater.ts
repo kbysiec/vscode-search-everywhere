@@ -35,6 +35,7 @@ export async function updateCacheByPath(
       [DetailedActionType.CreateNewFile]: updateUri.bind(null, uri),
       [DetailedActionType.RenameOrMoveFile]: updateUri.bind(null, uri),
       [DetailedActionType.TextChange]: updateUri.bind(null, uri),
+      [DetailedActionType.ReloadUnsavedUri]: updateUri.bind(null, uri),
       [DetailedActionType.RenameOrMoveDirectory]: updateFolder.bind(
         null,
         uri,

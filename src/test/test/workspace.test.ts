@@ -11,6 +11,7 @@ import {
   getWorkspaceFoldersChangeEvent,
 } from "../util/eventMockFactory";
 import { getAction } from "../util/mockFactory";
+import { getTextDocumentStub } from "../util/stubFactory";
 
 type SetupsType = ReturnType<typeof getTestSetups>;
 
@@ -52,6 +53,29 @@ describe("Workspace", () => {
 
       assert.equal(indexStub.calledOnce, true);
     });
+
+    it("1: should cache.clear method be invoked", async () => {
+      const [clearStub] = setups.index2();
+      await workspace.index(ActionTrigger.Search);
+
+      assert.equal(clearStub.calledOnce, true);
+    });
+  });
+
+  describe("removeDataForUnsavedUris", () => {
+    it("1: should common.registerAction be invoked twice for each unsaved uri", async () => {
+      const [registerActionStub] = setups.removeDataForUnsavedUris1();
+      await workspace.removeDataForUnsavedUris();
+
+      assert.equal(registerActionStub.callCount, 4);
+    });
+
+    it("2: should clear array of unsaved uris", async () => {
+      setups.removeDataForUnsavedUris2();
+      await workspace.removeDataForUnsavedUris();
+
+      assert.equal(workspace.getNotSavedUris().size, 0);
+    });
   });
 
   describe("registerEventListeners", () => {
@@ -60,6 +84,7 @@ describe("Workspace", () => {
         onDidChangeConfigurationStub,
         onDidChangeWorkspaceFoldersStub,
         onDidChangeTextDocumentStub,
+        onDidSaveTextDocumentStub,
         onWillProcessingStub,
         onDidProcessingStub,
         onWillExecuteActionStub,
@@ -70,6 +95,7 @@ describe("Workspace", () => {
       assert.equal(onDidChangeConfigurationStub.calledOnce, true);
       assert.equal(onDidChangeWorkspaceFoldersStub.calledOnce, true);
       assert.equal(onDidChangeTextDocumentStub.calledOnce, true);
+      assert.equal(onDidSaveTextDocumentStub.calledOnce, true);
       assert.equal(onWillProcessingStub.calledOnce, true);
       assert.equal(onDidProcessingStub.calledOnce, true);
       assert.equal(onWillExecuteActionStub.calledOnce, true);
@@ -254,6 +280,14 @@ describe("Workspace", () => {
 
       assert.equal(registerActionStub.calledOnce, false);
     });
+
+    it(`4: should add uri to not saved array if text document has changed and exists in workspace`, async () => {
+      setups.handleDidChangeTextDocument4();
+      const textDocumentChangeEvent = getTextDocumentChangeEvent(true);
+      await workspace.handleDidChangeTextDocument(textDocumentChangeEvent);
+
+      assert.equal(workspace.getNotSavedUris().size, 1);
+    });
   });
 
   describe("handleDidRenameFiles", () => {
@@ -299,6 +333,13 @@ describe("Workspace", () => {
       assert.equal(registerActionStub.calledOnce, true);
       assert.equal(registerActionStub.args[0][0], ActionType.Update);
     });
+
+    it(`4: should add uri to not saved array`, async () => {
+      setups.handleDidCreateFiles3();
+      await workspace.handleDidCreateFiles(getFileCreateEvent());
+
+      assert.equal(workspace.getNotSavedUris().size, 1);
+    });
   });
 
   describe("handleDidDeleteFiles", () => {
@@ -318,6 +359,17 @@ describe("Workspace", () => {
 
       assert.equal(registerActionStub.calledOnce, true);
       assert.equal(registerActionStub.args[0][0], ActionType.Remove);
+    });
+  });
+
+  describe("handleDidSaveTextDocument", () => {
+    it(`should remove uri from not saved array`, async () => {
+      setups.handleDidSaveTextDocument1();
+      await workspace.handleDidSaveTextDocument(
+        getTextDocumentStub(undefined, "/test/path2")
+      );
+
+      assert.equal(workspace.getNotSavedUris().size, 2);
     });
   });
 

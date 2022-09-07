@@ -85,6 +85,76 @@ export const getTestSetups = () => {
             object: common,
             method: "index",
           },
+          {
+            object: cache,
+            method: "clear",
+          },
+        ],
+        sandbox
+      );
+    },
+    index2: () => {
+      return stubMultiple(
+        [
+          {
+            object: common,
+            method: "index",
+          },
+          {
+            object: cache,
+            method: "clear",
+          },
+        ],
+        sandbox
+      );
+    },
+    removeDataForUnsavedUris1: () => {
+      let notSavedUris: string[] = ["/test/path1", "/test/path2"];
+
+      return stubMultiple(
+        [
+          {
+            object: common,
+            method: "registerAction",
+          },
+          {
+            object: cache,
+            method: "getNotSavedUriPaths",
+            callsFake: () => notSavedUris,
+          },
+          {
+            object: cache,
+            method: "updateNotSavedUriPaths",
+            callsFake: (paths: string[]) => (notSavedUris = paths),
+          },
+        ],
+        sandbox
+      );
+    },
+    removeDataForUnsavedUris2: () => {
+      let notSavedUris: string[] = ["/test/path1", "/test/path2"];
+
+      stubMultiple(
+        [
+          {
+            object: common,
+            method: "registerAction",
+          },
+          {
+            object: cache,
+            method: "getNotSavedUriPaths",
+            callsFake: () => notSavedUris,
+          },
+          {
+            object: cache,
+            method: "updateNotSavedUriPaths",
+            callsFake: (paths: string[]) => (notSavedUris = paths),
+          },
+          {
+            object: cache,
+            method: "clearNotSavedUriPaths",
+            callsFake: () => (notSavedUris = []),
+          },
         ],
         sandbox
       );
@@ -103,6 +173,10 @@ export const getTestSetups = () => {
           {
             object: vscode.workspace,
             method: "onDidChangeTextDocument",
+          },
+          {
+            object: vscode.workspace,
+            method: "onDidSaveTextDocument",
           },
           {
             object: actionProcessorEventsEmitter,
@@ -391,6 +465,34 @@ export const getTestSetups = () => {
         sandbox
       );
     },
+    handleDidChangeTextDocument4: () => {
+      let notSavedUris: string[] = [];
+
+      stubMultiple(
+        [
+          {
+            object: cache,
+            method: "getNotSavedUriPaths",
+            callsFake: () => notSavedUris,
+          },
+          {
+            object: cache,
+            method: "updateNotSavedUriPaths",
+            callsFake: (paths: string[]) => (notSavedUris = paths),
+          },
+          {
+            object: common,
+            method: "registerAction",
+          },
+          {
+            object: dataService,
+            method: "isUriExistingInWorkspace",
+            returns: Promise.resolve(true),
+          },
+        ],
+        sandbox
+      );
+    },
     handleDidRenameFiles1: () => {
       return stubMultiple(
         [
@@ -455,6 +557,34 @@ export const getTestSetups = () => {
         sandbox
       );
     },
+    handleDidCreateFiles3: () => {
+      let notSavedUris: string[] = [];
+
+      return stubMultiple(
+        [
+          {
+            object: cache,
+            method: "getNotSavedUriPaths",
+            callsFake: () => notSavedUris,
+          },
+          {
+            object: cache,
+            method: "updateNotSavedUriPaths",
+            callsFake: (paths: string[]) => (notSavedUris = paths),
+          },
+          {
+            object: common,
+            method: "registerAction",
+          },
+          {
+            object: utils,
+            method: "isDirectory",
+            returns: true,
+          },
+        ],
+        sandbox
+      );
+    },
     handleDidDeleteFiles1: () => {
       return stubMultiple(
         [
@@ -482,6 +612,29 @@ export const getTestSetups = () => {
             object: utils,
             method: "isDirectory",
             returns: true,
+          },
+        ],
+        sandbox
+      );
+    },
+    handleDidSaveTextDocument1: () => {
+      let notSavedUris: string[] = [
+        "/test/path1",
+        "/test/path2",
+        "/test/path3",
+      ];
+
+      return stubMultiple(
+        [
+          {
+            object: cache,
+            method: "getNotSavedUriPaths",
+            callsFake: () => notSavedUris,
+          },
+          {
+            object: cache,
+            method: "updateNotSavedUriPaths",
+            callsFake: (paths: string[]) => (notSavedUris = paths),
           },
         ],
         sandbox

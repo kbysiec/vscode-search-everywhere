@@ -72,5 +72,18 @@ describe("WorkspaceUpdater", () => {
       assert.equal(updateDataStub.calledOnce, true);
       assert.deepEqual(updateDataStub.args[0][0], getQpItems(2, "./fake-new/"));
     });
+
+    it(`6: should update data for given uri when file is reloaded if it is unsaved`, async () => {
+      const [updateDataStub] = setups.updateCacheByPath6();
+      await workspaceUpdater.updateCacheByPath(
+        getItem(),
+        DetailedActionType.ReloadUnsavedUri
+      );
+      assert.equal(updateDataStub.calledOnce, true);
+      assert.deepEqual(
+        updateDataStub.args[0][0],
+        getQpItemsSymbolAndUriExt("./fake-new/")
+      );
+    });
   });
 });

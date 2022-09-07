@@ -1,6 +1,9 @@
 import * as vscode from "vscode";
-import { initCache } from "./cache";
-import { fetchShouldInitOnStartup } from "./config";
+import { clear, clearConfig, clearNotSavedUriPaths, initCache } from "./cache";
+import {
+  fetchShouldInitOnStartup,
+  fetchShouldWorkspaceDataBeCached,
+} from "./config";
 import { logger } from "./logger";
 import { quickPick } from "./quickPick";
 import { Action, ActionTrigger, ActionType } from "./types";
@@ -19,9 +22,8 @@ function loadItemsAndShowQuickPick() {
   quickPick.loadItems();
   quickPick.show();
 }
-
-async function setQuickPickData(): Promise<void> {
-  const data = await workspace.getData();
+function setQuickPickData() {
+  const data = workspace.getData();
   quickPick.setItems(data);
 }
 
@@ -40,8 +42,73 @@ function setQuickPickPlaceholder(isBusy: boolean) {
   quickPick.setPlaceholder(isBusy);
 }
 
+function isDataEmpty() {
+  const data = workspace.getData();
+  return !data.length;
+}
+
 function shouldIndexOnQuickPickOpen() {
-  return !fetchShouldInitOnStartup() && !quickPick.isInitialized();
+  return (
+    controller.isInitOnStartupDisabledAndWorkspaceCachingDisabled() ||
+    controller.isInitOnStartupDisabledAndWorkspaceCachingEnabledButDataIsEmpty()
+  );
+}
+
+function isInitOnStartupDisabledAndWorkspaceCachingDisabled() {
+  return (
+    !fetchShouldInitOnStartup() &&
+    !quickPick.isInitialized() &&
+    !fetchShouldWorkspaceDataBeCached()
+  );
+}
+
+function isInitOnStartupDisabledAndWorkspaceCachingEnabledButDataIsEmpty() {
+  return (
+    !fetchShouldInitOnStartup() &&
+    !quickPick.isInitialized() &&
+    fetchShouldWorkspaceDataBeCached() &&
+    isDataEmpty()
+  );
+}
+
+function shouldIndexOnStartup() {
+  return (
+    controller.isInitOnStartupEnabledAndWorkspaceCachingDisabled() ||
+    controller.isInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty()
+  );
+}
+
+function isInitOnStartupEnabledAndWorkspaceCachingDisabled() {
+  return (
+    fetchShouldInitOnStartup() &&
+    !quickPick.isInitialized() &&
+    !fetchShouldWorkspaceDataBeCached()
+  );
+}
+
+function isInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty() {
+  return (
+    fetchShouldInitOnStartup() &&
+    !quickPick.isInitialized() &&
+    fetchShouldWorkspaceDataBeCached() &&
+    isDataEmpty()
+  );
+}
+
+function shouldLoadDataFromCacheOnQuickPickOpen() {
+  return (
+    !fetchShouldInitOnStartup() &&
+    !quickPick.isInitialized() &&
+    fetchShouldWorkspaceDataBeCached()
+  );
+}
+
+function shouldLoadDataFromCacheOnStartup() {
+  return (
+    fetchShouldInitOnStartup() &&
+    !quickPick.isInitialized() &&
+    fetchShouldWorkspaceDataBeCached()
+  );
 }
 
 function handleWillProcessing() {
@@ -49,8 +116,8 @@ function handleWillProcessing() {
   !quickPick.isInitialized() && quickPick.init();
 }
 
-async function handleDidProcessing() {
-  await controller.setQuickPickData();
+function handleDidProcessing() {
+  controller.setQuickPickData();
 
   quickPick.loadItems();
   controller.setBusy(false);
@@ -81,23 +148,41 @@ function handleWillReindexOnConfigurationChange() {
 }
 
 async function search(): Promise<void> {
-  if (utils.hasWorkspaceAnyFolder()) {
-    controller.shouldIndexOnQuickPickOpen() &&
-      (await workspace.index(ActionTrigger.Search));
-    quickPick.isInitialized() && loadItemsAndShowQuickPick();
-  } else {
-    utils.printNoFolderOpenedMessage();
+  if (controller.shouldIndexOnQuickPickOpen()) {
+    clear();
+    await workspace.index(ActionTrigger.Search);
   }
+
+  if (controller.shouldLoadDataFromCacheOnQuickPickOpen()) {
+    clearConfig();
+    !quickPick.isInitialized() && quickPick.init();
+    await workspace.removeDataForUnsavedUris();
+    controller.setQuickPickData();
+  }
+
+  quickPick.isInitialized() && loadItemsAndShowQuickPick();
 }
 
 async function reload(): Promise<void> {
+  clear();
+  clearNotSavedUriPaths();
+
   utils.hasWorkspaceAnyFolder()
     ? await workspace.index(ActionTrigger.Reload)
     : utils.printNoFolderOpenedMessage();
 }
 
 async function startup(): Promise<void> {
-  fetchShouldInitOnStartup() && (await workspace.index(ActionTrigger.Startup));
+  if (controller.shouldIndexOnStartup()) {
+    await workspace.index(ActionTrigger.Startup);
+  }
+
+  if (controller.shouldLoadDataFromCacheOnStartup()) {
+    clearConfig();
+    !quickPick.isInitialized() && quickPick.init();
+    await workspace.removeDataForUnsavedUris();
+    controller.setQuickPickData();
+  }
 }
 
 let extensionContext: vscode.ExtensionContext;
@@ -131,6 +216,13 @@ async function init(newExtensionContext: vscode.ExtensionContext) {
 
 export const controller = {
   shouldIndexOnQuickPickOpen,
+  shouldLoadDataFromCacheOnQuickPickOpen,
+  shouldIndexOnStartup,
+  shouldLoadDataFromCacheOnStartup,
+  isInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty,
+  isInitOnStartupDisabledAndWorkspaceCachingEnabledButDataIsEmpty,
+  isInitOnStartupEnabledAndWorkspaceCachingDisabled,
+  isInitOnStartupDisabledAndWorkspaceCachingDisabled,
   setQuickPickData,
   setBusy,
   getExtensionContext,

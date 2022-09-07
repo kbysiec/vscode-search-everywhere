@@ -45,10 +45,11 @@ export function getTextEditorStub(
 }
 
 export function getTextDocumentStub(
-  isUntitled: boolean = true
+  isUntitled: boolean = true,
+  uriPath: string = "#"
 ): vscode.TextDocument {
   return {
-    uri: createStubInstance(vscode.Uri),
+    uri: vscode.Uri.file(uriPath),
     fileName: "",
     isUntitled,
     languageId: "",

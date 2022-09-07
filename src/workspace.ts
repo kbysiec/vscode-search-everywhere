@@ -4,7 +4,13 @@ import {
   onWillExecuteAction,
   onWillProcessing,
 } from "./actionProcessorEventsEmitter";
-import { clearConfig } from "./cache";
+import {
+  clear,
+  clearConfig,
+  clearNotSavedUriPaths as clearNotSavedUriPathsFromCache,
+  getNotSavedUriPaths as getNotSavedUriPathsFromCache,
+  updateNotSavedUriPaths,
+} from "./cache";
 import { fetchExcludeMode } from "./config";
 import { dataConverter } from "./dataConverter";
 import { dataService } from "./dataService";
@@ -70,6 +76,8 @@ async function handleDidChangeTextDocument(
   const actionType = DetailedActionType.TextChange;
 
   if (isUriExistingInWorkspace && hasContentChanged) {
+    workspace.addNotSavedUri(uri);
+
     await common.registerAction(
       ActionType.Remove,
       removeFromCacheByPath.bind(null, uri, actionType),
@@ -118,6 +126,8 @@ async function handleDidCreateFiles(event: vscode.FileCreateEvent) {
     ? DetailedActionType.CreateNewDirectory
     : DetailedActionType.CreateNewFile;
 
+  workspace.addNotSavedUri(uri);
+
   await common.registerAction(
     ActionType.Update,
     updateCacheByPath.bind(null, uri, actionType),
@@ -138,6 +148,10 @@ async function handleDidDeleteFiles(event: vscode.FileDeleteEvent) {
     ActionTrigger.DidDeleteFiles,
     uri
   );
+}
+
+function handleDidSaveTextDocument(textDocument: vscode.TextDocument) {
+  workspace.removeFromNotSavedUri(textDocument.uri);
 }
 
 function handleWillActionProcessorProcessing() {
@@ -162,6 +176,7 @@ function shouldReindexOnConfigurationChange(
     "shouldHighlightSymbol",
     "shouldUseDebounce",
     "shouldItemsBeSorted",
+    "shouldWorkspaceDataBeCached",
   ].map((config: string) => `${defaultSection}.${config}`);
 
   return (
@@ -181,7 +196,36 @@ async function init() {
 }
 
 async function index(indexActionType: ActionTrigger): Promise<void> {
+  clear();
   await common.index(indexActionType);
+}
+
+async function removeDataForUnsavedUris() {
+  const paths = Array.from(workspace.getNotSavedUris());
+  for (let i = 0; i < paths.length; i++) {
+    const path = paths[i];
+    const uri = vscode.Uri.file(path);
+
+    await common.registerAction(
+      ActionType.Remove,
+      removeFromCacheByPath.bind(
+        null,
+        uri,
+        DetailedActionType.ReloadUnsavedUri
+      ),
+      ActionTrigger.ReloadUnsavedUri,
+      uri
+    );
+
+    await common.registerAction(
+      ActionType.Update,
+      updateCacheByPath.bind(null, uri, DetailedActionType.ReloadUnsavedUri),
+      ActionTrigger.ReloadUnsavedUri,
+      uri
+    );
+  }
+
+  workspace.clearNotSavedUris();
 }
 
 function registerEventListeners(): void {
@@ -198,6 +242,8 @@ function registerEventListeners(): void {
   vscode.workspace.onDidCreateFiles(handleDidCreateFiles);
   vscode.workspace.onDidDeleteFiles(handleDidDeleteFiles);
 
+  vscode.workspace.onDidSaveTextDocument(handleDidSaveTextDocument);
+
   onDidProcessing(handleDidActionProcessorProcessing);
   onWillProcessing(handleWillActionProcessorProcessing);
   onWillExecuteAction(handleWillActionProcessorExecuteAction);
@@ -207,6 +253,27 @@ function getData(): QuickPickItem[] {
   return common.getData();
 }
 
+function addNotSavedUri(uri: vscode.Uri) {
+  const notSavedUris = workspace.getNotSavedUris();
+  notSavedUris.add(uri.fsPath);
+  updateNotSavedUriPaths(Array.from(notSavedUris));
+}
+
+function removeFromNotSavedUri(uri: vscode.Uri) {
+  const notSavedUris = workspace.getNotSavedUris();
+  notSavedUris.delete(uri.fsPath);
+  updateNotSavedUriPaths(Array.from(notSavedUris));
+}
+
+function getNotSavedUris() {
+  const array = getNotSavedUriPathsFromCache();
+  return new Set<string>(array);
+}
+
+function clearNotSavedUris() {
+  clearNotSavedUriPathsFromCache();
+}
+
 const defaultSection = "searchEverywhere";
 
 export const workspace = {
@@ -214,10 +281,16 @@ export const workspace = {
   index,
   registerEventListeners,
   getData,
+  getNotSavedUris,
+  addNotSavedUri,
+  removeFromNotSavedUri,
+  clearNotSavedUris,
+  removeDataForUnsavedUris,
   shouldReindexOnConfigurationChange,
   handleDidChangeConfiguration,
   handleDidChangeWorkspaceFolders,
   handleDidChangeTextDocument,
+  handleDidSaveTextDocument,
   handleDidRenameFiles,
   handleDidCreateFiles,
   handleDidDeleteFiles,

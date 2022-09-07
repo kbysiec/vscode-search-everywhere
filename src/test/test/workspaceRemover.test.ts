@@ -74,5 +74,18 @@ describe("WorkspaceRemover", () => {
       );
       assert.equal(updateDataStub.calledWith([]), true);
     });
+
+    it("6: should remove given uri when file is reloaded if it is unsaved", () => {
+      const [updateDataStub] = setups.removeFromCacheByPath6();
+
+      workspaceRemover.removeFromCacheByPath(
+        getItem(),
+        DetailedActionType.ReloadUnsavedUri
+      );
+      assert.equal(
+        updateDataStub.calledWith(getQpItems(1, undefined, 1)),
+        true
+      );
+    });
   });
 });

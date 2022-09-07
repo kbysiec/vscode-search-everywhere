@@ -159,4 +159,16 @@ describe("Config", () => {
       assert.equal(config.fetchExcludeMode(), configuration[section][key]);
     });
   });
+
+  describe("fetchShouldWorkspaceDataBeCached", () => {
+    it("1: should return boolean from configuration", () => {
+      const section = "searchEverywhere";
+      const key = "shouldWorkspaceDataBeCached";
+
+      assert.equal(
+        config.fetchShouldWorkspaceDataBeCached(),
+        configuration[section][key]
+      );
+    });
+  });
 });

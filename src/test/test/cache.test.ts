@@ -45,6 +45,18 @@ describe("Cache", () => {
     });
   });
 
+  describe("getNotSavedUriPaths", () => {
+    it("1: should return array of uri paths from cache", () => {
+      const paths = setups.getNotSavedUriPaths1();
+      assert.equal(cache.getNotSavedUriPaths(), paths);
+    });
+
+    it("2: should return empty array if cache is undefined", () => {
+      const paths = setups.getNotSavedUriPaths2();
+      assert.deepEqual(cache.getNotSavedUriPaths(), paths);
+    });
+  });
+
   describe("getConfigByKey", () => {
     it("1: should return config value from cache", () => {
       const key = setups.getConfigByKey1();
@@ -91,7 +103,7 @@ describe("Cache", () => {
   });
 
   describe("clear", () => {
-    it("1: should clearData and clearConfig methods be invoked", () => {
+    it("1: should clear data and config from cache", () => {
       const [updateStub] = setups.clear1();
       cache.clear();
       assert.equal(updateStub.calledTwice, true);
@@ -99,9 +111,17 @@ describe("Cache", () => {
   });
 
   describe("clearConfig", () => {
-    it("1: should clear config cache", () => {
+    it("1: should clear config from cache", () => {
       const [updateStub] = setups.clearConfig1();
       cache.clearConfig();
+      assert.equal(updateStub.calledOnce, true);
+    });
+  });
+
+  describe("clearNotSavedUriPaths", () => {
+    it("1: should clear not saved uri paths from cache", () => {
+      const [updateStub] = setups.clearNotSavedUriPaths1();
+      cache.clearNotSavedUriPaths();
       assert.equal(updateStub.calledOnce, true);
     });
   });

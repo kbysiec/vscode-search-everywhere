@@ -18,6 +18,18 @@ export function updateData(data: QuickPickItem[]): void {
   extensionContext.workspaceState.update(appConfig.dataCacheKey, data);
 }
 
+export function getNotSavedUriPaths(): string[] {
+  const paths: string[] | undefined = extensionContext.workspaceState.get(
+    appConfig.notSaveUriPathsKey
+  );
+
+  return paths || [];
+}
+
+export function updateNotSavedUriPaths(paths: string[]): void {
+  extensionContext.workspaceState.update(appConfig.notSaveUriPathsKey, paths);
+}
+
 export function getConfigByKey<T>(key: string): T | undefined {
   const cache: any = extensionContext.workspaceState.get(
     appConfig.configCacheKey
@@ -45,4 +57,8 @@ export function clearConfig(): void {
 
 function clearData(): void {
   extensionContext.workspaceState.update(appConfig.dataCacheKey, []);
+}
+
+export function clearNotSavedUriPaths(): void {
+  extensionContext.workspaceState.update(appConfig.notSaveUriPathsKey, []);
 }

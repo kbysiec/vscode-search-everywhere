@@ -1,7 +1,7 @@
 import { performance } from "perf_hooks";
 import * as vscode from "vscode";
 import { actionProcessor } from "./actionProcessor";
-import { clear, getData as getDataFromCache, updateData } from "./cache";
+import { getData as getDataFromCache, updateData } from "./cache";
 import { fetchShouldDisplayNotificationInStatusBar } from "./config";
 import { dataConverter } from "./dataConverter";
 import { dataService } from "./dataService";
@@ -109,7 +109,6 @@ function printStats(data: WorkspaceData, elapsedTime: number) {
 }
 
 async function indexWorkspace(): Promise<WorkspaceData> {
-  clear();
   const data = await dataService.fetchData();
   const qpData = dataConverter.convertToQpData(data);
   updateData(qpData);

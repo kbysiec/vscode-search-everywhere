@@ -10,6 +10,7 @@ export enum ActionTrigger {
   DidRenameFiles = "DidRenameFiles",
   DidCreateFiles = "DidCreateFiles",
   DidDeleteFiles = "DidDeleteFiles",
+  ReloadUnsavedUri = "ReloadUnsavedUri",
 }
 
 export enum ActionType {
@@ -26,6 +27,7 @@ export enum DetailedActionType {
   RemoveFile = "RemoveFile",
   RemoveDirectory = "RemoveDirectory",
   TextChange = "TextChange",
+  ReloadUnsavedUri = "ReloadUnsavedUri",
 }
 
 export enum ExcludeMode {

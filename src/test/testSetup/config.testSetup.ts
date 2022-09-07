@@ -7,14 +7,13 @@ import { stubMultiple } from "../util/stubHelpers";
 export const getTestSetups = () => {
   const configuration = getConfiguration();
   const sandbox = sinon.createSandbox();
-  let getConfigurationStub: sinon.SinonStub;
 
   return {
     before: () => {
       return configuration;
     },
     beforeEach: () => {
-      [getConfigurationStub] = stubMultiple(
+      stubMultiple(
         [
           {
             object: vscode.workspace,

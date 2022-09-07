@@ -91,5 +91,21 @@ export const getTestSetups = () => {
         sandbox
       );
     },
+    removeFromCacheByPath6: () => {
+      return stubMultiple(
+        [
+          {
+            object: cache,
+            method: "updateData",
+          },
+          {
+            object: common,
+            method: "getData",
+            returns: getQpItems(),
+          },
+        ],
+        sandbox
+      );
+    },
   };
 };

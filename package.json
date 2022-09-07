@@ -158,6 +158,11 @@
           ],
           "default": "search everywhere",
           "description": "Ability to choose which exclude option should be applied. If gitignore file is not found or is empty, the extension option is used as a fallback. To see the changes from the updated gitignore file after indexing, the reload must be done."
+        },
+        "searchEverywhere.shouldWorkspaceDataBeCached": {
+          "type": "boolean",
+          "default": true,
+          "description": "Should the workspace be indexed only once. Each next startup of Visual Studio Code will collect data from cache."
         }
       }
     },

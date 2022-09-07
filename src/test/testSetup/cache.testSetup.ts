@@ -1,6 +1,7 @@
 import * as sinon from "sinon";
 import { appConfig } from "../../appConfig";
 import * as mock from "../mock/cache.mock";
+import { getItems } from "../util/itemMockFactory";
 import { getExtensionContext } from "../util/mockFactory";
 import { getQpItems } from "../util/qpItemMockFactory";
 import { stubMultiple } from "../util/stubHelpers";
@@ -78,6 +79,37 @@ export const getTestSetups = () => {
         stubs,
         qpItems: getQpItems(),
       };
+    },
+    getNotSavedUriPaths1: () => {
+      const items = getItems();
+      const paths = items.map((item) => item.fsPath);
+
+      stubMultiple(
+        [
+          {
+            object: context.workspaceState,
+            method: "get",
+            returns: paths,
+          },
+        ],
+        sandbox
+      );
+
+      return paths;
+    },
+    getNotSavedUriPaths2: () => {
+      stubMultiple(
+        [
+          {
+            object: context.workspaceState,
+            method: "get",
+            returns: undefined,
+          },
+        ],
+        sandbox
+      );
+
+      return [];
     },
     getConfigByKey1: () => {
       const key = "searchEverywhere.exclude";
@@ -165,6 +197,17 @@ export const getTestSetups = () => {
       );
     },
     clearConfig1: () => {
+      return stubMultiple(
+        [
+          {
+            object: context.workspaceState,
+            method: "update",
+          },
+        ],
+        sandbox
+      );
+    },
+    clearNotSavedUriPaths1: () => {
       return stubMultiple(
         [
           {
