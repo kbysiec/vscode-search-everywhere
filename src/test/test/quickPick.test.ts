@@ -1,4 +1,5 @@
 import { assert } from "chai";
+import * as vscode from "vscode";
 import { quickPick } from "../../quickPick";
 import { getTestSetups } from "../testSetup/quickPick.testSetup";
 import {
@@ -134,6 +135,17 @@ describe("QuickPick", () => {
       quickPick.setItems(getQpItems());
 
       assert.equal(quickPick.getItems().length, 2);
+    });
+
+    it("2: should items have assigned buttons property", () => {
+      quickPick.setItems(getQpItems());
+
+      assert.deepEqual(quickPick.getItems()[0].buttons, [
+        {
+          iconPath: new vscode.ThemeIcon("open-preview"),
+          tooltip: "Open to the side",
+        },
+      ]);
     });
   });
 

@@ -90,12 +90,12 @@ export const mocks = {
           start: new vscode.Position(0, 0),
           end: new vscode.Position(0, 0),
         },
-        buttons: [
-          {
-            iconPath: new vscode.ThemeIcon("open-preview"),
-            tooltip: "Open to the side",
-          },
-        ],
+        // buttons: [
+        //   {
+        //     iconPath: new vscode.ThemeIcon("open-preview"),
+        //     tooltip: "Open to the side",
+        //   },
+        // ],
       },
       {
         label: "test name",
@@ -107,12 +107,12 @@ export const mocks = {
           start: new vscode.Position(0, 0),
           end: new vscode.Position(3, 0),
         },
-        buttons: [
-          {
-            iconPath: new vscode.ThemeIcon("open-preview"),
-            tooltip: "Open to the side",
-          },
-        ],
+        // buttons: [
+        //   {
+        //     iconPath: new vscode.ThemeIcon("open-preview"),
+        //     tooltip: "Open to the side",
+        //   },
+        // ],
       },
       {
         label: "test name 2",
@@ -124,12 +124,12 @@ export const mocks = {
           start: new vscode.Position(4, 0),
           end: new vscode.Position(5, 0),
         },
-        buttons: [
-          {
-            iconPath: new vscode.ThemeIcon("open-preview"),
-            tooltip: "Open to the side",
-          },
-        ],
+        // buttons: [
+        //   {
+        //     iconPath: new vscode.ThemeIcon("open-preview"),
+        //     tooltip: "Open to the side",
+        //   },
+        // ],
       },
       {
         label: "test name 3",
@@ -141,12 +141,12 @@ export const mocks = {
           start: new vscode.Position(9, 0),
           end: new vscode.Position(9, 0),
         },
-        buttons: [
-          {
-            iconPath: new vscode.ThemeIcon("open-preview"),
-            tooltip: "Open to the side",
-          },
-        ],
+        // buttons: [
+        //   {
+        //     iconPath: new vscode.ThemeIcon("open-preview"),
+        //     tooltip: "Open to the side",
+        //   },
+        // ],
       },
     ];
 
@@ -207,12 +207,12 @@ export const mocks = {
           start: new vscode.Position(0, 0),
           end: new vscode.Position(0, 0),
         },
-        buttons: [
-          {
-            iconPath: new vscode.ThemeIcon("open-preview"),
-            tooltip: "Open to the side",
-          },
-        ],
+        // buttons: [
+        //   {
+        //     iconPath: new vscode.ThemeIcon("open-preview"),
+        //     tooltip: "Open to the side",
+        //   },
+        // ],
       },
       {
         label: "$(another-fake-icon)  test name",
@@ -224,12 +224,12 @@ export const mocks = {
           start: new vscode.Position(0, 0),
           end: new vscode.Position(3, 0),
         },
-        buttons: [
-          {
-            iconPath: new vscode.ThemeIcon("open-preview"),
-            tooltip: "Open to the side",
-          },
-        ],
+        // buttons: [
+        //   {
+        //     iconPath: new vscode.ThemeIcon("open-preview"),
+        //     tooltip: "Open to the side",
+        //   },
+        // ],
       },
       {
         label: "$(another-fake-icon)  test name 2",
@@ -241,12 +241,12 @@ export const mocks = {
           start: new vscode.Position(4, 0),
           end: new vscode.Position(5, 0),
         },
-        buttons: [
-          {
-            iconPath: new vscode.ThemeIcon("open-preview"),
-            tooltip: "Open to the side",
-          },
-        ],
+        // buttons: [
+        //   {
+        //     iconPath: new vscode.ThemeIcon("open-preview"),
+        //     tooltip: "Open to the side",
+        //   },
+        // ],
       },
     ];
 
