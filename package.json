@@ -2,7 +2,7 @@
   "name": "vscode-search-everywhere",
   "displayName": "Search everywhere",
   "description": "Fast and customizable files, symbols search engine. An alternative for 'Go to symbol in workspace' built-in feature.",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "preview": false,
   "publisher": "kbysiec",
   "author": {
