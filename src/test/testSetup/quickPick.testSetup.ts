@@ -60,6 +60,10 @@ export const getTestSetups = () => {
             object: config,
             method: "fetchShouldUseDebounce",
           },
+          {
+            object: config,
+            method: "fetchShouldItemsBeSorted",
+          },
         ],
         sandbox
       );
@@ -95,6 +99,10 @@ export const getTestSetups = () => {
           {
             object: config,
             method: "fetchItemsFilterPhrases",
+          },
+          {
+            object: config,
+            method: "fetchShouldItemsBeSorted",
           },
         ],
         sandbox
@@ -132,6 +140,10 @@ export const getTestSetups = () => {
             object: config,
             method: "fetchItemsFilterPhrases",
           },
+          {
+            object: config,
+            method: "fetchShouldItemsBeSorted",
+          },
         ],
         sandbox
       );
@@ -150,6 +162,10 @@ export const getTestSetups = () => {
           {
             object: config,
             method: "fetchItemsFilterPhrases",
+          },
+          {
+            object: config,
+            method: "fetchShouldItemsBeSorted",
           },
         ],
         sandbox
@@ -175,6 +191,10 @@ export const getTestSetups = () => {
               "1": "^^",
               "4": "@@",
             },
+          },
+          {
+            object: config,
+            method: "fetchShouldItemsBeSorted",
           },
         ],
         sandbox

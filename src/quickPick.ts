@@ -337,7 +337,20 @@ function getItems() {
 }
 
 function setItems(newItems: QuickPickItem[]): void {
+  reinitQpItemsButton(newItems);
   items = newItems;
+}
+
+function reinitQpItemsButton(data: QuickPickItem[]) {
+  data.forEach(
+    (item) =>
+      (item.buttons = [
+        {
+          iconPath: new vscode.ThemeIcon("open-preview"),
+          tooltip: "Open to the side",
+        },
+      ])
+  );
 }
 
 function getShouldUseItemsFilterPhrases() {
