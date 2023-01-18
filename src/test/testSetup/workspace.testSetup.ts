@@ -359,6 +359,11 @@ export const getTestSetups = () => {
             returns: false,
           },
           {
+            object: utils,
+            method: "isSortingConfigurationToggled",
+            returns: false,
+          },
+          {
             object: cache,
             method: "clearConfig",
           },
@@ -378,8 +383,18 @@ export const getTestSetups = () => {
             method: "fetchExcludeMode",
           },
           {
+            object: workspace,
+            method: "shouldReindexOnConfigurationChange",
+            returns: false,
+          },
+          {
             object: utils,
             method: "isDebounceConfigurationToggled",
+          },
+          {
+            object: utils,
+            method: "isSortingConfigurationToggled",
+            returns: false,
           },
         ],
         sandbox
