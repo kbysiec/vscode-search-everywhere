@@ -2,7 +2,7 @@
   "name": "vscode-search-everywhere",
   "displayName": "Search everywhere",
   "description": "Fast and customizable files, symbols search engine. An alternative for 'Go to symbol in workspace' built-in feature.",
-  "version": "2.0.0",
+  "version": "2.0.3",
   "preview": false,
   "publisher": "kbysiec",
   "author": {
@@ -203,7 +203,7 @@
     "gulp": "^4.0.2",
     "gulp-string-replacer": "^1.2.2",
     "istanbul": "^0.4.5",
-    "mocha": "^7.1.1",
+    "mocha": "^10.2.0",
     "remap-istanbul": "^0.13.0",
     "rimraf": "^3.0.2",
     "sinon": "^9.0.1",
