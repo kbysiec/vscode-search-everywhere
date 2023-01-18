@@ -34,6 +34,12 @@ export const getQpItem = (
         ? new vscode.Position(0, 5)
         : new vscode.Position(0, 0),
     },
+    buttons: [
+      {
+        iconPath: new vscode.ThemeIcon("open-preview"),
+        tooltip: "Open to the side",
+      },
+    ],
   };
   const qpItemAny = qpItem as any;
   qpItemAny.uri._fsPath = qpItemAny.uri.path;
