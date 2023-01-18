@@ -2,6 +2,9 @@
 
 All notable changes to the "vscode-search-everywhere" extension will be documented in this file.
 
+## [2.0.2] - 2022-09-07
+- Fix issue with invisible quick pick icons
+
 ## [2.0.0] - 2022-09-07
 - Fully rewritten from class based to function based approach
 - Test improvements
