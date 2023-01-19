@@ -214,7 +214,6 @@ function registerEventListeners() {
   const control = quickPick.getControl();
   control.onDidHide(handleDidHide);
   control.onDidAccept(handleDidAccept);
-  control.onDidChangeValue(handleDidChangeValue);
   control.onDidTriggerItemButton(handleDidTriggerItemButton);
 
   registerOnDidChangeValueEventListeners();
