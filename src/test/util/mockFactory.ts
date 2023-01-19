@@ -46,23 +46,28 @@ export const getExtensionContext = (): vscode.ExtensionContext => {
 export const getConfiguration = (): { [key: string]: any } => {
   return {
     searchEverywhere: {
-      shouldDisplayNotificationInStatusBar: true,
       shouldInitOnStartup: true,
+      shouldDisplayNotificationInStatusBar: true,
       shouldHighlightSymbol: true,
+      shouldUseDebounce: true,
       icons: { 0: "fake-icon", 1: "another-fake-icon" },
       itemsFilter: {
         allowedKinds: [1, 2, 3],
         ignoredKinds: [],
         ignoredNames: ["demo"],
       },
+      shouldUseItemsFilterPhrases: true,
       itemsFilterPhrases: {
         "0": "$$",
         "1": "^^",
         "4": "@@",
       },
+      helpPhrase: "?",
+      shouldItemsBeSorted: true,
+      shouldSearchSelection: true,
       include: "**/*.{js,ts}",
       exclude: ["**/node_modules/**"],
-      excludeModee: ExcludeMode.SearchEverywhere,
+      excludeMode: ExcludeMode.SearchEverywhere,
       shouldWorkspaceDataBeCached: true,
     },
     customSection: {
