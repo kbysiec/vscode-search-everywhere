@@ -42,9 +42,8 @@ function registerOnDidChangeValueWithDebounceEventListeners(): void {
 
 function registerOnDidChangeValueWithoutDebounceEventListeners(): void {
   const control = quickPick.getControl();
-  const onDidChangeValueEventListener = control.onDidChangeValue(
-    debounce(handleDidChangeValue, 400)
-  );
+  const onDidChangeValueEventListener =
+    control.onDidChangeValue(handleDidChangeValue);
 
   quickPick
     .getOnDidChangeValueEventListeners()
