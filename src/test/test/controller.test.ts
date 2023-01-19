@@ -93,8 +93,8 @@ describe("controller", () => {
       assert.equal(removeDataForUnsavedUrisStub.calledOnce, false);
     });
 
-    it(`5: get data and set it for quickPick if shouldLoadDataFromCacheOnQuickPickOpen method returns true and quickPick is not already initialized`, async () => {
-      const [, , , , getDataStub, setItemsStub] = setups.search5();
+    it(`6: get data and set it for quickPick if shouldLoadDataFromCacheOnQuickPickOpen method returns true and quickPick is not already initialized`, async () => {
+      const [, , , , getDataStub, setItemsStub] = setups.search6();
       await controller.search();
 
       assert.equal(getDataStub.calledOnce, false);
