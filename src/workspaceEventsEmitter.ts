@@ -11,7 +11,7 @@ export const onDidDebounceConfigToggleEventEmitter: vscode.EventEmitter<void> =
   new vscode.EventEmitter();
 export const onWillReindexOnConfigurationChangeEventEmitter: vscode.EventEmitter<void> =
   new vscode.EventEmitter();
-export const onDidGroupingConfigToggleEventEmitter: vscode.EventEmitter<void> =
+export const onDidSortingConfigToggleEventEmitter: vscode.EventEmitter<void> =
   new vscode.EventEmitter();
 export const onWillProcessing: vscode.Event<void> =
   onWillProcessingEventEmitter.event;
@@ -23,5 +23,5 @@ export const onDidDebounceConfigToggle: vscode.Event<void> =
   onDidDebounceConfigToggleEventEmitter.event;
 export const onWillReindexOnConfigurationChange: vscode.Event<void> =
   onWillReindexOnConfigurationChangeEventEmitter.event;
-export const onDidGroupingConfigToggle: vscode.Event<void> =
-  onDidGroupingConfigToggleEventEmitter.event;
+export const onDidSortingConfigToggle: vscode.Event<void> =
+  onDidSortingConfigToggleEventEmitter.event;

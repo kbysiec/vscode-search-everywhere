@@ -26,8 +26,8 @@ import { utils } from "./utils";
 import { workspaceCommon as common } from "./workspaceCommon";
 import {
   onDidDebounceConfigToggleEventEmitter,
-  onDidGroupingConfigToggleEventEmitter,
   onDidProcessingEventEmitter,
+  onDidSortingConfigToggleEventEmitter,
   onWillExecuteActionEventEmitter,
   onWillProcessingEventEmitter,
   onWillReindexOnConfigurationChangeEventEmitter,
@@ -53,7 +53,7 @@ async function handleDidChangeConfiguration(
   } else if (utils.isDebounceConfigurationToggled(event)) {
     onDidDebounceConfigToggleEventEmitter.fire();
   } else if (utils.isSortingConfigurationToggled(event)) {
-    onDidGroupingConfigToggleEventEmitter.fire();
+    onDidSortingConfigToggleEventEmitter.fire();
   }
 }
 

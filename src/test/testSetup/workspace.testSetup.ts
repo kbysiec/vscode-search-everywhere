@@ -338,6 +338,42 @@ export const getTestSetups = () => {
       return eventEmitter;
     },
     handleDidChangeConfiguration3: () => {
+      const eventEmitter = getEventEmitter();
+
+      stubMultiple(
+        [
+          {
+            object: workspace,
+            method: "shouldReindexOnConfigurationChange",
+            returns: false,
+          },
+          {
+            object: utils,
+            method: "isDebounceConfigurationToggled",
+            returns: false,
+          },
+          {
+            object: utils,
+            method: "isSortingConfigurationToggled",
+            returns: true,
+          },
+          {
+            object: events,
+            method: "onDidSortingConfigToggleEventEmitter",
+            returns: eventEmitter,
+            isNotMethod: true,
+          },
+          {
+            object: cache,
+            method: "clearConfig",
+          },
+        ],
+        sandbox
+      );
+
+      return eventEmitter;
+    },
+    handleDidChangeConfiguration4: () => {
       return stubMultiple(
         [
           {
@@ -371,7 +407,7 @@ export const getTestSetups = () => {
         sandbox
       );
     },
-    handleDidChangeConfiguration4: () => {
+    handleDidChangeConfiguration5: () => {
       return stubMultiple(
         [
           {

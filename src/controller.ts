@@ -11,8 +11,8 @@ import { utils } from "./utils";
 import { workspace } from "./workspace";
 import {
   onDidDebounceConfigToggle,
-  onDidGroupingConfigToggle,
   onDidProcessing,
+  onDidSortingConfigToggle,
   onWillExecuteAction,
   onWillProcessing,
   onWillReindexOnConfigurationChange,
@@ -137,7 +137,7 @@ function handleDidDebounceConfigToggle() {
   controller.setBusy(false);
 }
 
-function handleDidGroupingConfigToggle() {
+function handleDidSortingConfigToggle() {
   controller.setBusy(true);
   quickPick.reloadSortingSettings();
   controller.setBusy(false);
@@ -200,7 +200,7 @@ function registerWorkspaceEventListeners() {
   onDidProcessing(handleDidProcessing);
   onWillExecuteAction(handleWillExecuteAction);
   onDidDebounceConfigToggle(handleDidDebounceConfigToggle);
-  onDidGroupingConfigToggle(handleDidGroupingConfigToggle);
+  onDidSortingConfigToggle(handleDidSortingConfigToggle);
   onWillReindexOnConfigurationChange(handleWillReindexOnConfigurationChange);
 }
 
@@ -234,6 +234,6 @@ export const controller = {
   handleDidProcessing,
   handleWillExecuteAction,
   handleDidDebounceConfigToggle,
-  handleDidGroupingConfigToggle,
+  handleDidSortingConfigToggle,
   handleWillReindexOnConfigurationChange,
 };

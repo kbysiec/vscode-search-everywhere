@@ -93,6 +93,18 @@ describe("Config", () => {
     });
   });
 
+  describe("fetchItemsFilterPhrases", () => {
+    it("1: should return object containing items filter phrases from configuration", () => {
+      const section = "searchEverywhere";
+      const key = "itemsFilterPhrases";
+
+      assert.equal(
+        config.fetchItemsFilterPhrases(),
+        configuration[section][key]
+      );
+    });
+  });
+
   describe("fetchHelpPhrase", () => {
     it("1: should return help phrase from configuration", () => {
       const section = "searchEverywhere";
@@ -102,13 +114,13 @@ describe("Config", () => {
     });
   });
 
-  describe("fetchItemsFilterPhrases", () => {
-    it("1: should return object containing items filter phrases from configuration", () => {
+  describe("fetchShouldItemsBeSorted", () => {
+    it("1: should return boolean from configuration", () => {
       const section = "searchEverywhere";
-      const key = "itemsFilterPhrases";
+      const key = "shouldItemsBeSorted";
 
       assert.equal(
-        config.fetchItemsFilterPhrases(),
+        config.fetchShouldItemsBeSorted(),
         configuration[section][key]
       );
     });

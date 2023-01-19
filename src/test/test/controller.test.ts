@@ -594,6 +594,19 @@ describe("controller", () => {
     });
   });
 
+  describe("handleDidSortingConfigToggle", () => {
+    it("1: should setBusy and reloadSortingSettings methods be invoked", () => {
+      const [setBusyStub, reloadSortingSettingsStub] =
+        setups.handleDidSortingConfigToggle1();
+
+      controller.handleDidSortingConfigToggle();
+
+      assert.equal(setBusyStub.calledWith(true), true);
+      assert.equal(reloadSortingSettingsStub.calledOnce, true);
+      assert.equal(setBusyStub.calledWith(false), true);
+    });
+  });
+
   describe("handleWillReindexOnConfigurationChange", () => {
     it("1: should quickPick.reload method be invoked", () => {
       const [reloadStub] = setups.handleWillReindexOnConfigurationChange1();

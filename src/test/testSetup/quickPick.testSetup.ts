@@ -148,6 +148,30 @@ export const getTestSetups = () => {
         sandbox
       );
     },
+    reloadSortingSettings1: () => {
+      return stubMultiple(
+        [
+          {
+            object: config,
+            method: "fetchShouldItemsBeSorted",
+            returns: true,
+          },
+        ],
+        sandbox
+      );
+    },
+    reloadSortingSettings2: () => {
+      return stubMultiple(
+        [
+          {
+            object: config,
+            method: "fetchShouldItemsBeSorted",
+            returns: true,
+          },
+        ],
+        sandbox
+      );
+    },
     reload1: () => {
       return stubMultiple(
         [

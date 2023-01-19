@@ -1201,6 +1201,22 @@ export const getTestSetups = () => {
         sandbox
       );
     },
+    handleDidSortingConfigToggle1: () => {
+      stubComponents(sandbox);
+      return stubMultiple(
+        [
+          {
+            object: controller,
+            method: "setBusy",
+          },
+          {
+            object: quickPick,
+            method: "reloadSortingSettings",
+          },
+        ],
+        sandbox
+      );
+    },
     handleWillReindexOnConfigurationChange1: () => {
       stubComponents(sandbox);
       return stubMultiple(

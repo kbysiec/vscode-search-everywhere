@@ -197,8 +197,8 @@ describe("Workspace", () => {
       assert.equal(indexStub.calledOnce, true);
     });
 
-    it(`2: should index method be invoked which register
-      rebuild action if isDebounceConfigurationToggled is true`, async () => {
+    it(`2: should onDidDebounceConfigToggle event be emitted
+      if isDebounceConfigurationToggled is true`, async () => {
       const eventEmitter = setups.handleDidChangeConfiguration2();
 
       await workspace.handleDidChangeConfiguration(
@@ -208,9 +208,20 @@ describe("Workspace", () => {
       assert.equal(eventEmitter.fire.calledOnce, true);
     });
 
-    it("3: should do nothing if extension configuration has not changed", async () => {
+    it(`3: should onDidSortingConfigToggle event be emitted
+      if isSortingConfigurationToggled is true`, async () => {
+      const eventEmitter = setups.handleDidChangeConfiguration3();
+
+      await workspace.handleDidChangeConfiguration(
+        getConfigurationChangeEvent(true)
+      );
+
+      assert.equal(eventEmitter.fire.calledOnce, true);
+    });
+
+    it("4: should do nothing if extension configuration has not changed", async () => {
       const [registerActionStub, onDidDebounceConfigToggleEventEmitterStub] =
-        setups.handleDidChangeConfiguration3();
+        setups.handleDidChangeConfiguration4();
 
       await workspace.handleDidChangeConfiguration(
         getConfigurationChangeEvent(false)
@@ -220,8 +231,8 @@ describe("Workspace", () => {
       assert.equal(onDidDebounceConfigToggleEventEmitterStub.calledOnce, false);
     });
 
-    it("4: should cache.clearConfig method be invoked", async () => {
-      const [clearConfigStub] = setups.handleDidChangeConfiguration4();
+    it("5: should cache.clearConfig method be invoked", async () => {
+      const [clearConfigStub] = setups.handleDidChangeConfiguration5();
 
       await workspace.handleDidChangeConfiguration(
         getConfigurationChangeEvent(true)

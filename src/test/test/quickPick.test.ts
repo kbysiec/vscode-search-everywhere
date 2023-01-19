@@ -43,6 +43,23 @@ describe("QuickPick", () => {
     });
   });
 
+  describe("reloadSortingSettings", () => {
+    it(`1: should set that items should be sorted`, () => {
+      setups.reloadSortingSettings1();
+      quickPick.reloadSortingSettings();
+
+      assert.equal(quickPick.getShouldItemsBeSorted(), true);
+    });
+
+    it(`2: should set sortByLabel on quickPick control
+      to have separators between items`, () => {
+      setups.reloadSortingSettings2();
+      quickPick.reloadSortingSettings();
+
+      assert.equal((quickPick.getControl() as any).sortByLabel, false);
+    });
+  });
+
   describe("reloadOnDidChangeValueEventListener", () => {
     it(`1: should dispose existing event listeners and
       register one event listener if shouldUseDebounce returns false`, () => {
