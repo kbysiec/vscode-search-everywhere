@@ -1,4 +1,5 @@
 import * as sinon from "sinon";
+import * as vscode from "vscode";
 import * as cache from "../../cache";
 import * as config from "../../config";
 import { controller } from "../../controller";
@@ -10,6 +11,7 @@ import * as workspaceEventsEmitter from "../../workspaceEventsEmitter";
 import { getExtensionContext } from "../util/mockFactory";
 import { getQpItem, getQpItems } from "../util/qpItemMockFactory";
 import { stubMultiple } from "../util/stubHelpers";
+import { getTextEditorStub } from "../util/stubFactory";
 
 function stubComponents(sandbox: sinon.SinonSandbox) {
   return stubMultiple(
@@ -216,6 +218,27 @@ function stubComponentsForShouldLoadDataFromCacheOnStartup(
   return stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
     sandbox,
     returnsValues
+  );
+}
+
+function stubComponentsForShouldSearchSelection(
+  sandbox: sinon.SinonSandbox,
+  returnsValues: { [key: string]: any }
+) {
+  return stubMultiple(
+    [
+      {
+        object: quickPick,
+        method: "isInitialized",
+        returns: returnsValues.isInitialized,
+      },
+      {
+        object: config,
+        method: "fetchShouldSearchSelection",
+        returns: returnsValues.fetchShouldSearchSelection,
+      },
+    ],
+    sandbox
   );
 }
 
@@ -448,6 +471,10 @@ export const getTestSetups = () => {
             object: quickPick,
             method: "show",
           },
+          {
+            object: quickPick,
+            method: "setText",
+          },
         ],
         sandbox
       );
@@ -485,6 +512,65 @@ export const getTestSetups = () => {
         shouldIndexOnQuickPickOpen: false,
         shouldLoadDataFromCacheOnQuickPickOpen: false,
       });
+    },
+    search10: () => {
+      stubComponents(sandbox);
+      stubComponentsForSearch(sandbox, {
+        isInitialized: true,
+        shouldIndexOnQuickPickOpen: false,
+        shouldLoadDataFromCacheOnQuickPickOpen: false,
+        shouldSearchSelection: true,
+      });
+      const editor = getTextEditorStub(true, "test text");
+      return stubMultiple(
+        [
+          {
+            object: quickPick,
+            method: "setText",
+          },
+          {
+            object: quickPick,
+            method: "loadItems",
+          },
+          {
+            object: quickPick,
+            method: "show",
+          },
+          {
+            object: vscode.window,
+            method: "activeTextEditor",
+            isNotMethod: true,
+            returns: editor,
+          },
+        ],
+        sandbox
+      );
+    },
+    search11: () => {
+      stubComponents(sandbox);
+      stubComponentsForSearch(sandbox, {
+        isInitialized: true,
+        shouldIndexOnQuickPickOpen: false,
+        shouldLoadDataFromCacheOnQuickPickOpen: false,
+        shouldSearchSelection: false,
+      });
+      return stubMultiple(
+        [
+          {
+            object: quickPick,
+            method: "setText",
+          },
+          {
+            object: quickPick,
+            method: "loadItems",
+          },
+          {
+            object: quickPick,
+            method: "show",
+          },
+        ],
+        sandbox
+      );
     },
     reload1: () => {
       stubComponents(sandbox);
@@ -1031,6 +1117,92 @@ export const getTestSetups = () => {
         fetchShouldInitOnStartup: true,
         fetchShouldWorkspaceDataBeCached: true,
       });
+    },
+    shouldSearchSelection1: () => {
+      stubComponents(sandbox);
+      stubComponentsForShouldSearchSelection(sandbox, {
+        isInitialized: false,
+        fetchShouldSearchSelection: true,
+      });
+      const editor = getTextEditorStub(true);
+      return editor;
+    },
+    shouldSearchSelection2: () => {
+      stubComponents(sandbox);
+      stubComponentsForShouldSearchSelection(sandbox, {
+        isInitialized: true,
+        fetchShouldSearchSelection: false,
+      });
+      const editor = getTextEditorStub(true);
+      return editor;
+    },
+    shouldSearchSelection3: () => {
+      stubComponents(sandbox);
+      stubComponentsForShouldSearchSelection(sandbox, {
+        isInitialized: true,
+        fetchShouldSearchSelection: true,
+      });
+      const editor = undefined;
+      return editor;
+    },
+    shouldSearchSelection4: () => {
+      stubComponents(sandbox);
+      stubComponentsForShouldSearchSelection(sandbox, {
+        isInitialized: true,
+        fetchShouldSearchSelection: true,
+      });
+      const editor = getTextEditorStub(true);
+      return editor;
+    },
+    shouldQuickPickOpenFromSelection1: () => {
+      stubMultiple(
+        [
+          {
+            object: quickPick,
+            method: "isInitialized",
+            returns: false,
+          },
+          {
+            object: config,
+            method: "fetchShouldQuickPickOpenFromSelection",
+          },
+        ],
+        sandbox
+      );
+    },
+    shouldQuickPickOpenFromSelection2: () => {
+      stubMultiple(
+        [
+          {
+            object: quickPick,
+            method: "isInitialized",
+            returns: true,
+          },
+          {
+            object: config,
+            method: "fetchShouldQuickPickOpenFromSelection",
+            returns: false,
+          },
+        ],
+        sandbox
+      );
+    },
+    shouldQuickPickOpenFromSelection3: () => {
+      stubMultiple(
+        [
+          {
+            object: quickPick,
+            method: "isInitialized",
+            returns: true,
+          },
+          {
+            object: config,
+            method: "fetchShouldQuickPickOpenFromSelection",
+            returns: true,
+          },
+        ],
+        sandbox
+      );
     },
     handleWillProcessing1: () => {
       stubComponents(sandbox);

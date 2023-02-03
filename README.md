@@ -300,6 +300,11 @@ Default value: `search everywhere`.
 Ability to decide if the workspace should be indexed only once. Each next startup of Visual Studio Code will collect data from cache.
 Default value: `true`
 
+* `searchEverywhere.shouldSearchSelection`
+
+Ability to decide wheather selection in active editor is put in search.
+Default value: `true`
+
 ## Release Notes
 
 Please check changelog for release details.

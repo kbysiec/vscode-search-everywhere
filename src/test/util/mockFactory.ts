@@ -69,6 +69,7 @@ export const getConfiguration = (): { [key: string]: any } => {
       exclude: ["**/node_modules/**"],
       excludeMode: ExcludeMode.SearchEverywhere,
       shouldWorkspaceDataBeCached: true,
+      shouldSearchSelection: true,
     },
     customSection: {
       exclude: ["**/customFolder/**"],

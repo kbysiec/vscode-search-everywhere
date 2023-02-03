@@ -3,6 +3,7 @@ import { clear, clearConfig, clearNotSavedUriPaths, initCache } from "./cache";
 import {
   fetchShouldInitOnStartup,
   fetchShouldWorkspaceDataBeCached,
+  fetchShouldSearchSelection,
 } from "./config";
 import { logger } from "./logger";
 import { quickPick } from "./quickPick";
@@ -21,6 +22,15 @@ import {
 function loadItemsAndShowQuickPick() {
   quickPick.loadItems();
   quickPick.show();
+
+  const activeEditorOrUndefined = vscode.window.activeTextEditor;
+  
+  if (controller.shouldSearchSelection(activeEditorOrUndefined)) {
+    const activeEditor = activeEditorOrUndefined as vscode.TextEditor;
+    
+    const { start, end } = activeEditor.selection;
+    quickPick.setText(activeEditor.document.getText(new vscode.Range(start, end)));
+  }
 }
 function setQuickPickData() {
   const data = workspace.getData();
@@ -109,6 +119,10 @@ function shouldLoadDataFromCacheOnStartup() {
     !quickPick.isInitialized() &&
     fetchShouldWorkspaceDataBeCached()
   );
+}
+
+function shouldSearchSelection(editor: vscode.TextEditor | undefined) {
+  return quickPick.isInitialized() && fetchShouldSearchSelection() && !!editor;
 }
 
 function handleWillProcessing() {
@@ -219,6 +233,7 @@ export const controller = {
   shouldLoadDataFromCacheOnQuickPickOpen,
   shouldIndexOnStartup,
   shouldLoadDataFromCacheOnStartup,
+  shouldSearchSelection,
   isInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty,
   isInitOnStartupDisabledAndWorkspaceCachingEnabledButDataIsEmpty,
   isInitOnStartupEnabledAndWorkspaceCachingDisabled,

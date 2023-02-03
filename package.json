@@ -163,6 +163,11 @@
           "type": "boolean",
           "default": true,
           "description": "Ability to decide if the workspace should be indexed only once. Each next startup of Visual Studio Code will collect data from cache."
+        },
+        "searchEverywhere.shouldSearchSelection": {
+          "type": "boolean",
+          "default": true,
+          "description": "Ability to decide wheather selection in active editor is put in search."
         }
       }
     },

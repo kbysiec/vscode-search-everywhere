@@ -64,6 +64,10 @@ const keys = {
     name: "shouldWorkspaceDataBeCached",
     value: true,
   },
+  shouldSearchSelection: {
+    name: "shouldSearchSelection",
+    value: true,
+  },
 };
 
 function getConfigurationByKey<T>(
@@ -179,5 +183,12 @@ export function fetchShouldWorkspaceDataBeCached(): boolean {
   return get(
     keys.shouldWorkspaceDataBeCached.name,
     keys.shouldWorkspaceDataBeCached.value
+  );
+}
+
+export function fetchShouldSearchSelection(): boolean {
+  return get(
+    keys.shouldSearchSelection.name,
+    keys.shouldSearchSelection.value
   );
 }
