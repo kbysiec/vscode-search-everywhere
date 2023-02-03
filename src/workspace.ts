@@ -177,6 +177,7 @@ function shouldReindexOnConfigurationChange(
     "shouldUseDebounce",
     "shouldItemsBeSorted",
     "shouldWorkspaceDataBeCached",
+    "shouldSearchSelection",
   ].map((config: string) => `${defaultSection}.${config}`);
 
   return (

@@ -4,7 +4,7 @@ import { createStubInstance } from "./stubbedClass";
 
 export function getTextEditorStub(
   isUntitled: boolean = true,
-  selection: string = ""
+  getTextReturnValue: string = ""
 ): vscode.TextEditor {
   return {
     document: {
@@ -23,7 +23,7 @@ export function getTextEditorStub(
       },
       offsetAt: sinon.stub(),
       positionAt: sinon.stub(),
-      getText: sinon.stub().returns(selection),
+      getText: sinon.stub().returns(getTextReturnValue),
       getWordRangeAtPosition: sinon.stub(),
       validateRange: sinon.stub(),
       validatePosition: sinon.stub(),

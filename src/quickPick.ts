@@ -32,11 +32,10 @@ function registerOnDidChangeValueWithDebounceEventListeners(): void {
   const onDidChangeValueEventListener = control.onDidChangeValue(
     debounce(handleDidChangeValue, 400)
   );
-
   const onDidChangeValueEventListeners =
     quickPick.getOnDidChangeValueEventListeners();
-  onDidChangeValueEventListeners.push(onDidChangeValueClearingEventListener);
 
+  onDidChangeValueEventListeners.push(onDidChangeValueClearingEventListener);
   onDidChangeValueEventListeners.push(onDidChangeValueEventListener);
 }
 
@@ -433,4 +432,5 @@ export const quickPick = {
   handleDidAccept,
   handleDidHide,
   handleDidTriggerItemButton,
+  disposeOnDidChangeValueEventListeners,
 };

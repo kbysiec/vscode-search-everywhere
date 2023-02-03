@@ -126,6 +126,18 @@ describe("Config", () => {
     });
   });
 
+  describe("fetchShouldSearchSelection", () => {
+    it("1: should return boolean from configuration", () => {
+      const section = "searchEverywhere";
+      const key = "shouldSearchSelection";
+
+      assert.equal(
+        config.fetchShouldSearchSelection(),
+        configuration[section][key]
+      );
+    });
+  });
+
   describe("fetchExclude", () => {
     it("1: should return array of exclude patterns from configuration", () => {
       const section = "searchEverywhere";

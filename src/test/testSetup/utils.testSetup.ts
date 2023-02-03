@@ -110,6 +110,9 @@ export const getTestSetups = () => {
 
       return getWorkspaceData(workspaceDataItems);
     },
+    sleepAndExecute1: () => {
+      return sinon.stub();
+    },
     updateQpItemsWithNewDirectoryPath1: () => {
       stubWorkspaceFolders([
         "/test/path/to/workspace",

@@ -144,13 +144,15 @@ describe("controller", () => {
       returns true`, async () => {
       const [setTextStub] = setups.search10();
       await controller.search();
+
       assert.equal(setTextStub.calledWith("test text"), true);
     });
-    
+
     it(`11: should not invoke quickPick.setText method if shouldSearchSelection
       returns false`, async () => {
       const [setTextStub] = setups.search11();
       await controller.search();
+
       assert.equal(setTextStub.calledOnce, false);
     });
   });
@@ -467,6 +469,29 @@ describe("controller", () => {
         controller.isInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(),
         false
       );
+    });
+  });
+
+  describe("shouldSearchSelection", () => {
+    it("1: should return false if quickPick is not initialized", () => {
+      const editor = setups.shouldSearchSelection1();
+      assert.equal(controller.shouldSearchSelection(editor), false);
+    });
+
+    it("2: should return false if fetchShouldSearchSelection returns false", () => {
+      const editor = setups.shouldSearchSelection2();
+      assert.equal(controller.shouldSearchSelection(editor), false);
+    });
+
+    it("3: should return false if editor doesn't exist", () => {
+      const editor = setups.shouldSearchSelection3();
+      assert.equal(controller.shouldSearchSelection(editor), false);
+    });
+
+    it(`4: should return true if quickPick is initialized,
+      fetchShouldSearchSelection returns false and editor exists`, () => {
+      const editor = setups.shouldSearchSelection4();
+      assert.equal(controller.shouldSearchSelection(editor), true);
     });
   });
 

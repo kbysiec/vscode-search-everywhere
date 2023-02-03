@@ -2,8 +2,8 @@ import * as vscode from "vscode";
 import { clear, clearConfig, clearNotSavedUriPaths, initCache } from "./cache";
 import {
   fetchShouldInitOnStartup,
-  fetchShouldWorkspaceDataBeCached,
   fetchShouldSearchSelection,
+  fetchShouldWorkspaceDataBeCached,
 } from "./config";
 import { logger } from "./logger";
 import { quickPick } from "./quickPick";
@@ -24,12 +24,14 @@ function loadItemsAndShowQuickPick() {
   quickPick.show();
 
   const activeEditorOrUndefined = vscode.window.activeTextEditor;
-  
+
   if (controller.shouldSearchSelection(activeEditorOrUndefined)) {
     const activeEditor = activeEditorOrUndefined as vscode.TextEditor;
-    
+
     const { start, end } = activeEditor.selection;
-    quickPick.setText(activeEditor.document.getText(new vscode.Range(start, end)));
+    quickPick.setText(
+      activeEditor.document.getText(new vscode.Range(start, end))
+    );
   }
 }
 function setQuickPickData() {
@@ -174,6 +176,27 @@ async function search(): Promise<void> {
     controller.setQuickPickData();
   }
 
+  const activeEditorOrUndefined = vscode.window.activeTextEditor;
+
+  if (controller.shouldSearchSelection(activeEditorOrUndefined)) {
+    const timeInMsToAvoidListFlashing = 380;
+    const activeEditor = activeEditorOrUndefined as vscode.TextEditor;
+    quickPick.disposeOnDidChangeValueEventListeners();
+
+    const { start, end } = activeEditor.selection;
+    quickPick.setText(
+      activeEditor.document.getText(new vscode.Range(start, end))
+    );
+
+    await utils.sleepAndExecute(
+      timeInMsToAvoidListFlashing,
+      quickPick.reloadOnDidChangeValueEventListener
+    );
+
+    // setTimeout(() => {
+    //   quickPick.reloadOnDidChangeValueEventListener();
+    // }, timeInMsToAvoidListFlashing);
+  }
   quickPick.isInitialized() && loadItemsAndShowQuickPick();
 }
 

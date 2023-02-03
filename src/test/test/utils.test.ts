@@ -202,6 +202,24 @@ describe("Utils", () => {
     });
   });
 
+  describe("sleepAndExecute", () => {
+    it("1: should given fn be invoked after give", async () => {
+      const stub = setups.sleepAndExecute1();
+      const clock = sinon.useFakeTimers();
+      let fulfilled = false;
+      utils.sleepAndExecute(1000, stub);
+
+      // https://stackoverflow.com/questions/51526312/testing-setinterval-with-sinon-faketimers-not-working
+      await Promise.resolve();
+      clock.tick(999);
+      assert.equal(stub.calledOnce, false);
+      clock.tick(2);
+      assert.equal(stub.calledOnce, true);
+
+      clock.restore();
+    });
+  });
+
   describe("countWordInstances", () => {
     it("1: should count word instances in given text", () => {
       const instances = utils.countWordInstances(

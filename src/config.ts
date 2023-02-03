@@ -48,6 +48,10 @@ const keys = {
     name: "shouldItemsBeSorted",
     value: true,
   },
+  shouldSearchSelection: {
+    name: "shouldSearchSelection",
+    value: true,
+  },
   exclude: {
     name: "exclude",
     value: [] as string[],
@@ -62,10 +66,6 @@ const keys = {
   },
   shouldWorkspaceDataBeCached: {
     name: "shouldWorkspaceDataBeCached",
-    value: true,
-  },
-  shouldSearchSelection: {
-    name: "shouldSearchSelection",
     value: true,
   },
 };
@@ -150,6 +150,10 @@ export function fetchShouldItemsBeSorted(): boolean {
   return get(keys.shouldItemsBeSorted.name, keys.shouldItemsBeSorted.value);
 }
 
+export function fetchShouldSearchSelection(): boolean {
+  return get(keys.shouldSearchSelection.name, keys.shouldSearchSelection.value);
+}
+
 export function fetchExclude(): string[] {
   return get(keys.exclude.name, keys.exclude.value);
 }
@@ -183,12 +187,5 @@ export function fetchShouldWorkspaceDataBeCached(): boolean {
   return get(
     keys.shouldWorkspaceDataBeCached.name,
     keys.shouldWorkspaceDataBeCached.value
-  );
-}
-
-export function fetchShouldSearchSelection(): boolean {
-  return get(
-    keys.shouldSearchSelection.name,
-    keys.shouldSearchSelection.value
   );
 }

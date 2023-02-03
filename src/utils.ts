@@ -106,8 +106,14 @@ function getUrisForDirectoryPathUpdate(
     .map((qpItem: QuickPickItem) => qpItem.uri);
 }
 
-function sleep(ms: number) {
+function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function sleepAndExecute(ms: number, fn: Function): Promise<void> {
+  setTimeout(async () => {
+    await fn();
+  }, ms);
 }
 
 function countWordInstances(text: string, word: string): number {
@@ -284,6 +290,7 @@ export const utils = {
   getSplitter,
   getUrisForDirectoryPathUpdate,
   sleep,
+  sleepAndExecute,
   countWordInstances,
   getNthIndex,
   getLastFromArray,
