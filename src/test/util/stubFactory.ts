@@ -3,7 +3,8 @@ import * as vscode from "vscode";
 import { createStubInstance } from "./stubbedClass";
 
 export function getTextEditorStub(
-  isUntitled: boolean = true
+  isUntitled: boolean = true,
+  selection: string = ""
 ): vscode.TextEditor {
   return {
     document: {
@@ -22,7 +23,7 @@ export function getTextEditorStub(
       },
       offsetAt: sinon.stub(),
       positionAt: sinon.stub(),
-      getText: sinon.stub(),
+      getText: sinon.stub().returns(selection),
       getWordRangeAtPosition: sinon.stub(),
       validateRange: sinon.stub(),
       validatePosition: sinon.stub(),

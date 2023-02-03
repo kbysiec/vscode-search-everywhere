@@ -171,4 +171,16 @@ describe("Config", () => {
       );
     });
   });
+
+  describe("fetchShouldSearchSelection", () => {
+    it("1: should return boolean from configuration", () => {
+      const section = "searchEverywhere";
+      const key = "shouldSearchSelection";
+
+      assert.equal(
+        config.fetchShouldSearchSelection(),
+        configuration[section][key]
+      );
+    });
+  });
 });
