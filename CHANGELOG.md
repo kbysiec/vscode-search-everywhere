@@ -2,6 +2,9 @@
 
 All notable changes to the "vscode-search-everywhere" extension will be documented in this file.
 
+## [2.1.0] - 2023-02-03
+- Feat: ability to decide whether selection in the active editor is put in the search (#PR33)
+
 ## [2.0.2] - 2022-09-07
 - Fix issue with invisible quick pick icons
 

@@ -249,7 +249,7 @@ Default value: `?`
 
 * `searchEverywhere.shouldItemsBeSorted`
 
-Ability to decide wheather items should be sorted by type.
+Ability to decide whether items should be sorted by type.
 Default value: `true`
 
 * `searchEverywhere.exclude`
@@ -302,7 +302,7 @@ Default value: `true`
 
 * `searchEverywhere.shouldSearchSelection`
 
-Ability to decide wheather selection in active editor is put in search.
+Ability to decide whether selection in the active editor is put in the search.
 Default value: `true`
 
 ## Release Notes
