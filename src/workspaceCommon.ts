@@ -118,6 +118,7 @@ async function indexWorkspace(): Promise<WorkspaceData> {
 function resetProgress() {
   setCurrentProgressValue(0);
   setProgressStep(0);
+  countScannedUri = 0;
 }
 
 function handleCancellationRequested() {
@@ -133,7 +134,7 @@ function handleDidItemIndexed(
 ) {
   !isProgressStepCalculated() && calculateProgressStep(urisCount);
   increaseCurrentProgressValue();
-  reportCurrentProgress(progress);
+  reportCurrentProgress(progress, urisCount);
 }
 
 function isProgressStepCalculated(): boolean {
@@ -154,11 +155,15 @@ function reportCurrentProgress(
   progress: vscode.Progress<{
     message?: string | undefined;
     increment?: number | undefined;
-  }>
+  }>,
+  urisCount: number
 ): void {
+  countScannedUri++;
   progress.report({
     increment: workspaceCommon.getProgressStep(),
-    message: ` ${`${Math.round(workspaceCommon.getCurrentProgressValue())}%`}`,
+    message: ` ${countScannedUri} / ${urisCount} ... ${`${Math.round(
+      workspaceCommon.getCurrentProgressValue()
+    )}%`}`,
   });
 }
 
@@ -171,7 +176,7 @@ function getNotificationLocation(): vscode.ProgressLocation {
 function getNotificationTitle(): string {
   return fetchShouldDisplayNotificationInStatusBar()
     ? "Indexing..."
-    : "Indexing workspace files and symbols...";
+    : "Indexing workspace... file";
 }
 
 function setProgressStep(newProgressStep: number) {
@@ -192,6 +197,7 @@ function getCurrentProgressValue() {
 
 let progressStep = 0;
 let currentProgressValue = 0;
+let countScannedUri = 0;
 
 export const workspaceCommon = {
   getProgressStep,

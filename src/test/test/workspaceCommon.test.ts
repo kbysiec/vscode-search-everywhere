@@ -128,7 +128,7 @@ describe("WorkspaceCommon", () => {
 
       assert.equal(
         workspaceCommon.getNotificationTitle(),
-        "Indexing workspace files and symbols..."
+        "Indexing workspace... file"
       );
     });
 
@@ -222,7 +222,10 @@ describe("WorkspaceCommon", () => {
       workspaceCommon.handleDidItemIndexed(progress, 5);
 
       assert.equal(
-        progress.report.calledOnceWith({ increment: 20, message: " 40%" }),
+        progress.report.calledOnceWith({
+          increment: 20,
+          message: " 2 / 5 ... 40%",
+        }),
         true
       );
     });
