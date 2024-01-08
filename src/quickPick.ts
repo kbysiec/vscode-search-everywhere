@@ -71,7 +71,7 @@ async function openItem(
   viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active
 ): Promise<void> {
   const uriOrFileName =
-    (qpItem.uri!.scheme === "file" || qpItem.uri!.scheme === "vscode-remote") ? qpItem.uri!.path : qpItem.uri;
+  (qpItem.uri!.scheme === "file" || qpItem.uri!.scheme === "vscode-remote") ? qpItem.uri!.path : qpItem.uri;
   const document =
     uriOrFileName instanceof vscode.Uri
       ? await vscode.workspace.openTextDocument(uriOrFileName)
@@ -121,8 +121,9 @@ function getHelpItemForKind(
   itemFilterPhrase: string
 ): QuickPickItem {
   return {
-    label: `${quickPick.getHelpPhrase()} Type ${itemFilterPhrase} for limit results to ${vscode.SymbolKind[parseInt(symbolKind)]
-      } only`,
+    label: `${quickPick.getHelpPhrase()} Type ${itemFilterPhrase} for limit results to ${
+      vscode.SymbolKind[parseInt(symbolKind)]
+    } only`,
     symbolKind: Number(symbolKind),
     isHelp: true,
     uri: vscode.Uri.parse("#"),
@@ -303,11 +304,12 @@ function setPlaceholder(isBusy: boolean): void {
   control.placeholder = isBusy
     ? "Please wait, loading..."
     : quickPick.getShouldUseItemsFilterPhrases()
-      ? `${helpPhrase
-        ? `Type ${helpPhrase} for help or start typing file or symbol name...`
-        : `Help phrase not set. Start typing file or symbol name...`
+    ? `${
+        helpPhrase
+          ? `Type ${helpPhrase} for help or start typing file or symbol name...`
+          : `Help phrase not set. Start typing file or symbol name...`
       }`
-      : "Start typing file or symbol name...";
+    : "Start typing file or symbol name...";
 }
 
 let control: vscode.QuickPick<QuickPickItem>;
@@ -339,12 +341,12 @@ function setItems(newItems: QuickPickItem[]): void {
 function reinitQpItemsButton(data: QuickPickItem[]) {
   data.forEach(
     (item) =>
-    (item.buttons = [
-      {
-        iconPath: new vscode.ThemeIcon("open-preview"),
-        tooltip: "Open to the side",
-      },
-    ])
+      (item.buttons = [
+        {
+          iconPath: new vscode.ThemeIcon("open-preview"),
+          tooltip: "Open to the side",
+        },
+      ])
   );
 }
 
