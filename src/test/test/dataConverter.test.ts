@@ -13,8 +13,8 @@ describe("DataConverter", () => {
   afterEach(() => setups.afterEach());
 
   describe("reload", () => {
-    it("1: should fetchConfig method be invoked", () => {
-      const [fetchConfigStub] = setups.reload1();
+    it("should fetchConfig method be invoked", () => {
+      const [fetchConfigStub] = setups.reload.setupForFetchingConfig();
       dataConverter.reload();
 
       assert.equal(fetchConfigStub.calledOnce, true);
@@ -22,8 +22,8 @@ describe("DataConverter", () => {
   });
 
   describe("cancel", () => {
-    it("1: should setCancelled method be invoked with true parameter", () => {
-      const [setCancelledStub] = setups.cancel1();
+    it("should setCancelled method be invoked with true parameter", () => {
+      const [setCancelledStub] = setups.cancel.setupForSettingCancelledFlag();
       dataConverter.cancel();
 
       assert.equal(setCancelledStub.calledOnce, true);
@@ -32,36 +32,41 @@ describe("DataConverter", () => {
   });
 
   describe("convertToQpData", () => {
-    it("1: should return quick pick data - without icons and filter phrases", () => {
-      const { workspaceData, qpItems } = setups.convertToQpData1();
+    it("should return quick pick data - without icons and filter phrases", () => {
+      const { workspaceData, qpItems } =
+        setups.convertToQpData.setupForConvertingWithoutIconsAndFilterPhrases();
       assert.deepEqual(dataConverter.convertToQpData(workspaceData), qpItems);
     });
 
-    it("2: should return quick pick data - with icons and filter phrases", () => {
-      const { workspaceData, qpItems } = setups.convertToQpData2();
+    it("should return quick pick data - with icons and filter phrases", () => {
+      const { workspaceData, qpItems } =
+        setups.convertToQpData.setupForConvertingWithIconsAndFilterPhrases();
       assert.deepEqual(dataConverter.convertToQpData(workspaceData), qpItems);
     });
 
-    it("3: should return empty array", () => {
-      const { workspaceData, qpItems } = setups.convertToQpData3();
+    it("should return empty array", () => {
+      const { workspaceData, qpItems } =
+        setups.convertToQpData.setupForReturningEmptyArray();
       assert.deepEqual(dataConverter.convertToQpData(workspaceData), qpItems);
     });
 
-    it("4: should return empty array if isCancelled equal to true", () => {
-      const { workspaceData, qpItems } = setups.convertToQpData4();
+    it("should return empty array if isCancelled equal to true", () => {
+      const { workspaceData, qpItems } =
+        setups.convertToQpData.setupForReturningEmptyArrayWhenCancelled();
       assert.deepEqual(dataConverter.convertToQpData(workspaceData), qpItems);
     });
   });
 
   describe("fetchConfig", () => {
-    it("1: should fetch icons", () => {
-      const icons = setups.fetchConfig1();
+    it("should fetch icons", () => {
+      const icons = setups.fetchConfig.setupForFetchingIcons();
       dataConverter.fetchConfig();
       assert.equal(dataConverter.getIcons(), icons);
     });
 
-    it("2: should fetch shouldUseItemsFilterPhrases flag", () => {
-      const shouldUseItemsFilterPhrases = setups.fetchConfig2();
+    it("should fetch shouldUseItemsFilterPhrases flag", () => {
+      const shouldUseItemsFilterPhrases =
+        setups.fetchConfig.setupForFetchingShouldUseItemsFilterPhrasesFlag();
       dataConverter.fetchConfig();
       assert.equal(
         dataConverter.getShouldUseItemsFilterPhrases(),
@@ -69,8 +74,9 @@ describe("DataConverter", () => {
       );
     });
 
-    it("3: should fetch items filter phrases", () => {
-      const itemsFilterPhrases = setups.fetchConfig3();
+    it("should fetch items filter phrases", () => {
+      const itemsFilterPhrases =
+        setups.fetchConfig.setupForFetchingItemsFilterPhrases();
       dataConverter.fetchConfig();
       assert.equal(dataConverter.getItemsFilterPhrases(), itemsFilterPhrases);
     });

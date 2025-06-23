@@ -16,8 +16,9 @@ describe("WorkspaceRemover", () => {
   afterEach(() => setups.afterEach());
 
   describe("removeFromCacheByPath", () => {
-    it("1: should remove given uri from stored data when file is removed ", () => {
-      const [updateDataStub] = setups.removeFromCacheByPath1();
+    it("should remove given uri from stored data when file is removed ", () => {
+      const [updateDataStub] =
+        setups.removeFromCacheByPath.setupForRemovingGivenUriFromStoredDataWhenFileRemoved();
 
       workspaceRemover.removeFromCacheByPath(
         getItem(),
@@ -29,8 +30,9 @@ describe("WorkspaceRemover", () => {
       );
     });
 
-    it("2: should remove given uri from stored data when file is renamed or moved", () => {
-      const [updateDataStub] = setups.removeFromCacheByPath2();
+    it("should remove given uri from stored data when file is renamed or moved", () => {
+      const [updateDataStub] =
+        setups.removeFromCacheByPath.setupForRemovingGivenUriFromStoredDataWhenFileRenamedOrMoved();
 
       workspaceRemover.removeFromCacheByPath(
         getItem(),
@@ -42,8 +44,9 @@ describe("WorkspaceRemover", () => {
       );
     });
 
-    it("3: should remove given uri from stored data when text in file is changed", () => {
-      const [updateDataStub] = setups.removeFromCacheByPath3();
+    it("should remove given uri from stored data when text in file is changed", () => {
+      const [updateDataStub] =
+        setups.removeFromCacheByPath.setupForRemovingGivenUriFromStoredDataWhenTextInFileChanged();
 
       workspaceRemover.removeFromCacheByPath(
         getItem(),
@@ -55,8 +58,9 @@ describe("WorkspaceRemover", () => {
       );
     });
 
-    it("4: should remove all uris for given folder uri when directory is removed", () => {
-      const [updateDataStub] = setups.removeFromCacheByPath4();
+    it("should remove all uris for given folder uri when directory is removed", () => {
+      const [updateDataStub] =
+        setups.removeFromCacheByPath.setupForRemovingAllUrisForGivenFolderUriWhenDirectoryRemoved();
 
       workspaceRemover.removeFromCacheByPath(
         getDirectory("./fake/"),
@@ -65,8 +69,9 @@ describe("WorkspaceRemover", () => {
       assert.equal(updateDataStub.calledWith([]), true);
     });
 
-    it("5: should remove all uris for given folder uri when directory is renamed", () => {
-      const [updateDataStub] = setups.removeFromCacheByPath5();
+    it("should remove all uris for given folder uri when directory is renamed", () => {
+      const [updateDataStub] =
+        setups.removeFromCacheByPath.setupForRemovingAllUrisForGivenFolderUriWhenDirectoryRenamed();
 
       workspaceRemover.removeFromCacheByPath(
         getDirectory("./fake/"),
@@ -75,8 +80,9 @@ describe("WorkspaceRemover", () => {
       assert.equal(updateDataStub.calledWith([]), true);
     });
 
-    it("6: should remove given uri when file is reloaded if it is unsaved", () => {
-      const [updateDataStub] = setups.removeFromCacheByPath6();
+    it("should remove given uri when file is reloaded if it is unsaved", () => {
+      const [updateDataStub] =
+        setups.removeFromCacheByPath.setupForRemovingGivenUriWhenFileReloadedIfUnsaved();
 
       workspaceRemover.removeFromCacheByPath(
         getItem(),

@@ -19,23 +19,23 @@ describe("Cache", () => {
   afterEach(() => setups.afterEach());
 
   describe("getData", () => {
-    it("1: should return array of indexed symbols and files from cache", () => {
-      const qpItems = setups.getData1();
+    it("should return array of indexed symbols and files from cache", () => {
+      const qpItems = setups.getData.setupForReturningCachedData();
       assert.equal(cache.getData(), qpItems);
     });
 
-    it("2: should return empty array if cache is undefined", () => {
-      const qpItems = setups.getData2();
+    it("should return empty array if cache is undefined", () => {
+      const qpItems = setups.getData.setupForEmptyCache();
       assert.deepEqual(cache.getData(), qpItems);
     });
   });
 
   describe("updateData", () => {
-    it("1: should update cache with new array", () => {
+    it("should update cache with new array", () => {
       const {
         stubs: [updateStub],
         qpItems,
-      } = setups.updateData1();
+      } = setups.updateData.setupForUpdatingCache();
       cache.updateData(qpItems);
 
       assert.equal(
@@ -46,20 +46,20 @@ describe("Cache", () => {
   });
 
   describe("getNotSavedUriPaths", () => {
-    it("1: should return array of uri paths from cache", () => {
-      const paths = setups.getNotSavedUriPaths1();
+    it("should return array of uri paths from cache", () => {
+      const paths = setups.getNotSavedUriPaths.setupForReturningCachedPaths();
       assert.equal(cache.getNotSavedUriPaths(), paths);
     });
 
-    it("2: should return empty array if cache is undefined", () => {
-      const paths = setups.getNotSavedUriPaths2();
+    it("should return empty array if cache is undefined", () => {
+      const paths = setups.getNotSavedUriPaths.setupForEmptyCache();
       assert.deepEqual(cache.getNotSavedUriPaths(), paths);
     });
   });
 
   describe("getConfigByKey", () => {
-    it("1: should return config value from cache", () => {
-      const key = setups.getConfigByKey1();
+    it("should return config value from cache", () => {
+      const key = setups.getConfigByKey.setupForExistingConfigKey();
 
       assert.deepEqual(
         cache.getConfigByKey<string[]>(key),
@@ -67,19 +67,19 @@ describe("Cache", () => {
       );
     });
 
-    it("2: should return undefined if cache does not contain value for given key", () => {
-      const key = setups.getConfigByKey2();
+    it("should return undefined if cache does not contain value for given key", () => {
+      const key = setups.getConfigByKey.setupForNonExistentConfigKey();
       assert.equal(cache.getConfigByKey<string[]>(key), undefined);
     });
   });
 
   describe("updateConfigByKey", () => {
-    it("1: should update config value in cache if cache object exists", () => {
+    it("should update config value in cache if cache object exists", () => {
       const {
         stubs: [updateStub],
         key,
         newConfig,
-      } = setups.updateConfigByKey1();
+      } = setups.updateConfigByKey.setupForExistingCacheObject();
       cache.updateConfigByKey(key, mock.newExcludePatterns);
 
       assert.equal(
@@ -88,11 +88,11 @@ describe("Cache", () => {
       );
     });
 
-    it("2: should create cache object if it does not exist and set config value", () => {
+    it("should create cache object if it does not exist and set config value", () => {
       const {
         stubs: [updateStub],
         key,
-      } = setups.updateConfigByKey2();
+      } = setups.updateConfigByKey.setupForNonExistentCacheObject();
       cache.updateConfigByKey(key, mock.newExcludePatterns);
 
       assert.equal(
@@ -103,24 +103,25 @@ describe("Cache", () => {
   });
 
   describe("clear", () => {
-    it("1: should clear data and config from cache", () => {
-      const [updateStub] = setups.clear1();
+    it("should clear data and config from cache", () => {
+      const [updateStub] = setups.clear.setupForClearingDataAndConfig();
       cache.clear();
       assert.equal(updateStub.calledTwice, true);
     });
   });
 
   describe("clearConfig", () => {
-    it("1: should clear config from cache", () => {
-      const [updateStub] = setups.clearConfig1();
+    it("should clear config from cache", () => {
+      const [updateStub] = setups.clearConfig.setupForClearingConfig();
       cache.clearConfig();
       assert.equal(updateStub.calledOnce, true);
     });
   });
 
   describe("clearNotSavedUriPaths", () => {
-    it("1: should clear not saved uri paths from cache", () => {
-      const [updateStub] = setups.clearNotSavedUriPaths1();
+    it("should clear not saved uri paths from cache", () => {
+      const [updateStub] =
+        setups.clearNotSavedUriPaths.setupForClearingNotSavedUriPaths();
       cache.clearNotSavedUriPaths();
       assert.equal(updateStub.calledOnce, true);
     });

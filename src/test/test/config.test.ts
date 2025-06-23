@@ -16,7 +16,7 @@ describe("Config", () => {
   afterEach(() => setups.afterEach());
 
   describe("fetchShouldDisplayNotificationInStatusBar", () => {
-    it("1: should return boolean from configuration", () => {
+    it("should return boolean from configuration", () => {
       const section = "searchEverywhere";
       const key = "shouldDisplayNotificationInStatusBar";
 
@@ -28,7 +28,7 @@ describe("Config", () => {
   });
 
   describe("fetchShouldInitOnStartup", () => {
-    it("1: should return boolean from configuration", () => {
+    it("should return boolean from configuration", () => {
       const section = "searchEverywhere";
       const key = "shouldInitOnStartup";
 
@@ -40,7 +40,7 @@ describe("Config", () => {
   });
 
   describe("fetchShouldHighlightSymbol", () => {
-    it("1: should return boolean from configuration", () => {
+    it("should return boolean from configuration", () => {
       const section = "searchEverywhere";
       const key = "shouldHighlightSymbol";
 
@@ -52,7 +52,7 @@ describe("Config", () => {
   });
 
   describe("fetchShouldUseDebounce", () => {
-    it("1: should return boolean from configuration", () => {
+    it("should return boolean from configuration", () => {
       const section = "searchEverywhere";
       const key = "shouldUseDebounce";
 
@@ -64,7 +64,7 @@ describe("Config", () => {
   });
 
   describe("fetchIcons", () => {
-    it("1: should return object containing icons from configuration", () => {
+    it("should return object containing icons from configuration", () => {
       const section = "searchEverywhere";
       const key = "icons";
 
@@ -73,7 +73,7 @@ describe("Config", () => {
   });
 
   describe("fetchItemsFilter", () => {
-    it("1: should return object containing items filter from configuration", () => {
+    it("should return object containing items filter from configuration", () => {
       const section = "searchEverywhere";
       const key = "itemsFilter";
 
@@ -82,7 +82,7 @@ describe("Config", () => {
   });
 
   describe("fetchShouldUseItemsFilterPhrases", () => {
-    it("1: should return boolean from configuration", () => {
+    it("should return boolean from configuration", () => {
       const section = "searchEverywhere";
       const key = "shouldUseItemsFilterPhrases";
 
@@ -94,7 +94,7 @@ describe("Config", () => {
   });
 
   describe("fetchItemsFilterPhrases", () => {
-    it("1: should return object containing items filter phrases from configuration", () => {
+    it("should return object containing items filter phrases from configuration", () => {
       const section = "searchEverywhere";
       const key = "itemsFilterPhrases";
 
@@ -106,7 +106,7 @@ describe("Config", () => {
   });
 
   describe("fetchHelpPhrase", () => {
-    it("1: should return help phrase from configuration", () => {
+    it("should return help phrase from configuration", () => {
       const section = "searchEverywhere";
       const key = "helpPhrase";
 
@@ -115,7 +115,7 @@ describe("Config", () => {
   });
 
   describe("fetchShouldItemsBeSorted", () => {
-    it("1: should return boolean from configuration", () => {
+    it("should return boolean from configuration", () => {
       const section = "searchEverywhere";
       const key = "shouldItemsBeSorted";
 
@@ -127,7 +127,7 @@ describe("Config", () => {
   });
 
   describe("fetchShouldSearchSelection", () => {
-    it("1: should return boolean from configuration", () => {
+    it("should return boolean from configuration", () => {
       const section = "searchEverywhere";
       const key = "shouldSearchSelection";
 
@@ -139,18 +139,18 @@ describe("Config", () => {
   });
 
   describe("fetchExclude", () => {
-    it("1: should return array of exclude patterns from configuration", () => {
+    it("should return array of exclude patterns from configuration", () => {
       const section = "searchEverywhere";
       const key = "exclude";
 
       assert.equal(config.fetchExclude(), configuration[section][key]);
     });
 
-    it(`2: should return array of exclude patterns
-        from cache if it is not empty`, () => {
+    it("should return array of exclude patterns from cache if it is not empty", () => {
       const section = "searchEverywhere";
       const key = "exclude";
-      const [getConfigurationStub] = setups.getExclude2(section, key);
+      const [getConfigurationStub] =
+        setups.fetchExclude.setupForReturningFromCache(section, key);
 
       assert.deepEqual(config.fetchExclude(), configuration[section][key]);
       assert.equal(getConfigurationStub.calledOnce, false);
@@ -158,7 +158,7 @@ describe("Config", () => {
   });
 
   describe("fetchInclude", () => {
-    it("1: should return array of include pattern from configuration", () => {
+    it("should return array of include pattern from configuration", () => {
       const section = "searchEverywhere";
       const key = "include";
 
@@ -167,7 +167,7 @@ describe("Config", () => {
   });
 
   describe("fetchFilesAndSearchExclude", () => {
-    it("1: should return array of exclude patterns from configuration", () => {
+    it("should return array of exclude patterns from configuration", () => {
       assert.deepEqual(config.fetchFilesAndSearchExclude(), [
         "**/.git",
         "**/search_exclude/**",
@@ -176,7 +176,7 @@ describe("Config", () => {
   });
 
   describe("fetchExcludeMode", () => {
-    it("1: should return exclude mode from configuration", () => {
+    it("should return exclude mode from configuration", () => {
       const section = "searchEverywhere";
       const key = "excludeMode";
 
@@ -185,7 +185,7 @@ describe("Config", () => {
   });
 
   describe("fetchShouldWorkspaceDataBeCached", () => {
-    it("1: should return boolean from configuration", () => {
+    it("should return boolean from configuration", () => {
       const section = "searchEverywhere";
       const key = "shouldWorkspaceDataBeCached";
 
@@ -197,7 +197,7 @@ describe("Config", () => {
   });
 
   describe("fetchShouldSearchSelection", () => {
-    it("1: should return boolean from configuration", () => {
+    it("should return boolean from configuration", () => {
       const section = "searchEverywhere";
       const key = "shouldSearchSelection";
 

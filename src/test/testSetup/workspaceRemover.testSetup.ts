@@ -11,101 +11,109 @@ export const getTestSetups = () => {
     afterEach: () => {
       sandbox.restore();
     },
-    removeFromCacheByPath1: () => {
-      return stubMultiple(
-        [
-          {
-            object: cache,
-            method: "updateData",
-          },
-          {
-            object: common,
-            method: "getData",
-            returns: getQpItems(),
-          },
-        ],
-        sandbox
-      );
-    },
-    removeFromCacheByPath2: () => {
-      return stubMultiple(
-        [
-          {
-            object: cache,
-            method: "updateData",
-          },
-          {
-            object: common,
-            method: "getData",
-            returns: getQpItems(),
-          },
-        ],
-        sandbox
-      );
-    },
-    removeFromCacheByPath3: () => {
-      return stubMultiple(
-        [
-          {
-            object: cache,
-            method: "updateData",
-          },
-          {
-            object: common,
-            method: "getData",
-            returns: getQpItems(),
-          },
-        ],
-        sandbox
-      );
-    },
-    removeFromCacheByPath4: () => {
-      return stubMultiple(
-        [
-          {
-            object: cache,
-            method: "updateData",
-          },
-          {
-            object: common,
-            method: "getData",
-            returns: getQpItems(),
-          },
-        ],
-        sandbox
-      );
-    },
-    removeFromCacheByPath5: () => {
-      return stubMultiple(
-        [
-          {
-            object: cache,
-            method: "updateData",
-          },
-          {
-            object: common,
-            method: "getData",
-            returns: getQpItems(),
-          },
-        ],
-        sandbox
-      );
-    },
-    removeFromCacheByPath6: () => {
-      return stubMultiple(
-        [
-          {
-            object: cache,
-            method: "updateData",
-          },
-          {
-            object: common,
-            method: "getData",
-            returns: getQpItems(),
-          },
-        ],
-        sandbox
-      );
+
+    removeFromCacheByPath: {
+      setupForRemovingGivenUriFromStoredDataWhenFileRemoved: () => {
+        return stubMultiple(
+          [
+            {
+              object: cache,
+              method: "updateData",
+            },
+            {
+              object: common,
+              method: "getData",
+              returns: getQpItems(),
+            },
+          ],
+          sandbox
+        );
+      },
+
+      setupForRemovingGivenUriFromStoredDataWhenFileRenamedOrMoved: () => {
+        return stubMultiple(
+          [
+            {
+              object: cache,
+              method: "updateData",
+            },
+            {
+              object: common,
+              method: "getData",
+              returns: getQpItems(),
+            },
+          ],
+          sandbox
+        );
+      },
+
+      setupForRemovingGivenUriFromStoredDataWhenTextInFileChanged: () => {
+        return stubMultiple(
+          [
+            {
+              object: cache,
+              method: "updateData",
+            },
+            {
+              object: common,
+              method: "getData",
+              returns: getQpItems(),
+            },
+          ],
+          sandbox
+        );
+      },
+
+      setupForRemovingAllUrisForGivenFolderUriWhenDirectoryRemoved: () => {
+        return stubMultiple(
+          [
+            {
+              object: cache,
+              method: "updateData",
+            },
+            {
+              object: common,
+              method: "getData",
+              returns: getQpItems(),
+            },
+          ],
+          sandbox
+        );
+      },
+
+      setupForRemovingAllUrisForGivenFolderUriWhenDirectoryRenamed: () => {
+        return stubMultiple(
+          [
+            {
+              object: cache,
+              method: "updateData",
+            },
+            {
+              object: common,
+              method: "getData",
+              returns: getQpItems(),
+            },
+          ],
+          sandbox
+        );
+      },
+
+      setupForRemovingGivenUriWhenFileReloadedIfUnsaved: () => {
+        return stubMultiple(
+          [
+            {
+              object: cache,
+              method: "updateData",
+            },
+            {
+              object: common,
+              method: "getData",
+              returns: getQpItems(),
+            },
+          ],
+          sandbox
+        );
+      },
     },
   };
 };

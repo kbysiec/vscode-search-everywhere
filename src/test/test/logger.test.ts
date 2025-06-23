@@ -14,20 +14,21 @@ describe("Logger", () => {
   afterEach(() => setups.afterEach());
 
   describe("init", () => {
-    it("1: should output channel be created", () => {
-      const [createOutputChannelStub] = setups.init1();
+    it("should output channel be created", () => {
+      const [createOutputChannelStub] =
+        setups.init.setupForCreatingOutputChannel();
       logger.init();
       assert.equal(createOutputChannelStub.calledOnce, true);
     });
   });
 
   describe("log", () => {
-    it("1: should log message with timestamp", () => {
+    it("should log message with timestamp", () => {
       const {
         stubs: [outputChannelInnerStub],
         expectedMessage,
         fakeTimer,
-      } = setups.log1();
+      } = setups.log.setupForLoggingMessageWithTimestamp();
       logger.log("test message");
 
       assert.equal(
@@ -40,13 +41,13 @@ describe("Logger", () => {
   });
 
   describe("logAction", () => {
-    it("1: should log message with executed action", () => {
+    it("should log message with executed action", () => {
       const {
         stubs: [outputChannelInnerStub],
         expectedMessage,
         fakeTimer,
         action,
-      } = setups.logAction1();
+      } = setups.logAction.setupForLoggingExecutedAction();
       logger.logAction(action);
 
       assert.equal(
@@ -59,13 +60,13 @@ describe("Logger", () => {
   });
 
   describe("logScanTime", () => {
-    it("1: should log message with scan time", () => {
+    it("should log message with scan time", () => {
       const {
         stubs: [outputChannelInnerStub],
         expectedMessage,
         fakeTimer,
         indexStats,
-      } = setups.logScanTime1();
+      } = setups.logScanTime.setupForLoggingScanTimeWithStats();
       logger.logScanTime(indexStats);
 
       assert.equal(
@@ -78,13 +79,13 @@ describe("Logger", () => {
   });
 
   describe("logStructure", () => {
-    it("1: should log message with scanned workspace struture", () => {
+    it("should log message with scanned workspace struture", () => {
       const {
         stubs: [outputChannelInnerStub],
         expectedMessage,
         fakeTimer,
         workspaceData,
-      } = setups.logStructure1();
+      } = setups.logStructure.setupForLoggingWorkspaceStructure();
       logger.logStructure(workspaceData);
 
       assert.equal(

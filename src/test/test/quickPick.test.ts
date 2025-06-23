@@ -19,24 +19,23 @@ describe("QuickPick", () => {
   afterEach(() => setups.afterEach());
 
   describe("init", () => {
-    it("1: should vscode quick pick be created", () => {
-      const [createQuickPickStub] = setups.init1();
+    it("should vscode quick pick be created", () => {
+      const [createQuickPickStub] =
+        setups.init.setupForCreatingVscodeQuickPick();
       quickPick.init();
 
       assert.equal(createQuickPickStub.calledOnce, true);
     });
 
-    it(`2: should register two event listeners
-      if shouldUseDebounce returns true`, () => {
-      setups.init2();
+    it("should register two event listeners if shouldUseDebounce returns true", () => {
+      setups.init.setupForRegisteringTwoEventListenersWhenDebounceEnabled();
       quickPick.init();
 
       assert.equal(quickPick.getOnDidChangeValueEventListeners().length, 2);
     });
 
-    it(`3: should register two event listeners
-      if shouldUseDebounce returns false`, () => {
-      setups.init3();
+    it("should register one event listener if shouldUseDebounce returns false", () => {
+      setups.init.setupForRegisteringOneEventListenerWhenDebounceDisabled();
       quickPick.init();
 
       assert.equal(quickPick.getOnDidChangeValueEventListeners().length, 1);
@@ -44,16 +43,15 @@ describe("QuickPick", () => {
   });
 
   describe("reloadSortingSettings", () => {
-    it(`1: should set that items should be sorted`, () => {
-      setups.reloadSortingSettings1();
+    it("should set that items should be sorted", () => {
+      setups.reloadSortingSettings.setupForSettingSortingEnabled();
       quickPick.reloadSortingSettings();
 
       assert.equal(quickPick.getShouldItemsBeSorted(), true);
     });
 
-    it(`2: should set sortByLabel on quickPick control
-      to have separators between items`, () => {
-      setups.reloadSortingSettings2();
+    it("should set sortByLabel on quickPick control to have separators between items", () => {
+      setups.reloadSortingSettings.setupForSettingSortByLabelToFalseForSeparators();
       quickPick.reloadSortingSettings();
 
       assert.equal((quickPick.getControl() as any).sortByLabel, false);
@@ -61,17 +59,15 @@ describe("QuickPick", () => {
   });
 
   describe("reloadOnDidChangeValueEventListener", () => {
-    it(`1: should dispose existing event listeners and
-      register one event listener if shouldUseDebounce returns false`, () => {
-      setups.reloadOnDidChangeValueEventListener1();
+    it("should dispose existing event listeners and register one event listener if shouldUseDebounce returns false", () => {
+      setups.reloadOnDidChangeValueEventListener.setupForRegisteringOneListenerWhenDebounceDisabled();
       quickPick.reloadOnDidChangeValueEventListener();
 
       assert.equal(quickPick.getOnDidChangeValueEventListeners().length, 1);
     });
 
-    it(`2: should dispose existing event listeners and
-      register two event listeners if shouldUseDebounce returns true`, () => {
-      setups.reloadOnDidChangeValueEventListener2();
+    it("should dispose existing event listeners and register two event listeners if shouldUseDebounce returns true", () => {
+      setups.reloadOnDidChangeValueEventListener.setupForRegisteringTwoListenersWhenDebounceEnabled();
       quickPick.reloadOnDidChangeValueEventListener();
 
       assert.equal(quickPick.getOnDidChangeValueEventListeners().length, 2);
@@ -79,12 +75,12 @@ describe("QuickPick", () => {
   });
 
   describe("reload", () => {
-    it("1: should fetch configuration from config component", () => {
+    it("should fetch configuration from config component", () => {
       const [
         shouldUseItemsFilterPhrasesStub,
         getHelpPhraseStub,
         getItemsFilterPhrasesStub,
-      ] = setups.reload1();
+      ] = setups.reload.setupForFetchingConfigurationFromConfig();
       quickPick.reload();
 
       assert.equal(shouldUseItemsFilterPhrasesStub.calledOnce, true);
@@ -92,8 +88,8 @@ describe("QuickPick", () => {
       assert.equal(getItemsFilterPhrasesStub.calledOnce, true);
     });
 
-    it("2: should fetch help data", () => {
-      const qpHelpItems = setups.reload2();
+    it("should fetch help data", () => {
+      const qpHelpItems = setups.reload.setupForFetchingHelpData();
       quickPick.reload();
 
       assert.deepEqual(quickPick.getHelpItems(), qpHelpItems);
@@ -101,21 +97,21 @@ describe("QuickPick", () => {
   });
 
   describe("isInitialized", () => {
-    it("1: should return true if vscode quick pick is initialized", () => {
-      setups.isInitialized1();
+    it("should return true if vscode quick pick is initialized", () => {
+      setups.isInitialized.setupForReturningTrueWhenQuickPickInitialized();
       assert.equal(quickPick.isInitialized(), true);
     });
 
-    it("2: should return false if vscode quick pick is not initialized", () => {
-      setups.isInitialized2();
+    it("should return false if vscode quick pick is not initialized", () => {
+      setups.isInitialized.setupForReturningFalseWhenQuickPickNotInitialized();
       assert.equal(quickPick.isInitialized(), false);
     });
   });
 
   describe("show", () => {
-    it(`1: should vscode.quickPick.show method be invoked
-    if quick pick is initialized`, () => {
-      const [showStub] = setups.show1();
+    it("should vscode.quickPick.show method be invoked if quick pick is initialized", () => {
+      const [showStub] =
+        setups.show.setupForInvokingShowWhenQuickPickInitialized();
       quickPick.show();
 
       assert.equal(showStub.calledOnce, true);
@@ -123,15 +119,15 @@ describe("QuickPick", () => {
   });
 
   describe("loadItems", () => {
-    it("1: should unsorted items be loaded", () => {
-      const items = setups.loadItems1();
+    it("should unsorted items be loaded", () => {
+      const items = setups.loadItems.setupForLoadingUnsortedItems();
       quickPick.loadItems();
 
       assert.deepEqual(quickPick.getControl().items, items);
     });
 
-    it("2: should sorted items be loaded", () => {
-      const items = setups.loadItems2();
+    it("should sorted items be loaded", () => {
+      const items = setups.loadItems.setupForLoadingSortedItems();
       quickPick.loadItems();
 
       assert.deepEqual(quickPick.getControl().items, items);
@@ -139,8 +135,8 @@ describe("QuickPick", () => {
   });
 
   describe("loadHelpItems", () => {
-    it("1: should help items be loaded", () => {
-      const helpItems = setups.loadHelpItems1();
+    it("should help items be loaded", () => {
+      const helpItems = setups.loadHelpItems.setupForLoadingHelpItems();
       quickPick.loadHelpItems();
 
       assert.deepEqual(quickPick.getControl().items, helpItems);
@@ -148,13 +144,13 @@ describe("QuickPick", () => {
   });
 
   describe("setItems", () => {
-    it("1: should items be set", () => {
+    it("should items be set", () => {
       quickPick.setItems(getQpItems());
 
       assert.equal(quickPick.getItems().length, 2);
     });
 
-    it("2: should items have assigned buttons property", () => {
+    it("should items have assigned buttons property", () => {
       quickPick.setItems(getQpItems());
 
       assert.deepEqual(quickPick.getItems()[0].buttons, [
@@ -167,8 +163,8 @@ describe("QuickPick", () => {
   });
 
   describe("showLoading", () => {
-    it("1: should vscode.quickPick.busy property be set", () => {
-      setups.showLoading1();
+    it("should vscode.quickPick.busy property be set", () => {
+      setups.showLoading.setupForSettingBusyProperty();
       quickPick.showLoading(true);
 
       assert.equal(quickPick.getControl().busy, true);
@@ -176,8 +172,8 @@ describe("QuickPick", () => {
   });
 
   describe("setText", () => {
-    it("1: should text be set", () => {
-      setups.setText1();
+    it("should text be set", () => {
+      setups.setText.setupForSettingText();
       const text = "test text";
       quickPick.setText(text);
 
@@ -186,8 +182,8 @@ describe("QuickPick", () => {
   });
 
   describe("setPlaceholder", () => {
-    it("1: should set placeholder to loading text", () => {
-      setups.setPlaceholder1();
+    it("should set placeholder to loading text", () => {
+      setups.setPlaceholder.setupForSettingLoadingPlaceholder();
       quickPick.setPlaceholder(true);
       assert.equal(
         quickPick.getControl().placeholder,
@@ -195,8 +191,8 @@ describe("QuickPick", () => {
       );
     });
 
-    it("2: should set placeholder to searching text if shouldUseItemsFilterPhrase is false", () => {
-      setups.setPlaceholder2();
+    it("should set placeholder to searching text if shouldUseItemsFilterPhrase is false", () => {
+      setups.setPlaceholder.setupForSettingSearchingPlaceholderWhenFilterPhrasesDisabled();
       quickPick.setPlaceholder(false);
 
       assert.equal(
@@ -205,8 +201,8 @@ describe("QuickPick", () => {
       );
     });
 
-    it("3: should set placeholder to help text if shouldUseItemsFilterPhrase is true", () => {
-      setups.setPlaceholder3();
+    it("should set placeholder to help text if shouldUseItemsFilterPhrase is true", () => {
+      setups.setPlaceholder.setupForSettingHelpPlaceholderWhenFilterPhrasesEnabled();
       quickPick.setPlaceholder(false);
 
       assert.equal(
@@ -215,9 +211,8 @@ describe("QuickPick", () => {
       );
     });
 
-    it(`4: should change quick pick placeholder to help text with not set help phrase
-      if shouldUseItemsFilterPhrase is true`, () => {
-      setups.setPlaceholder4();
+    it("should change quick pick placeholder to help text with not set help phrase if shouldUseItemsFilterPhrase is true", () => {
+      setups.setPlaceholder.setupForSettingNotSetHelpPlaceholderWhenHelpPhraseEmpty();
       quickPick.setPlaceholder(false);
 
       assert.equal(
@@ -228,7 +223,7 @@ describe("QuickPick", () => {
   });
 
   describe("setOnDidChangeValueEventListeners", () => {
-    it("1: should set new array of onDidChangeValueEventListeners", () => {
+    it("should set new array of onDidChangeValueEventListeners", () => {
       quickPick.setOnDidChangeValueEventListeners(
         getQuickPickOnDidChangeValueEventListeners(2)
       );
@@ -237,8 +232,8 @@ describe("QuickPick", () => {
   });
 
   describe("handleDidChangeValueClearing", () => {
-    it("1: should clear quick pick items", () => {
-      setups.handleDidChangeValueClearing1();
+    it("should clear quick pick items", () => {
+      setups.handleDidChangeValueClearing.setupForClearingQuickPickItems();
       quickPick.handleDidChangeValueClearing();
 
       assert.equal(quickPick.getControl().items.length, 0);
@@ -246,15 +241,17 @@ describe("QuickPick", () => {
   });
 
   describe("handleDidChangeValue", () => {
-    it("1: should load workspace items", async () => {
-      const [loadItemsStub] = setups.handleDidChangeValue1();
+    it("should load workspace items", async () => {
+      const [loadItemsStub] =
+        setups.handleDidChangeValue.setupForLoadingWorkspaceItems();
       await quickPick.handleDidChangeValue("test text");
 
       assert.equal(loadItemsStub.calledOnce, true);
     });
 
-    it("2: should load help items", async () => {
-      const [loadItemsStub] = setups.handleDidChangeValue2();
+    it("should load help items", async () => {
+      const [loadItemsStub] =
+        setups.handleDidChangeValue.setupForLoadingHelpItems();
       await quickPick.handleDidChangeValue("?");
 
       assert.equal(loadItemsStub.calledOnce, true);
@@ -262,21 +259,23 @@ describe("QuickPick", () => {
   });
 
   describe("handleDidAccept", () => {
-    it("1: should open selected qpItem with uri scheme equals to 'file'", async () => {
-      const [revealRangeStub] = setups.handleDidAccept1();
+    it("should open selected qpItem with uri scheme equals to 'file'", async () => {
+      const [revealRangeStub] =
+        setups.handleDidAccept.setupForOpeningFileSchemeItem();
       await quickPick.handleDidAccept();
       assert.equal(revealRangeStub.calledOnce, true);
     });
 
-    it("2: should open selected qpItem with uri scheme equals to 'untitled'", async () => {
-      const [revealRangeStub] = setups.handleDidAccept2();
+    it("should open selected qpItem with uri scheme equals to 'untitled'", async () => {
+      const [revealRangeStub] =
+        setups.handleDidAccept.setupForOpeningUntitledSchemeItem();
       await quickPick.handleDidAccept();
 
       assert.equal(revealRangeStub.calledOnce, true);
     });
 
-    it("3: should open selected qpItem which is help item", async () => {
-      const [loadItemsStub] = setups.handleDidAccept3();
+    it("should open selected qpItem which is help item", async () => {
+      const [loadItemsStub] = setups.handleDidAccept.setupForOpeningHelpItem();
       await quickPick.handleDidAccept();
 
       assert.equal(loadItemsStub.calledOnce, true);
@@ -284,8 +283,8 @@ describe("QuickPick", () => {
   });
 
   describe("handleDidHide", () => {
-    it("1: should setText method be invoked with empty string as argument", () => {
-      setups.handleDidHide1();
+    it("should setText method be invoked with empty string as argument", () => {
+      setups.handleDidHide.setupForSettingEmptyText();
       quickPick.handleDidHide();
 
       assert.equal(quickPick.getControl().value, "");
@@ -293,8 +292,9 @@ describe("QuickPick", () => {
   });
 
   describe("handleDidTriggerItemButton", () => {
-    it("1: should openItem method be invoked", async () => {
-      const [openItemStub] = setups.handleDidTriggerItemButton1();
+    it("should openItem method be invoked", async () => {
+      const [openItemStub] =
+        setups.handleDidTriggerItemButton.setupForInvokingOpenItem();
       await quickPick.handleDidTriggerItemButton(getQuickPickItemButtonEvent());
 
       assert.equal(openItemStub.calledOnce, true);

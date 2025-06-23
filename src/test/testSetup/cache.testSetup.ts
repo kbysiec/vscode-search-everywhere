@@ -35,188 +35,216 @@ export const getTestSetups = () => {
     afterEach: () => {
       sandbox.restore();
     },
-    getData1: () => {
-      const qpItems = getQpItems();
-      stubMultiple(
-        [
-          {
-            object: context.workspaceState,
-            method: "get",
-            returns: qpItems,
-          },
-        ],
-        sandbox
-      );
 
-      return qpItems;
+    getData: {
+      setupForReturningCachedData: () => {
+        const qpItems = getQpItems();
+        stubMultiple(
+          [
+            {
+              object: context.workspaceState,
+              method: "get",
+              returns: qpItems,
+            },
+          ],
+          sandbox
+        );
+
+        return qpItems;
+      },
+
+      setupForEmptyCache: () => {
+        stubMultiple(
+          [
+            {
+              object: context.workspaceState,
+              method: "get",
+              returns: undefined,
+            },
+          ],
+          sandbox
+        );
+
+        return [];
+      },
     },
-    getData2: () => {
-      stubMultiple(
-        [
-          {
-            object: context.workspaceState,
-            method: "get",
-            returns: undefined,
-          },
-        ],
-        sandbox
-      );
 
-      return [];
+    updateData: {
+      setupForUpdatingCache: () => {
+        const stubs = stubMultiple(
+          [
+            {
+              object: context.workspaceState,
+              method: "update",
+            },
+          ],
+          sandbox
+        );
+
+        return {
+          stubs,
+          qpItems: getQpItems(),
+        };
+      },
     },
-    updateData1: () => {
-      const stubs = stubMultiple(
-        [
-          {
-            object: context.workspaceState,
-            method: "update",
-          },
-        ],
-        sandbox
-      );
 
-      return {
-        stubs,
-        qpItems: getQpItems(),
-      };
+    getNotSavedUriPaths: {
+      setupForReturningCachedPaths: () => {
+        const items = getItems();
+        const paths = items.map((item) => item.path);
+
+        stubMultiple(
+          [
+            {
+              object: context.workspaceState,
+              method: "get",
+              returns: paths,
+            },
+          ],
+          sandbox
+        );
+
+        return paths;
+      },
+
+      setupForEmptyCache: () => {
+        stubMultiple(
+          [
+            {
+              object: context.workspaceState,
+              method: "get",
+              returns: undefined,
+            },
+          ],
+          sandbox
+        );
+
+        return [];
+      },
     },
-    getNotSavedUriPaths1: () => {
-      const items = getItems();
-      const paths = items.map((item) => item.path);
 
-      stubMultiple(
-        [
-          {
-            object: context.workspaceState,
-            method: "get",
-            returns: paths,
-          },
-        ],
-        sandbox
-      );
+    getConfigByKey: {
+      setupForExistingConfigKey: () => {
+        const key = "searchEverywhere.exclude";
+        stubMultiple(
+          [
+            {
+              object: context.workspaceState,
+              method: "get",
+              returns: { [key]: mock.configuration[key] },
+            },
+          ],
+          sandbox
+        );
 
-      return paths;
+        return key;
+      },
+
+      setupForNonExistentConfigKey: () => {
+        const key = "searchEverywhere.exclude";
+        stubMultiple(
+          [
+            {
+              object: context.workspaceState,
+              method: "get",
+              returns: undefined,
+            },
+          ],
+          sandbox
+        );
+
+        return key;
+      },
     },
-    getNotSavedUriPaths2: () => {
-      stubMultiple(
-        [
-          {
-            object: context.workspaceState,
-            method: "get",
-            returns: undefined,
-          },
-        ],
-        sandbox
-      );
 
-      return [];
-    },
-    getConfigByKey1: () => {
-      const key = "searchEverywhere.exclude";
-      stubMultiple(
-        [
-          {
-            object: context.workspaceState,
-            method: "get",
-            returns: { [key]: mock.configuration[key] },
-          },
-        ],
-        sandbox
-      );
+    updateConfigByKey: {
+      setupForExistingCacheObject: () => {
+        const key = "searchEverywhere.exclude";
+        const newConfig = {
+          ...mock.configuration,
+          ...{ [key]: mock.newExcludePatterns },
+        };
 
-      return key;
-    },
-    getConfigByKey2: () => {
-      const key = "searchEverywhere.exclude";
-      stubMultiple(
-        [
-          {
-            object: context.workspaceState,
-            method: "get",
-            returns: undefined,
-          },
-        ],
-        sandbox
-      );
+        const stubs = stubMultiple(
+          [
+            {
+              object: context.workspaceState,
+              method: "update",
+            },
+            {
+              object: context.workspaceState,
+              method: "get",
+              returns: mock.configuration,
+            },
+          ],
+          sandbox
+        );
 
-      return key;
-    },
-    updateConfigByKey1: () => {
-      const key = "searchEverywhere.exclude";
-      const newConfig = {
-        ...mock.configuration,
-        ...{ [key]: mock.newExcludePatterns },
-      };
+        return { stubs, key, newConfig };
+      },
 
-      const stubs = stubMultiple(
-        [
-          {
-            object: context.workspaceState,
-            method: "update",
-          },
-          {
-            object: context.workspaceState,
-            method: "get",
-            returns: mock.configuration,
-          },
-        ],
-        sandbox
-      );
+      setupForNonExistentCacheObject: () => {
+        const key = "searchEverywhere.exclude";
 
-      return { stubs, key, newConfig };
-    },
-    updateConfigByKey2: () => {
-      const key = "searchEverywhere.exclude";
+        const stubs = stubMultiple(
+          [
+            {
+              object: context.workspaceState,
+              method: "update",
+            },
+            {
+              object: context.workspaceState,
+              method: "get",
+              returns: undefined,
+            },
+          ],
+          sandbox
+        );
 
-      const stubs = stubMultiple(
-        [
-          {
-            object: context.workspaceState,
-            method: "update",
-          },
-          {
-            object: context.workspaceState,
-            method: "get",
-            returns: undefined,
-          },
-        ],
-        sandbox
-      );
+        return { stubs, key };
+      },
+    },
 
-      return { stubs, key };
+    clear: {
+      setupForClearingDataAndConfig: () => {
+        return stubMultiple(
+          [
+            {
+              object: context.workspaceState,
+              method: "update",
+            },
+          ],
+          sandbox
+        );
+      },
     },
-    clear1: () => {
-      return stubMultiple(
-        [
-          {
-            object: context.workspaceState,
-            method: "update",
-          },
-        ],
-        sandbox
-      );
+
+    clearConfig: {
+      setupForClearingConfig: () => {
+        return stubMultiple(
+          [
+            {
+              object: context.workspaceState,
+              method: "update",
+            },
+          ],
+          sandbox
+        );
+      },
     },
-    clearConfig1: () => {
-      return stubMultiple(
-        [
-          {
-            object: context.workspaceState,
-            method: "update",
-          },
-        ],
-        sandbox
-      );
-    },
-    clearNotSavedUriPaths1: () => {
-      return stubMultiple(
-        [
-          {
-            object: context.workspaceState,
-            method: "update",
-          },
-        ],
-        sandbox
-      );
+
+    clearNotSavedUriPaths: {
+      setupForClearingNotSavedUriPaths: () => {
+        return stubMultiple(
+          [
+            {
+              object: context.workspaceState,
+              method: "update",
+            },
+          ],
+          sandbox
+        );
+      },
     },
   };
 };

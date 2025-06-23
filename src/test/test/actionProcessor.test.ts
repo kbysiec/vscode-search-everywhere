@@ -15,30 +15,30 @@ describe("ActionProcessor", () => {
   afterEach(() => setups.afterEach());
 
   describe("register", () => {
-    it("1: should add method be invoked", async () => {
-      const [addStub] = setups.register1();
+    it("should add action to queue when register is called", async () => {
+      const [addStub] = setups.register.setupForAddingActionToQueue();
       await actionProcessor.register(getAction());
 
       assert.equal(addStub.calledOnce, true);
     });
 
-    it("2: should process method be invoked if action processor is not busy", async () => {
-      const [processStub] = setups.register2();
+    it("should process action when action processor is not busy", async () => {
+      const [processStub] = setups.register.setupForProcessingWhenNotBusy();
       await actionProcessor.register(getAction());
 
       assert.equal(processStub.calledOnce, true);
     });
 
-    it("3: should not process method be invoked if action processor is busy", async () => {
-      const [processStub] = setups.register3();
+    it("should not process action when action processor is busy", async () => {
+      const [processStub] = setups.register.setupForProcessingWhenBusy();
       await actionProcessor.register(getAction());
 
       assert.equal(processStub.calledOnce, false);
     });
 
-    it(`4: should take actions from queue, reduce, and invoke
-      its functions in appropriate order - with rebuild queued`, async () => {
-      const { action, queue } = setups.register4();
+    it("should take actions from queue, reduce, and invoke its functions in appropriate order - with rebuild queued", async () => {
+      const { action, queue } =
+        setups.register.setupForQueueProcessingWithRebuildQueued();
       await actionProcessor.register(action);
 
       assert.equal((queue[0].fn as sinon.SinonStub).calledOnce, false);
@@ -48,9 +48,9 @@ describe("ActionProcessor", () => {
       assert.equal((action.fn as sinon.SinonStub).calledOnce, true);
     });
 
-    it(`5: should take actions from queue, reduce, and invoke
-       its functions in appropriate order - without rebuild queued`, async () => {
-      const { action, queue } = setups.register5();
+    it("should take actions from queue, reduce, and invoke its functions in appropriate order - without rebuild queued", async () => {
+      const { action, queue } =
+        setups.register.setupForQueueProcessingWithoutRebuildQueued();
       await actionProcessor.register(action);
 
       assert.equal((queue[0].fn as sinon.SinonStub).calledOnce, false);
@@ -59,31 +59,33 @@ describe("ActionProcessor", () => {
       assert.equal((action.fn as sinon.SinonStub).calledOnce, true);
     });
 
-    it("6: should onWillProcessing be emitted at the beginning of processing", async () => {
-      const { action, eventEmitter } = setups.register6();
+    it("should emit onWillProcessing event at the beginning of processing", async () => {
+      const { action, eventEmitter } =
+        setups.register.setupForWillProcessingEventEmission();
       await actionProcessor.register(action);
 
       assert.equal(eventEmitter.fire.calledOnce, true);
     });
 
-    it("7: should onDidProcessing be emitted in the end of processing", async () => {
-      const { action, eventEmitter } = setups.register7();
+    it("should emit onDidProcessing event at the end of processing", async () => {
+      const { action, eventEmitter } =
+        setups.register.setupForDidProcessingEventEmission();
       await actionProcessor.register(action);
 
       assert.equal(eventEmitter.fire.calledOnce, true);
     });
 
-    it(`8: should onWillExecuteAction be emitted before execution
-        of each action function`, async () => {
-      const { action, eventEmitter } = setups.register8();
+    it("should emit onWillExecuteAction event before execution of each action function", async () => {
+      const { action, eventEmitter } =
+        setups.register.setupForWillExecuteActionEventEmission();
       await actionProcessor.register(action);
 
       assert.equal(eventEmitter.fire.calledTwice, true);
     });
 
-    it(`9: should reduce rebuild actions and return array with last
-      rebuild action if previous action is different type than rebuild`, async () => {
-      const { action, queue } = setups.register9();
+    it("should reduce rebuild actions and return array with last rebuild action if previous action is different type than rebuild", async () => {
+      const { action, queue } =
+        setups.register.setupForRebuildActionReductionWithDifferentPreviousAction();
       await actionProcessor.register(action);
 
       assert.equal((queue[0].fn as sinon.SinonStub).calledOnce, false);
@@ -91,9 +93,9 @@ describe("ActionProcessor", () => {
       assert.equal((action.fn as sinon.SinonStub).calledOnce, true);
     });
 
-    it(`10: should reduce rebuild actions and return empty array
-          if previous action is rebuild type`, async () => {
-      const { action, queue } = setups.register10();
+    it("should reduce rebuild actions and return empty array if previous action is rebuild type", async () => {
+      const { action, queue } =
+        setups.register.setupForRebuildActionReductionWithRebuildPreviousAction();
       await actionProcessor.register(action);
 
       assert.equal((queue[0].fn as sinon.SinonStub).calledOnce, false);
@@ -101,8 +103,9 @@ describe("ActionProcessor", () => {
       assert.equal((action.fn as sinon.SinonStub).calledOnce, false);
     });
 
-    it("11: should reduce actions with other type than rebuild", async () => {
-      const { action, queue } = setups.register11();
+    it("should reduce actions with other type than rebuild", async () => {
+      const { action, queue } =
+        setups.register.setupForNonRebuildActionReduction();
       await actionProcessor.register(action);
 
       assert.equal((queue[0].fn as sinon.SinonStub).calledOnce, false);

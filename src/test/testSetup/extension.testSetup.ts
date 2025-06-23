@@ -15,71 +15,91 @@ export const getTestSetups = () => {
     afterEach: () => {
       sandbox.restore();
     },
-    activate1: () => {
-      return stubMultiple(
-        [
-          {
-            object: vscode.commands,
-            method: "registerCommand",
-          },
-          {
-            object: controller,
-            method: "init",
-          },
-          {
-            object: controller,
-            method: "startup",
-          },
-        ],
-        sandbox
-      );
+
+    activate: {
+      setupForRegisteringCommands: () => {
+        return stubMultiple(
+          [
+            {
+              object: vscode.commands,
+              method: "registerCommand",
+            },
+            {
+              object: controller,
+              method: "init",
+            },
+            {
+              object: controller,
+              method: "startup",
+            },
+          ],
+          sandbox
+        );
+      },
+
+      setupForControllerInit: () => {
+        return stubMultiple(
+          [
+            {
+              object: controller,
+              method: "init",
+            },
+            {
+              object: vscode.commands,
+              method: "registerCommand",
+            },
+            {
+              object: controller,
+              method: "startup",
+            },
+          ],
+          sandbox
+        );
+      },
+
+      setupForControllerStartup: () => {
+        return stubMultiple(
+          [
+            {
+              object: controller,
+              method: "startup",
+            },
+            {
+              object: controller,
+              method: "init",
+            },
+            {
+              object: vscode.commands,
+              method: "registerCommand",
+            },
+          ],
+          sandbox
+        );
+      },
     },
-    activate2: () => {
-      return stubMultiple(
-        [
-          {
-            object: controller,
-            method: "init",
-          },
-          {
-            object: vscode.commands,
-            method: "registerCommand",
-          },
-          {
-            object: controller,
-            method: "startup",
-          },
-        ],
-        sandbox
-      );
+
+    deactivate: {
+      setupForLogging: () => {
+        return stubMultiple([{ object: console, method: "log" }], sandbox);
+      },
     },
-    activate3: () => {
-      return stubMultiple(
-        [
-          {
-            object: controller,
-            method: "startup",
-          },
-          {
-            object: controller,
-            method: "init",
-          },
-          {
-            object: vscode.commands,
-            method: "registerCommand",
-          },
-        ],
-        sandbox
-      );
+
+    search: {
+      setupForControllerSearch: () => {
+        return stubMultiple(
+          [{ object: controller, method: "search" }],
+          sandbox
+        );
+      },
     },
-    deactivate1: () => {
-      return stubMultiple([{ object: console, method: "log" }], sandbox);
-    },
-    search1: () => {
-      return stubMultiple([{ object: controller, method: "search" }], sandbox);
-    },
-    reload1: () => {
-      return stubMultiple([{ object: controller, method: "reload" }], sandbox);
+
+    reload: {
+      setupForControllerReload: () => {
+        return stubMultiple(
+          [{ object: controller, method: "reload" }],
+          sandbox
+        );
+      },
     },
   };
 };

@@ -1,15 +1,5 @@
 import * as vscode from "vscode";
-import { QuickPickItem } from "../../types";
 import { getWorkspaceData } from "../util/mockFactory";
-
-export const itemUntitledUri = vscode.Uri.file("./fake/fake-1.ts");
-(itemUntitledUri as any).scheme = "untitled";
-
-export const qpItemUntitled: QuickPickItem = {
-  label: "fake-1.ts",
-  uri: itemUntitledUri,
-  symbolKind: 0,
-};
 
 export const mocks = {
   workspaceFolders: [

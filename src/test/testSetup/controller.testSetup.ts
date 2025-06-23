@@ -254,1167 +254,1227 @@ export const getTestSetups = () => {
     afterEach: () => {
       sandbox.restore();
     },
-    init1: () => {
-      stubMultiple(
-        [
-          {
-            object: cache,
-            method: "initCache",
-          },
-          {
-            object: workspace,
-            method: "init",
-          },
-          {
-            object: workspace,
-            method: "registerEventListeners",
-          },
-          {
-            object: workspaceEventsEmitter,
-            method: "onWillProcessing",
-          },
-          {
-            object: workspaceEventsEmitter,
-            method: "onDidProcessing",
-          },
-          {
-            object: workspaceEventsEmitter,
-            method: "onWillExecuteAction",
-          },
-          {
-            object: workspaceEventsEmitter,
-            method: "onDidDebounceConfigToggle",
-          },
-          {
-            object: workspaceEventsEmitter,
-            method: "onWillReindexOnConfigurationChange",
-          },
-        ],
-        sandbox
-      );
-      return getExtensionContext();
-    },
-    init2: () => {
-      return stubMultiple(
-        [
-          {
-            object: cache,
-            method: "initCache",
-          },
-          {
-            object: workspace,
-            method: "init",
-          },
-          {
-            object: workspace,
-            method: "registerEventListeners",
-          },
-          {
-            object: workspaceEventsEmitter,
-            method: "onWillProcessing",
-          },
-          {
-            object: workspaceEventsEmitter,
-            method: "onDidProcessing",
-          },
-          {
-            object: workspaceEventsEmitter,
-            method: "onWillExecuteAction",
-          },
-          {
-            object: workspaceEventsEmitter,
-            method: "onDidDebounceConfigToggle",
-          },
-          {
-            object: workspaceEventsEmitter,
-            method: "onWillReindexOnConfigurationChange",
-          },
-        ],
-        sandbox
-      );
-    },
-    init3: () => {
-      return stubMultiple(
-        [
-          {
-            object: workspace,
-            method: "init",
-          },
-          {
-            object: cache,
-            method: "initCache",
-          },
-          {
-            object: workspace,
-            method: "registerEventListeners",
-          },
-          {
-            object: workspaceEventsEmitter,
-            method: "onWillProcessing",
-          },
-          {
-            object: workspaceEventsEmitter,
-            method: "onDidProcessing",
-          },
-          {
-            object: workspaceEventsEmitter,
-            method: "onWillExecuteAction",
-          },
-          {
-            object: workspaceEventsEmitter,
-            method: "onDidDebounceConfigToggle",
-          },
-          {
-            object: workspaceEventsEmitter,
-            method: "onWillReindexOnConfigurationChange",
-          },
-        ],
-        sandbox
-      );
-    },
-    init4: () => {
-      return stubMultiple(
-        [
-          {
-            object: workspaceEventsEmitter,
-            method: "onWillProcessing",
-          },
-          {
-            object: workspaceEventsEmitter,
-            method: "onDidProcessing",
-          },
-          {
-            object: workspaceEventsEmitter,
-            method: "onWillExecuteAction",
-          },
-          {
-            object: workspaceEventsEmitter,
-            method: "onDidDebounceConfigToggle",
-          },
-          {
-            object: workspaceEventsEmitter,
-            method: "onWillReindexOnConfigurationChange",
-          },
-          {
-            object: workspace,
-            method: "init",
-          },
-          {
-            object: cache,
-            method: "initCache",
-          },
-          {
-            object: workspace,
-            method: "registerEventListeners",
-          },
-        ],
-        sandbox
-      );
-    },
-    search1: () => {
-      stubComponents(sandbox);
-      return stubComponentsForSearch(sandbox, {
-        isInitialized: false,
-        shouldIndexOnQuickPickOpen: true,
-        shouldLoadDataFromCacheOnQuickPickOpen: false,
-      });
-    },
-    search2: () => {
-      stubComponents(sandbox);
-      return stubComponentsForSearch(sandbox, {
-        isInitialized: false,
-        shouldIndexOnQuickPickOpen: true,
-        shouldLoadDataFromCacheOnQuickPickOpen: false,
-      });
-    },
-    search3: () => {
-      stubComponents(sandbox);
-      return stubComponentsForSearch(sandbox, {
-        isInitialized: false,
-        shouldIndexOnQuickPickOpen: false,
-        shouldLoadDataFromCacheOnQuickPickOpen: true,
-      });
-    },
-    search4: () => {
-      stubComponents(sandbox);
-      return stubComponentsForSearch(sandbox, {
-        isInitialized: false,
-        shouldIndexOnQuickPickOpen: false,
-        shouldLoadDataFromCacheOnQuickPickOpen: true,
-      });
-    },
-    search5: () => {
-      stubComponents(sandbox);
-      return stubComponentsForSearch(sandbox, {
-        isInitialized: false,
-        shouldIndexOnQuickPickOpen: false,
-        shouldLoadDataFromCacheOnQuickPickOpen: true,
-      });
-    },
-    search6: () => {
-      stubComponents(sandbox);
-      return stubComponentsForSearch(sandbox, {
-        isInitialized: false,
-        shouldIndexOnQuickPickOpen: false,
-        shouldLoadDataFromCacheOnQuickPickOpen: true,
-      });
-    },
-    search7: () => {
-      stubComponents(sandbox);
-      stubComponentsForSearch(sandbox, {
-        isInitialized: true,
-        shouldIndexOnQuickPickOpen: false,
-        shouldLoadDataFromCacheOnQuickPickOpen: false,
-      });
-      return stubMultiple(
-        [
-          {
-            object: quickPick,
-            method: "loadItems",
-          },
-          {
-            object: quickPick,
-            method: "show",
-          },
-          {
-            object: quickPick,
-            method: "setText",
-          },
-        ],
-        sandbox
-      );
-    },
-    search8: () => {
-      stubComponents(sandbox);
-      stubComponentsForSearch(sandbox, {
-        isInitialized: false,
-        shouldIndexOnQuickPickOpen: false,
-        shouldLoadDataFromCacheOnQuickPickOpen: false,
-      });
-      return stubMultiple(
-        [
-          {
-            object: quickPick,
-            method: "loadItems",
-          },
-          {
-            object: quickPick,
-            method: "show",
-          },
-          {
-            object: patternProvider,
-            method: "getExcludePatterns",
-            returns: Promise.resolve(["**/.history/**", "**/.vscode/**"]),
-          },
-        ],
-        sandbox
-      );
-    },
-    search9: () => {
-      stubComponents(sandbox);
-      return stubComponentsForSearch(sandbox, {
-        isInitialized: false,
-        shouldIndexOnQuickPickOpen: false,
-        shouldLoadDataFromCacheOnQuickPickOpen: false,
-      });
-    },
-    search10: () => {
-      stubComponents(sandbox);
-      stubComponentsForSearch(sandbox, {
-        isInitialized: true,
-        shouldIndexOnQuickPickOpen: false,
-        shouldLoadDataFromCacheOnQuickPickOpen: false,
-        shouldSearchSelection: true,
-      });
-      const editor = getTextEditorStub(true, "test text");
 
-      return stubMultiple(
-        [
-          {
-            object: quickPick,
-            method: "setText",
-          },
-          {
-            object: quickPick,
-            method: "loadItems",
-          },
-          {
-            object: quickPick,
-            method: "show",
-          },
-          {
-            object: utils,
-            method: "sleepAndExecute",
-          },
-          {
-            object: vscode.window,
-            method: "activeTextEditor",
-            isNotMethod: true,
-            returns: editor,
-          },
-        ],
-        sandbox
-      );
-    },
-    search11: () => {
-      stubComponents(sandbox);
-      stubComponentsForSearch(sandbox, {
-        isInitialized: true,
-        shouldIndexOnQuickPickOpen: false,
-        shouldLoadDataFromCacheOnQuickPickOpen: false,
-        shouldSearchSelection: false,
-      });
+    init: {
+      setupForExtensionContextAssignment: () => {
+        stubMultiple(
+          [
+            {
+              object: cache,
+              method: "initCache",
+            },
+            {
+              object: workspace,
+              method: "init",
+            },
+            {
+              object: workspace,
+              method: "registerEventListeners",
+            },
+            {
+              object: workspaceEventsEmitter,
+              method: "onWillProcessing",
+            },
+            {
+              object: workspaceEventsEmitter,
+              method: "onDidProcessing",
+            },
+            {
+              object: workspaceEventsEmitter,
+              method: "onWillExecuteAction",
+            },
+            {
+              object: workspaceEventsEmitter,
+              method: "onDidDebounceConfigToggle",
+            },
+            {
+              object: workspaceEventsEmitter,
+              method: "onWillReindexOnConfigurationChange",
+            },
+          ],
+          sandbox
+        );
+        return getExtensionContext();
+      },
 
-      return stubMultiple(
-        [
-          {
-            object: quickPick,
-            method: "setText",
-          },
-          {
-            object: quickPick,
-            method: "loadItems",
-          },
-          {
-            object: quickPick,
-            method: "show",
-          },
-        ],
-        sandbox
-      );
+      setupForCacheInitialization: () => {
+        return stubMultiple(
+          [
+            {
+              object: cache,
+              method: "initCache",
+            },
+            {
+              object: workspace,
+              method: "init",
+            },
+            {
+              object: workspace,
+              method: "registerEventListeners",
+            },
+            {
+              object: workspaceEventsEmitter,
+              method: "onWillProcessing",
+            },
+            {
+              object: workspaceEventsEmitter,
+              method: "onDidProcessing",
+            },
+            {
+              object: workspaceEventsEmitter,
+              method: "onWillExecuteAction",
+            },
+            {
+              object: workspaceEventsEmitter,
+              method: "onDidDebounceConfigToggle",
+            },
+            {
+              object: workspaceEventsEmitter,
+              method: "onWillReindexOnConfigurationChange",
+            },
+          ],
+          sandbox
+        );
+      },
+
+      setupForWorkspaceInitialization: () => {
+        return stubMultiple(
+          [
+            {
+              object: workspace,
+              method: "init",
+            },
+            {
+              object: cache,
+              method: "initCache",
+            },
+            {
+              object: workspace,
+              method: "registerEventListeners",
+            },
+            {
+              object: workspaceEventsEmitter,
+              method: "onWillProcessing",
+            },
+            {
+              object: workspaceEventsEmitter,
+              method: "onDidProcessing",
+            },
+            {
+              object: workspaceEventsEmitter,
+              method: "onWillExecuteAction",
+            },
+            {
+              object: workspaceEventsEmitter,
+              method: "onDidDebounceConfigToggle",
+            },
+            {
+              object: workspaceEventsEmitter,
+              method: "onWillReindexOnConfigurationChange",
+            },
+          ],
+          sandbox
+        );
+      },
+
+      setupForEventListenerRegistration: () => {
+        return stubMultiple(
+          [
+            {
+              object: workspaceEventsEmitter,
+              method: "onWillProcessing",
+            },
+            {
+              object: workspaceEventsEmitter,
+              method: "onDidProcessing",
+            },
+            {
+              object: workspaceEventsEmitter,
+              method: "onWillExecuteAction",
+            },
+            {
+              object: workspaceEventsEmitter,
+              method: "onDidDebounceConfigToggle",
+            },
+            {
+              object: workspaceEventsEmitter,
+              method: "onWillReindexOnConfigurationChange",
+            },
+            {
+              object: workspace,
+              method: "init",
+            },
+            {
+              object: cache,
+              method: "initCache",
+            },
+            {
+              object: workspace,
+              method: "registerEventListeners",
+            },
+          ],
+          sandbox
+        );
+      },
     },
-    reload1: () => {
-      stubComponents(sandbox);
-      return stubMultiple(
-        [
-          {
-            object: utils,
-            method: "printNoFolderOpenedMessage",
-          },
-          {
-            object: cache,
-            method: "clear",
-          },
-          {
-            object: cache,
-            method: "clearNotSavedUriPaths",
-          },
-          {
-            object: utils,
-            method: "hasWorkspaceAnyFolder",
-            returns: false,
-          },
-        ],
-        sandbox
-      );
-    },
-    reload2: () => {
-      stubComponents(sandbox);
-      return stubMultiple(
-        [
-          {
-            object: workspace,
-            method: "index",
-          },
-          {
-            object: cache,
-            method: "clear",
-          },
-          {
-            object: cache,
-            method: "clearNotSavedUriPaths",
-          },
-          {
-            object: utils,
-            method: "hasWorkspaceAnyFolder",
-            returns: true,
-          },
-        ],
-        sandbox
-      );
-    },
-    reload3: () => {
-      stubComponents(sandbox);
-      return stubMultiple(
-        [
-          {
-            object: cache,
-            method: "clear",
-          },
-          {
-            object: cache,
-            method: "clearNotSavedUriPaths",
-          },
-          {
-            object: workspace,
-            method: "index",
-          },
-          {
-            object: utils,
-            method: "hasWorkspaceAnyFolder",
-            returns: true,
-          },
-        ],
-        sandbox
-      );
-    },
-    startup1: () => {
-      stubComponents(sandbox);
-      return stubComponentsForStartup(sandbox, {
-        shouldIndexOnStartup: true,
-        shouldLoadDataFromCacheOnStartup: false,
-      });
-    },
-    startup2: () => {
-      stubComponents(sandbox);
-      return stubComponentsForStartup(sandbox, {
-        isInitialized: false,
-        shouldIndexOnStartup: false,
-        shouldLoadDataFromCacheOnStartup: false,
-      });
-    },
-    startup3: () => {
-      stubComponents(sandbox);
-      return stubComponentsForStartup(sandbox, {
-        isInitialized: false,
-        shouldIndexOnStartup: false,
-        shouldLoadDataFromCacheOnStartup: true,
-      });
-    },
-    startup4: () => {
-      stubComponents(sandbox);
-      return stubComponentsForStartup(sandbox, {
-        isInitialized: false,
-        shouldIndexOnStartup: false,
-        shouldLoadDataFromCacheOnStartup: true,
-      });
-    },
-    startup5: () => {
-      stubComponents(sandbox);
-      return stubComponentsForStartup(sandbox, {
-        isInitialized: false,
-        shouldIndexOnStartup: false,
-        shouldLoadDataFromCacheOnStartup: true,
-      });
-    },
-    startup6: () => {
-      stubComponents(sandbox);
-      return stubComponentsForStartup(sandbox, {
-        isInitialized: false,
-        shouldIndexOnStartup: false,
-        shouldLoadDataFromCacheOnStartup: true,
-      });
-    },
-    shouldIndexOnQuickPickOpen1: () => {
-      stubComponents(sandbox);
-      stubMultiple(
-        [
-          {
-            object: controller,
-            method: "isInitOnStartupDisabledAndWorkspaceCachingDisabled",
-            returns: false,
-          },
-          {
-            object: controller,
-            method:
-              "isInitOnStartupDisabledAndWorkspaceCachingEnabledButDataIsEmpty",
-            returns: true,
-          },
-        ],
-        sandbox
-      );
-    },
-    shouldIndexOnQuickPickOpen2: () => {
-      stubComponents(sandbox);
-      stubMultiple(
-        [
-          {
-            object: controller,
-            method: "isInitOnStartupDisabledAndWorkspaceCachingDisabled",
-            returns: true,
-          },
-          {
-            object: controller,
-            method:
-              "isInitOnStartupDisabledAndWorkspaceCachingEnabledButDataIsEmpty",
-            returns: false,
-          },
-        ],
-        sandbox
-      );
-    },
-    shouldIndexOnQuickPickOpen3: () => {
-      stubComponents(sandbox);
-      stubMultiple(
-        [
-          {
-            object: controller,
-            method: "isInitOnStartupDisabledAndWorkspaceCachingDisabled",
-            returns: true,
-          },
-          {
-            object: controller,
-            method:
-              "isInitOnStartupDisabledAndWorkspaceCachingEnabledButDataIsEmpty",
-            returns: true,
-          },
-        ],
-        sandbox
-      );
-    },
-    shouldIndexOnQuickPickOpen4: () => {
-      stubComponents(sandbox);
-      stubMultiple(
-        [
-          {
-            object: controller,
-            method: "isInitOnStartupDisabledAndWorkspaceCachingDisabled",
-            returns: false,
-          },
-          {
-            object: controller,
-            method:
-              "isInitOnStartupDisabledAndWorkspaceCachingEnabledButDataIsEmpty",
-            returns: false,
-          },
-        ],
-        sandbox
-      );
-    },
-    shouldIndexOnStartup1: () => {
-      stubComponents(sandbox);
-      stubMultiple(
-        [
-          {
-            object: controller,
-            method: "isInitOnStartupEnabledAndWorkspaceCachingDisabled",
-            returns: false,
-          },
-          {
-            object: controller,
-            method:
-              "isInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty",
-            returns: true,
-          },
-        ],
-        sandbox
-      );
-    },
-    shouldIndexOnStartup2: () => {
-      stubComponents(sandbox);
-      stubMultiple(
-        [
-          {
-            object: controller,
-            method: "isInitOnStartupEnabledAndWorkspaceCachingDisabled",
-            returns: true,
-          },
-          {
-            object: controller,
-            method:
-              "isInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty",
-            returns: false,
-          },
-        ],
-        sandbox
-      );
-    },
-    shouldIndexOnStartup3: () => {
-      stubComponents(sandbox);
-      stubMultiple(
-        [
-          {
-            object: controller,
-            method: "isInitOnStartupEnabledAndWorkspaceCachingDisabled",
-            returns: true,
-          },
-          {
-            object: controller,
-            method:
-              "isInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty",
-            returns: true,
-          },
-        ],
-        sandbox
-      );
-    },
-    shouldIndexOnStartup4: () => {
-      stubComponents(sandbox);
-      stubMultiple(
-        [
-          {
-            object: controller,
-            method: "isInitOnStartupEnabledAndWorkspaceCachingDisabled",
-            returns: false,
-          },
-          {
-            object: controller,
-            method:
-              "isInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty",
-            returns: false,
-          },
-        ],
-        sandbox
-      );
-    },
-    isInitOnStartupDisabledAndWorkspaceCachingEnabledButDataIsEmpty1: () => {
-      stubComponents(sandbox);
-      stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
-        sandbox,
-        {
+
+    search: {
+      setupForClearingCacheWhenIndexingOnOpen: () => {
+        stubComponents(sandbox);
+        return stubComponentsForSearch(sandbox, {
+          isInitialized: false,
+          shouldIndexOnQuickPickOpen: true,
+          shouldLoadDataFromCacheOnQuickPickOpen: false,
+        });
+      },
+
+      setupForWorkspaceIndexingWhenIndexingOnOpen: () => {
+        stubComponents(sandbox);
+        return stubComponentsForSearch(sandbox, {
+          isInitialized: false,
+          shouldIndexOnQuickPickOpen: true,
+          shouldLoadDataFromCacheOnQuickPickOpen: false,
+        });
+      },
+
+      setupForClearingConfigWhenLoadingFromCache: () => {
+        stubComponents(sandbox);
+        return stubComponentsForSearch(sandbox, {
+          isInitialized: false,
+          shouldIndexOnQuickPickOpen: false,
+          shouldLoadDataFromCacheOnQuickPickOpen: true,
+        });
+      },
+
+      setupForInitializingQuickPickWhenLoadingFromCache: () => {
+        stubComponents(sandbox);
+        return stubComponentsForSearch(sandbox, {
+          isInitialized: false,
+          shouldIndexOnQuickPickOpen: false,
+          shouldLoadDataFromCacheOnQuickPickOpen: true,
+        });
+      },
+
+      setupForRemovingUnsavedUrisWhenLoadingFromCache: () => {
+        stubComponents(sandbox);
+        return stubComponentsForSearch(sandbox, {
+          isInitialized: false,
+          shouldIndexOnQuickPickOpen: false,
+          shouldLoadDataFromCacheOnQuickPickOpen: true,
+        });
+      },
+
+      setupForGettingAndSettingDataWhenLoadingFromCache: () => {
+        stubComponents(sandbox);
+        return stubComponentsForSearch(sandbox, {
+          isInitialized: false,
+          shouldIndexOnQuickPickOpen: false,
+          shouldLoadDataFromCacheOnQuickPickOpen: true,
+        });
+      },
+
+      setupForShowingQuickPickWhenInitialized: () => {
+        stubComponents(sandbox);
+        stubComponentsForSearch(sandbox, {
           isInitialized: true,
-          fetchShouldInitOnStartup: false,
-          fetchShouldWorkspaceDataBeCached: true,
-          getData: [],
-        }
-      );
-    },
-    isInitOnStartupDisabledAndWorkspaceCachingEnabledButDataIsEmpty2: () => {
-      stubComponents(sandbox);
-      stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
-        sandbox,
-        {
+          shouldIndexOnQuickPickOpen: false,
+          shouldLoadDataFromCacheOnQuickPickOpen: false,
+        });
+        return stubMultiple(
+          [
+            {
+              object: quickPick,
+              method: "loadItems",
+            },
+            {
+              object: quickPick,
+              method: "show",
+            },
+            {
+              object: quickPick,
+              method: "setText",
+            },
+          ],
+          sandbox
+        );
+      },
+
+      setupForNotShowingQuickPickWhenNotInitialized: () => {
+        stubComponents(sandbox);
+        stubComponentsForSearch(sandbox, {
           isInitialized: false,
-          fetchShouldInitOnStartup: true,
-          fetchShouldWorkspaceDataBeCached: true,
-          getData: [],
-        }
-      );
-    },
-    isInitOnStartupDisabledAndWorkspaceCachingEnabledButDataIsEmpty3: () => {
-      stubComponents(sandbox);
-      stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
-        sandbox,
-        {
+          shouldIndexOnQuickPickOpen: false,
+          shouldLoadDataFromCacheOnQuickPickOpen: false,
+        });
+        return stubMultiple(
+          [
+            {
+              object: quickPick,
+              method: "loadItems",
+            },
+            {
+              object: quickPick,
+              method: "show",
+            },
+            {
+              object: patternProvider,
+              method: "getExcludePatterns",
+              returns: Promise.resolve(["**/.history/**", "**/.vscode/**"]),
+            },
+          ],
+          sandbox
+        );
+      },
+
+      setupForDoingNothingWhenConditionsFalse: () => {
+        stubComponents(sandbox);
+        return stubComponentsForSearch(sandbox, {
           isInitialized: false,
-          fetchShouldInitOnStartup: false,
-          fetchShouldWorkspaceDataBeCached: false,
-          getData: [],
-        }
-      );
-    },
-    isInitOnStartupDisabledAndWorkspaceCachingEnabledButDataIsEmpty4: () => {
-      stubComponents(sandbox);
-      stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
-        sandbox,
-        {
-          isInitialized: false,
-          fetchShouldInitOnStartup: false,
-          fetchShouldWorkspaceDataBeCached: true,
-          getData: [getQpItem()],
-        }
-      );
-    },
-    isInitOnStartupDisabledAndWorkspaceCachingEnabledButDataIsEmpty5: () => {
-      stubComponents(sandbox);
-      stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
-        sandbox,
-        {
-          isInitialized: false,
-          fetchShouldInitOnStartup: false,
-          fetchShouldWorkspaceDataBeCached: true,
-          getData: [],
-        }
-      );
-    },
-    isInitOnStartupDisabledAndWorkspaceCachingDisabled1: () => {
-      stubComponents(sandbox);
-      stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
-        sandbox,
-        {
+          shouldIndexOnQuickPickOpen: false,
+          shouldLoadDataFromCacheOnQuickPickOpen: false,
+        });
+      },
+
+      setupForSettingSelectedTextWhenSearchSelection: () => {
+        stubComponents(sandbox);
+        stubComponentsForSearch(sandbox, {
           isInitialized: true,
-          fetchShouldInitOnStartup: false,
-          fetchShouldWorkspaceDataBeCached: false,
-        }
-      );
+          shouldIndexOnQuickPickOpen: false,
+          shouldLoadDataFromCacheOnQuickPickOpen: false,
+          shouldSearchSelection: true,
+        });
+        const editor = getTextEditorStub(true, "test text");
+
+        return stubMultiple(
+          [
+            {
+              object: quickPick,
+              method: "setText",
+            },
+            {
+              object: quickPick,
+              method: "loadItems",
+            },
+            {
+              object: quickPick,
+              method: "show",
+            },
+            {
+              object: utils,
+              method: "sleepAndExecute",
+            },
+            {
+              object: vscode.window,
+              method: "activeTextEditor",
+              isNotMethod: true,
+              returns: editor,
+            },
+          ],
+          sandbox
+        );
+      },
+
+      setupForNotSettingTextWhenSearchSelectionFalse: () => {
+        stubComponents(sandbox);
+        stubComponentsForSearch(sandbox, {
+          isInitialized: true,
+          shouldIndexOnQuickPickOpen: false,
+          shouldLoadDataFromCacheOnQuickPickOpen: false,
+          shouldSearchSelection: false,
+        });
+
+        return stubMultiple(
+          [
+            {
+              object: quickPick,
+              method: "setText",
+            },
+            {
+              object: quickPick,
+              method: "loadItems",
+            },
+            {
+              object: quickPick,
+              method: "show",
+            },
+          ],
+          sandbox
+        );
+      },
     },
-    isInitOnStartupDisabledAndWorkspaceCachingDisabled2: () => {
-      stubComponents(sandbox);
-      stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
-        sandbox,
-        {
+
+    reload: {
+      setupForNoFolderOpenedNotification: () => {
+        stubComponents(sandbox);
+        return stubMultiple(
+          [
+            {
+              object: utils,
+              method: "printNoFolderOpenedMessage",
+            },
+            {
+              object: cache,
+              method: "clear",
+            },
+            {
+              object: cache,
+              method: "clearNotSavedUriPaths",
+            },
+            {
+              object: utils,
+              method: "hasWorkspaceAnyFolder",
+              returns: false,
+            },
+          ],
+          sandbox
+        );
+      },
+
+      setupForWorkspaceIndexing: () => {
+        stubComponents(sandbox);
+        return stubMultiple(
+          [
+            {
+              object: workspace,
+              method: "index",
+            },
+            {
+              object: cache,
+              method: "clear",
+            },
+            {
+              object: cache,
+              method: "clearNotSavedUriPaths",
+            },
+            {
+              object: utils,
+              method: "hasWorkspaceAnyFolder",
+              returns: true,
+            },
+          ],
+          sandbox
+        );
+      },
+
+      setupForCacheClearing: () => {
+        stubComponents(sandbox);
+        return stubMultiple(
+          [
+            {
+              object: cache,
+              method: "clear",
+            },
+            {
+              object: cache,
+              method: "clearNotSavedUriPaths",
+            },
+            {
+              object: workspace,
+              method: "index",
+            },
+            {
+              object: utils,
+              method: "hasWorkspaceAnyFolder",
+              returns: true,
+            },
+          ],
+          sandbox
+        );
+      },
+    },
+
+    startup: {
+      setupForIndexingWhenEnabledOnStartup: () => {
+        stubComponents(sandbox);
+        return stubComponentsForStartup(sandbox, {
+          shouldIndexOnStartup: true,
+          shouldLoadDataFromCacheOnStartup: false,
+        });
+      },
+
+      setupForDoingNothingWhenConditionsFalse: () => {
+        stubComponents(sandbox);
+        return stubComponentsForStartup(sandbox, {
           isInitialized: false,
-          fetchShouldInitOnStartup: true,
-          fetchShouldWorkspaceDataBeCached: false,
-        }
-      );
-    },
-    isInitOnStartupDisabledAndWorkspaceCachingDisabled3: () => {
-      stubComponents(sandbox);
-      stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
-        sandbox,
-        {
+          shouldIndexOnStartup: false,
+          shouldLoadDataFromCacheOnStartup: false,
+        });
+      },
+
+      setupForClearingConfigWhenLoadingFromCacheOnStartup: () => {
+        stubComponents(sandbox);
+        return stubComponentsForStartup(sandbox, {
           isInitialized: false,
-          fetchShouldInitOnStartup: false,
-          fetchShouldWorkspaceDataBeCached: true,
-        }
-      );
-    },
-    isInitOnStartupDisabledAndWorkspaceCachingDisabled4: () => {
-      stubComponents(sandbox);
-      stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
-        sandbox,
-        {
+          shouldIndexOnStartup: false,
+          shouldLoadDataFromCacheOnStartup: true,
+        });
+      },
+
+      setupForInitializingQuickPickWhenLoadingFromCacheOnStartup: () => {
+        stubComponents(sandbox);
+        return stubComponentsForStartup(sandbox, {
           isInitialized: false,
-          fetchShouldInitOnStartup: false,
-          fetchShouldWorkspaceDataBeCached: false,
-        }
-      );
+          shouldIndexOnStartup: false,
+          shouldLoadDataFromCacheOnStartup: true,
+        });
+      },
+
+      setupForRemovingUnsavedUrisWhenLoadingFromCacheOnStartup: () => {
+        stubComponents(sandbox);
+        return stubComponentsForStartup(sandbox, {
+          isInitialized: false,
+          shouldIndexOnStartup: false,
+          shouldLoadDataFromCacheOnStartup: true,
+        });
+      },
+
+      setupForGettingAndSettingDataWhenLoadingFromCacheOnStartup: () => {
+        stubComponents(sandbox);
+        return stubComponentsForStartup(sandbox, {
+          isInitialized: false,
+          shouldIndexOnStartup: false,
+          shouldLoadDataFromCacheOnStartup: true,
+        });
+      },
     },
-    isInitOnStartupEnabledAndWorkspaceCachingDisabled1: () => {
-      stubComponents(sandbox);
-      stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
-        sandbox,
-        {
+
+    shouldIndexOnQuickPickOpen: {
+      setupForTrueWhenDisabledCachingDisabledAndDataEmpty: () => {
+        stubComponents(sandbox);
+        stubMultiple(
+          [
+            {
+              object: controller,
+              method: "isInitOnStartupDisabledAndWorkspaceCachingDisabled",
+              returns: false,
+            },
+            {
+              object: controller,
+              method:
+                "isInitOnStartupDisabledAndWorkspaceCachingEnabledButDataIsEmpty",
+              returns: true,
+            },
+          ],
+          sandbox
+        );
+      },
+
+      setupForTrueWhenDisabledCachingDisabledAndDataNotEmpty: () => {
+        stubComponents(sandbox);
+        stubMultiple(
+          [
+            {
+              object: controller,
+              method: "isInitOnStartupDisabledAndWorkspaceCachingDisabled",
+              returns: true,
+            },
+            {
+              object: controller,
+              method:
+                "isInitOnStartupDisabledAndWorkspaceCachingEnabledButDataIsEmpty",
+              returns: false,
+            },
+          ],
+          sandbox
+        );
+      },
+
+      setupForTrueWhenBothConditionsTrue: () => {
+        stubComponents(sandbox);
+        stubMultiple(
+          [
+            {
+              object: controller,
+              method: "isInitOnStartupDisabledAndWorkspaceCachingDisabled",
+              returns: true,
+            },
+            {
+              object: controller,
+              method:
+                "isInitOnStartupDisabledAndWorkspaceCachingEnabledButDataIsEmpty",
+              returns: true,
+            },
+          ],
+          sandbox
+        );
+      },
+
+      setupForFalseWhenBothConditionsFalse: () => {
+        stubComponents(sandbox);
+        stubMultiple(
+          [
+            {
+              object: controller,
+              method: "isInitOnStartupDisabledAndWorkspaceCachingDisabled",
+              returns: false,
+            },
+            {
+              object: controller,
+              method:
+                "isInitOnStartupDisabledAndWorkspaceCachingEnabledButDataIsEmpty",
+              returns: false,
+            },
+          ],
+          sandbox
+        );
+      },
+    },
+
+    shouldIndexOnStartup: {
+      setupForTrueWhenEnabledCachingDisabledAndDataEmpty: () => {
+        stubComponents(sandbox);
+        stubMultiple(
+          [
+            {
+              object: controller,
+              method: "isInitOnStartupEnabledAndWorkspaceCachingDisabled",
+              returns: false,
+            },
+            {
+              object: controller,
+              method:
+                "isInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty",
+              returns: true,
+            },
+          ],
+          sandbox
+        );
+      },
+
+      setupForTrueWhenEnabledCachingDisabledAndDataNotEmpty: () => {
+        stubComponents(sandbox);
+        stubMultiple(
+          [
+            {
+              object: controller,
+              method: "isInitOnStartupEnabledAndWorkspaceCachingDisabled",
+              returns: true,
+            },
+            {
+              object: controller,
+              method:
+                "isInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty",
+              returns: false,
+            },
+          ],
+          sandbox
+        );
+      },
+
+      setupForTrueWhenBothConditionsTrue: () => {
+        stubComponents(sandbox);
+        stubMultiple(
+          [
+            {
+              object: controller,
+              method: "isInitOnStartupEnabledAndWorkspaceCachingDisabled",
+              returns: true,
+            },
+            {
+              object: controller,
+              method:
+                "isInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty",
+              returns: true,
+            },
+          ],
+          sandbox
+        );
+      },
+
+      setupForFalseWhenBothConditionsFalse: () => {
+        stubComponents(sandbox);
+        stubMultiple(
+          [
+            {
+              object: controller,
+              method: "isInitOnStartupEnabledAndWorkspaceCachingDisabled",
+              returns: false,
+            },
+            {
+              object: controller,
+              method:
+                "isInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty",
+              returns: false,
+            },
+          ],
+          sandbox
+        );
+      },
+    },
+
+    isInitOnStartupDisabledAndWorkspaceCachingEnabledButDataIsEmpty: {
+      setupForFalseWhenQuickPickInitialized: () => {
+        stubComponents(sandbox);
+        stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
+          sandbox,
+          {
+            isInitialized: true,
+            fetchShouldInitOnStartup: false,
+            fetchShouldWorkspaceDataBeCached: true,
+            getData: [],
+          }
+        );
+      },
+
+      setupForFalseWhenInitOnStartupTrue: () => {
+        stubComponents(sandbox);
+        stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
+          sandbox,
+          {
+            isInitialized: false,
+            fetchShouldInitOnStartup: true,
+            fetchShouldWorkspaceDataBeCached: true,
+            getData: [],
+          }
+        );
+      },
+
+      setupForFalseWhenWorkspaceCachingFalse: () => {
+        stubComponents(sandbox);
+        stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
+          sandbox,
+          {
+            isInitialized: false,
+            fetchShouldInitOnStartup: false,
+            fetchShouldWorkspaceDataBeCached: false,
+            getData: [],
+          }
+        );
+      },
+
+      setupForFalseWhenDataNotEmpty: () => {
+        stubComponents(sandbox);
+        stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
+          sandbox,
+          {
+            isInitialized: false,
+            fetchShouldInitOnStartup: false,
+            fetchShouldWorkspaceDataBeCached: true,
+            getData: [getQpItem()],
+          }
+        );
+      },
+
+      setupForTrueWhenAllConditionsMet: () => {
+        stubComponents(sandbox);
+        stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
+          sandbox,
+          {
+            isInitialized: false,
+            fetchShouldInitOnStartup: false,
+            fetchShouldWorkspaceDataBeCached: true,
+            getData: [],
+          }
+        );
+      },
+    },
+
+    isInitOnStartupDisabledAndWorkspaceCachingDisabled: {
+      setupForFalseWhenQuickPickInitialized: () => {
+        stubComponents(sandbox);
+        stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
+          sandbox,
+          {
+            isInitialized: true,
+            fetchShouldInitOnStartup: false,
+            fetchShouldWorkspaceDataBeCached: false,
+          }
+        );
+      },
+
+      setupForFalseWhenInitOnStartupTrue: () => {
+        stubComponents(sandbox);
+        stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
+          sandbox,
+          {
+            isInitialized: false,
+            fetchShouldInitOnStartup: true,
+            fetchShouldWorkspaceDataBeCached: false,
+          }
+        );
+      },
+
+      setupForFalseWhenWorkspaceCachingTrue: () => {
+        stubComponents(sandbox);
+        stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
+          sandbox,
+          {
+            isInitialized: false,
+            fetchShouldInitOnStartup: false,
+            fetchShouldWorkspaceDataBeCached: true,
+          }
+        );
+      },
+
+      setupForTrueWhenAllConditionsMet: () => {
+        stubComponents(sandbox);
+        stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
+          sandbox,
+          {
+            isInitialized: false,
+            fetchShouldInitOnStartup: false,
+            fetchShouldWorkspaceDataBeCached: false,
+          }
+        );
+      },
+    },
+
+    isInitOnStartupEnabledAndWorkspaceCachingDisabled: {
+      setupForFalseWhenQuickPickInitialized: () => {
+        stubComponents(sandbox);
+        stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
+          sandbox,
+          {
+            isInitialized: true,
+            fetchShouldInitOnStartup: true,
+            fetchShouldWorkspaceDataBeCached: false,
+          }
+        );
+      },
+
+      setupForFalseWhenInitOnStartupFalse: () => {
+        stubComponents(sandbox);
+        stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
+          sandbox,
+          {
+            isInitialized: false,
+            fetchShouldInitOnStartup: false,
+            fetchShouldWorkspaceDataBeCached: false,
+          }
+        );
+      },
+
+      setupForFalseWhenWorkspaceCachingTrue: () => {
+        stubComponents(sandbox);
+        stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
+          sandbox,
+          {
+            isInitialized: false,
+            fetchShouldInitOnStartup: true,
+            fetchShouldWorkspaceDataBeCached: true,
+          }
+        );
+      },
+
+      setupForTrueWhenAllConditionsMet: () => {
+        stubComponents(sandbox);
+        stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
+          sandbox,
+          {
+            isInitialized: false,
+            fetchShouldInitOnStartup: true,
+            fetchShouldWorkspaceDataBeCached: false,
+          }
+        );
+      },
+    },
+
+    isInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty: {
+      setupForFalseWhenQuickPickInitialized: () => {
+        stubComponents(sandbox);
+        stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
+          sandbox,
+          {
+            isInitialized: true,
+            fetchShouldInitOnStartup: true,
+            fetchShouldWorkspaceDataBeCached: true,
+            getData: [],
+          }
+        );
+      },
+
+      setupForFalseWhenInitOnStartupFalse: () => {
+        stubComponents(sandbox);
+        stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
+          sandbox,
+          {
+            isInitialized: false,
+            fetchShouldInitOnStartup: false,
+            fetchShouldWorkspaceDataBeCached: true,
+            getData: [],
+          }
+        );
+      },
+
+      setupForFalseWhenWorkspaceCachingFalse: () => {
+        stubComponents(sandbox);
+        stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
+          sandbox,
+          {
+            isInitialized: false,
+            fetchShouldInitOnStartup: true,
+            fetchShouldWorkspaceDataBeCached: false,
+            getData: [],
+          }
+        );
+      },
+
+      setupForFalseWhenDataNotEmpty: () => {
+        stubComponents(sandbox);
+        stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
+          sandbox,
+          {
+            isInitialized: false,
+            fetchShouldInitOnStartup: true,
+            fetchShouldWorkspaceDataBeCached: true,
+            getData: [getQpItem()],
+          }
+        );
+      },
+
+      setupForTrueWhenAllConditionsMet: () => {
+        stubComponents(sandbox);
+        stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
+          sandbox,
+          {
+            isInitialized: false,
+            fetchShouldInitOnStartup: true,
+            fetchShouldWorkspaceDataBeCached: true,
+            getData: [],
+          }
+        );
+      },
+    },
+
+    shouldSearchSelection: {
+      setupForFalseWhenQuickPickNotInitialized: () => {
+        stubComponents(sandbox);
+        stubComponentsForShouldSearchSelection(sandbox, {
+          isInitialized: false,
+          fetchShouldSearchSelection: true,
+        });
+        const editor = getTextEditorStub(true, "test text");
+
+        return editor;
+      },
+
+      setupForFalseWhenSearchSelectionDisabled: () => {
+        stubComponents(sandbox);
+        stubComponentsForShouldSearchSelection(sandbox, {
+          isInitialized: true,
+          fetchShouldSearchSelection: false,
+        });
+        const editor = getTextEditorStub(true, "test text");
+
+        return editor;
+      },
+
+      setupForFalseWhenEditorNotExists: () => {
+        stubComponents(sandbox);
+        stubComponentsForShouldSearchSelection(sandbox, {
+          isInitialized: true,
+          fetchShouldSearchSelection: true,
+        });
+        const editor = undefined;
+
+        return editor;
+      },
+
+      setupForTrueWhenAllConditionsMet: () => {
+        stubComponents(sandbox);
+        stubComponentsForShouldSearchSelection(sandbox, {
+          isInitialized: true,
+          fetchShouldSearchSelection: true,
+        });
+        const editor = getTextEditorStub(true, "test text");
+
+        return editor;
+      },
+    },
+
+    shouldLoadDataFromCacheOnQuickPickOpen: {
+      setupForFalseWhenQuickPickInitialized: () => {
+        stubComponents(sandbox);
+        stubComponentsForShouldLoadDataFromCacheOnQuickPickOpen(sandbox, {
           isInitialized: true,
           fetchShouldInitOnStartup: true,
-          fetchShouldWorkspaceDataBeCached: false,
-        }
-      );
-    },
-    isInitOnStartupEnabledAndWorkspaceCachingDisabled2: () => {
-      stubComponents(sandbox);
-      stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
-        sandbox,
-        {
-          isInitialized: false,
-          fetchShouldInitOnStartup: false,
-          fetchShouldWorkspaceDataBeCached: false,
-        }
-      );
-    },
-    isInitOnStartupEnabledAndWorkspaceCachingDisabled3: () => {
-      stubComponents(sandbox);
-      stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
-        sandbox,
-        {
+          fetchShouldWorkspaceDataBeCached: true,
+        });
+      },
+
+      setupForFalseWhenInitOnStartupTrue: () => {
+        stubComponents(sandbox);
+        stubComponentsForShouldLoadDataFromCacheOnQuickPickOpen(sandbox, {
           isInitialized: false,
           fetchShouldInitOnStartup: true,
           fetchShouldWorkspaceDataBeCached: true,
-        }
-      );
-    },
-    isInitOnStartupEnabledAndWorkspaceCachingDisabled4: () => {
-      stubComponents(sandbox);
-      stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
-        sandbox,
-        {
+        });
+      },
+
+      setupForFalseWhenWorkspaceCachingFalse: () => {
+        stubComponents(sandbox);
+        stubComponentsForShouldLoadDataFromCacheOnQuickPickOpen(sandbox, {
           isInitialized: false,
-          fetchShouldInitOnStartup: true,
+          fetchShouldInitOnStartup: false,
           fetchShouldWorkspaceDataBeCached: false,
-        }
-      );
+        });
+      },
+
+      setupForTrueWhenAllConditionsMet: () => {
+        stubComponents(sandbox);
+        stubComponentsForShouldLoadDataFromCacheOnQuickPickOpen(sandbox, {
+          isInitialized: false,
+          fetchShouldInitOnStartup: false,
+          fetchShouldWorkspaceDataBeCached: true,
+        });
+      },
     },
-    isInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty1: () => {
-      stubComponents(sandbox);
-      stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
-        sandbox,
-        {
+
+    shouldLoadDataFromCacheOnStartup: {
+      setupForFalseWhenQuickPickInitialized: () => {
+        stubComponents(sandbox);
+        stubComponentsForShouldLoadDataFromCacheOnStartup(sandbox, {
           isInitialized: true,
           fetchShouldInitOnStartup: true,
           fetchShouldWorkspaceDataBeCached: true,
-          getData: [],
-        }
-      );
-    },
-    isInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty2: () => {
-      stubComponents(sandbox);
-      stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
-        sandbox,
-        {
+        });
+      },
+
+      setupForFalseWhenInitOnStartupFalse: () => {
+        stubComponents(sandbox);
+        stubComponentsForShouldLoadDataFromCacheOnStartup(sandbox, {
           isInitialized: false,
           fetchShouldInitOnStartup: false,
           fetchShouldWorkspaceDataBeCached: true,
-          getData: [],
-        }
-      );
-    },
-    isInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty3: () => {
-      stubComponents(sandbox);
-      stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
-        sandbox,
-        {
+        });
+      },
+
+      setupForFalseWhenWorkspaceCachingFalse: () => {
+        stubComponents(sandbox);
+        stubComponentsForShouldLoadDataFromCacheOnStartup(sandbox, {
           isInitialized: false,
           fetchShouldInitOnStartup: true,
           fetchShouldWorkspaceDataBeCached: false,
-          getData: [],
-        }
-      );
-    },
-    isInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty4: () => {
-      stubComponents(sandbox);
-      stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
-        sandbox,
-        {
+        });
+      },
+
+      setupForTrueWhenAllConditionsMet: () => {
+        stubComponents(sandbox);
+        stubComponentsForShouldLoadDataFromCacheOnStartup(sandbox, {
           isInitialized: false,
           fetchShouldInitOnStartup: true,
           fetchShouldWorkspaceDataBeCached: true,
-          getData: [getQpItem()],
-        }
-      );
+        });
+      },
     },
-    isInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty5: () => {
-      stubComponents(sandbox);
-      stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty(
-        sandbox,
-        {
-          isInitialized: false,
-          fetchShouldInitOnStartup: true,
-          fetchShouldWorkspaceDataBeCached: true,
-          getData: [],
-        }
-      );
-    },
-    shouldSearchSelection1: () => {
-      stubComponents(sandbox);
-      stubComponentsForShouldSearchSelection(sandbox, {
-        isInitialized: false,
-        fetchShouldSearchSelection: true,
-      });
-      const editor = getTextEditorStub(true, "test text");
 
-      return editor;
-    },
-    shouldSearchSelection2: () => {
-      stubComponents(sandbox);
-      stubComponentsForShouldSearchSelection(sandbox, {
-        isInitialized: true,
-        fetchShouldSearchSelection: false,
-      });
-      const editor = getTextEditorStub(true, "test text");
+    handleWillProcessing: {
+      setupForShowingLoadingWhenQuickPickInitialized: () => {
+        stubComponents(sandbox);
+        return stubMultiple(
+          [
+            {
+              object: quickPick,
+              method: "showLoading",
+            },
+            {
+              object: quickPick,
+              method: "setPlaceholder",
+            },
+            {
+              object: quickPick,
+              method: "isInitialized",
+              returns: true,
+            },
+          ],
+          sandbox
+        );
+      },
 
-      return editor;
-    },
-    shouldSearchSelection3: () => {
-      stubComponents(sandbox);
-      stubComponentsForShouldSearchSelection(sandbox, {
-        isInitialized: true,
-        fetchShouldSearchSelection: true,
-      });
-      const editor = undefined;
+      setupForNotShowingLoadingWhenQuickPickNotInitialized: () => {
+        stubComponents(sandbox);
+        return stubMultiple(
+          [
+            {
+              object: quickPick,
+              method: "showLoading",
+            },
+            {
+              object: quickPick,
+              method: "setPlaceholder",
+            },
+            {
+              object: quickPick,
+              method: "fetchConfig",
+            },
+            {
+              object: quickPick,
+              method: "isInitialized",
+              returns: false,
+            },
+            {
+              object: quickPick,
+              method: "init",
+            },
+          ],
+          sandbox
+        );
+      },
 
-      return editor;
+      setupForInitializingQuickPickWhenNotInitialized: () => {
+        stubComponents(sandbox);
+        return stubMultiple(
+          [
+            {
+              object: quickPick,
+              method: "init",
+            },
+            {
+              object: quickPick,
+              method: "isInitialized",
+              returns: false,
+            },
+          ],
+          sandbox
+        );
+      },
     },
-    shouldSearchSelection4: () => {
-      stubComponents(sandbox);
-      stubComponentsForShouldSearchSelection(sandbox, {
-        isInitialized: true,
-        fetchShouldSearchSelection: true,
-      });
-      const editor = getTextEditorStub(true, "test text");
 
-      return editor;
+    handleDidProcessing: {
+      setupForSettingQuickPickDataAndLoading: () => {
+        stubComponents(sandbox);
+        return stubMultiple(
+          [
+            {
+              object: controller,
+              method: "setQuickPickData",
+            },
+            {
+              object: quickPick,
+              method: "init",
+            },
+            {
+              object: quickPick,
+              method: "loadItems",
+            },
+            {
+              object: controller,
+              method: "setBusy",
+            },
+            {
+              object: quickPick,
+              method: "isInitialized",
+              returns: true,
+            },
+          ],
+          sandbox
+        );
+      },
+
+      setupForSettingItemsFromWorkspaceData: () => {
+        stubComponents(sandbox);
+        return stubMultiple(
+          [
+            {
+              object: quickPick,
+              method: "setItems",
+            },
+            {
+              object: workspace,
+              method: "getData",
+              returns: getQpItems(),
+            },
+            {
+              object: quickPick,
+              method: "loadItems",
+            },
+            {
+              object: quickPick,
+              method: "isInitialized",
+            },
+          ],
+          sandbox
+        );
+      },
     },
-    shouldLoadDataFromCacheOnQuickPickOpen1: () => {
-      stubComponents(sandbox);
-      stubComponentsForShouldLoadDataFromCacheOnQuickPickOpen(sandbox, {
-        isInitialized: true,
-        fetchShouldInitOnStartup: true,
-        fetchShouldWorkspaceDataBeCached: true,
-      });
+
+    handleWillExecuteAction: {
+      setupForClearingItemsWhenRebuildAction: () => {
+        stubComponents(sandbox);
+        return stubMultiple(
+          [
+            {
+              object: quickPick,
+              method: "setItems",
+            },
+            {
+              object: quickPick,
+              method: "loadItems",
+            },
+          ],
+          sandbox
+        );
+      },
+
+      setupForDoingNothingWhenNonRebuildAction: () => {
+        stubComponents(sandbox);
+        return stubMultiple(
+          [
+            {
+              object: quickPick,
+              method: "setItems",
+            },
+            {
+              object: quickPick,
+              method: "loadItems",
+            },
+          ],
+          sandbox
+        );
+      },
     },
-    shouldLoadDataFromCacheOnQuickPickOpen2: () => {
-      stubComponents(sandbox);
-      stubComponentsForShouldLoadDataFromCacheOnQuickPickOpen(sandbox, {
-        isInitialized: false,
-        fetchShouldInitOnStartup: true,
-        fetchShouldWorkspaceDataBeCached: true,
-      });
+
+    handleDidDebounceConfigToggle: {
+      setupForReloadingEventListener: () => {
+        stubComponents(sandbox);
+        return stubMultiple(
+          [
+            {
+              object: controller,
+              method: "setBusy",
+            },
+            {
+              object: quickPick,
+              method: "reloadOnDidChangeValueEventListener",
+            },
+          ],
+          sandbox
+        );
+      },
     },
-    shouldLoadDataFromCacheOnQuickPickOpen3: () => {
-      stubComponents(sandbox);
-      stubComponentsForShouldLoadDataFromCacheOnQuickPickOpen(sandbox, {
-        isInitialized: false,
-        fetchShouldInitOnStartup: false,
-        fetchShouldWorkspaceDataBeCached: false,
-      });
+
+    handleDidSortingConfigToggle: {
+      setupForReloadingSortingSettings: () => {
+        stubComponents(sandbox);
+        return stubMultiple(
+          [
+            {
+              object: controller,
+              method: "setBusy",
+            },
+            {
+              object: quickPick,
+              method: "reloadSortingSettings",
+            },
+          ],
+          sandbox
+        );
+      },
     },
-    shouldLoadDataFromCacheOnQuickPickOpen4: () => {
-      stubComponents(sandbox);
-      stubComponentsForShouldLoadDataFromCacheOnQuickPickOpen(sandbox, {
-        isInitialized: false,
-        fetchShouldInitOnStartup: false,
-        fetchShouldWorkspaceDataBeCached: true,
-      });
-    },
-    shouldLoadDataFromCacheOnStartup1: () => {
-      stubComponents(sandbox);
-      stubComponentsForShouldLoadDataFromCacheOnStartup(sandbox, {
-        isInitialized: true,
-        fetchShouldInitOnStartup: true,
-        fetchShouldWorkspaceDataBeCached: true,
-      });
-    },
-    shouldLoadDataFromCacheOnStartup2: () => {
-      stubComponents(sandbox);
-      stubComponentsForShouldLoadDataFromCacheOnStartup(sandbox, {
-        isInitialized: false,
-        fetchShouldInitOnStartup: false,
-        fetchShouldWorkspaceDataBeCached: true,
-      });
-    },
-    shouldLoadDataFromCacheOnStartup3: () => {
-      stubComponents(sandbox);
-      stubComponentsForShouldLoadDataFromCacheOnStartup(sandbox, {
-        isInitialized: false,
-        fetchShouldInitOnStartup: true,
-        fetchShouldWorkspaceDataBeCached: false,
-      });
-    },
-    shouldLoadDataFromCacheOnStartup4: () => {
-      stubComponents(sandbox);
-      stubComponentsForShouldLoadDataFromCacheOnStartup(sandbox, {
-        isInitialized: false,
-        fetchShouldInitOnStartup: true,
-        fetchShouldWorkspaceDataBeCached: true,
-      });
-    },
-    shouldQuickPickOpenFromSelection1: () => {
-      stubMultiple(
-        [
-          {
-            object: quickPick,
-            method: "isInitialized",
-            returns: false,
-          },
-          {
-            object: config,
-            method: "fetchShouldQuickPickOpenFromSelection",
-          },
-        ],
-        sandbox
-      );
-    },
-    shouldQuickPickOpenFromSelection2: () => {
-      stubMultiple(
-        [
-          {
-            object: quickPick,
-            method: "isInitialized",
-            returns: true,
-          },
-          {
-            object: config,
-            method: "fetchShouldQuickPickOpenFromSelection",
-            returns: false,
-          },
-        ],
-        sandbox
-      );
-    },
-    shouldQuickPickOpenFromSelection3: () => {
-      stubMultiple(
-        [
-          {
-            object: quickPick,
-            method: "isInitialized",
-            returns: true,
-          },
-          {
-            object: config,
-            method: "fetchShouldQuickPickOpenFromSelection",
-            returns: true,
-          },
-        ],
-        sandbox
-      );
-    },
-    handleWillProcessing1: () => {
-      stubComponents(sandbox);
-      return stubMultiple(
-        [
-          {
-            object: quickPick,
-            method: "showLoading",
-          },
-          {
-            object: quickPick,
-            method: "setPlaceholder",
-          },
-          {
-            object: quickPick,
-            method: "isInitialized",
-            returns: true,
-          },
-        ],
-        sandbox
-      );
-    },
-    handleWillProcessing2: () => {
-      stubComponents(sandbox);
-      return stubMultiple(
-        [
-          {
-            object: quickPick,
-            method: "showLoading",
-          },
-          {
-            object: quickPick,
-            method: "setPlaceholder",
-          },
-          {
-            object: quickPick,
-            method: "fetchConfig",
-          },
-          {
-            object: quickPick,
-            method: "isInitialized",
-            returns: false,
-          },
-          {
-            object: quickPick,
-            method: "init",
-          },
-        ],
-        sandbox
-      );
-    },
-    handleWillProcessing3: () => {
-      stubComponents(sandbox);
-      return stubMultiple(
-        [
-          {
-            object: quickPick,
-            method: "init",
-          },
-          {
-            object: quickPick,
-            method: "isInitialized",
-            returns: false,
-          },
-        ],
-        sandbox
-      );
-    },
-    handleDidProcessing1: () => {
-      stubComponents(sandbox);
-      return stubMultiple(
-        [
-          {
-            object: controller,
-            method: "setQuickPickData",
-          },
-          {
-            object: quickPick,
-            method: "init",
-          },
-          {
-            object: quickPick,
-            method: "loadItems",
-          },
-          {
-            object: controller,
-            method: "setBusy",
-          },
-          {
-            object: quickPick,
-            method: "isInitialized",
-            returns: true,
-          },
-        ],
-        sandbox
-      );
-    },
-    handleDidProcessing2: () => {
-      stubComponents(sandbox);
-      return stubMultiple(
-        [
-          {
-            object: quickPick,
-            method: "setItems",
-          },
-          {
-            object: workspace,
-            method: "getData",
-            returns: getQpItems(),
-          },
-          {
-            object: quickPick,
-            method: "loadItems",
-          },
-          {
-            object: quickPick,
-            method: "isInitialized",
-          },
-        ],
-        sandbox
-      );
-    },
-    handleWillExecuteAction1: () => {
-      stubComponents(sandbox);
-      return stubMultiple(
-        [
-          {
-            object: quickPick,
-            method: "setItems",
-          },
-          {
-            object: quickPick,
-            method: "loadItems",
-          },
-        ],
-        sandbox
-      );
-    },
-    handleWillExecuteAction2: () => {
-      stubComponents(sandbox);
-      return stubMultiple(
-        [
-          {
-            object: quickPick,
-            method: "setItems",
-          },
-          {
-            object: quickPick,
-            method: "loadItems",
-          },
-        ],
-        sandbox
-      );
-    },
-    handleDidDebounceConfigToggle1: () => {
-      stubComponents(sandbox);
-      return stubMultiple(
-        [
-          {
-            object: controller,
-            method: "setBusy",
-          },
-          {
-            object: quickPick,
-            method: "reloadOnDidChangeValueEventListener",
-          },
-        ],
-        sandbox
-      );
-    },
-    handleDidSortingConfigToggle1: () => {
-      stubComponents(sandbox);
-      return stubMultiple(
-        [
-          {
-            object: controller,
-            method: "setBusy",
-          },
-          {
-            object: quickPick,
-            method: "reloadSortingSettings",
-          },
-        ],
-        sandbox
-      );
-    },
-    handleWillReindexOnConfigurationChange1: () => {
-      stubComponents(sandbox);
-      return stubMultiple(
-        [
-          {
-            object: quickPick,
-            method: "reload",
-          },
-        ],
-        sandbox
-      );
+
+    handleWillReindexOnConfigurationChange: {
+      setupForReloadingQuickPick: () => {
+        stubComponents(sandbox);
+        return stubMultiple(
+          [
+            {
+              object: quickPick,
+              method: "reload",
+            },
+          ],
+          sandbox
+        );
+      },
     },
   };
 };

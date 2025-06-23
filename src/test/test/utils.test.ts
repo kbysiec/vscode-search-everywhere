@@ -26,38 +26,38 @@ describe("Utils", () => {
   afterEach(() => setups.afterEach());
 
   describe("hasWorkspaceAnyFolder", () => {
-    it("1: should return true if workspace contains at least one folder", () => {
-      setups.hasWorkspaceAnyFolder1();
+    it("should return true if workspace contains at least one folder", () => {
+      setups.hasWorkspaceAnyFolder.setupForReturningTrueWhenWorkspaceHasFolders();
       assert.equal(utils.hasWorkspaceAnyFolder(), true);
     });
 
-    it("2: should return false if workspace does not contain any folder", () => {
-      setups.hasWorkspaceAnyFolder2();
+    it("should return false if workspace does not contain any folder", () => {
+      setups.hasWorkspaceAnyFolder.setupForReturningFalseWhenWorkspaceHasNoFolders();
       assert.equal(utils.hasWorkspaceAnyFolder(), false);
     });
   });
 
   describe("hasWorkspaceMoreThanOneFolder", () => {
-    it("1: should return true if workspace contains more than one folder", () => {
-      setups.hasWorkspaceMoreThanOneFolder1();
+    it("should return true if workspace contains more than one folder", () => {
+      setups.hasWorkspaceMoreThanOneFolder.setupForReturningTrueWhenWorkspaceHasMultipleFolders();
       assert.equal(utils.hasWorkspaceMoreThanOneFolder(), true);
     });
 
-    it("2: should return false if workspace contains either one folder or any", () => {
-      setups.hasWorkspaceMoreThanOneFolder2();
+    it("should return false if workspace contains either one folder or any", () => {
+      setups.hasWorkspaceMoreThanOneFolder.setupForReturningFalseWhenWorkspaceHasOneOrNoFolders();
       assert.equal(utils.hasWorkspaceMoreThanOneFolder(), false);
     });
   });
 
   describe("hasWorkspaceChanged", () => {
-    it("1: should return true if amount of opened folders in workspace has changed", () => {
+    it("should return true if amount of opened folders in workspace has changed", () => {
       assert.equal(
         utils.hasWorkspaceChanged(getWorkspaceFoldersChangeEvent(true)),
         true
       );
     });
 
-    it("2: should return false if amount of opened folders in workspace has not changed", () => {
+    it("should return false if amount of opened folders in workspace has not changed", () => {
       assert.equal(
         utils.hasWorkspaceChanged(getWorkspaceFoldersChangeEvent(false)),
         false
@@ -66,8 +66,7 @@ describe("Utils", () => {
   });
 
   describe("isDebounceConfigurationToggled", () => {
-    it(`1: should return true if extension configuration
-      related to debounce setting has changed`, () => {
+    it("should return true if extension configuration related to debounce setting has changed", () => {
       assert.equal(
         utils.isDebounceConfigurationToggled(
           getConfigurationChangeEvent(true, false)
@@ -76,8 +75,7 @@ describe("Utils", () => {
       );
     });
 
-    it(`2: should return false if extension configuration
-      related to debounce setting has not changed`, () => {
+    it("should return false if extension configuration related to debounce setting has not changed", () => {
       assert.equal(
         utils.isDebounceConfigurationToggled(
           getConfigurationChangeEvent(false)
@@ -88,8 +86,7 @@ describe("Utils", () => {
   });
 
   describe("isSortingConfigurationToggled", () => {
-    it(`1: should return true if extension configuration
-      related to sorting setting has changed`, () => {
+    it("should return true if extension configuration related to sorting setting has changed", () => {
       assert.equal(
         utils.isSortingConfigurationToggled(
           getConfigurationChangeEvent(true, false)
@@ -98,8 +95,7 @@ describe("Utils", () => {
       );
     });
 
-    it(`2: should return false if extension configuration
-      related to debounce setting has not changed`, () => {
+    it("should return false if extension configuration related to debounce setting has not changed", () => {
       assert.equal(
         utils.isSortingConfigurationToggled(getConfigurationChangeEvent(false)),
         false
@@ -108,8 +104,9 @@ describe("Utils", () => {
   });
 
   describe("printNoFolderOpenedMessage", () => {
-    it("1: should display notification", async () => {
-      const [showInformationMessageStub] = setups.printNoFolderOpenedMessage1();
+    it("should display notification", async () => {
+      const [showInformationMessageStub] =
+        setups.printNoFolderOpenedMessage.setupForDisplayingNotification();
       utils.printNoFolderOpenedMessage();
 
       assert.equal(showInformationMessageStub.calledOnce, true);
@@ -117,8 +114,9 @@ describe("Utils", () => {
   });
 
   describe("printErrorMessage", () => {
-    it("1: should display notification", async () => {
-      const [showInformationMessageStub] = setups.printNoFolderOpenedMessage2();
+    it("should display notification", async () => {
+      const [showInformationMessageStub] =
+        setups.printErrorMessage.setupForDisplayingNotification();
       utils.printErrorMessage(new Error("test error message"));
 
       assert.equal(showInformationMessageStub.calledOnce, true);
@@ -126,8 +124,9 @@ describe("Utils", () => {
   });
 
   describe("printStatsMessage", () => {
-    it("1: should display notification with scan stats", async () => {
-      const [showInformationMessageStub] = setups.printStatsMessage1();
+    it("should display notification with scan stats", async () => {
+      const [showInformationMessageStub] =
+        setups.printStatsMessage.setupForDisplayingStatsNotification();
       const indexStats = getIndexStats();
       utils.printStatsMessage(indexStats);
 
@@ -143,14 +142,15 @@ describe("Utils", () => {
   });
 
   describe("createWorkspaceData", () => {
-    it("1: should create workspaceData object", () => {
+    it("should create workspaceData object", () => {
       assert.deepEqual(utils.createWorkspaceData(), getWorkspaceData());
     });
   });
 
   describe("clearWorkspaceData", () => {
-    it("1: should clear workspaceData object", () => {
-      const workspaceData = setups.clearWorkspaceData1();
+    it("should clear workspaceData object", () => {
+      const workspaceData =
+        setups.clearWorkspaceData.setupForClearingWorkspaceDataObject();
 
       utils.clearWorkspaceData(workspaceData);
       assert.equal(workspaceData.count, 0);
@@ -159,14 +159,13 @@ describe("Utils", () => {
   });
 
   describe("getSplitter", () => {
-    it("1: should return splitter string", () => {
+    it("should return splitter string", () => {
       assert.equal(utils.getSplitter(), "§&§");
     });
   });
 
   describe("getUrisForDirectoryPathUpdate", () => {
-    it(`1: should return uris containing renamed directory
-      name and file symbol kind`, async () => {
+    it("should return uris containing renamed directory name and file symbol kind", async () => {
       const qpItems = getQpItems();
       qpItems[1] = getQpItem("./test/fake-files/", 2);
       assert.deepEqual(
@@ -181,7 +180,7 @@ describe("Utils", () => {
   });
 
   describe("sleep", () => {
-    it("1: should be fulfilled", async () => {
+    it("should be fulfilled", async () => {
       const clock = sinon.useFakeTimers();
       let fulfilled = false;
       const sleepPromise = utils.sleep(1000);
@@ -203,8 +202,8 @@ describe("Utils", () => {
   });
 
   describe("sleepAndExecute", () => {
-    it("1: should given fn be invoked after give", async () => {
-      const stub = setups.sleepAndExecute1();
+    it("should given fn be invoked after give", async () => {
+      const stub = setups.sleepAndExecute.setupForInvokingFunctionAfterDelay();
       const clock = sinon.useFakeTimers();
       let fulfilled = false;
       utils.sleepAndExecute(1000, stub);
@@ -221,7 +220,7 @@ describe("Utils", () => {
   });
 
   describe("countWordInstances", () => {
-    it("1: should count word instances in given text", () => {
+    it("should count word instances in given text", () => {
       const instances = utils.countWordInstances(
         "test string with xxxtestxxx value",
         "test"
@@ -231,7 +230,7 @@ describe("Utils", () => {
   });
 
   describe("getNthIndex", () => {
-    it("1: should return index of second occurrence of word in given text", () => {
+    it("should return index of second occurrence of word in given text", () => {
       const index = utils.getNthIndex(
         "test string with xxxtestxxx value",
         "test",
@@ -240,14 +239,14 @@ describe("Utils", () => {
       assert.equal(index, 20);
     });
 
-    it("2: should return -1 if word does not occur in given text", () => {
+    it("should return -1 if word does not occur in given text", () => {
       const index = utils.getNthIndex("string with value", "test", 2);
       assert.equal(index, -1);
     });
   });
 
   describe("getLastFromArray", () => {
-    it("1: should return last element from array fulfilling given predicate", () => {
+    it("should return last element from array fulfilling given predicate", () => {
       const lastAction = getAction(ActionType.Rebuild, "test action 3", 3);
       const actual = utils.getLastFromArray(
         [
@@ -261,7 +260,7 @@ describe("Utils", () => {
       assert.deepEqual(actual, lastAction);
     });
 
-    it("2: should return undefined if given predicated is not fulfilled", () => {
+    it("should return undefined if given predicated is not fulfilled", () => {
       const last = utils.getLastFromArray(
         [
           getAction(ActionType.Rebuild, "test action 1", 1),
@@ -276,7 +275,7 @@ describe("Utils", () => {
   });
 
   describe("groupBy", () => {
-    it("1: should return map containing grouped array", () => {
+    it("should return map containing grouped array", () => {
       const actions = [
         getAction(ActionType.Rebuild, "test action 1", 1),
         getAction(ActionType.Remove, "test action 2", 2),
@@ -296,8 +295,8 @@ describe("Utils", () => {
   describe("getNameFromUri", () => {});
 
   describe("updateQpItemsWithNewDirectoryPath", () => {
-    it("1: should update qpItems with new directory path", () => {
-      setups.updateQpItemsWithNewDirectoryPath1();
+    it("should update qpItems with new directory path", () => {
+      setups.updateQpItemsWithNewDirectoryPath.setupForUpdatingItemsWithNewDirectoryPath();
       assert.deepEqual(
         utils.updateQpItemsWithNewDirectoryPath(
           getQpItems(),
@@ -308,9 +307,8 @@ describe("Utils", () => {
       );
     });
 
-    it(`2: should return unchanged qpItems if item
-      does not contain old directory path`, () => {
-      setups.updateQpItemsWithNewDirectoryPath2();
+    it("should return unchanged qpItems if item does not contain old directory path", () => {
+      setups.updateQpItemsWithNewDirectoryPath.setupForReturningUnchangedItemsWhenDirectoryNotFound();
       assert.deepEqual(
         utils.updateQpItemsWithNewDirectoryPath(
           getQpItems(),
@@ -323,40 +321,44 @@ describe("Utils", () => {
   });
 
   describe("normalizeUriPath", () => {
-    it("1: should return uri path without workspace part if workspace has more than one folder", () => {
-      const { item, qpItem } = setups.normalizeUriPath1();
+    it("should return uri path without workspace part if workspace has more than one folder", () => {
+      const { item, qpItem } =
+        setups.normalizeUriPath.setupForRemovingWorkspacePartWhenMultipleFolders();
       assert.equal(utils.normalizeUriPath(item.path), qpItem.uri.path);
     });
 
-    it("2: should return uri path without workspace part if workspace has only one folder", () => {
-      const { item, qpItem } = setups.normalizeUriPath2();
+    it("should return uri path without workspace part if workspace has only one folder", () => {
+      const { item, qpItem } =
+        setups.normalizeUriPath.setupForRemovingWorkspacePartWhenSingleFolder();
       assert.equal(utils.normalizeUriPath(item.path), qpItem.uri.path);
     });
 
-    it("3: should return uri path with workspace part if workspace doesn't have any folder", () => {
-      const { item, qpItem } = setups.normalizeUriPath3();
+    it("should return uri path with workspace part if workspace doesn't have any folder", () => {
+      const { item, qpItem } =
+        setups.normalizeUriPath.setupForKeepingWorkspacePartWhenNoFolders();
       assert.equal(utils.normalizeUriPath(item.path), qpItem.uri.path);
     });
   });
 
   describe("isDirectory", () => {
-    it("1: should return true if passed uri is a directory", () => {
+    it("should return true if passed uri is a directory", () => {
       assert.equal(utils.isDirectory(getDirectory("./fake/")), true);
     });
-    it("2: should return false if passed uri is a file", () => {
+    it("should return false if passed uri is a file", () => {
       assert.equal(utils.isDirectory(getItem()), false);
     });
   });
 
   describe("convertMsToSec", () => {
-    it("1: should get value in ms and convert it to seconds", () => {
+    it("should get value in ms and convert it to seconds", () => {
       assert.equal(utils.convertMsToSec(2000), 2);
     });
   });
 
   describe("getStructure", () => {
-    it("1: should return tree structure based on workspace data", () => {
-      const workspaceData = setups.getStructure1();
+    it("should return tree structure based on workspace data", () => {
+      const workspaceData =
+        setups.getStructure.setupForReturningTreeStructureFromWorkspaceData();
       assert.equal(
         utils.getStructure(workspaceData),
         `{
@@ -375,20 +377,20 @@ describe("Utils", () => {
   });
 
   describe("setWorkspaceFoldersCommonPath", () => {
-    it("1: should do nothing if workspace has only one folder", () => {
-      setups.setWorkspaceFoldersCommonPath1();
+    it("should do nothing if workspace has only one folder", () => {
+      setups.setWorkspaceFoldersCommonPath.setupForDoingNothingWhenSingleFolder();
       utils.setWorkspaceFoldersCommonPath();
       assert.equal(utils.getWorkspaceFoldersCommonPathProp(), "");
     });
 
-    it("2: should do nothing if workspace doesn't have any folder", () => {
-      setups.setWorkspaceFoldersCommonPath2();
+    it("should do nothing if workspace doesn't have any folder", () => {
+      setups.setWorkspaceFoldersCommonPath.setupForDoingNothingWhenNoFolders();
       utils.setWorkspaceFoldersCommonPath();
       assert.equal(utils.getWorkspaceFoldersCommonPathProp(), "");
     });
 
-    it("3: should extract common path if workspace has more than one folder", () => {
-      setups.setWorkspaceFoldersCommonPath3();
+    it("should extract common path if workspace has more than one folder", () => {
+      setups.setWorkspaceFoldersCommonPath.setupForExtractingCommonPathWhenMultipleFolders();
       utils.setWorkspaceFoldersCommonPath();
       assert.equal(utils.getWorkspaceFoldersCommonPathProp(), "/common/path");
     });

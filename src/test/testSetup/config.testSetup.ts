@@ -35,23 +35,26 @@ export const getTestSetups = () => {
     afterEach: () => {
       sandbox.restore();
     },
-    getExclude2: (section: string, key: string) => {
-      sandbox.restore();
-      return stubMultiple(
-        [
-          {
-            object: vscode.workspace,
-            method: "getConfiguration",
-            returns: getVscodeConfiguration(configuration),
-          },
-          {
-            object: cache,
-            method: "getConfigByKey",
-            returns: configuration[section][key],
-          },
-        ],
-        sandbox
-      );
+
+    fetchExclude: {
+      setupForReturningFromCache: (section: string, key: string) => {
+        sandbox.restore();
+        return stubMultiple(
+          [
+            {
+              object: vscode.workspace,
+              method: "getConfiguration",
+              returns: getVscodeConfiguration(configuration),
+            },
+            {
+              object: cache,
+              method: "getConfigByKey",
+              returns: configuration[section][key],
+            },
+          ],
+          sandbox
+        );
+      },
     },
   };
 };

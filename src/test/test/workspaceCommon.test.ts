@@ -17,23 +17,23 @@ describe("WorkspaceCommon", () => {
   afterEach(() => setups.afterEach());
 
   describe("getData", () => {
-    it("1: should cache.getData method be invoked", () => {
-      setups.getData1();
+    it("should cache.getData method be invoked", () => {
+      setups.getData.setupForInvokingCacheGetDataMethod();
 
       assert.deepEqual(workspaceCommon.getData(), getQpItems());
     });
 
-    it("2: should return empty array if cache.getData method returns undefined", () => {
-      setups.getData2();
+    it("should return empty array if cache.getData method returns undefined", () => {
+      setups.getData.setupForReturningEmptyArrayWhenCacheGetDataReturnsUndefined();
 
       assert.deepEqual(workspaceCommon.getData(), []);
     });
   });
 
   describe("index", () => {
-    it(`1: should registerAction method be invoked
-          which register rebuild action`, async () => {
-      const [registerStub] = setups.index1();
+    it("should registerAction method be invoked which register rebuild action", async () => {
+      const [registerStub] =
+        setups.index.setupForInvokingRegisterActionToRegisterRebuildAction();
       await workspaceCommon.index("test comment");
 
       assert.equal(registerStub.calledOnce, true);
@@ -42,17 +42,17 @@ describe("WorkspaceCommon", () => {
   });
 
   describe("indexWithProgress", () => {
-    it(`1: should vscode.window.withProgress method be invoked
-          if workspace has opened at least one folder`, async () => {
-      const [withProgressStub] = setups.indexWithProgress1();
+    it("should vscode.window.withProgress method be invoked if workspace has opened at least one folder", async () => {
+      const [withProgressStub] =
+        setups.indexWithProgress.setupForInvokingVscodeWindowWithProgressWhenWorkspaceHasFolders();
 
       await workspaceCommon.indexWithProgress();
       assert.equal(withProgressStub.calledOnce, true);
     });
 
-    it(`2: should printNoFolderOpenedMessage method be invoked
-          if workspace does not has opened at least one folder`, async () => {
-      const [printNoFolderOpenedMessageStub] = setups.indexWithProgress2();
+    it("should printNoFolderOpenedMessage method be invoked if workspace does not has opened at least one folder", async () => {
+      const [printNoFolderOpenedMessageStub] =
+        setups.indexWithProgress.setupForInvokingPrintNoFolderOpenedMessageWhenWorkspaceHasNoFolders();
 
       await workspaceCommon.indexWithProgress();
       assert.equal(printNoFolderOpenedMessageStub.calledOnce, true);
@@ -60,8 +60,9 @@ describe("WorkspaceCommon", () => {
   });
 
   describe("registerAction", () => {
-    it("1: should actionProcessor.register method be invoked", async () => {
-      const [registerStub] = setups.registerAction1();
+    it("should actionProcessor.register method be invoked", async () => {
+      const [registerStub] =
+        setups.registerAction.setupForInvokingActionProcessorRegisterMethod();
 
       await workspaceCommon.registerAction(
         ActionType.Rebuild,
@@ -75,17 +76,17 @@ describe("WorkspaceCommon", () => {
   });
 
   describe("downloadData", () => {
-    it("1: should return data for quick pick", async () => {
-      setups.downloadData1();
+    it("should return data for quick pick", async () => {
+      setups.downloadData.setupForReturningDataForQuickPick();
 
       assert.deepEqual(await workspaceCommon.downloadData(), getQpItems());
     });
   });
 
   describe("cancelIndexing", () => {
-    it("1: should dataService.cancel and dataConverter.cancel methods be invoked", () => {
+    it("should dataService.cancel and dataConverter.cancel methods be invoked", () => {
       const [dataServiceCancelStub, dataConverterCancelStub] =
-        setups.cancelIndexing1();
+        setups.cancelIndexing.setupForInvokingDataServiceAndDataConverterCancelMethods();
 
       workspaceCommon.cancelIndexing();
       assert.deepEqual(dataServiceCancelStub.calledOnce, true);
@@ -94,8 +95,9 @@ describe("WorkspaceCommon", () => {
   });
 
   describe("handleCancellationRequested", () => {
-    it("1: should cancelIndexing method be invoked", () => {
-      const [cancelIndexingStub] = setups.cancelIndexing1();
+    it("should cancelIndexing method be invoked", () => {
+      const [cancelIndexingStub] =
+        setups.cancelIndexing.setupForInvokingDataServiceAndDataConverterCancelMethods();
 
       (workspaceCommon as any).handleCancellationRequested();
       assert.deepEqual(cancelIndexingStub.calledOnce, true);
@@ -103,8 +105,8 @@ describe("WorkspaceCommon", () => {
   });
 
   describe("getNotificationLocation", () => {
-    it("1: should return Window as the location for messages", () => {
-      setups.getNotificationLocation1();
+    it("should return Window as the location for messages", () => {
+      setups.getNotificationLocation.setupForReturningWindowAsLocationForMessages();
 
       assert.equal(
         workspaceCommon.getNotificationLocation(),
@@ -112,8 +114,8 @@ describe("WorkspaceCommon", () => {
       );
     });
 
-    it("2: should return Notification as the location for messages", () => {
-      setups.getNotificationLocation2();
+    it("should return Notification as the location for messages", () => {
+      setups.getNotificationLocation.setupForReturningNotificationAsLocationForMessages();
 
       assert.equal(
         workspaceCommon.getNotificationLocation(),
@@ -123,8 +125,8 @@ describe("WorkspaceCommon", () => {
   });
 
   describe("getNotificationTitle", () => {
-    it("1: should return long title", () => {
-      setups.getNotificationTitle1();
+    it("should return long title", () => {
+      setups.getNotificationTitle.setupForReturningLongTitle();
 
       assert.equal(
         workspaceCommon.getNotificationTitle(),
@@ -132,19 +134,20 @@ describe("WorkspaceCommon", () => {
       );
     });
 
-    it("2: should return short title", () => {
-      setups.getNotificationTitle2();
+    it("should return short title", () => {
+      setups.getNotificationTitle.setupForReturningShortTitle();
 
       assert.equal(workspaceCommon.getNotificationTitle(), "Indexing...");
     });
   });
 
   describe("indexWithProgressTask", () => {
-    it("1: should existing onDidItemIndexed subscription be disposed", async () => {
+    it("should existing onDidItemIndexed subscription be disposed", async () => {
       const {
         onDidItemIndexedSubscription,
         stubs: [onDidItemIndexedStub],
-      } = setups.indexWithProgressTask1();
+      } =
+        setups.indexWithProgressTask.setupForDisposingExistingOnDidItemIndexedSubscription();
       const cancellationTokenSource = new vscode.CancellationTokenSource();
 
       await workspaceCommon.indexWithProgressTask(
@@ -156,8 +159,9 @@ describe("WorkspaceCommon", () => {
       assert.equal(onDidItemIndexedSubscription.dispose.calledOnce, true);
     });
 
-    it("2: should utils.sleep method be invoked", async () => {
-      const [sleepStub] = setups.indexWithProgressTask2();
+    it("should utils.sleep method be invoked", async () => {
+      const [sleepStub] =
+        setups.indexWithProgressTask.setupForInvokingUtilsSleepMethod();
       const cancellationTokenSource = new vscode.CancellationTokenSource();
 
       await workspaceCommon.indexWithProgressTask(
@@ -168,8 +172,9 @@ describe("WorkspaceCommon", () => {
       assert.equal(sleepStub.calledOnce, true);
     });
 
-    it("3: should print stats message be printed after indexing", async () => {
-      const [printStatsMessageStub] = setups.indexWithProgressTask3();
+    it("should print stats message be printed after indexing", async () => {
+      const [printStatsMessageStub] =
+        setups.indexWithProgressTask.setupForPrintingStatsMessageAfterIndexing();
       const cancellationTokenSource = new vscode.CancellationTokenSource();
 
       await workspaceCommon.indexWithProgressTask(
@@ -180,9 +185,9 @@ describe("WorkspaceCommon", () => {
       assert.equal(printStatsMessageStub.calledOnce, true);
     });
 
-    it("4: should dataService.fetchData and dataConverter.convertToQpData methods be invoked", async () => {
+    it("should dataService.fetchData and dataConverter.convertToQpData methods be invoked", async () => {
       const [fetchDataStub, convertToQpDataStub] =
-        setups.indexWithProgressTask4();
+        setups.indexWithProgressTask.setupForInvokingDataServiceFetchDataAndDataConverterConvertToQpDataMethods();
       const cancellationTokenSource = new vscode.CancellationTokenSource();
 
       await workspaceCommon.indexWithProgressTask(
@@ -194,9 +199,9 @@ describe("WorkspaceCommon", () => {
       assert.equal(convertToQpDataStub.calledOnce, true);
     });
 
-    it("5: should utils.printStatsMessage, logger.logScanTime and logger.logStructure methods be invoked", async () => {
+    it("should utils.printStatsMessage, logger.logScanTime and logger.logStructure methods be invoked", async () => {
       const [printStatsMessageStub, logScanTimeStub, logStructureMessageStub] =
-        setups.indexWithProgressTask5();
+        setups.indexWithProgressTask.setupForInvokingUtilsPrintStatsMessageLoggerLogScanTimeAndLoggerLogStructureMethods();
       const cancellationTokenSource = new vscode.CancellationTokenSource();
 
       await workspaceCommon.indexWithProgressTask(
@@ -211,13 +216,13 @@ describe("WorkspaceCommon", () => {
   });
 
   describe("handleDidItemIndexed", () => {
-    it("1: should calculate progress step if doesn't exit", () => {
+    it("should calculate progress step if doesn't exit", () => {
       workspaceCommon.handleDidItemIndexed(getProgress(), 5);
 
       assert.equal(workspaceCommon.getProgressStep(), 20);
     });
 
-    it("2: should report current progress", () => {
+    it("should report current progress", () => {
       const progress = getProgress(40);
       workspaceCommon.handleDidItemIndexed(progress, 5);
 

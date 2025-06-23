@@ -17,22 +17,23 @@ describe("extension", () => {
   afterEach(() => setups.afterEach());
 
   describe("activate", () => {
-    it("1: should register two commands", async () => {
-      const [registerCommandStub] = setups.activate1();
+    it("should register two commands", async () => {
+      const [registerCommandStub] =
+        setups.activate.setupForRegisteringCommands();
       await extension.activate(context);
 
       assert.equal(registerCommandStub.calledTwice, true);
     });
 
-    it("2: should controller.init method be invoked", async () => {
-      const [initStub] = setups.activate2();
+    it("should controller.init method be invoked", async () => {
+      const [initStub] = setups.activate.setupForControllerInit();
       await extension.activate(context);
 
       assert.equal(initStub.calledOnce, true);
     });
 
-    it("3: should controller.startup method be invoked", async () => {
-      const [startupStub] = setups.activate2();
+    it("should controller.startup method be invoked", async () => {
+      const [startupStub] = setups.activate.setupForControllerStartup();
       await extension.activate(context);
 
       assert.equal(startupStub.calledOnce, true);
@@ -40,7 +41,7 @@ describe("extension", () => {
   });
 
   describe("deactivate", () => {
-    it("1: should function exist", () => {
+    it("should function exist", () => {
       const logStub = sinon.spy(console, "log", ["get"]);
       extension.deactivate();
 
@@ -49,8 +50,8 @@ describe("extension", () => {
   });
 
   describe("search", () => {
-    it("1: should controller.search method be invoked", () => {
-      const [searchStub] = setups.search1();
+    it("should controller.search method be invoked", () => {
+      const [searchStub] = setups.search.setupForControllerSearch();
       extension.search();
 
       assert.equal(searchStub.calledOnce, true);
@@ -58,8 +59,8 @@ describe("extension", () => {
   });
 
   describe("reload", () => {
-    it("1: should controller.reload method be invoked", () => {
-      const [reloadStub] = setups.reload1();
+    it("should controller.reload method be invoked", () => {
+      const [reloadStub] = setups.reload.setupForControllerReload();
       extension.reload();
 
       assert.equal(reloadStub.calledOnce, true);
