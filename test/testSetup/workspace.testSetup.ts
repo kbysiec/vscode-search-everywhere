@@ -8,8 +8,8 @@ import { dataService } from "../../src/dataService";
 import { ExcludeMode } from "../../src/types";
 import { utils } from "../../src/utils";
 import { workspace } from "../../src/workspace";
-import { workspaceCommon as common } from "../../src/workspaceCommon";
 import * as events from "../../src/workspaceEventsEmitter";
+import { workspaceIndexer as indexer } from "../../src/workspaceIndexer";
 import { getItems } from "../util/itemMockFactory";
 import { getEventEmitter } from "../util/mockFactory";
 import { stubMultiple } from "../util/stubHelpers";
@@ -89,7 +89,7 @@ export const getTestSetups = () => {
         return stubMultiple(
           [
             {
-              object: common,
+              object: indexer,
               method: "index",
             },
             {
@@ -105,7 +105,7 @@ export const getTestSetups = () => {
         return stubMultiple(
           [
             {
-              object: common,
+              object: indexer,
               method: "index",
             },
             {
@@ -125,7 +125,7 @@ export const getTestSetups = () => {
         return stubMultiple(
           [
             {
-              object: common,
+              object: indexer,
               method: "registerAction",
             },
             {
@@ -149,7 +149,7 @@ export const getTestSetups = () => {
         stubMultiple(
           [
             {
-              object: common,
+              object: indexer,
               method: "registerAction",
             },
             {
@@ -216,7 +216,7 @@ export const getTestSetups = () => {
         return stubMultiple(
           [
             {
-              object: common,
+              object: indexer,
               method: "getData",
               returns: getItems(),
             },
@@ -409,7 +409,7 @@ export const getTestSetups = () => {
         return stubMultiple(
           [
             {
-              object: common,
+              object: indexer,
               method: "registerAction",
             },
             {
@@ -493,7 +493,7 @@ export const getTestSetups = () => {
         return stubMultiple(
           [
             {
-              object: common,
+              object: indexer,
               method: "registerAction",
             },
             {
@@ -513,7 +513,7 @@ export const getTestSetups = () => {
           return stubMultiple(
             [
               {
-                object: common,
+                object: indexer,
                 method: "registerAction",
               },
               {
@@ -530,7 +530,7 @@ export const getTestSetups = () => {
         return stubMultiple(
           [
             {
-              object: common,
+              object: indexer,
               method: "registerAction",
             },
             {
@@ -547,7 +547,7 @@ export const getTestSetups = () => {
         return stubMultiple(
           [
             {
-              object: common,
+              object: indexer,
               method: "registerAction",
             },
             {
@@ -577,7 +577,7 @@ export const getTestSetups = () => {
                 callsFake: (paths: string[]) => (notSavedUris = paths),
               },
               {
-                object: common,
+                object: indexer,
                 method: "registerAction",
               },
               {
@@ -596,7 +596,7 @@ export const getTestSetups = () => {
         return stubMultiple(
           [
             {
-              object: common,
+              object: indexer,
               method: "registerAction",
             },
             {
@@ -613,7 +613,7 @@ export const getTestSetups = () => {
         return stubMultiple(
           [
             {
-              object: common,
+              object: indexer,
               method: "registerAction",
             },
             {
@@ -632,7 +632,7 @@ export const getTestSetups = () => {
         return stubMultiple(
           [
             {
-              object: common,
+              object: indexer,
               method: "registerAction",
             },
             {
@@ -649,7 +649,7 @@ export const getTestSetups = () => {
         return stubMultiple(
           [
             {
-              object: common,
+              object: indexer,
               method: "registerAction",
             },
             {
@@ -678,7 +678,7 @@ export const getTestSetups = () => {
               callsFake: (paths: string[]) => (notSavedUris = paths),
             },
             {
-              object: common,
+              object: indexer,
               method: "registerAction",
             },
             {
@@ -697,7 +697,7 @@ export const getTestSetups = () => {
         return stubMultiple(
           [
             {
-              object: common,
+              object: indexer,
               method: "registerAction",
             },
             {
@@ -714,7 +714,7 @@ export const getTestSetups = () => {
         return stubMultiple(
           [
             {
-              object: common,
+              object: indexer,
               method: "registerAction",
             },
             {

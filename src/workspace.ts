@@ -23,7 +23,6 @@ import {
   QuickPickItem,
 } from "./types";
 import { utils } from "./utils";
-import { workspaceCommon as common } from "./workspaceCommon";
 import {
   onDidDebounceConfigToggleEventEmitter,
   onDidProcessingEventEmitter,
@@ -32,6 +31,7 @@ import {
   onWillProcessingEventEmitter,
   onWillReindexOnConfigurationChangeEventEmitter,
 } from "./workspaceEventsEmitter";
+import { workspaceIndexer as indexer } from "./workspaceIndexer";
 import { removeFromCacheByPath } from "./workspaceRemover";
 import { updateCacheByPath } from "./workspaceUpdater";
 
@@ -78,14 +78,14 @@ async function handleDidChangeTextDocument(
   if (isUriExistingInWorkspace && hasContentChanged) {
     workspace.addNotSavedUri(uri);
 
-    await common.registerAction(
+    await indexer.registerAction(
       ActionType.Remove,
       removeFromCacheByPath.bind(null, uri, actionType),
       ActionTrigger.DidChangeTextDocument,
       uri
     );
 
-    await common.registerAction(
+    await indexer.registerAction(
       ActionType.Update,
       updateCacheByPath.bind(null, uri, actionType),
       ActionTrigger.DidChangeTextDocument,
@@ -103,7 +103,7 @@ async function handleDidRenameFiles(event: vscode.FileRenameEvent) {
   for (let i = 0; i < event.files.length; i++) {
     const file = event.files[i];
 
-    await common.registerAction(
+    await indexer.registerAction(
       ActionType.Update,
       updateCacheByPath.bind(null, file.newUri, actionType, file.oldUri),
       ActionTrigger.DidRenameFiles,
@@ -111,7 +111,7 @@ async function handleDidRenameFiles(event: vscode.FileRenameEvent) {
     );
 
     actionType === DetailedActionType.RenameOrMoveFile &&
-      (await common.registerAction(
+      (await indexer.registerAction(
         ActionType.Remove,
         removeFromCacheByPath.bind(null, file.oldUri, actionType),
         ActionTrigger.DidRenameFiles,
@@ -128,7 +128,7 @@ async function handleDidCreateFiles(event: vscode.FileCreateEvent) {
 
   workspace.addNotSavedUri(uri);
 
-  await common.registerAction(
+  await indexer.registerAction(
     ActionType.Update,
     updateCacheByPath.bind(null, uri, actionType),
     ActionTrigger.DidCreateFiles,
@@ -142,7 +142,7 @@ async function handleDidDeleteFiles(event: vscode.FileDeleteEvent) {
     ? DetailedActionType.RemoveDirectory
     : DetailedActionType.RemoveFile;
 
-  await common.registerAction(
+  await indexer.registerAction(
     ActionType.Remove,
     removeFromCacheByPath.bind(null, uri, actionType),
     ActionTrigger.DidDeleteFiles,
@@ -198,7 +198,7 @@ async function init() {
 
 async function index(indexActionType: ActionTrigger): Promise<void> {
   clear();
-  await common.index(indexActionType);
+  await indexer.index(indexActionType);
 }
 
 async function removeDataForUnsavedUris() {
@@ -207,7 +207,7 @@ async function removeDataForUnsavedUris() {
     const path = paths[i];
     const uri = vscode.Uri.file(path);
 
-    await common.registerAction(
+    await indexer.registerAction(
       ActionType.Remove,
       removeFromCacheByPath.bind(
         null,
@@ -218,7 +218,7 @@ async function removeDataForUnsavedUris() {
       uri
     );
 
-    await common.registerAction(
+    await indexer.registerAction(
       ActionType.Update,
       updateCacheByPath.bind(null, uri, DetailedActionType.ReloadUnsavedUri),
       ActionTrigger.ReloadUnsavedUri,
@@ -251,7 +251,7 @@ function registerEventListeners(): void {
 }
 
 function getData(): QuickPickItem[] {
-  return common.getData();
+  return indexer.getData();
 }
 
 function addNotSavedUri(uri: vscode.Uri) {

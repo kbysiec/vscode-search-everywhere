@@ -1,6 +1,6 @@
 import * as sinon from "sinon";
 import * as cache from "../../src/cache";
-import { workspaceCommon as common } from "../../src/workspaceCommon";
+import { workspaceIndexer as indexer } from "../../src/workspaceIndexer";
 import { getQpItems } from "../util/qpItemMockFactory";
 import { stubMultiple } from "../util/stubHelpers";
 
@@ -21,7 +21,7 @@ export const getTestSetups = () => {
               method: "updateData",
             },
             {
-              object: common,
+              object: indexer,
               method: "getData",
               returns: getQpItems(),
             },
@@ -38,7 +38,7 @@ export const getTestSetups = () => {
               method: "updateData",
             },
             {
-              object: common,
+              object: indexer,
               method: "getData",
               returns: getQpItems(),
             },
@@ -55,7 +55,7 @@ export const getTestSetups = () => {
               method: "updateData",
             },
             {
-              object: common,
+              object: indexer,
               method: "getData",
               returns: getQpItems(),
             },
@@ -72,7 +72,7 @@ export const getTestSetups = () => {
               method: "updateData",
             },
             {
-              object: common,
+              object: indexer,
               method: "getData",
               returns: getQpItems(),
             },
@@ -89,7 +89,7 @@ export const getTestSetups = () => {
               method: "updateData",
             },
             {
-              object: common,
+              object: indexer,
               method: "getData",
               returns: getQpItems(),
             },
@@ -106,7 +106,7 @@ export const getTestSetups = () => {
               method: "updateData",
             },
             {
-              object: common,
+              object: indexer,
               method: "getData",
               returns: getQpItems(),
             },

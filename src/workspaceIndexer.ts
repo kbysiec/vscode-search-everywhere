@@ -22,8 +22,8 @@ async function indexWithProgress(): Promise<void> {
   utils.hasWorkspaceAnyFolder()
     ? await vscode.window.withProgress(
         {
-          location: workspaceCommon.getNotificationLocation(),
-          title: workspaceCommon.getNotificationTitle(),
+          location: workspaceIndexer.getNotificationLocation(),
+          title: workspaceIndexer.getNotificationTitle(),
           cancellable: true,
         },
         indexWithProgressTask
@@ -122,7 +122,7 @@ function resetProgress() {
 }
 
 function handleCancellationRequested() {
-  workspaceCommon.cancelIndexing();
+  workspaceIndexer.cancelIndexing();
 }
 
 function handleDidItemIndexed(
@@ -138,7 +138,7 @@ function handleDidItemIndexed(
 }
 
 function isProgressStepCalculated(): boolean {
-  return !!workspaceCommon.getProgressStep();
+  return !!workspaceIndexer.getProgressStep();
 }
 
 function calculateProgressStep(urisCount: number): void {
@@ -146,8 +146,8 @@ function calculateProgressStep(urisCount: number): void {
 }
 
 function increaseCurrentProgressValue(): void {
-  const progressStep = workspaceCommon.getProgressStep();
-  const currentProgressValue = workspaceCommon.getCurrentProgressValue();
+  const progressStep = workspaceIndexer.getProgressStep();
+  const currentProgressValue = workspaceIndexer.getCurrentProgressValue();
   setCurrentProgressValue(currentProgressValue + progressStep);
 }
 
@@ -160,9 +160,9 @@ function reportCurrentProgress(
 ): void {
   countScannedUri++;
   progress.report({
-    increment: workspaceCommon.getProgressStep(),
+    increment: workspaceIndexer.getProgressStep(),
     message: ` ${countScannedUri} / ${urisCount} ... ${`${Math.round(
-      workspaceCommon.getCurrentProgressValue()
+      workspaceIndexer.getCurrentProgressValue()
     )}%`}`,
   });
 }
@@ -199,7 +199,7 @@ let progressStep = 0;
 let currentProgressValue = 0;
 let countScannedUri = 0;
 
-export const workspaceCommon = {
+export const workspaceIndexer = {
   getProgressStep,
   getCurrentProgressValue,
   getData,

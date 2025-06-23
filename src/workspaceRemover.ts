@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { updateData } from "./cache";
 import { DetailedActionType, QuickPickItem } from "./types";
-import { workspaceCommon as common } from "./workspaceCommon";
+import { workspaceIndexer as indexer } from "./workspaceIndexer";
 
 function removeUri(data: QuickPickItem[], uri: vscode.Uri): QuickPickItem[] {
   return data.filter((qpItem: QuickPickItem) => qpItem.uri.path !== uri.path);
@@ -17,7 +17,7 @@ export function removeFromCacheByPath(
   uri: vscode.Uri,
   detailedActionType: DetailedActionType
 ) {
-  let data = common.getData();
+  let data = indexer.getData();
 
   const removeFnByDetailedActionType: { [key: string]: Function } = {
     [DetailedActionType.RenameOrMoveFile]: removeUri.bind(null, data, uri),

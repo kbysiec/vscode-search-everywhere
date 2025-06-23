@@ -1,7 +1,7 @@
 import * as sinon from "sinon";
 import * as cache from "../../src/cache";
 import { utils } from "../../src/utils";
-import { workspaceCommon as common } from "../../src/workspaceCommon";
+import { workspaceIndexer as indexer } from "../../src/workspaceIndexer";
 import {
   getQpItem,
   getQpItems,
@@ -22,11 +22,11 @@ export const getTestSetups = () => {
         return stubMultiple(
           [
             {
-              object: common,
+              object: indexer,
               method: "index",
             },
             {
-              object: common,
+              object: indexer,
               method: "downloadData",
               throws: new Error("test error"),
             },
@@ -47,12 +47,12 @@ export const getTestSetups = () => {
               method: "updateData",
             },
             {
-              object: common,
+              object: indexer,
               method: "downloadData",
               returns: Promise.resolve(getQpItemsSymbolAndUri("./fake-new/")),
             },
             {
-              object: common,
+              object: indexer,
               method: "getData",
               returns: [],
             },
@@ -69,12 +69,12 @@ export const getTestSetups = () => {
               method: "updateData",
             },
             {
-              object: common,
+              object: indexer,
               method: "downloadData",
               returns: Promise.resolve(getQpItem()),
             },
             {
-              object: common,
+              object: indexer,
               method: "getData",
               returns: [],
             },
@@ -91,12 +91,12 @@ export const getTestSetups = () => {
               method: "updateData",
             },
             {
-              object: common,
+              object: indexer,
               method: "downloadData",
               returns: Promise.resolve(getQpItem()),
             },
             {
-              object: common,
+              object: indexer,
               method: "getData",
               returns: [],
             },
@@ -113,7 +113,7 @@ export const getTestSetups = () => {
               method: "updateData",
             },
             {
-              object: common,
+              object: indexer,
               method: "getData",
               returns: getQpItems(),
             },
@@ -135,12 +135,12 @@ export const getTestSetups = () => {
               method: "updateData",
             },
             {
-              object: common,
+              object: indexer,
               method: "downloadData",
               returns: Promise.resolve(getQpItemsSymbolAndUri("./fake-new/")),
             },
             {
-              object: common,
+              object: indexer,
               method: "getData",
               returns: [],
             },
