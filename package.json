@@ -2,7 +2,7 @@
   "name": "vscode-search-everywhere",
   "displayName": "Search everywhere",
   "description": "Fast and customizable files, symbols search engine. An alternative for 'Go to symbol in workspace' built-in feature.",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "preview": false,
   "publisher": "kbysiec",
   "author": {
@@ -25,6 +25,10 @@
   ],
   "activationEvents": [
     "onCommand:searchEverywhere.search",
+    "onCommand:searchEverywhere.searchCurrentFile",
+    "onCommand:searchEverywhere.navigateIntoFile",
+    "onCommand:searchEverywhere.navigateBack",
+    "onCommand:searchEverywhere.openToTheSide",
     "onCommand:searchEverywhere.reload",
     "onCommand:searchEverywhere.clearSharedCache"
   ],
@@ -204,6 +208,22 @@
         "title": "Search everywhere: Search"
       },
       {
+        "command": "searchEverywhere.searchCurrentFile",
+        "title": "Search everywhere: Search in Current File"
+      },
+      {
+        "command": "searchEverywhere.navigateIntoFile",
+        "title": "Search everywhere: Navigate into File"
+      },
+      {
+        "command": "searchEverywhere.navigateBack",
+        "title": "Search everywhere: Navigate Back to Workspace"
+      },
+      {
+        "command": "searchEverywhere.openToTheSide",
+        "title": "Search everywhere: Open to the Side"
+      },
+      {
         "command": "searchEverywhere.reload",
         "title": "Search everywhere: Reload"
       },
@@ -212,11 +232,42 @@
         "title": "Search everywhere: Clear Shared Worktree Cache"
       }
     ],
-    "keybindings": {
-      "command": "searchEverywhere.search",
-      "key": "ctrl+alt+p",
-      "mac": "alt+cmd+p"
-    }
+    "keybindings": [
+      {
+        "command": "searchEverywhere.search",
+        "key": "ctrl+alt+p",
+        "mac": "alt+cmd+p"
+      },
+      {
+        "command": "searchEverywhere.searchCurrentFile",
+        "key": "ctrl+alt+o",
+        "mac": "alt+cmd+o"
+      },
+      {
+        "command": "searchEverywhere.navigateIntoFile",
+        "key": "alt+right",
+        "mac": "alt+right",
+        "when": "searchEverywhereOpen && !searchEverywhereInFileScope"
+      },
+      {
+        "command": "searchEverywhere.navigateBack",
+        "key": "alt+left",
+        "mac": "alt+left",
+        "when": "searchEverywhereOpen && searchEverywhereInFileScope"
+      },
+      {
+        "command": "searchEverywhere.openToTheSide",
+        "key": "ctrl+enter",
+        "mac": "cmd+enter",
+        "when": "searchEverywhereOpen"
+      },
+      {
+        "command": "searchEverywhere.openToTheSide",
+        "key": "alt+enter",
+        "mac": "alt+enter",
+        "when": "searchEverywhereOpen"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

@@ -226,6 +226,15 @@ function createTables(): void {
   } catch {}
 
   db.run("CREATE INDEX IF NOT EXISTS idx_symbols_uri ON symbols(uri)");
+  db.run(
+    "CREATE INDEX IF NOT EXISTS idx_symbols_uri_line ON symbols(uri, range_start_line, range_start_char)"
+  );
+  db.run(
+    "CREATE INDEX IF NOT EXISTS idx_symbols_uri_nocase ON symbols(uri COLLATE NOCASE)"
+  );
+  db.run(
+    "CREATE INDEX IF NOT EXISTS idx_symbols_uri_line_nocase ON symbols(uri COLLATE NOCASE, range_start_line, range_start_char)"
+  );
   db.run("CREATE INDEX IF NOT EXISTS idx_symbols_kind ON symbols(symbol_kind)");
   db.run(
     "CREATE INDEX IF NOT EXISTS idx_symbols_name_nocase ON symbols(name COLLATE NOCASE)"
@@ -333,6 +342,7 @@ export interface SearchOptions {
   ignoredKinds?: number[];
   ignoredNames?: string[];
   sortByKind?: boolean;
+  fileUri?: string;
 }
 
 const QUERY_COLUMNS =
@@ -355,7 +365,7 @@ export function search(
   }
 
   // Fast-path: Check LRU search cache
-  const cacheKey = `${query}|${limit}|${options?.symbolKind ?? ""}|${options?.sortByKind ? "1" : "0"}|${options?.allowedKinds?.join(",") ?? ""}|${options?.ignoredKinds?.join(",") ?? ""}|${options?.ignoredNames?.join(",") ?? ""}`;
+  const cacheKey = `${query}|${limit}|${options?.symbolKind ?? ""}|${options?.sortByKind ? "1" : "0"}|${options?.fileUri ?? ""}|${options?.allowedKinds?.join(",") ?? ""}|${options?.ignoredKinds?.join(",") ?? ""}|${options?.ignoredNames?.join(",") ?? ""}`;
   if (searchCache.has(cacheKey)) {
     return searchCache.get(cacheKey)!;
   }
@@ -364,6 +374,18 @@ export function search(
   const params: any[] = [];
 
   if (options) {
+    if (options.fileUri) {
+      let fileUriStr = options.fileUri;
+      if (!fileUriStr.includes("://")) {
+        try {
+          fileUriStr = vscode.Uri.file(fileUriStr).toString();
+        } catch {}
+      }
+      conditions.push("uri COLLATE NOCASE = ?");
+      params.push(fileUriStr);
+      conditions.push("symbol_kind != 0");
+    }
+
     if (options.symbolKind !== undefined) {
       conditions.push("symbol_kind = ?");
       params.push(options.symbolKind);
@@ -405,7 +427,9 @@ export function search(
   };
 
   if (!query) {
-    const sortOrder = options?.sortByKind
+    const sortOrder = options?.fileUri
+      ? "range_start_line ASC, range_start_char ASC"
+      : options?.sortByKind
       ? "symbol_kind ASC, name COLLATE NOCASE ASC"
       : "name COLLATE NOCASE ASC";
     const results = db.exec(

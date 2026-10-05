@@ -6,6 +6,22 @@ export async function search() {
   await controller.search();
 }
 
+export async function searchCurrentFile() {
+  await controller.searchCurrentFile();
+}
+
+export async function navigateIntoFile() {
+  await controller.navigateIntoFile();
+}
+
+export async function navigateBack() {
+  await controller.navigateBack();
+}
+
+export async function openToTheSide() {
+  await controller.openToTheSide();
+}
+
 export async function reload() {
   await controller.reload();
 }
@@ -24,6 +40,22 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(
       "searchEverywhere.search",
       search.bind(null, controller)
+    ),
+    vscode.commands.registerCommand(
+      "searchEverywhere.searchCurrentFile",
+      searchCurrentFile
+    ),
+    vscode.commands.registerCommand(
+      "searchEverywhere.navigateIntoFile",
+      navigateIntoFile
+    ),
+    vscode.commands.registerCommand(
+      "searchEverywhere.navigateBack",
+      navigateBack
+    ),
+    vscode.commands.registerCommand(
+      "searchEverywhere.openToTheSide",
+      openToTheSide
     ),
     vscode.commands.registerCommand(
       "searchEverywhere.reload",

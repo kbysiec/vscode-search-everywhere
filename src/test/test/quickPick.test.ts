@@ -1,6 +1,7 @@
 import { assert } from "chai";
+import * as sinon from "sinon";
 import * as vscode from "vscode";
-import { quickPick } from "../../quickPick";
+import { ensureUri, quickPick } from "../../quickPick";
 import { getTestSetups } from "../testSetup/quickPick.testSetup";
 import {
   getQuickPickItemButtonEvent,
@@ -155,6 +156,10 @@ describe("QuickPick", () => {
 
       assert.deepEqual(quickPick.getItems()[0].buttons, [
         {
+          iconPath: new vscode.ThemeIcon("arrow-right"),
+          tooltip: "Search symbols in this file",
+        },
+        {
           iconPath: new vscode.ThemeIcon("open-preview"),
           tooltip: "Open to the side",
         },
@@ -298,6 +303,113 @@ describe("QuickPick", () => {
       await quickPick.handleDidTriggerItemButton(getQuickPickItemButtonEvent());
 
       assert.equal(openItemStub.calledOnce, true);
+    });
+  });
+
+  describe("file scope navigation", () => {
+    it("should navigate into file and update control state", async () => {
+      const qpItem = getQpItems()[0];
+      await quickPick.navigateIntoFile(qpItem);
+
+      assert.equal(quickPick.getFileScopeUri(), qpItem.uri.toString());
+      assert.isTrue(quickPick.getControl().title?.includes("fake-1.ts"));
+      assert.equal(quickPick.getControl().buttons.length, 1);
+      assert.equal(
+        quickPick.getControl().buttons[0],
+        vscode.QuickInputButtons.Back
+      );
+    });
+
+    it("should navigate back to workspace and reset control state", async () => {
+      const qpItem = getQpItems()[0];
+      await quickPick.navigateIntoFile(qpItem);
+      assert.isDefined(quickPick.getFileScopeUri());
+
+      await quickPick.navigateBack();
+      assert.isUndefined(quickPick.getFileScopeUri());
+      assert.isUndefined(quickPick.getControl().title);
+      assert.equal(quickPick.getControl().buttons.length, 0);
+    });
+
+    it("should handle handleDidTriggerButton with Back button", async () => {
+      const qpItem = getQpItems()[0];
+      await quickPick.navigateIntoFile(qpItem);
+      assert.isDefined(quickPick.getFileScopeUri());
+
+      await quickPick.handleDidTriggerButton(vscode.QuickInputButtons.Back);
+      assert.isUndefined(quickPick.getFileScopeUri());
+    });
+
+    it("should navigateIntoFile when handleDidTriggerItemButton is triggered with arrow-right", async () => {
+      const qpItem = getQpItems()[0];
+      await quickPick.handleDidTriggerItemButton({
+        button: {
+          iconPath: new vscode.ThemeIcon("arrow-right"),
+          tooltip: "Search symbols in this file",
+        },
+        item: qpItem,
+      });
+
+      assert.equal(quickPick.getFileScopeUri(), qpItem.uri.toString());
+      await quickPick.navigateBack();
+    });
+
+    it("should call loadItems immediately upon navigateIntoFile without waiting for background indexing", async () => {
+      const qpItem = getQpItems()[0];
+      const loadItemsSpy = sinon.spy(quickPick, "loadItems");
+
+      await quickPick.navigateIntoFile(qpItem);
+      assert.isTrue(loadItemsSpy.called);
+
+      loadItemsSpy.restore();
+      await quickPick.navigateBack();
+    });
+  });
+
+  describe("openToTheSide", () => {
+    it("should open active item beside and hide control", async () => {
+      const qpItem = getQpItems()[0];
+      const openItemStub = sinon.stub(quickPick, "openItem").resolves();
+      const hideStub = sinon.stub(quickPick.getControl(), "hide");
+
+      await quickPick.openToTheSide(qpItem);
+
+      assert.equal(openItemStub.calledOnce, true);
+      assert.equal(openItemStub.firstCall.args[1], vscode.ViewColumn.Beside);
+      assert.equal(hideStub.calledOnce, true);
+
+      openItemStub.restore();
+      hideStub.restore();
+    });
+  });
+
+  describe("ensureUri", () => {
+    it("should return vscode.Uri instance as-is", () => {
+      const uri = vscode.Uri.file("/home/user/file.ts");
+      assert.equal(ensureUri(uri), uri);
+    });
+
+    it("should parse string URI correctly including remote schemes", () => {
+      const remoteUriStr = "vscode-remote://ssh-remote%2Bmyserver/home/user/main.cpp";
+      const uri = ensureUri(remoteUriStr);
+      assert.isTrue(uri instanceof vscode.Uri);
+      assert.equal(uri.scheme, "vscode-remote");
+      assert.equal(uri.authority, "ssh-remote+myserver");
+      assert.equal(uri.path, "/home/user/main.cpp");
+    });
+
+    it("should revive serialized URI objects from JSON cache", () => {
+      const serialized = {
+        scheme: "vscode-remote",
+        authority: "ssh-remote+myserver",
+        path: "/home/user/main.cpp",
+        query: "",
+        fragment: "",
+      };
+      const uri = ensureUri(serialized);
+      assert.isTrue(uri instanceof vscode.Uri);
+      assert.equal(uri.scheme, "vscode-remote");
+      assert.equal(uri.path, "/home/user/main.cpp");
     });
   });
 });

@@ -263,5 +263,62 @@ describe("Database", () => {
       });
     });
   });
+
+  describe("search with fileUri", () => {
+    const fileItem: QuickPickItem = {
+      uri: vscode.Uri.file("/workspace/src/UserController.ts"),
+      symbolKind: vscode.SymbolKind.File,
+      label: "$(symbol-file) UserController.ts",
+      description: "src/UserController.ts",
+      detail: "src/UserController.ts",
+      range: new vscode.Range(new vscode.Position(0, 0), new vscode.Position(0, 0)),
+    };
+    const method1: QuickPickItem = {
+      uri: vscode.Uri.file("/workspace/src/UserController.ts"),
+      symbolKind: vscode.SymbolKind.Method,
+      label: "$(symbol-method) getUser",
+      description: "src/UserController.ts",
+      detail: "getUser(): void",
+      range: new vscode.Range(new vscode.Position(15, 0), new vscode.Position(18, 0)),
+    };
+    const method2: QuickPickItem = {
+      uri: vscode.Uri.file("/workspace/src/UserController.ts"),
+      symbolKind: vscode.SymbolKind.Method,
+      label: "$(symbol-method) createUser",
+      description: "src/UserController.ts",
+      detail: "createUser(): void",
+      range: new vscode.Range(new vscode.Position(20, 0), new vscode.Position(25, 0)),
+    };
+
+    it("should filter symbols scoped to given fileUri and exclude file itself", () => {
+      database.insertSymbolsBatch([fileItem, item1, method1, method2, item2]);
+      const results = database.search("", 100, {
+        fileUri: vscode.Uri.file("/workspace/src/UserController.ts").toString(),
+      });
+      assert.equal(results.length, 3);
+      assert.isFalse(results.some((r) => r.symbolKind === vscode.SymbolKind.File));
+      assert.isFalse(results.some((r) => r.uri.toString().includes("UserService.ts")));
+      assert.equal(results[0].label, item1.label);
+      assert.equal(results[1].label, method1.label);
+      assert.equal(results[2].label, method2.label);
+    });
+
+    it("should search matching query within fileUri", () => {
+      database.insertSymbolsBatch([fileItem, item1, method1, method2, item2]);
+      const results = database.search("create", 100, {
+        fileUri: vscode.Uri.file("/workspace/src/UserController.ts").toString(),
+      });
+      assert.equal(results.length, 1);
+      assert.equal(results[0].label, method2.label);
+    });
+
+    it("should match fileUri case-insensitively or by path", () => {
+      database.insertSymbolsBatch([fileItem, item1, method1, method2, item2]);
+      const results = database.search("", 100, {
+        fileUri: vscode.Uri.file("/workspace/src/usercontroller.ts").toString(),
+      });
+      assert.equal(results.length, 3);
+    });
+  });
 });
 

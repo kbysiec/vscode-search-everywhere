@@ -6,14 +6,13 @@ It allows user to easily navigate through files and symbols in the whole workspa
 It is the alternative for "Go to Symbol in Workspace..." - fully customizable.
 
 
-> 🚀 **v3.0.0 Released: The Next-Gen SQLite WASM Engine**
+> 🚀 **v3.2.0 Released: In-File Scope Search, Split Editor & Remote Fixes**
 > 
-> Engineered for speed and massive enterprise codebases:
+> - 🔍 **In-File Scope Search & Outline Navigation:** Search symbols in the current active file (`searchEverywhere.searchCurrentFile`), or drill down into any file with `alt + right` / right-arrow button, and back with `alt + left` / Back button.
+> - 📖 **Open to the Side:** Open any file or symbol in a side-by-side editor with `cmd + enter` / `ctrl + enter` or `alt + enter`.
 > - ⚡ **Sub-millisecond query latency (~0.20 ms)** powered by covering B-Tree indexes (and **0.00 ms** instant LRU cache).
-> - 🐘 **Massive scale:** Effortlessly indexes and searches workspaces with **over 2,000,000 symbols**.
-> - 🪶 **95% RAM reduction:** Peak memory slashed from **> 1.5 GB down to < 80 MB** thanks to streaming batch indexing.
-> - 🔄 **Zero-lag real-time tracking:** Changes to variables, functions, and components are synchronized instantly without freezing your editor.
-> - 🗂️ **Multi-root workspaces:** Seamless cross-project search with dynamic folder resolution.
+> - 🌐 **Remote Development Fix:** Seamless multi-tab caching for SSH, WSL, Dev Containers, and virtual file systems.
+> - 🐘 **Massive scale:** Effortlessly indexes and searches workspaces with **over 2,000,000 symbols** with 95% less RAM.
 
 ## How it works
 
@@ -91,6 +90,8 @@ After the scan is completed, the extension continuously tracks changes in the wo
 
 * Item icon to open it to the side
 
+* Drill-down search in a specific file: search symbols inside any file by clicking the right-arrow icon button or using a shortcut (`alt + right`). Return to workspace search anytime with `alt + left` or the Back button.
+
 * Dedicated output with logs related to triggered actions, scanned directories structure, etc.
 
 * Ability to decide whether the items should be sorted by type
@@ -110,6 +111,34 @@ After the scan is completed, the extension continuously tracks changes in the wo
   Default keybinding for the command is:
   * mac: `alt + cmd + p`
   * win/linux: `ctrl + alt + p`
+
+* `searchEverywhere.searchCurrentFile`
+
+  Search symbols within the currently active editor file (scoped file search / outline).
+
+  Default keybinding:
+  * mac: `alt + cmd + o`
+  * win/linux: `ctrl + alt + o`
+
+* `searchEverywhere.navigateIntoFile`
+
+  Drill down into the selected file item to search symbols within it while inside Search Everywhere. Also available via the right-arrow button on file items.
+
+  Default keybinding: `alt + right` (mac/win/linux, configurable)
+
+* `searchEverywhere.navigateBack`
+
+  Navigate back to the workspace search from a file search, preserving your previous query. Also available via the Back button on the title bar.
+
+  Default keybinding: `alt + left` (mac/win/linux, configurable)
+
+* `searchEverywhere.openToTheSide`
+
+  Open the selected symbol or file into a split editor beside the active editor. Also available via the split editor icon button on each item.
+
+  Default keybindings:
+  * mac: `cmd + enter` or `alt + enter` (configurable)
+  * win/linux: `ctrl + enter` or `alt + enter` (configurable)
 
 * `searchEverywhere.reload`
 

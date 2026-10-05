@@ -2,6 +2,23 @@
 
 All notable changes to the "vscode-search-everywhere" extension will be documented in this file.
 
+## [3.2.0] - 2026-10-05
+### 🔍 In-File Scope Search, Split Editor & Remote Development Fixes
+- **In-File Scope Search & Outline Navigation** (issue #45):
+  - Added `searchEverywhere.searchCurrentFile` (`cmd+alt+o` on macOS / `ctrl+alt+o` on Windows/Linux) to immediately search symbols within the currently active editor file.
+  - Drill-down navigation: seamlessly navigate from workspace search results into any file's symbol list via right-arrow icon button or `alt+right` (`searchEverywhere.navigateIntoFile`).
+  - Navigate back anytime using the title bar Back button or `alt+left` (`searchEverywhere.navigateBack`), automatically restoring your previous workspace search query and position.
+- **Open to the Side Command & Shortcut**:
+  - Added `searchEverywhere.openToTheSide` to open highlighted symbols and files directly in a side-by-side split editor (`vscode.ViewColumn.Beside`).
+  - Configurable default shortcuts: `cmd+enter` / `alt+enter` (macOS) and `ctrl+enter` / `alt+enter` (Windows/Linux), as well as a dedicated split preview icon button on each result item.
+- **Remote Host Duplicate Tab Fix** (issue #46):
+  - Fixed an issue where opening cached items in remote hosts (SSH, WSL, Dev Containers, Codespaces) resulted in new duplicate editor tabs being opened every time.
+  - Replaced path string conversions with robust URI parsing (`ensureUri`), preserving remote schemes (`vscode-remote://`, `vscode-vfs://`, etc.) and authority across serialization and cache lookups.
+  - Expanded `patternProvider` to properly support include/exclude pattern matching on remote and virtual filesystems.
+- **Performance & Instant UI Rendering**:
+  - Eliminated UI lag when drilling down into file scope by rendering cached SQLite symbols immediately (< 5 ms) and fetching updated Language Server symbols non-blockingly in the background.
+  - Added dedicated SQLite B-tree indexes (`idx_symbols_uri_nocase`, `idx_symbols_uri_line_nocase`) ensuring instant O(log N) file-scoped symbol lookups without full table scans.
+
 ## [3.1.0] - 2026-10-05
 ### ⚡ Shared Worktree Cache, Recent Items & Enhanced Matching
 - **Shared Repository Cache for Git Worktrees & Clones** (issue #54):
