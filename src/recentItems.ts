@@ -140,12 +140,19 @@ export function getRecentItems(limit: number = 10): QuickPickItem[] {
 
     // 1. Preferred: real tabs visible in editor tab bars (VS Code >= 1.67)
     const tabGroups = (vscode.window as any).tabGroups;
+    const isDocumentUri = (u: any): boolean => {
+      if (!(u instanceof vscode.Uri)) {
+        return false;
+      }
+      return !["output", "debug", "vscode-terminal", "git", "walkThrough"].includes(u.scheme);
+    };
+
     if (tabGroups && Array.isArray(tabGroups.all)) {
       for (const group of tabGroups.all) {
         if (group && Array.isArray(group.tabs)) {
           for (const tab of group.tabs) {
             const inputUri = (tab?.input as any)?.uri;
-            if (inputUri instanceof vscode.Uri && inputUri.scheme === "file") {
+            if (isDocumentUri(inputUri)) {
               openUris.push(inputUri);
             }
           }
@@ -154,7 +161,7 @@ export function getRecentItems(limit: number = 10): QuickPickItem[] {
     } else if (vscode.window.visibleTextEditors) {
       // 2. Fallback: only actively visible text editors
       for (const editor of vscode.window.visibleTextEditors) {
-        if (editor?.document?.uri && editor.document.uri.scheme === "file") {
+        if (editor?.document?.uri && isDocumentUri(editor.document.uri)) {
           openUris.push(editor.document.uri);
         }
       }

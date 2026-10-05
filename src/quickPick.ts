@@ -75,6 +75,40 @@ function loadItemsForFilterPhrase(qpItem: QuickPickItem): void {
   quickPick.loadItems();
 }
 
+export function ensureUri(uri: any): vscode.Uri {
+  if (uri instanceof vscode.Uri) {
+    return uri;
+  }
+  if (typeof uri === "string") {
+    try {
+      return vscode.Uri.parse(uri);
+    } catch {
+      return vscode.Uri.file(uri);
+    }
+  }
+  if (uri && typeof uri === "object") {
+    if (uri.external) {
+      try {
+        return vscode.Uri.parse(uri.external);
+      } catch {}
+    }
+    if (uri.scheme || uri.path) {
+      try {
+        return vscode.Uri.from({
+          scheme: uri.scheme || "file",
+          authority: uri.authority || "",
+          path: uri.path || "",
+          query: uri.query || "",
+          fragment: uri.fragment || "",
+        });
+      } catch {
+        return vscode.Uri.file(uri.path || uri.fsPath || "");
+      }
+    }
+  }
+  return vscode.Uri.file(String(uri));
+}
+
 async function openItem(
   qpItem: QuickPickItem,
   viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active
@@ -83,12 +117,8 @@ async function openItem(
     return;
   }
   recentItems.addRecentItem(qpItem);
-  const uriOrFileName =
-    qpItem.uri!.scheme === "file" ? qpItem.uri!.path : qpItem.uri;
-  const document =
-    uriOrFileName instanceof vscode.Uri
-      ? await vscode.workspace.openTextDocument(uriOrFileName)
-      : await vscode.workspace.openTextDocument(uriOrFileName);
+  const targetUri = ensureUri(qpItem.uri);
+  const document = await vscode.workspace.openTextDocument(targetUri);
   const editor = await vscode.window.showTextDocument(document, viewColumn);
   selectQpItem(editor, qpItem);
 }

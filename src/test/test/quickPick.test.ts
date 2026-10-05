@@ -1,7 +1,7 @@
 import { assert } from "chai";
 import * as sinon from "sinon";
 import * as vscode from "vscode";
-import { quickPick } from "../../quickPick";
+import { ensureUri, quickPick } from "../../quickPick";
 import { getTestSetups } from "../testSetup/quickPick.testSetup";
 import {
   getQuickPickItemButtonEvent,
@@ -369,6 +369,36 @@ describe("QuickPick", () => {
 
       openItemStub.restore();
       hideStub.restore();
+    });
+  });
+
+  describe("ensureUri", () => {
+    it("should return vscode.Uri instance as-is", () => {
+      const uri = vscode.Uri.file("/home/user/file.ts");
+      assert.equal(ensureUri(uri), uri);
+    });
+
+    it("should parse string URI correctly including remote schemes", () => {
+      const remoteUriStr = "vscode-remote://ssh-remote%2Bmyserver/home/user/main.cpp";
+      const uri = ensureUri(remoteUriStr);
+      assert.isTrue(uri instanceof vscode.Uri);
+      assert.equal(uri.scheme, "vscode-remote");
+      assert.equal(uri.authority, "ssh-remote+myserver");
+      assert.equal(uri.path, "/home/user/main.cpp");
+    });
+
+    it("should revive serialized URI objects from JSON cache", () => {
+      const serialized = {
+        scheme: "vscode-remote",
+        authority: "ssh-remote+myserver",
+        path: "/home/user/main.cpp",
+        query: "",
+        fragment: "",
+      };
+      const uri = ensureUri(serialized);
+      assert.isTrue(uri instanceof vscode.Uri);
+      assert.equal(uri.scheme, "vscode-remote");
+      assert.equal(uri.path, "/home/user/main.cpp");
     });
   });
 });
