@@ -395,4 +395,40 @@ describe("Utils", () => {
       assert.equal(utils.getWorkspaceFoldersCommonPathProp(), "/common/path");
     });
   });
+
+  describe("debounce", () => {
+    it("should delay function execution until wait period elapses", (done) => {
+      let callCount = 0;
+      const debounced = utils.debounce(() => {
+        callCount++;
+      }, 50);
+
+      debounced();
+      debounced();
+      debounced();
+
+      assert.equal(callCount, 0);
+
+      setTimeout(() => {
+        assert.equal(callCount, 1);
+        done();
+      }, 80);
+    });
+
+    it("should pass latest arguments to debounced function", (done) => {
+      let receivedArg = "";
+      const debounced = utils.debounce((val: string) => {
+        receivedArg = val;
+      }, 30);
+
+      debounced("first");
+      debounced("second");
+      debounced("third");
+
+      setTimeout(() => {
+        assert.equal(receivedArg, "third");
+        done();
+      }, 60);
+    });
+  });
 });

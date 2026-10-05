@@ -17,7 +17,7 @@ describe("WorkspaceRemover", () => {
 
   describe("removeFromCacheByPath", () => {
     it("should remove given uri from stored data when file is removed ", () => {
-      const [updateDataStub] =
+      const [deleteByUriStub] =
         setups.removeFromCacheByPath.setupForRemovingGivenUriFromStoredDataWhenFileRemoved();
 
       workspaceRemover.removeFromCacheByPath(
@@ -25,13 +25,13 @@ describe("WorkspaceRemover", () => {
         DetailedActionType.RemoveFile
       );
       assert.equal(
-        updateDataStub.calledWith(getQpItems(1, undefined, 1)),
+        deleteByUriStub.calledWith(getItem().toString()),
         true
       );
     });
 
     it("should remove given uri from stored data when file is renamed or moved", () => {
-      const [updateDataStub] =
+      const [deleteByUriStub] =
         setups.removeFromCacheByPath.setupForRemovingGivenUriFromStoredDataWhenFileRenamedOrMoved();
 
       workspaceRemover.removeFromCacheByPath(
@@ -39,13 +39,13 @@ describe("WorkspaceRemover", () => {
         DetailedActionType.RenameOrMoveFile
       );
       assert.equal(
-        updateDataStub.calledWith(getQpItems(1, undefined, 1)),
+        deleteByUriStub.calledWith(getItem().toString()),
         true
       );
     });
 
     it("should remove given uri from stored data when text in file is changed", () => {
-      const [updateDataStub] =
+      const [deleteByUriStub] =
         setups.removeFromCacheByPath.setupForRemovingGivenUriFromStoredDataWhenTextInFileChanged();
 
       workspaceRemover.removeFromCacheByPath(
@@ -53,35 +53,41 @@ describe("WorkspaceRemover", () => {
         DetailedActionType.TextChange
       );
       assert.equal(
-        updateDataStub.calledWith(getQpItems(1, undefined, 1)),
+        deleteByUriStub.calledWith(getItem().toString()),
         true
       );
     });
 
     it("should remove all uris for given folder uri when directory is removed", () => {
-      const [updateDataStub] =
+      const [deleteByUriPrefixStub] =
         setups.removeFromCacheByPath.setupForRemovingAllUrisForGivenFolderUriWhenDirectoryRemoved();
 
       workspaceRemover.removeFromCacheByPath(
         getDirectory("./fake/"),
         DetailedActionType.RemoveDirectory
       );
-      assert.equal(updateDataStub.calledWith([]), true);
+      assert.equal(
+        deleteByUriPrefixStub.calledWith(getDirectory("./fake/").toString()),
+        true
+      );
     });
 
     it("should remove all uris for given folder uri when directory is renamed", () => {
-      const [updateDataStub] =
+      const [deleteByUriPrefixStub] =
         setups.removeFromCacheByPath.setupForRemovingAllUrisForGivenFolderUriWhenDirectoryRenamed();
 
       workspaceRemover.removeFromCacheByPath(
         getDirectory("./fake/"),
         DetailedActionType.RenameOrMoveDirectory
       );
-      assert.equal(updateDataStub.calledWith([]), true);
+      assert.equal(
+        deleteByUriPrefixStub.calledWith(getDirectory("./fake/").toString()),
+        true
+      );
     });
 
     it("should remove given uri when file is reloaded if it is unsaved", () => {
-      const [updateDataStub] =
+      const [deleteByUriStub] =
         setups.removeFromCacheByPath.setupForRemovingGivenUriWhenFileReloadedIfUnsaved();
 
       workspaceRemover.removeFromCacheByPath(
@@ -89,7 +95,7 @@ describe("WorkspaceRemover", () => {
         DetailedActionType.ReloadUnsavedUri
       );
       assert.equal(
-        updateDataStub.calledWith(getQpItems(1, undefined, 1)),
+        deleteByUriStub.calledWith(getItem().toString()),
         true
       );
     });

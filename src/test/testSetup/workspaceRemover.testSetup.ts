@@ -1,7 +1,5 @@
 import * as sinon from "sinon";
-import * as cache from "../../cache";
-import { workspaceIndexer as indexer } from "../../workspaceIndexer";
-import { getQpItems } from "../util/qpItemMockFactory";
+import { database } from "../../database";
 import { stubMultiple } from "../util/stubHelpers";
 
 export const getTestSetups = () => {
@@ -17,13 +15,12 @@ export const getTestSetups = () => {
         return stubMultiple(
           [
             {
-              object: cache,
-              method: "updateData",
+              object: database,
+              method: "deleteByUri",
             },
             {
-              object: indexer,
-              method: "getData",
-              returns: getQpItems(),
+              object: database,
+              method: "schedulePersist",
             },
           ],
           sandbox
@@ -34,13 +31,12 @@ export const getTestSetups = () => {
         return stubMultiple(
           [
             {
-              object: cache,
-              method: "updateData",
+              object: database,
+              method: "deleteByUri",
             },
             {
-              object: indexer,
-              method: "getData",
-              returns: getQpItems(),
+              object: database,
+              method: "schedulePersist",
             },
           ],
           sandbox
@@ -51,13 +47,12 @@ export const getTestSetups = () => {
         return stubMultiple(
           [
             {
-              object: cache,
-              method: "updateData",
+              object: database,
+              method: "deleteByUri",
             },
             {
-              object: indexer,
-              method: "getData",
-              returns: getQpItems(),
+              object: database,
+              method: "schedulePersist",
             },
           ],
           sandbox
@@ -68,13 +63,12 @@ export const getTestSetups = () => {
         return stubMultiple(
           [
             {
-              object: cache,
-              method: "updateData",
+              object: database,
+              method: "deleteByUriPrefix",
             },
             {
-              object: indexer,
-              method: "getData",
-              returns: getQpItems(),
+              object: database,
+              method: "schedulePersist",
             },
           ],
           sandbox
@@ -85,13 +79,12 @@ export const getTestSetups = () => {
         return stubMultiple(
           [
             {
-              object: cache,
-              method: "updateData",
+              object: database,
+              method: "deleteByUriPrefix",
             },
             {
-              object: indexer,
-              method: "getData",
-              returns: getQpItems(),
+              object: database,
+              method: "schedulePersist",
             },
           ],
           sandbox
@@ -102,13 +95,12 @@ export const getTestSetups = () => {
         return stubMultiple(
           [
             {
-              object: cache,
-              method: "updateData",
+              object: database,
+              method: "deleteByUri",
             },
             {
-              object: indexer,
-              method: "getData",
-              returns: getQpItems(),
+              object: database,
+              method: "schedulePersist",
             },
           ],
           sandbox

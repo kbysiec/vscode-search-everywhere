@@ -27,11 +27,11 @@ describe("QuickPick", () => {
       assert.equal(createQuickPickStub.calledOnce, true);
     });
 
-    it("should register two event listeners if shouldUseDebounce returns true", () => {
+    it("should register one event listener if shouldUseDebounce returns true", () => {
       setups.init.setupForRegisteringTwoEventListenersWhenDebounceEnabled();
       quickPick.init();
 
-      assert.equal(quickPick.getOnDidChangeValueEventListeners().length, 2);
+      assert.equal(quickPick.getOnDidChangeValueEventListeners().length, 1);
     });
 
     it("should register one event listener if shouldUseDebounce returns false", () => {
@@ -66,11 +66,11 @@ describe("QuickPick", () => {
       assert.equal(quickPick.getOnDidChangeValueEventListeners().length, 1);
     });
 
-    it("should dispose existing event listeners and register two event listeners if shouldUseDebounce returns true", () => {
+    it("should dispose existing event listeners and register one event listener if shouldUseDebounce returns true", () => {
       setups.reloadOnDidChangeValueEventListener.setupForRegisteringTwoListenersWhenDebounceEnabled();
       quickPick.reloadOnDidChangeValueEventListener();
 
-      assert.equal(quickPick.getOnDidChangeValueEventListeners().length, 2);
+      assert.equal(quickPick.getOnDidChangeValueEventListeners().length, 1);
     });
   });
 

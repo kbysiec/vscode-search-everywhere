@@ -6,11 +6,13 @@ import {
   fetchShouldWorkspaceDataBeCached,
 } from "./config";
 import { database } from "./database";
+import { gitService } from "./gitService";
 import { logger } from "./logger";
 import { quickPick } from "./quickPick";
-import { Action, ActionTrigger, ActionType } from "./types";
+import { Action, ActionTrigger, ActionType, DetailedActionType } from "./types";
 import { utils } from "./utils";
 import { workspace } from "./workspace";
+import { updateCacheByPath } from "./workspaceUpdater";
 import {
   onDidDebounceConfigToggle,
   onDidProcessing,
@@ -129,18 +131,22 @@ function handleWillProcessing() {
   !quickPick.isInitialized() && quickPick.init();
 }
 
+function setQuickPickData() {
+  !quickPick.isInitialized() && quickPick.init();
+  quickPick.setItems(workspace.getData());
+}
+
 function handleDidProcessing() {
-  // No need to load all data into quickPick — it queries DB on demand
+  controller.setQuickPickData();
   quickPick.loadItems();
   controller.setBusy(false);
 }
 
 function handleWillExecuteAction(action: Action) {
   if (action.type === ActionType.Rebuild) {
-    // Clear QuickPick display
     if (quickPick.isInitialized()) {
-      const control = quickPick.getControl();
-      control.items = [];
+      quickPick.setItems([]);
+      quickPick.loadItems();
     }
   }
   logger.logAction(action);
@@ -210,6 +216,34 @@ async function reload(): Promise<void> {
 }
 
 async function startup(): Promise<void> {
+  if (database.wasSeededFromTemplate()) {
+    database.setSeededFromTemplate(false);
+    clearConfig();
+    !quickPick.isInitialized() && quickPick.init();
+    await workspace.removeDataForUnsavedUris();
+
+    const workspaceFolder =
+      vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders[0];
+    if (workspaceFolder) {
+      try {
+        const rootPath = workspaceFolder.uri.fsPath;
+        const changedFiles = await gitService.getModifiedOrUntrackedFiles(rootPath);
+        if (changedFiles.length > 0) {
+          logger.log(
+            `Syncing ${changedFiles.length} modified/untracked files for seeded worktree...`
+          );
+          for (const filePath of changedFiles) {
+            const fileUri = vscode.Uri.file(filePath);
+            await updateCacheByPath(fileUri, DetailedActionType.TextChange);
+          }
+        }
+      } catch (error) {
+        logger.log(`Error syncing worktree delta: ${error}`);
+      }
+    }
+    return;
+  }
+
   if (controller.shouldIndexOnStartup()) {
     await workspace.index(ActionTrigger.Startup);
   }
@@ -263,6 +297,7 @@ export const controller = {
   isInitOnStartupEnabledAndWorkspaceCachingDisabled,
   isInitOnStartupDisabledAndWorkspaceCachingDisabled,
   setBusy,
+  setQuickPickData,
   getExtensionContext,
   init,
   search,

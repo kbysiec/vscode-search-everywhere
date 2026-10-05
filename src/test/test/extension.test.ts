@@ -17,12 +17,12 @@ describe("extension", () => {
   afterEach(() => setups.afterEach());
 
   describe("activate", () => {
-    it("should register two commands", async () => {
+    it("should register three commands", async () => {
       const [registerCommandStub] =
         setups.activate.setupForRegisteringCommands();
       await extension.activate(context);
 
-      assert.equal(registerCommandStub.calledTwice, true);
+      assert.equal(registerCommandStub.calledThrice, true);
     });
 
     it("should controller.init method be invoked", async () => {

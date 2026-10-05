@@ -49,6 +49,7 @@ export function updateConfigByKey<T>(key: string, value: T): void {
 export function clear(): void {
   clearData();
   clearConfig();
+  clearRecentItems();
 }
 
 export function clearConfig(): void {
@@ -61,4 +62,19 @@ function clearData(): void {
 
 export function clearNotSavedUriPaths(): void {
   extensionContext.workspaceState.update(appConfig.notSaveUriPathsKey, []);
+}
+
+export function getRecentItems<T>(): T[] {
+  const items: T[] | undefined = extensionContext?.workspaceState?.get(
+    appConfig.recentItemsKey
+  );
+  return items || [];
+}
+
+export function updateRecentItems<T>(items: T[]): void {
+  extensionContext?.workspaceState?.update(appConfig.recentItemsKey, items);
+}
+
+export function clearRecentItems(): void {
+  extensionContext?.workspaceState?.update(appConfig.recentItemsKey, []);
 }

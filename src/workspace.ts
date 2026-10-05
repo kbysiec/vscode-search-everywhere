@@ -36,7 +36,7 @@ import { workspaceIndexer as indexer } from "./workspaceIndexer";
 import { removeFromCacheByPath } from "./workspaceRemover";
 import { updateCacheByPath } from "./workspaceUpdater";
 
-const debounce = require("debounce");
+const debounce = utils.debounce;
 
 function reloadComponents() {
   dataConverter.reload();

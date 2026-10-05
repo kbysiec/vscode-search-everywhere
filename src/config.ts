@@ -54,7 +54,7 @@ const keys = {
   },
   shouldItemsBeSorted: {
     name: "shouldItemsBeSorted",
-    value: true,
+    value: false,
   },
   shouldSearchSelection: {
     name: "shouldSearchSelection",
@@ -75,6 +75,18 @@ const keys = {
   shouldWorkspaceDataBeCached: {
     name: "shouldWorkspaceDataBeCached",
     value: true,
+  },
+  shareCacheAcrossWorktrees: {
+    name: "shareCacheAcrossWorktrees",
+    value: true,
+  },
+  showRecentItemsOnEmptyQuery: {
+    name: "showRecentItemsOnEmptyQuery",
+    value: true,
+  },
+  recentItemsLimit: {
+    name: "recentItemsLimit",
+    value: 10,
   },
 };
 
@@ -224,5 +236,26 @@ export function fetchShouldWorkspaceDataBeCached(): boolean {
   return get(
     keys.shouldWorkspaceDataBeCached.name,
     keys.shouldWorkspaceDataBeCached.value
+  );
+}
+
+export function fetchShareCacheAcrossWorktrees(): boolean {
+  return get(
+    keys.shareCacheAcrossWorktrees.name,
+    keys.shareCacheAcrossWorktrees.value
+  );
+}
+
+export function fetchShowRecentItemsOnEmptyQuery(): boolean {
+  return get(
+    keys.showRecentItemsOnEmptyQuery.name,
+    keys.showRecentItemsOnEmptyQuery.value
+  );
+}
+
+export function fetchRecentItemsLimit(): number {
+  return get(
+    keys.recentItemsLimit.name,
+    keys.recentItemsLimit.value
   );
 }
