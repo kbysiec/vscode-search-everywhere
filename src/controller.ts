@@ -310,6 +310,10 @@ async function navigateBack(): Promise<void> {
   await quickPick.navigateBack();
 }
 
+async function openToTheSide(): Promise<void> {
+  await quickPick.openToTheSide();
+}
+
 export const controller = {
   shouldIndexOnQuickPickOpen,
   shouldLoadDataFromCacheOnQuickPickOpen,
@@ -328,6 +332,7 @@ export const controller = {
   searchCurrentFile,
   navigateIntoFile,
   navigateBack,
+  openToTheSide,
   startup,
   reload,
   handleWillProcessing,

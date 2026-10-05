@@ -133,6 +133,14 @@ After the scan is completed, the extension continuously tracks changes in the wo
 
   Default keybinding: `alt + left` (mac/win/linux, configurable)
 
+* `searchEverywhere.openToTheSide`
+
+  Open the selected symbol or file into a split editor beside the active editor. Also available via the split editor icon button on each item.
+
+  Default keybindings:
+  * mac: `cmd + enter` or `alt + enter` (configurable)
+  * win/linux: `ctrl + enter` or `alt + enter` (configurable)
+
 * `searchEverywhere.reload`
 
   Re-index the whole workspace.

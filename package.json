@@ -28,6 +28,7 @@
     "onCommand:searchEverywhere.searchCurrentFile",
     "onCommand:searchEverywhere.navigateIntoFile",
     "onCommand:searchEverywhere.navigateBack",
+    "onCommand:searchEverywhere.openToTheSide",
     "onCommand:searchEverywhere.reload",
     "onCommand:searchEverywhere.clearSharedCache"
   ],
@@ -219,6 +220,10 @@
         "title": "Search everywhere: Navigate Back to Workspace"
       },
       {
+        "command": "searchEverywhere.openToTheSide",
+        "title": "Search everywhere: Open to the Side"
+      },
+      {
         "command": "searchEverywhere.reload",
         "title": "Search everywhere: Reload"
       },
@@ -249,6 +254,18 @@
         "key": "alt+left",
         "mac": "alt+left",
         "when": "searchEverywhereOpen && searchEverywhereInFileScope"
+      },
+      {
+        "command": "searchEverywhere.openToTheSide",
+        "key": "ctrl+enter",
+        "mac": "cmd+enter",
+        "when": "searchEverywhereOpen"
+      },
+      {
+        "command": "searchEverywhere.openToTheSide",
+        "key": "alt+enter",
+        "mac": "alt+enter",
+        "when": "searchEverywhereOpen"
       }
     ]
   },

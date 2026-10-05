@@ -373,6 +373,26 @@ async function searchCurrentFile(): Promise<void> {
   loadItems();
 }
 
+async function openToTheSide(item?: QuickPickItem): Promise<void> {
+  const control = quickPick.getControl();
+  if (!control) {
+    return;
+  }
+  const targetItem =
+    item ||
+    (control.activeItems && control.activeItems.length > 0
+      ? control.activeItems[0]
+      : undefined);
+  if (
+    !targetItem ||
+    targetItem.kind === vscode.QuickPickItemKind.Separator
+  ) {
+    return;
+  }
+  await quickPick.openItem(targetItem, vscode.ViewColumn.Beside);
+  control.hide();
+}
+
 function init(): void {
   const control = vscode.window.createQuickPick<QuickPickItem>();
   setControl(control);
@@ -740,6 +760,7 @@ export const quickPick = {
   navigateIntoFile,
   navigateBack,
   searchCurrentFile,
+  openToTheSide,
   getFileScopeUri,
   disposeOnDidChangeValueEventListeners,
 };

@@ -17,12 +17,12 @@ describe("extension", () => {
   afterEach(() => setups.afterEach());
 
   describe("activate", () => {
-    it("should register six commands", async () => {
+    it("should register seven commands", async () => {
       const [registerCommandStub] =
         setups.activate.setupForRegisteringCommands();
       await extension.activate(context);
 
-      assert.equal(registerCommandStub.callCount, 6);
+      assert.equal(registerCommandStub.callCount, 7);
     });
 
     it("should controller.init method be invoked", async () => {
@@ -91,6 +91,15 @@ describe("extension", () => {
     it("should controller.navigateBack method be invoked", () => {
       const [stub] = setups.navigateBack.setupForControllerNavigateBack();
       extension.navigateBack();
+
+      assert.equal(stub.calledOnce, true);
+    });
+  });
+
+  describe("openToTheSide", () => {
+    it("should controller.openToTheSide method be invoked", () => {
+      const [stub] = setups.openToTheSide.setupForControllerOpenToTheSide();
+      extension.openToTheSide();
 
       assert.equal(stub.calledOnce, true);
     });

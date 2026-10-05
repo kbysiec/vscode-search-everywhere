@@ -18,6 +18,10 @@ export async function navigateBack() {
   await controller.navigateBack();
 }
 
+export async function openToTheSide() {
+  await controller.openToTheSide();
+}
+
 export async function reload() {
   await controller.reload();
 }
@@ -48,6 +52,10 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(
       "searchEverywhere.navigateBack",
       navigateBack
+    ),
+    vscode.commands.registerCommand(
+      "searchEverywhere.openToTheSide",
+      openToTheSide
     ),
     vscode.commands.registerCommand(
       "searchEverywhere.reload",

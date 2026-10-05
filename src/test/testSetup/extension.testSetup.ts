@@ -128,5 +128,14 @@ export const getTestSetups = () => {
         );
       },
     },
+
+    openToTheSide: {
+      setupForControllerOpenToTheSide: () => {
+        return stubMultiple(
+          [{ object: controller, method: "openToTheSide" }],
+          sandbox
+        );
+      },
+    },
   };
 };

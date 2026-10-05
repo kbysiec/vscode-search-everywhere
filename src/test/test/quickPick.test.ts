@@ -1,4 +1,5 @@
 import { assert } from "chai";
+import * as sinon from "sinon";
 import * as vscode from "vscode";
 import { quickPick } from "../../quickPick";
 import { getTestSetups } from "../testSetup/quickPick.testSetup";
@@ -351,6 +352,23 @@ describe("QuickPick", () => {
 
       assert.equal(quickPick.getFileScopeUri(), qpItem.uri.toString());
       await quickPick.navigateBack();
+    });
+  });
+
+  describe("openToTheSide", () => {
+    it("should open active item beside and hide control", async () => {
+      const qpItem = getQpItems()[0];
+      const openItemStub = sinon.stub(quickPick, "openItem").resolves();
+      const hideStub = sinon.stub(quickPick.getControl(), "hide");
+
+      await quickPick.openToTheSide(qpItem);
+
+      assert.equal(openItemStub.calledOnce, true);
+      assert.equal(openItemStub.firstCall.args[1], vscode.ViewColumn.Beside);
+      assert.equal(hideStub.calledOnce, true);
+
+      openItemStub.restore();
+      hideStub.restore();
     });
   });
 });
