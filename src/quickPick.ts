@@ -30,16 +30,12 @@ function registerOnDidChangeValueEventListeners(): void {
 
 function registerOnDidChangeValueWithDebounceEventListeners(): void {
   const control = quickPick.getControl();
-  const onDidChangeValueClearingEventListener = control.onDidChangeValue(
-    handleDidChangeValueClearing
-  );
   const onDidChangeValueEventListener = control.onDidChangeValue(
-    debounce(handleDidChangeValue, 400)
+    debounce(handleDidChangeValue, 50)
   );
   const onDidChangeValueEventListeners =
     quickPick.getOnDidChangeValueEventListeners();
 
-  onDidChangeValueEventListeners.push(onDidChangeValueClearingEventListener);
   onDidChangeValueEventListeners.push(onDidChangeValueEventListener);
 }
 

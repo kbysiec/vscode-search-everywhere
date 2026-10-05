@@ -56,6 +56,16 @@ export async function initDatabase(
     db = new sqlJs.Database();
   }
 
+  // Performance PRAGMAs for SQLite WASM
+  try {
+    db.run("PRAGMA synchronous = OFF;");
+    db.run("PRAGMA journal_mode = MEMORY;");
+    db.run("PRAGMA temp_store = MEMORY;");
+    db.run("PRAGMA cache_size = -64000;");
+  } catch {
+    // Ignore PRAGMA errors on in-memory databases
+  }
+
   createTables();
 }
 
@@ -92,6 +102,7 @@ export function insertSymbol(item: QuickPickItem): void {
   if (!db) {
     return;
   }
+  clearSearchCache();
   db.run(
     `INSERT INTO symbols
      (uri, name, symbol_kind, label, description, detail,
@@ -116,6 +127,7 @@ export function insertSymbolsBatch(items: QuickPickItem[]): void {
   if (!db || !items || !items.length) {
     return;
   }
+  clearSearchCache();
   db.run("BEGIN TRANSACTION");
   const stmt = db.prepare(`
     INSERT INTO symbols
@@ -158,6 +170,7 @@ export function deleteByUri(uriPath: string): void {
   if (!db) {
     return;
   }
+  clearSearchCache();
   db.run("DELETE FROM symbols WHERE uri = ?", [uriPath]);
 }
 
@@ -165,6 +178,7 @@ export function deleteByUriPrefix(uriPath: string): void {
   if (!db) {
     return;
   }
+  clearSearchCache();
   db.run("DELETE FROM symbols WHERE uri LIKE ?", [uriPath + "%"]);
 }
 
@@ -175,6 +189,16 @@ export interface SearchOptions {
   ignoredNames?: string[];
 }
 
+const QUERY_COLUMNS =
+  "uri, symbol_kind, label, description, detail, range_start_line, range_start_char, range_end_line, range_end_char";
+
+const SEARCH_CACHE_MAX_SIZE = 50;
+const searchCache = new Map<string, QuickPickItem[]>();
+
+export function clearSearchCache(): void {
+  searchCache.clear();
+}
+
 export function search(
   query: string,
   limit: number = SEARCH_LIMIT,
@@ -182,6 +206,12 @@ export function search(
 ): QuickPickItem[] {
   if (!db) {
     return [];
+  }
+
+  // Fast-path: Check LRU search cache
+  const cacheKey = `${query}|${limit}|${options?.symbolKind ?? ""}|${options?.allowedKinds?.join(",") ?? ""}|${options?.ignoredKinds?.join(",") ?? ""}|${options?.ignoredNames?.join(",") ?? ""}`;
+  if (searchCache.has(cacheKey)) {
+    return searchCache.get(cacheKey)!;
   }
 
   const conditions: string[] = [];
@@ -215,89 +245,88 @@ export function search(
 
   const baseWhere = conditions.length ? "WHERE " + conditions.join(" AND ") : "";
 
+  let matchedItems: QuickPickItem[] = [];
+
   if (!query) {
     const results = db.exec(
-      `SELECT * FROM symbols ${baseWhere} ORDER BY symbol_kind, name LIMIT ${limit}`,
+      `SELECT ${QUERY_COLUMNS} FROM symbols ${baseWhere} ORDER BY symbol_kind, name COLLATE NOCASE LIMIT ${limit}`,
       params
     );
-    if (!results || !results.length) {
-      return [];
+    if (results && results.length) {
+      matchedItems = results[0].values.map((row: any[]) => rowToQuickPickItem(row));
     }
-    const cols = results[0].columns;
-    return results[0].values.map((row: any[]) => rowToQuickPickItem(cols, row));
-  }
-
-  // Path search (e.g. "src/user")
-  if (query.includes("/")) {
+  } else if (query.includes("/")) {
+    // Path search (e.g. "src/user")
     const matchClause = "uri LIKE ?";
     const fullWhere = baseWhere ? `${baseWhere} AND ${matchClause}` : `WHERE ${matchClause}`;
     const results = db.exec(
-      `SELECT * FROM symbols ${fullWhere} ORDER BY symbol_kind, name LIMIT ${limit}`,
+      `SELECT ${QUERY_COLUMNS} FROM symbols ${fullWhere} ORDER BY name COLLATE NOCASE LIMIT ${limit}`,
       [...params, `%${query}%`]
     );
-    if (!results || !results.length) {
-      return [];
+    if (results && results.length) {
+      matchedItems = results[0].values.map((row: any[]) => rowToQuickPickItem(row));
     }
-    const cols = results[0].columns;
-    return results[0].values.map((row: any[]) => rowToQuickPickItem(cols, row));
-  }
+  } else {
+    // Symbol / file name search: 2-stage index-accelerated query
+    // Stage 1: Prefix search (instant B-tree index lookup, ~0.2ms)
+    const prefixMatchClause = "name LIKE ?";
+    const prefixWhere = baseWhere
+      ? `${baseWhere} AND ${prefixMatchClause}`
+      : `WHERE ${prefixMatchClause}`;
+    const prefixParams = [...params, `${query}%`];
 
-  // Symbol / file name search: 2-stage index-accelerated query
-  // Stage 1: Prefix search (instant B-tree index lookup, 1ms)
-  const prefixMatchClause = "name LIKE ?";
-  const prefixWhere = baseWhere
-    ? `${baseWhere} AND ${prefixMatchClause}`
-    : `WHERE ${prefixMatchClause}`;
-  const prefixParams = [...params, `${query}%`];
-
-  const prefixResults = db.exec(
-    `SELECT * FROM symbols ${prefixWhere} ORDER BY symbol_kind, name LIMIT ${limit}`,
-    prefixParams
-  );
-
-  const matchedItems: QuickPickItem[] = [];
-  if (prefixResults && prefixResults.length) {
-    const cols = prefixResults[0].columns;
-    for (const row of prefixResults[0].values) {
-      matchedItems.push(rowToQuickPickItem(cols, row));
-    }
-  }
-
-  // Stage 2: Substring search to fill remaining slots if needed
-  const remaining = limit - matchedItems.length;
-  if (remaining > 0) {
-    const subMatchClause = "name LIKE ? AND name NOT LIKE ?";
-    const subWhere = baseWhere
-      ? `${baseWhere} AND ${subMatchClause}`
-      : `WHERE ${subMatchClause}`;
-    const subParams = [...params, `%${query}%`, `${query}%`];
-
-    const subResults = db.exec(
-      `SELECT * FROM symbols ${subWhere} ORDER BY symbol_kind, name LIMIT ${remaining}`,
-      subParams
+    const prefixResults = db.exec(
+      `SELECT ${QUERY_COLUMNS} FROM symbols ${prefixWhere} ORDER BY name COLLATE NOCASE LIMIT ${limit}`,
+      prefixParams
     );
 
-    if (subResults && subResults.length) {
-      const cols = subResults[0].columns;
-      for (const row of subResults[0].values) {
-        matchedItems.push(rowToQuickPickItem(cols, row));
+    if (prefixResults && prefixResults.length) {
+      for (const row of prefixResults[0].values) {
+        matchedItems.push(rowToQuickPickItem(row));
+      }
+    }
+
+    // Stage 2: Substring search only if prefix search returned few results (< 50)
+    // If we already have >= 50 exact prefix matches, that fills multiple QuickPick viewports
+    const SUBSTRING_MIN_THRESHOLD = 50;
+    if (matchedItems.length < SUBSTRING_MIN_THRESHOLD) {
+      const remaining = Math.min(
+        limit - matchedItems.length,
+        SUBSTRING_MIN_THRESHOLD - matchedItems.length
+      );
+      const subMatchClause = "name LIKE ? AND name NOT LIKE ?";
+      const subWhere = baseWhere
+        ? `${baseWhere} AND ${subMatchClause}`
+        : `WHERE ${subMatchClause}`;
+      const subParams = [...params, `%${query}%`, `${query}%`];
+
+      const subResults = db.exec(
+        `SELECT ${QUERY_COLUMNS} FROM symbols ${subWhere} ORDER BY name COLLATE NOCASE LIMIT ${remaining}`,
+        subParams
+      );
+
+      if (subResults && subResults.length) {
+        for (const row of subResults[0].values) {
+          matchedItems.push(rowToQuickPickItem(row));
+        }
       }
     }
   }
 
+  // Save to LRU cache
+  if (searchCache.size >= SEARCH_CACHE_MAX_SIZE) {
+    const oldestKey = searchCache.keys().next().value;
+    if (oldestKey) {
+      searchCache.delete(oldestKey);
+    }
+  }
+  searchCache.set(cacheKey, matchedItems);
+
   return matchedItems;
 }
 
-function rowToQuickPickItem(
-  columns: string[],
-  row: any[]
-): QuickPickItem {
-  const obj: any = {};
-  columns.forEach((col: string, i: number) => {
-    obj[col] = row[i];
-  });
-
-  const uriStr = obj.uri as string;
+function rowToQuickPickItem(row: any[]): QuickPickItem {
+  const uriStr = row[0] as string;
   let uri: vscode.Uri;
   try {
     uri = vscode.Uri.parse(uriStr);
@@ -307,25 +336,20 @@ function rowToQuickPickItem(
 
   return {
     uri,
-    symbolKind: obj.symbol_kind as number,
-    label: obj.label as string,
-    description: (obj.description as string) || "",
-    detail: (obj.detail as string) || "",
+    symbolKind: row[1] as number,
+    label: row[2] as string,
+    description: (row[3] as string) || "",
+    detail: (row[4] as string) || "",
     range: {
-      start: new vscode.Position(
-        obj.range_start_line as number,
-        obj.range_start_char as number
-      ),
-      end: new vscode.Position(
-        obj.range_end_line as number,
-        obj.range_end_char as number
-      ),
+      start: new vscode.Position(row[5] as number, row[6] as number),
+      end: new vscode.Position(row[7] as number, row[8] as number),
     },
   } as QuickPickItem;
 }
 
 export function clearAll(): void {
   if (db) {
+    clearSearchCache();
     db.run("DELETE FROM symbols");
   }
 }
@@ -394,6 +418,7 @@ export const database = {
   deleteByUri,
   deleteByUriPrefix,
   search,
+  clearSearchCache,
   clearAll,
   getCount,
   isEmpty,
