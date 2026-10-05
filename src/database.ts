@@ -229,6 +229,12 @@ function createTables(): void {
   db.run(
     "CREATE INDEX IF NOT EXISTS idx_symbols_uri_line ON symbols(uri, range_start_line, range_start_char)"
   );
+  db.run(
+    "CREATE INDEX IF NOT EXISTS idx_symbols_uri_nocase ON symbols(uri COLLATE NOCASE)"
+  );
+  db.run(
+    "CREATE INDEX IF NOT EXISTS idx_symbols_uri_line_nocase ON symbols(uri COLLATE NOCASE, range_start_line, range_start_char)"
+  );
   db.run("CREATE INDEX IF NOT EXISTS idx_symbols_kind ON symbols(symbol_kind)");
   db.run(
     "CREATE INDEX IF NOT EXISTS idx_symbols_name_nocase ON symbols(name COLLATE NOCASE)"
@@ -369,14 +375,14 @@ export function search(
 
   if (options) {
     if (options.fileUri) {
-      let fsPath = "";
-      try {
-        fsPath = vscode.Uri.parse(options.fileUri).path;
-      } catch {
-        fsPath = options.fileUri;
+      let fileUriStr = options.fileUri;
+      if (!fileUriStr.includes("://")) {
+        try {
+          fileUriStr = vscode.Uri.file(fileUriStr).toString();
+        } catch {}
       }
-      conditions.push("(uri = ? OR uri COLLATE NOCASE = ? OR uri LIKE ?)");
-      params.push(options.fileUri, options.fileUri, `%${fsPath}`);
+      conditions.push("uri COLLATE NOCASE = ?");
+      params.push(fileUriStr);
       conditions.push("symbol_kind != 0");
     }
 

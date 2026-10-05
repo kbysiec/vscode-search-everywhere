@@ -273,29 +273,49 @@ async function handleDidTriggerButton(button: vscode.QuickInputButton) {
   }
 }
 
+const checkedSymbolUris = new Set<string>();
+
+export function invalidateSymbolCache(uriStr?: string): void {
+  if (uriStr) {
+    checkedSymbolUris.delete(uriStr);
+  } else {
+    checkedSymbolUris.clear();
+  }
+}
+
 async function ensureFileSymbolsIndexed(
   targetUri: vscode.Uri,
   forceRefresh: boolean = false
-): Promise<void> {
+): Promise<boolean> {
   const uriStr = targetUri.toString();
-  const existing = database.search("", 1, { fileUri: uriStr });
-  if (existing.length === 0 || forceRefresh) {
-    try {
-      const symbols = await dataService.getSymbolsForUri(targetUri);
-      if (symbols && symbols.length) {
-        if (forceRefresh) {
-          database.deleteByUri(uriStr);
-        }
-        const qpItems = dataConverter.convertUriAndSymbolsToQpItems(
-          targetUri,
-          symbols
-        );
-        database.insertSymbolsBatch(qpItems);
-      }
-    } catch {
-      // ignore
-    }
+  if (!forceRefresh && checkedSymbolUris.has(uriStr)) {
+    return false;
   }
+
+  const existing = database.search("", 1, { fileUri: uriStr });
+  if (existing.length > 0 && !forceRefresh) {
+    checkedSymbolUris.add(uriStr);
+    return false;
+  }
+
+  checkedSymbolUris.add(uriStr);
+  try {
+    const symbols = await dataService.getSymbolsForUri(targetUri);
+    if (symbols && symbols.length) {
+      if (forceRefresh) {
+        database.deleteByUri(uriStr);
+      }
+      const qpItems = dataConverter.convertUriAndSymbolsToQpItems(
+        targetUri,
+        symbols
+      );
+      database.insertSymbolsBatch(qpItems);
+      return true;
+    }
+  } catch {
+    // ignore
+  }
+  return false;
 }
 
 async function navigateIntoFile(item?: QuickPickItem): Promise<void> {
@@ -327,14 +347,20 @@ async function navigateIntoFile(item?: QuickPickItem): Promise<void> {
   control.buttons = [vscode.QuickInputButtons.Back];
   control.value = "";
 
-  await vscode.commands.executeCommand(
+  // Render items immediately from local database cache
+  quickPick.loadItems();
+
+  void vscode.commands.executeCommand(
     "setContext",
     "searchEverywhereInFileScope",
     true
   );
 
-  await ensureFileSymbolsIndexed(targetItem.uri, false);
-  loadItems();
+  void ensureFileSymbolsIndexed(targetItem.uri, false).then((hasNewSymbols) => {
+    if (hasNewSymbols && fileScopeUri === targetItem.uri.toString()) {
+      quickPick.loadItems();
+    }
+  });
 }
 
 async function navigateBack(): Promise<void> {
@@ -354,13 +380,13 @@ async function navigateBack(): Promise<void> {
   control.value = savedWorkspaceSearchText;
   savedWorkspaceSearchText = "";
 
-  await vscode.commands.executeCommand(
+  quickPick.loadItems();
+
+  void vscode.commands.executeCommand(
     "setContext",
     "searchEverywhereInFileScope",
     false
   );
-
-  loadItems();
 }
 
 async function searchCurrentFile(): Promise<void> {
@@ -387,20 +413,25 @@ async function searchCurrentFile(): Promise<void> {
   control.buttons = [vscode.QuickInputButtons.Back];
   control.value = "";
 
-  await vscode.commands.executeCommand(
+  void vscode.commands.executeCommand(
     "setContext",
     "searchEverywhereOpen",
     true
   );
-  await vscode.commands.executeCommand(
+  void vscode.commands.executeCommand(
     "setContext",
     "searchEverywhereInFileScope",
     true
   );
 
   quickPick.show();
-  await ensureFileSymbolsIndexed(targetUri, true);
-  loadItems();
+  quickPick.loadItems();
+
+  void ensureFileSymbolsIndexed(targetUri, true).then((hasNewSymbols) => {
+    if (hasNewSymbols && fileScopeUri === targetUri.toString()) {
+      quickPick.loadItems();
+    }
+  });
 }
 
 async function openToTheSide(item?: QuickPickItem): Promise<void> {
@@ -793,4 +824,5 @@ export const quickPick = {
   openToTheSide,
   getFileScopeUri,
   disposeOnDidChangeValueEventListeners,
+  invalidateSymbolCache,
 };

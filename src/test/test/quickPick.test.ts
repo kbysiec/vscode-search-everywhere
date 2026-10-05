@@ -353,6 +353,17 @@ describe("QuickPick", () => {
       assert.equal(quickPick.getFileScopeUri(), qpItem.uri.toString());
       await quickPick.navigateBack();
     });
+
+    it("should call loadItems immediately upon navigateIntoFile without waiting for background indexing", async () => {
+      const qpItem = getQpItems()[0];
+      const loadItemsSpy = sinon.spy(quickPick, "loadItems");
+
+      await quickPick.navigateIntoFile(qpItem);
+      assert.isTrue(loadItemsSpy.called);
+
+      loadItemsSpy.restore();
+      await quickPick.navigateBack();
+    });
   });
 
   describe("openToTheSide", () => {
