@@ -239,7 +239,7 @@ function registerEventListeners(): void {
     debounce(handleDidChangeWorkspaceFolders, 250)
   );
   vscode.workspace.onDidChangeTextDocument(
-    debounce(handleDidChangeTextDocument, 700)
+    debounce(handleDidChangeTextDocument, 300)
   );
   vscode.workspace.onDidRenameFiles(handleDidRenameFiles);
   vscode.workspace.onDidCreateFiles(handleDidCreateFiles);

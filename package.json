@@ -93,10 +93,15 @@
           },
           "description": "Ability to define a filter that should be applied to items."
         },
-        "searchEverywhere.excludeVariablesAndProperties": {
+        "searchEverywhere.excludeProperties": {
           "type": "boolean",
           "default": true,
-          "description": "Exclude local variables (kind 12) and object properties (kind 6) to reduce index size by ~80% and drastically improve performance."
+          "description": "Exclude object properties (kind 6) to reduce index size by more than 50% and eliminate property noise in large codebases."
+        },
+        "searchEverywhere.excludeVariables": {
+          "type": "boolean",
+          "default": false,
+          "description": "Exclude variables and constants (kind 12). Disabled by default so newly written variables and constants are indexed."
         },
         "searchEverywhere.shouldUseItemsFilterPhrases": {
           "type": "boolean",

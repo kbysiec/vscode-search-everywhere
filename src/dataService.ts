@@ -24,6 +24,8 @@ async function getUrisOrFetchIfEmpty(
   return uris && uris.length ? uris : await dataService.fetchUris();
 }
 
+let isWarmupDone = false;
+
 async function warmupLanguageServer(
   uris: vscode.Uri[],
   progress?: vscode.Progress<{
@@ -31,6 +33,10 @@ async function warmupLanguageServer(
     increment?: number | undefined;
   }>
 ): Promise<void> {
+  if (isWarmupDone || uris.length <= 1) {
+    return;
+  }
+  isWarmupDone = true;
   progress?.report({ message: "Initializing Language Server..." });
   logger.log("Warming up language servers...");
 
@@ -410,8 +416,7 @@ async function fetchData(
 }
 
 async function isUriExistingInWorkspace(uri: vscode.Uri): Promise<boolean> {
-  const uris = await dataService.fetchUris();
-  return uris.some((existingUri: vscode.Uri) => existingUri.path === uri.path);
+  return !!vscode.workspace.getWorkspaceFolder(uri);
 }
 
 async function fetchConfig() {
