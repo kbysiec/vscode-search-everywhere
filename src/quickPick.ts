@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import {
   fetchHelpPhrase,
+  fetchItemsFilter,
   fetchItemsFilterPhrases,
   fetchShouldHighlightSymbol,
   fetchShouldItemsBeSorted,
@@ -246,15 +247,70 @@ function loadItems() {
   }
 
   const control = quickPick.getControl();
-  const query = control.value || "";
+  const rawQuery = control.value || "";
 
-  // Query SQLite with current search text — returns max VIRTUAL_PAGE_SIZE results
-  const dbResults = database.search(query, VIRTUAL_PAGE_SIZE);
+  let symbolKind: number | undefined = undefined;
+  let cleanQuery = rawQuery;
+
+  if (quickPick.getShouldUseItemsFilterPhrases()) {
+    const trimmed = rawQuery.trimStart();
+    const filterPhrases = quickPick.getItemsFilterPhrases();
+    if (filterPhrases) {
+      const sortedKinds = Object.keys(filterPhrases).sort(
+        (a, b) =>
+          (filterPhrases[parseInt(b)]?.length || 0) -
+          (filterPhrases[parseInt(a)]?.length || 0)
+      );
+      for (const kindStr of sortedKinds) {
+        const phrase = filterPhrases[parseInt(kindStr)];
+        if (phrase && trimmed.startsWith(phrase)) {
+          symbolKind = parseInt(kindStr);
+          cleanQuery = trimmed.slice(phrase.length).trim();
+          break;
+        }
+      }
+    }
+  }
+
+  const itemsFilter = fetchItemsFilter();
+
+  // Query SQLite with clean search text, symbol kind and itemsFilter
+  const dbResults = database.search(cleanQuery, VIRTUAL_PAGE_SIZE, {
+    symbolKind,
+    allowedKinds: itemsFilter.allowedKinds,
+    ignoredKinds: itemsFilter.ignoredKinds,
+    ignoredNames: itemsFilter.ignoredNames,
+  });
   reinitQpItemsButton(dbResults);
+  syncItemsFilterPhrases(dbResults);
 
   quickPick.getShouldItemsBeSorted()
     ? loadSortedItemsFromResults(dbResults)
     : loadUnsortedItemsFromResults(dbResults);
+}
+
+function syncItemsFilterPhrases(items: QuickPickItem[]): void {
+  const filterPhrases = quickPick.getItemsFilterPhrases();
+  const shouldUse = quickPick.getShouldUseItemsFilterPhrases();
+
+  for (const item of items) {
+    if (!shouldUse || !filterPhrases) {
+      item.description = item.description?.replace(/^\[[^\]]+\]\s*/, "");
+      continue;
+    }
+    const phrase = filterPhrases[item.symbolKind];
+    if (phrase) {
+      const name = item.label.replace(/^\$\([^)]+\)\s+/, "");
+      const tag = `[${phrase}${name}]`;
+      if (item.description && item.description.startsWith("[")) {
+        item.description = item.description.replace(/^\[[^\]]+\]/, () => tag);
+      } else {
+        item.description = item.description ? `${tag} ${item.description}` : tag;
+      }
+    } else {
+      item.description = item.description?.replace(/^\[[^\]]+\]\s*/, "");
+    }
+  }
 }
 
 function loadUnsortedItemsFromResults(results: QuickPickItem[]): void {

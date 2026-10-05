@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { fetchItemsFilter } from "./config";
 import { onDidItemIndexedEventEmitter } from "./dataServiceEventsEmitter";
+import { logger } from "./logger";
 import { patternProvider } from "./patternProvider";
 import { Item, ItemsFilter, WorkspaceData } from "./types";
 import { utils } from "./utils";
@@ -22,10 +23,113 @@ async function getUrisOrFetchIfEmpty(
   return uris && uris.length ? uris : await dataService.fetchUris();
 }
 
+async function warmupLanguageServer(
+  uris: vscode.Uri[],
+  progress?: vscode.Progress<{
+    message?: string | undefined;
+    increment?: number | undefined;
+  }>
+): Promise<void> {
+  progress?.report({ message: "Inicjalizacja Language Servera..." });
+  logger.log("Warming up language servers...");
+
+  // 1. Explicitly activate built-in / common language extensions
+  const LANG_EXTENSIONS = [
+    "vscode.typescript-language-features",
+    "vscode.json-language-features",
+    "vscode.markdown-language-features",
+  ];
+
+  for (const extId of LANG_EXTENSIONS) {
+    try {
+      const ext = vscode.extensions.getExtension(extId);
+      if (ext && !ext.isActive) {
+        logger.log(`Activating extension ${extId}...`);
+        await ext.activate();
+        logger.log(`Extension ${extId} activated.`);
+      }
+    } catch (e) {
+      logger.log(`Could not activate ${extId}: ${e}`);
+    }
+  }
+
+  // 2. Find candidate code URIs that are regular source files
+  const codeExts = ["ts", "tsx", "js", "jsx"];
+  const candidateUris = uris.filter((u) => {
+    const p = u.path.toLowerCase();
+    const ext = p.split(".").pop();
+    return (
+      ext &&
+      codeExts.includes(ext) &&
+      !p.endsWith(".d.ts") &&
+      !p.includes("test") &&
+      !p.includes("fixtures")
+    );
+  });
+
+  const sampleUri =
+    candidateUris[Math.floor(candidateUris.length / 2)] ||
+    candidateUris[0] ||
+    uris[0];
+
+  if (!sampleUri) {
+    return;
+  }
+
+  try {
+    logger.log(`Opening sample document: ${sampleUri.path}`);
+    await vscode.workspace.openTextDocument(sampleUri);
+  } catch (e) {
+    logger.log(`Failed to open sample document: ${e}`);
+  }
+
+  // 3. Poll sampleUri until executeDocumentSymbolProvider returns actual symbols
+  const maxAttempts = 30; // up to 15s
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    if (dataService.getIsCancelled()) {
+      return;
+    }
+
+    progress?.report({
+      message: `Inicjalizacja Language Servera (${attempt + 1}/${maxAttempts})...`,
+    });
+
+    try {
+      const rawSymbols = await loadAllSymbolsForUri(sampleUri);
+      logger.log(
+        `Warmup attempt ${attempt + 1}/${maxAttempts}: returned ${
+          rawSymbols ? `${rawSymbols.length} raw symbols` : "undefined"
+        }`
+      );
+      if (rawSymbols && rawSymbols.length > 0) {
+        logger.log(
+          `Language server is ready! Found ${rawSymbols.length} symbols in sample file.`
+        );
+        progress?.report({ message: "Language Server gotowy! Indeksowanie..." });
+        break;
+      }
+    } catch (e) {
+      logger.log(`Warmup attempt ${attempt + 1} threw error: ${e}`);
+    }
+
+    await utils.sleep(500);
+  }
+}
+
 async function includeSymbols(
   workspaceData: WorkspaceData,
-  uris: vscode.Uri[]
+  uris: vscode.Uri[],
+  progress?: vscode.Progress<{
+    message?: string | undefined;
+    increment?: number | undefined;
+  }>
 ): Promise<void> {
+  if (!uris.length || dataService.getIsCancelled()) {
+    return;
+  }
+
+  await warmupLanguageServer(uris, progress);
+
   const CONCURRENCY = 20;
   let currentIndex = 0;
 
@@ -67,6 +171,7 @@ async function tryToGetSymbolsForUri(
   if (ext && NON_SYMBOL_EXTENSIONS.has(ext)) {
     return undefined;
   }
+
   return await dataService.getSymbolsForUri(uri);
 }
 
@@ -132,9 +237,9 @@ function ifUriExistsInArray(
   uri: vscode.Uri
 ) {
   return array.some((uriInArray: vscode.Uri | vscode.DocumentSymbol) => {
-    if (!uriInArray.hasOwnProperty("range")) {
-      uriInArray = uriInArray as vscode.Uri;
-      return uriInArray.path === uri.path;
+    if (!("range" in uriInArray || "kind" in uriInArray)) {
+      const uriElement = uriInArray as vscode.Uri;
+      return uriElement.path === uri.path;
     }
     return false;
   });
@@ -174,7 +279,9 @@ function reduceAndFlatSymbolsArrayForUri(
         ...reduceAndFlatSymbolsArrayForUri(symbol.children, symbol.name)
       );
     }
-    symbol.children = [];
+    if (symbol.children) {
+      symbol.children = [];
+    }
   });
 
   return flatArrayOfSymbols;
@@ -216,7 +323,7 @@ function isSymbolValid(symbol: vscode.DocumentSymbol): boolean {
 function isItemValid(item: vscode.Uri | vscode.DocumentSymbol): boolean {
   let symbolKind: number;
   let name: string | undefined;
-  const isUri = item.hasOwnProperty("path");
+  const isUri = !("kind" in item);
 
   if (isUri) {
     symbolKind = 0;
@@ -269,11 +376,17 @@ function isNotInIgnoredNames(
   );
 }
 
-async function fetchData(uris?: vscode.Uri[]): Promise<WorkspaceData> {
+async function fetchData(
+  uris?: vscode.Uri[],
+  progress?: vscode.Progress<{
+    message?: string | undefined;
+    increment?: number | undefined;
+  }>
+): Promise<WorkspaceData> {
   const workspaceData: WorkspaceData = utils.createWorkspaceData();
   const uriItems = await getUrisOrFetchIfEmpty(uris);
 
-  await includeSymbols(workspaceData, uriItems);
+  await includeSymbols(workspaceData, uriItems, progress);
   includeUris(workspaceData, uriItems);
 
   dataService.setIsCancelled(false);

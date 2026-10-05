@@ -79,8 +79,12 @@ function createTables(): void {
     )
   `);
   db.run("CREATE INDEX IF NOT EXISTS idx_symbols_uri ON symbols(uri)");
+  db.run("CREATE INDEX IF NOT EXISTS idx_symbols_kind ON symbols(symbol_kind)");
   db.run(
-    "CREATE INDEX IF NOT EXISTS idx_symbols_kind ON symbols(symbol_kind)"
+    "CREATE INDEX IF NOT EXISTS idx_symbols_name_nocase ON symbols(name COLLATE NOCASE)"
+  );
+  db.run(
+    "CREATE INDEX IF NOT EXISTS idx_symbols_kind_name ON symbols(symbol_kind, name COLLATE NOCASE)"
   );
 }
 
@@ -113,12 +117,32 @@ export function insertSymbolsBatch(items: QuickPickItem[]): void {
     return;
   }
   db.run("BEGIN TRANSACTION");
+  const stmt = db.prepare(`
+    INSERT INTO symbols
+    (uri, name, symbol_kind, label, description, detail,
+     range_start_line, range_start_char, range_end_line, range_end_char)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
   try {
-    for (const item of items) {
-      insertSymbol(item);
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      stmt.run([
+        item.uri.toString(),
+        extractName(item.label),
+        item.symbolKind,
+        item.label,
+        item.description || "",
+        item.detail || "",
+        item.range ? item.range.start.line : 0,
+        item.range ? item.range.start.character : 0,
+        item.range ? item.range.end.line : 0,
+        item.range ? item.range.end.character : 0,
+      ]);
     }
+    stmt.free();
     db.run("COMMIT");
   } catch (e) {
+    stmt.free();
     db.run("ROLLBACK");
     throw e;
   }
@@ -144,53 +168,124 @@ export function deleteByUriPrefix(uriPath: string): void {
   db.run("DELETE FROM symbols WHERE uri LIKE ?", [uriPath + "%"]);
 }
 
+export interface SearchOptions {
+  symbolKind?: number;
+  allowedKinds?: number[];
+  ignoredKinds?: number[];
+  ignoredNames?: string[];
+}
+
 export function search(
   query: string,
-  limit: number = SEARCH_LIMIT
+  limit: number = SEARCH_LIMIT,
+  options?: SearchOptions
 ): QuickPickItem[] {
   if (!db) {
     return [];
   }
 
-  let results: any[];
+  const conditions: string[] = [];
+  const params: any[] = [];
+
+  if (options) {
+    if (options.symbolKind !== undefined) {
+      conditions.push("symbol_kind = ?");
+      params.push(options.symbolKind);
+    } else if (options.allowedKinds && options.allowedKinds.length > 0) {
+      const placeholders = options.allowedKinds.map(() => "?").join(", ");
+      conditions.push(`symbol_kind IN (${placeholders})`);
+      params.push(...options.allowedKinds);
+    }
+
+    if (options.ignoredKinds && options.ignoredKinds.length > 0) {
+      const placeholders = options.ignoredKinds.map(() => "?").join(", ");
+      conditions.push(`symbol_kind NOT IN (${placeholders})`);
+      params.push(...options.ignoredKinds);
+    }
+
+    if (options.ignoredNames && options.ignoredNames.length > 0) {
+      for (const ign of options.ignoredNames) {
+        if (ign) {
+          conditions.push("name NOT LIKE ?");
+          params.push(`%${ign}%`);
+        }
+      }
+    }
+  }
+
+  const baseWhere = conditions.length ? "WHERE " + conditions.join(" AND ") : "";
 
   if (!query) {
-    results = db.exec(
-      `SELECT * FROM symbols ORDER BY symbol_kind, name LIMIT ${limit}`
+    const results = db.exec(
+      `SELECT * FROM symbols ${baseWhere} ORDER BY symbol_kind, name LIMIT ${limit}`,
+      params
     );
-  } else {
-    // Build fuzzy pattern: "abc" -> "%a%b%c%"
-    const fuzzyPattern =
-      "%" + query.split("").join("%") + "%";
-    const lowerFuzzy = fuzzyPattern.toLowerCase();
-    const lowerQ = query.toLowerCase();
-    const lowerExact = "%" + lowerQ + "%";
-    const lowerStart = lowerQ + "%";
-    results = db.exec(
-      `SELECT * FROM symbols
-       WHERE LOWER(name) LIKE ?
-          OR LOWER(label) LIKE ?
-          OR LOWER(detail) LIKE ?
-       ORDER BY
-         CASE
-           WHEN LOWER(name) = ? THEN 0
-           WHEN LOWER(name) LIKE ? THEN 1
-           WHEN LOWER(name) LIKE ? THEN 2
-           ELSE 3
-         END,
-         symbol_kind, name
-       LIMIT ${limit}`,
-      [lowerFuzzy, lowerFuzzy, lowerFuzzy, lowerQ, lowerStart, lowerExact]
-    );
+    if (!results || !results.length) {
+      return [];
+    }
+    const cols = results[0].columns;
+    return results[0].values.map((row: any[]) => rowToQuickPickItem(cols, row));
   }
 
-  if (!results || !results.length) {
-    return [];
+  // Path search (e.g. "src/user")
+  if (query.includes("/")) {
+    const matchClause = "uri LIKE ?";
+    const fullWhere = baseWhere ? `${baseWhere} AND ${matchClause}` : `WHERE ${matchClause}`;
+    const results = db.exec(
+      `SELECT * FROM symbols ${fullWhere} ORDER BY symbol_kind, name LIMIT ${limit}`,
+      [...params, `%${query}%`]
+    );
+    if (!results || !results.length) {
+      return [];
+    }
+    const cols = results[0].columns;
+    return results[0].values.map((row: any[]) => rowToQuickPickItem(cols, row));
   }
 
-  const columns: string[] = results[0].columns;
-  const rows: any[][] = results[0].values;
-  return rows.map((row: any[]) => rowToQuickPickItem(columns, row));
+  // Symbol / file name search: 2-stage index-accelerated query
+  // Stage 1: Prefix search (instant B-tree index lookup, 1ms)
+  const prefixMatchClause = "name LIKE ?";
+  const prefixWhere = baseWhere
+    ? `${baseWhere} AND ${prefixMatchClause}`
+    : `WHERE ${prefixMatchClause}`;
+  const prefixParams = [...params, `${query}%`];
+
+  const prefixResults = db.exec(
+    `SELECT * FROM symbols ${prefixWhere} ORDER BY symbol_kind, name LIMIT ${limit}`,
+    prefixParams
+  );
+
+  const matchedItems: QuickPickItem[] = [];
+  if (prefixResults && prefixResults.length) {
+    const cols = prefixResults[0].columns;
+    for (const row of prefixResults[0].values) {
+      matchedItems.push(rowToQuickPickItem(cols, row));
+    }
+  }
+
+  // Stage 2: Substring search to fill remaining slots if needed
+  const remaining = limit - matchedItems.length;
+  if (remaining > 0) {
+    const subMatchClause = "name LIKE ? AND name NOT LIKE ?";
+    const subWhere = baseWhere
+      ? `${baseWhere} AND ${subMatchClause}`
+      : `WHERE ${subMatchClause}`;
+    const subParams = [...params, `%${query}%`, `${query}%`];
+
+    const subResults = db.exec(
+      `SELECT * FROM symbols ${subWhere} ORDER BY symbol_kind, name LIMIT ${remaining}`,
+      subParams
+    );
+
+    if (subResults && subResults.length) {
+      const cols = subResults[0].columns;
+      for (const row of subResults[0].values) {
+        matchedItems.push(rowToQuickPickItem(cols, row));
+      }
+    }
+  }
+
+  return matchedItems;
 }
 
 function rowToQuickPickItem(

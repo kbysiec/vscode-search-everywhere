@@ -103,6 +103,24 @@ describe("Database", () => {
       const results = database.search("User", 2);
       assert.equal(results.length, 2);
     });
+
+    it("should filter by symbolKind", () => {
+      const results = database.search("", 500, { symbolKind: vscode.SymbolKind.Class });
+      assert.equal(results.length, 2);
+      assert.isTrue(results.every((r) => r.symbolKind === vscode.SymbolKind.Class));
+    });
+
+    it("should filter by allowedKinds", () => {
+      const results = database.search("", 500, { allowedKinds: [vscode.SymbolKind.Interface] });
+      assert.equal(results.length, 1);
+      assert.equal(results[0].symbolKind, vscode.SymbolKind.Interface);
+    });
+
+    it("should filter by ignoredNames", () => {
+      const results = database.search("", 500, { ignoredNames: ["Controller"] });
+      assert.equal(results.length, 2);
+      assert.isFalse(results.some((r) => r.label.includes("Controller")));
+    });
   });
 
   describe("deleteByUri", () => {

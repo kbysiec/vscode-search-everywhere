@@ -75,7 +75,7 @@ async function indexWithProgressTask(
   );
 
   const startMeasure = startTimeMeasurement();
-  const data = await indexWorkspace();
+  const data = await indexWorkspace(progress);
 
   resetProgress();
   handleCancellationRequestedSubscription.dispose();
@@ -111,8 +111,15 @@ function printStats(data: WorkspaceData, elapsedTime: number) {
   logger.logStructure(data);
 }
 
-async function indexWorkspace(): Promise<WorkspaceData> {
-  const data = await dataService.fetchData();
+async function indexWorkspace(
+  progress?: vscode.Progress<{
+    message?: string | undefined;
+    increment?: number | undefined;
+  }>
+): Promise<WorkspaceData> {
+  const data = await dataService.fetchData(undefined, progress);
+
+  progress?.report({ message: "Zapisywanie bazy indeksu..." });
   const qpData = dataConverter.convertToQpData(data);
 
   // Store in SQLite instead of workspaceState cache
