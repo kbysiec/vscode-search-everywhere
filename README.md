@@ -91,6 +91,8 @@ After the scan is completed, the extension continuously tracks changes in the wo
 
 * Item icon to open it to the side
 
+* Drill-down search in a specific file: search symbols inside any file by clicking the right-arrow icon button or using a shortcut (`alt + right`). Return to workspace search anytime with `alt + left` or the Back button.
+
 * Dedicated output with logs related to triggered actions, scanned directories structure, etc.
 
 * Ability to decide whether the items should be sorted by type
@@ -110,6 +112,26 @@ After the scan is completed, the extension continuously tracks changes in the wo
   Default keybinding for the command is:
   * mac: `alt + cmd + p`
   * win/linux: `ctrl + alt + p`
+
+* `searchEverywhere.searchCurrentFile`
+
+  Search symbols within the currently active editor file (scoped file search / outline).
+
+  Default keybinding:
+  * mac: `alt + cmd + o`
+  * win/linux: `ctrl + alt + o`
+
+* `searchEverywhere.navigateIntoFile`
+
+  Drill down into the selected file item to search symbols within it while inside Search Everywhere. Also available via the right-arrow button on file items.
+
+  Default keybinding: `alt + right` (mac/win/linux, configurable)
+
+* `searchEverywhere.navigateBack`
+
+  Navigate back to the workspace search from a file search, preserving your previous query. Also available via the Back button on the title bar.
+
+  Default keybinding: `alt + left` (mac/win/linux, configurable)
 
 * `searchEverywhere.reload`
 

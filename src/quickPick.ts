@@ -1,3 +1,4 @@
+import * as path from "path";
 import * as vscode from "vscode";
 import {
   fetchHelpPhrase,
@@ -10,6 +11,8 @@ import {
   fetchShouldUseItemsFilterPhrases,
   fetchShowRecentItemsOnEmptyQuery,
 } from "./config";
+import { dataConverter } from "./dataConverter";
+import { dataService } from "./dataService";
 import { database } from "./database";
 import { recentItems } from "./recentItems";
 import { ItemsFilterPhrases, QuickPickItem } from "./types";
@@ -190,17 +193,184 @@ async function handleDidAccept() {
   selectedItem && (await openSelected(selectedItem));
 }
 
+let fileScopeUri: string | undefined = undefined;
+let savedWorkspaceSearchText: string = "";
+
+function getFileScopeUri(): string | undefined {
+  return fileScopeUri;
+}
+
 function handleDidHide() {
   quickPick.setText("");
+  fileScopeUri = undefined;
+  savedWorkspaceSearchText = "";
+  const control = quickPick.getControl();
+  if (control) {
+    control.title = undefined;
+    control.placeholder = undefined;
+    control.buttons = [];
+  }
+  vscode.commands.executeCommand(
+    "setContext",
+    "searchEverywhereInFileScope",
+    false
+  );
+  vscode.commands.executeCommand(
+    "setContext",
+    "searchEverywhereOpen",
+    false
+  );
 }
 
 async function handleDidTriggerItemButton({
   item: qpItem,
+  button,
 }: vscode.QuickPickItemButtonEvent<QuickPickItem>) {
   if (qpItem.kind === vscode.QuickPickItemKind.Separator) {
     return;
   }
+  const iconId = (button?.iconPath as vscode.ThemeIcon)?.id;
+  if (iconId === "arrow-right") {
+    await navigateIntoFile(qpItem);
+    return;
+  }
   await quickPick.openItem(qpItem, vscode.ViewColumn.Beside);
+}
+
+async function handleDidTriggerButton(button: vscode.QuickInputButton) {
+  if (button === vscode.QuickInputButtons.Back) {
+    await navigateBack();
+  }
+}
+
+async function ensureFileSymbolsIndexed(
+  targetUri: vscode.Uri,
+  forceRefresh: boolean = false
+): Promise<void> {
+  const uriStr = targetUri.toString();
+  const existing = database.search("", 1, { fileUri: uriStr });
+  if (existing.length === 0 || forceRefresh) {
+    try {
+      const symbols = await dataService.getSymbolsForUri(targetUri);
+      if (symbols && symbols.length) {
+        if (forceRefresh) {
+          database.deleteByUri(uriStr);
+        }
+        const qpItems = dataConverter.convertUriAndSymbolsToQpItems(
+          targetUri,
+          symbols
+        );
+        database.insertSymbolsBatch(qpItems);
+      }
+    } catch {
+      // ignore
+    }
+  }
+}
+
+async function navigateIntoFile(item?: QuickPickItem): Promise<void> {
+  const control = quickPick.getControl();
+  if (!control) {
+    return;
+  }
+  const targetItem =
+    item ||
+    (control.activeItems && control.activeItems.length > 0
+      ? control.activeItems[0]
+      : undefined);
+  if (
+    !targetItem ||
+    !targetItem.uri ||
+    targetItem.kind === vscode.QuickPickItemKind.Separator
+  ) {
+    return;
+  }
+
+  if (!fileScopeUri) {
+    savedWorkspaceSearchText = control.value || "";
+  }
+
+  fileScopeUri = targetItem.uri.toString();
+  const filename = path.basename(targetItem.uri.fsPath);
+  control.title = `Search in ${filename}`;
+  control.placeholder = `Search symbols in ${filename}...`;
+  control.buttons = [vscode.QuickInputButtons.Back];
+  control.value = "";
+
+  await vscode.commands.executeCommand(
+    "setContext",
+    "searchEverywhereInFileScope",
+    true
+  );
+
+  await ensureFileSymbolsIndexed(targetItem.uri, false);
+  loadItems();
+}
+
+async function navigateBack(): Promise<void> {
+  if (!fileScopeUri) {
+    return;
+  }
+
+  const control = quickPick.getControl();
+  if (!control) {
+    return;
+  }
+
+  fileScopeUri = undefined;
+  control.title = undefined;
+  control.placeholder = undefined;
+  control.buttons = [];
+  control.value = savedWorkspaceSearchText;
+  savedWorkspaceSearchText = "";
+
+  await vscode.commands.executeCommand(
+    "setContext",
+    "searchEverywhereInFileScope",
+    false
+  );
+
+  loadItems();
+}
+
+async function searchCurrentFile(): Promise<void> {
+  const activeEditor = vscode.window.activeTextEditor;
+  if (!activeEditor || !activeEditor.document || !activeEditor.document.uri) {
+    vscode.window.showInformationMessage(
+      "Search everywhere: No active file in editor to search in."
+    );
+    return;
+  }
+
+  if (!quickPick.isInitialized()) {
+    quickPick.init();
+  }
+
+  const targetUri = activeEditor.document.uri;
+  fileScopeUri = targetUri.toString();
+  savedWorkspaceSearchText = "";
+
+  const control = quickPick.getControl();
+  const filename = path.basename(targetUri.fsPath);
+  control.title = `Search in ${filename}`;
+  control.placeholder = `Search symbols in ${filename}...`;
+  control.buttons = [vscode.QuickInputButtons.Back];
+  control.value = "";
+
+  await vscode.commands.executeCommand(
+    "setContext",
+    "searchEverywhereOpen",
+    true
+  );
+  await vscode.commands.executeCommand(
+    "setContext",
+    "searchEverywhereInFileScope",
+    true
+  );
+
+  quickPick.show();
+  await ensureFileSymbolsIndexed(targetUri, true);
+  loadItems();
 }
 
 function init(): void {
@@ -229,6 +399,7 @@ function registerEventListeners() {
   control.onDidHide(handleDidHide);
   control.onDidAccept(handleDidAccept);
   control.onDidTriggerItemButton(handleDidTriggerItemButton);
+  control.onDidTriggerButton(handleDidTriggerButton);
 
   registerOnDidChangeValueEventListeners();
 }
@@ -250,6 +421,11 @@ function isInitialized(): boolean {
 function show(): void {
   const control = quickPick.getControl();
   control.show();
+  vscode.commands.executeCommand(
+    "setContext",
+    "searchEverywhereOpen",
+    true
+  );
 }
 
 function loadItems() {
@@ -290,6 +466,7 @@ function loadItems() {
   }
 
   if (
+    !fileScopeUri &&
     cleanQuery === "" &&
     symbolKind === undefined &&
     fetchShowRecentItemsOnEmptyQuery()
@@ -318,6 +495,7 @@ function loadItems() {
     allowedKinds: itemsFilter.allowedKinds,
     ignoredKinds: itemsFilter.ignoredKinds,
     ignoredNames: itemsFilter.ignoredNames,
+    fileUri: fileScopeUri,
   });
   reinitQpItemsButton(dbResults);
   syncItemsFilterPhrases(dbResults);
@@ -413,6 +591,11 @@ function setText(text: string): void {
 
 function setPlaceholder(isBusy: boolean): void {
   const control = quickPick.getControl();
+  if (fileScopeUri) {
+    const filename = path.basename(vscode.Uri.parse(fileScopeUri).fsPath);
+    control.placeholder = `Search symbols in ${filename}...`;
+    return;
+  }
   const helpPhrase = quickPick.getHelpPhrase();
   control.placeholder = isBusy
     ? "Please wait, loading..."
@@ -455,12 +638,18 @@ function setItems(newItems: QuickPickItem[]): void {
 function reinitQpItemsButton(data: QuickPickItem[]) {
   data.forEach((item) => {
     if (item.kind !== vscode.QuickPickItemKind.Separator) {
-      item.buttons = [
-        {
-          iconPath: new vscode.ThemeIcon("open-preview"),
-          tooltip: "Open to the side",
-        },
-      ];
+      const buttons: vscode.QuickInputButton[] = [];
+      if (item.symbolKind === 0 && !fileScopeUri) {
+        buttons.push({
+          iconPath: new vscode.ThemeIcon("arrow-right"),
+          tooltip: "Search symbols in this file",
+        });
+      }
+      buttons.push({
+        iconPath: new vscode.ThemeIcon("open-preview"),
+        tooltip: "Open to the side",
+      });
+      item.buttons = buttons;
     }
   });
 }
@@ -547,5 +736,10 @@ export const quickPick = {
   handleDidAccept,
   handleDidHide,
   handleDidTriggerItemButton,
+  handleDidTriggerButton,
+  navigateIntoFile,
+  navigateBack,
+  searchCurrentFile,
+  getFileScopeUri,
   disposeOnDidChangeValueEventListeners,
 };

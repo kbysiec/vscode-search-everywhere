@@ -101,5 +101,32 @@ export const getTestSetups = () => {
         );
       },
     },
+
+    searchCurrentFile: {
+      setupForControllerSearchCurrentFile: () => {
+        return stubMultiple(
+          [{ object: controller, method: "searchCurrentFile" }],
+          sandbox
+        );
+      },
+    },
+
+    navigateIntoFile: {
+      setupForControllerNavigateIntoFile: () => {
+        return stubMultiple(
+          [{ object: controller, method: "navigateIntoFile" }],
+          sandbox
+        );
+      },
+    },
+
+    navigateBack: {
+      setupForControllerNavigateBack: () => {
+        return stubMultiple(
+          [{ object: controller, method: "navigateBack" }],
+          sandbox
+        );
+      },
+    },
   };
 };

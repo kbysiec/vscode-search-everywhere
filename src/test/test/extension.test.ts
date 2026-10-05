@@ -17,12 +17,12 @@ describe("extension", () => {
   afterEach(() => setups.afterEach());
 
   describe("activate", () => {
-    it("should register three commands", async () => {
+    it("should register six commands", async () => {
       const [registerCommandStub] =
         setups.activate.setupForRegisteringCommands();
       await extension.activate(context);
 
-      assert.equal(registerCommandStub.calledThrice, true);
+      assert.equal(registerCommandStub.callCount, 6);
     });
 
     it("should controller.init method be invoked", async () => {
@@ -64,6 +64,35 @@ describe("extension", () => {
       extension.reload();
 
       assert.equal(reloadStub.calledOnce, true);
+    });
+  });
+
+  describe("searchCurrentFile", () => {
+    it("should controller.searchCurrentFile method be invoked", () => {
+      const [stub] =
+        setups.searchCurrentFile.setupForControllerSearchCurrentFile();
+      extension.searchCurrentFile();
+
+      assert.equal(stub.calledOnce, true);
+    });
+  });
+
+  describe("navigateIntoFile", () => {
+    it("should controller.navigateIntoFile method be invoked", () => {
+      const [stub] =
+        setups.navigateIntoFile.setupForControllerNavigateIntoFile();
+      extension.navigateIntoFile();
+
+      assert.equal(stub.calledOnce, true);
+    });
+  });
+
+  describe("navigateBack", () => {
+    it("should controller.navigateBack method be invoked", () => {
+      const [stub] = setups.navigateBack.setupForControllerNavigateBack();
+      extension.navigateBack();
+
+      assert.equal(stub.calledOnce, true);
     });
   });
 });

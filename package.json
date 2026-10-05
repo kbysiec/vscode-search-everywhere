@@ -25,6 +25,9 @@
   ],
   "activationEvents": [
     "onCommand:searchEverywhere.search",
+    "onCommand:searchEverywhere.searchCurrentFile",
+    "onCommand:searchEverywhere.navigateIntoFile",
+    "onCommand:searchEverywhere.navigateBack",
     "onCommand:searchEverywhere.reload",
     "onCommand:searchEverywhere.clearSharedCache"
   ],
@@ -204,6 +207,18 @@
         "title": "Search everywhere: Search"
       },
       {
+        "command": "searchEverywhere.searchCurrentFile",
+        "title": "Search everywhere: Search in Current File"
+      },
+      {
+        "command": "searchEverywhere.navigateIntoFile",
+        "title": "Search everywhere: Navigate into File"
+      },
+      {
+        "command": "searchEverywhere.navigateBack",
+        "title": "Search everywhere: Navigate Back to Workspace"
+      },
+      {
         "command": "searchEverywhere.reload",
         "title": "Search everywhere: Reload"
       },
@@ -212,11 +227,30 @@
         "title": "Search everywhere: Clear Shared Worktree Cache"
       }
     ],
-    "keybindings": {
-      "command": "searchEverywhere.search",
-      "key": "ctrl+alt+p",
-      "mac": "alt+cmd+p"
-    }
+    "keybindings": [
+      {
+        "command": "searchEverywhere.search",
+        "key": "ctrl+alt+p",
+        "mac": "alt+cmd+p"
+      },
+      {
+        "command": "searchEverywhere.searchCurrentFile",
+        "key": "ctrl+alt+o",
+        "mac": "alt+cmd+o"
+      },
+      {
+        "command": "searchEverywhere.navigateIntoFile",
+        "key": "alt+right",
+        "mac": "alt+right",
+        "when": "searchEverywhereOpen && !searchEverywhereInFileScope"
+      },
+      {
+        "command": "searchEverywhere.navigateBack",
+        "key": "alt+left",
+        "mac": "alt+left",
+        "when": "searchEverywhereOpen && searchEverywhereInFileScope"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

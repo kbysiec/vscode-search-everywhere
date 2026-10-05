@@ -286,6 +286,30 @@ async function init(newExtensionContext: vscode.ExtensionContext) {
   logger.log(`Extension "vscode-search-everywhere" has been activated.`);
 }
 
+async function searchCurrentFile(): Promise<void> {
+  if (controller.shouldIndexOnQuickPickOpen()) {
+    clear();
+    database.clearAll();
+    await workspace.index(ActionTrigger.Search);
+  }
+
+  if (controller.shouldLoadDataFromCacheOnQuickPickOpen()) {
+    clearConfig();
+    !quickPick.isInitialized() && quickPick.init();
+    await workspace.removeDataForUnsavedUris();
+  }
+
+  await quickPick.searchCurrentFile();
+}
+
+async function navigateIntoFile(): Promise<void> {
+  await quickPick.navigateIntoFile();
+}
+
+async function navigateBack(): Promise<void> {
+  await quickPick.navigateBack();
+}
+
 export const controller = {
   shouldIndexOnQuickPickOpen,
   shouldLoadDataFromCacheOnQuickPickOpen,
@@ -301,6 +325,9 @@ export const controller = {
   getExtensionContext,
   init,
   search,
+  searchCurrentFile,
+  navigateIntoFile,
+  navigateBack,
   startup,
   reload,
   handleWillProcessing,

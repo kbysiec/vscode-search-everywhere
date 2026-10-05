@@ -155,6 +155,10 @@ describe("QuickPick", () => {
 
       assert.deepEqual(quickPick.getItems()[0].buttons, [
         {
+          iconPath: new vscode.ThemeIcon("arrow-right"),
+          tooltip: "Search symbols in this file",
+        },
+        {
           iconPath: new vscode.ThemeIcon("open-preview"),
           tooltip: "Open to the side",
         },
@@ -298,6 +302,55 @@ describe("QuickPick", () => {
       await quickPick.handleDidTriggerItemButton(getQuickPickItemButtonEvent());
 
       assert.equal(openItemStub.calledOnce, true);
+    });
+  });
+
+  describe("file scope navigation", () => {
+    it("should navigate into file and update control state", async () => {
+      const qpItem = getQpItems()[0];
+      await quickPick.navigateIntoFile(qpItem);
+
+      assert.equal(quickPick.getFileScopeUri(), qpItem.uri.toString());
+      assert.isTrue(quickPick.getControl().title?.includes("fake-1.ts"));
+      assert.equal(quickPick.getControl().buttons.length, 1);
+      assert.equal(
+        quickPick.getControl().buttons[0],
+        vscode.QuickInputButtons.Back
+      );
+    });
+
+    it("should navigate back to workspace and reset control state", async () => {
+      const qpItem = getQpItems()[0];
+      await quickPick.navigateIntoFile(qpItem);
+      assert.isDefined(quickPick.getFileScopeUri());
+
+      await quickPick.navigateBack();
+      assert.isUndefined(quickPick.getFileScopeUri());
+      assert.isUndefined(quickPick.getControl().title);
+      assert.equal(quickPick.getControl().buttons.length, 0);
+    });
+
+    it("should handle handleDidTriggerButton with Back button", async () => {
+      const qpItem = getQpItems()[0];
+      await quickPick.navigateIntoFile(qpItem);
+      assert.isDefined(quickPick.getFileScopeUri());
+
+      await quickPick.handleDidTriggerButton(vscode.QuickInputButtons.Back);
+      assert.isUndefined(quickPick.getFileScopeUri());
+    });
+
+    it("should navigateIntoFile when handleDidTriggerItemButton is triggered with arrow-right", async () => {
+      const qpItem = getQpItems()[0];
+      await quickPick.handleDidTriggerItemButton({
+        button: {
+          iconPath: new vscode.ThemeIcon("arrow-right"),
+          tooltip: "Search symbols in this file",
+        },
+        item: qpItem,
+      });
+
+      assert.equal(quickPick.getFileScopeUri(), qpItem.uri.toString());
+      await quickPick.navigateBack();
     });
   });
 });
