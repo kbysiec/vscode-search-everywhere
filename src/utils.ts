@@ -56,6 +56,34 @@ function isSortingConfigurationToggled(
   return event.affectsConfiguration("searchEverywhere.shouldItemsBeSorted");
 }
 
+export function debounce<T extends (...args: any[]) => any>(
+  fn: T,
+  wait: number,
+  immediate: boolean = false
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout | undefined;
+
+  return function (this: any, ...args: Parameters<T>): void {
+    const context = this;
+    const callNow = immediate && !timeout;
+
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+
+    timeout = setTimeout(() => {
+      timeout = undefined;
+      if (!immediate) {
+        fn.apply(context, args);
+      }
+    }, wait);
+
+    if (callNow) {
+      fn.apply(context, args);
+    }
+  };
+}
+
 function printNoFolderOpenedMessage(): void {
   vscode.window.showInformationMessage(
     "Workspace doesn't contain any folder opened"
@@ -305,4 +333,5 @@ export const utils = {
   convertMsToSec,
   getStructure,
   setWorkspaceFoldersCommonPath,
+  debounce,
 };

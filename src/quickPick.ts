@@ -11,7 +11,7 @@ import {
 import { database } from "./database";
 import { ItemsFilterPhrases, QuickPickItem } from "./types";
 import { utils } from "./utils";
-const debounce = require("debounce");
+const debounce = utils.debounce;
 
 const VIRTUAL_PAGE_SIZE = 500;
 
