@@ -1,15 +1,19 @@
 import * as vscode from "vscode";
 import {
   fetchHelpPhrase,
+  fetchItemsFilter,
   fetchItemsFilterPhrases,
   fetchShouldHighlightSymbol,
   fetchShouldItemsBeSorted,
   fetchShouldUseDebounce,
   fetchShouldUseItemsFilterPhrases,
 } from "./config";
+import { database } from "./database";
 import { ItemsFilterPhrases, QuickPickItem } from "./types";
 import { utils } from "./utils";
 const debounce = require("debounce");
+
+const VIRTUAL_PAGE_SIZE = 500;
 
 function disposeOnDidChangeValueEventListeners(): void {
   quickPick
@@ -26,16 +30,12 @@ function registerOnDidChangeValueEventListeners(): void {
 
 function registerOnDidChangeValueWithDebounceEventListeners(): void {
   const control = quickPick.getControl();
-  const onDidChangeValueClearingEventListener = control.onDidChangeValue(
-    handleDidChangeValueClearing
-  );
   const onDidChangeValueEventListener = control.onDidChangeValue(
-    debounce(handleDidChangeValue, 400)
+    debounce(handleDidChangeValue, 50)
   );
   const onDidChangeValueEventListeners =
     quickPick.getOnDidChangeValueEventListeners();
 
-  onDidChangeValueEventListeners.push(onDidChangeValueClearingEventListener);
   onDidChangeValueEventListeners.push(onDidChangeValueEventListener);
 }
 
@@ -142,6 +142,7 @@ function fetchConfig(): void {
 
   const shouldItemsBeSorted = fetchShouldItemsBeSorted();
   setShouldItemsBeSorted(shouldItemsBeSorted);
+  toggleKeepingSeparatorsVisibleOnFiltering();
 }
 
 function reloadSortingSettings() {
@@ -205,8 +206,10 @@ function toggleKeepingSeparatorsVisibleOnFiltering() {
   const shouldItemsBeSorted = quickPick.getShouldItemsBeSorted();
   const control = quickPick.getControl();
 
-  // necessary hack to keep separators visible on filtering
-  (control as any).sortByLabel = !shouldItemsBeSorted;
+  if (control) {
+    // necessary hack to keep separators visible on filtering
+    (control as any).sortByLabel = !shouldItemsBeSorted;
+  }
 }
 
 function registerEventListeners() {
@@ -238,17 +241,86 @@ function show(): void {
 }
 
 function loadItems() {
-  quickPick.getShouldItemsBeSorted() ? loadSortedItems() : loadUnsortedItems();
+  if (!database.isReady()) {
+    return;
+  }
+
+  const control = quickPick.getControl();
+  const rawQuery = control.value || "";
+
+  let symbolKind: number | undefined = undefined;
+  let cleanQuery = rawQuery;
+
+  if (quickPick.getShouldUseItemsFilterPhrases()) {
+    const trimmed = rawQuery.trimStart();
+    const filterPhrases = quickPick.getItemsFilterPhrases();
+    if (filterPhrases) {
+      const sortedKinds = Object.keys(filterPhrases).sort(
+        (a, b) =>
+          (filterPhrases[parseInt(b)]?.length || 0) -
+          (filterPhrases[parseInt(a)]?.length || 0)
+      );
+      for (const kindStr of sortedKinds) {
+        const phrase = filterPhrases[parseInt(kindStr)];
+        if (phrase && trimmed.startsWith(phrase)) {
+          symbolKind = parseInt(kindStr);
+          cleanQuery = trimmed.slice(phrase.length).trim();
+          break;
+        }
+      }
+    }
+  }
+
+  const itemsFilter = fetchItemsFilter();
+
+  // Query SQLite with clean search text, symbol kind, sorting and itemsFilter
+  const dbResults = database.search(cleanQuery, VIRTUAL_PAGE_SIZE, {
+    symbolKind,
+    sortByKind: quickPick.getShouldItemsBeSorted(),
+    allowedKinds: itemsFilter.allowedKinds,
+    ignoredKinds: itemsFilter.ignoredKinds,
+    ignoredNames: itemsFilter.ignoredNames,
+  });
+  reinitQpItemsButton(dbResults);
+  syncItemsFilterPhrases(dbResults);
+
+  quickPick.getShouldItemsBeSorted()
+    ? loadSortedItemsFromResults(dbResults)
+    : loadUnsortedItemsFromResults(dbResults);
 }
 
-function loadUnsortedItems(): void {
-  const control = quickPick.getControl();
-  control.items = quickPick.getItems();
+function syncItemsFilterPhrases(items: QuickPickItem[]): void {
+  const filterPhrases = quickPick.getItemsFilterPhrases();
+  const shouldUse = quickPick.getShouldUseItemsFilterPhrases();
+
+  for (const item of items) {
+    if (!shouldUse || !filterPhrases) {
+      item.description = item.description?.replace(/^\[[^\]]+\]\s*/, "");
+      continue;
+    }
+    const phrase = filterPhrases[item.symbolKind];
+    if (phrase) {
+      const name = item.label.replace(/^\$\([^)]+\)\s+/, "");
+      const tag = `[${phrase}${name}]`;
+      if (item.description && item.description.startsWith("[")) {
+        item.description = item.description.replace(/^\[[^\]]+\]/, () => tag);
+      } else {
+        item.description = item.description ? `${tag} ${item.description}` : tag;
+      }
+    } else {
+      item.description = item.description?.replace(/^\[[^\]]+\]\s*/, "");
+    }
+  }
 }
 
-function loadSortedItems(): void {
+function loadUnsortedItemsFromResults(results: QuickPickItem[]): void {
   const control = quickPick.getControl();
-  const items = [...quickPick.getItems()];
+  control.items = results;
+}
+
+function loadSortedItemsFromResults(results: QuickPickItem[]): void {
+  const control = quickPick.getControl();
+  const items = [...results];
   items.sort((firstItem, secondItem) => {
     if (firstItem.symbolKind > secondItem.symbolKind) {
       return 1;
@@ -313,7 +385,6 @@ function setPlaceholder(isBusy: boolean): void {
 }
 
 let control: vscode.QuickPick<QuickPickItem>;
-let items: QuickPickItem[] = [];
 let shouldUseItemsFilterPhrases: boolean;
 let helpPhrase: string;
 let shouldItemsBeSorted: boolean;
@@ -329,13 +400,14 @@ function setControl(newControl: vscode.QuickPick<QuickPickItem>) {
   control = newControl;
 }
 
+// Kept for API compat — returns empty array (data now in DB)
 function getItems() {
-  return items;
+  return [] as QuickPickItem[];
 }
 
-function setItems(newItems: QuickPickItem[]): void {
-  reinitQpItemsButton(newItems);
-  items = newItems;
+// No-op — data is now in SQLite
+function setItems(_newItems: QuickPickItem[]): void {
+  // Items are stored in the database, not in memory
 }
 
 function reinitQpItemsButton(data: QuickPickItem[]) {

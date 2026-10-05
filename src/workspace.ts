@@ -14,6 +14,7 @@ import {
 import { fetchExcludeMode } from "./config";
 import { dataConverter } from "./dataConverter";
 import { dataService } from "./dataService";
+import { database } from "./database";
 import {
   Action,
   ActionTrigger,
@@ -60,8 +61,10 @@ async function handleDidChangeConfiguration(
 async function handleDidChangeWorkspaceFolders(
   event: vscode.WorkspaceFoldersChangeEvent
 ) {
-  utils.hasWorkspaceChanged(event) &&
-    (await workspace.index(ActionTrigger.WorkspaceFoldersChange));
+  if (utils.hasWorkspaceChanged(event)) {
+    utils.setWorkspaceFoldersCommonPath();
+    await workspace.index(ActionTrigger.WorkspaceFoldersChange);
+  }
 }
 
 async function handleDidChangeTextDocument(
@@ -198,6 +201,7 @@ async function init() {
 
 async function index(indexActionType: ActionTrigger): Promise<void> {
   clear();
+  database.clearAll();
   await indexer.index(indexActionType);
 }
 
@@ -237,7 +241,7 @@ function registerEventListeners(): void {
     debounce(handleDidChangeWorkspaceFolders, 250)
   );
   vscode.workspace.onDidChangeTextDocument(
-    debounce(handleDidChangeTextDocument, 700)
+    debounce(handleDidChangeTextDocument, 300)
   );
   vscode.workspace.onDidRenameFiles(handleDidRenameFiles);
   vscode.workspace.onDidCreateFiles(handleDidCreateFiles);

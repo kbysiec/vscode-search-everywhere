@@ -5,6 +5,7 @@ import {
   fetchShouldSearchSelection,
   fetchShouldWorkspaceDataBeCached,
 } from "./config";
+import { database } from "./database";
 import { logger } from "./logger";
 import { quickPick } from "./quickPick";
 import { Action, ActionTrigger, ActionType } from "./types";
@@ -20,6 +21,7 @@ import {
 } from "./workspaceEventsEmitter";
 
 function loadItemsAndShowQuickPick() {
+  quickPick.reload();
   quickPick.loadItems();
   quickPick.show();
 
@@ -33,10 +35,6 @@ function loadItemsAndShowQuickPick() {
       activeEditor.document.getText(new vscode.Range(start, end))
     );
   }
-}
-function setQuickPickData() {
-  const data = workspace.getData();
-  quickPick.setItems(data);
 }
 
 function setBusy(isBusy: boolean) {
@@ -55,8 +53,7 @@ function setQuickPickPlaceholder(isBusy: boolean) {
 }
 
 function isDataEmpty() {
-  const data = workspace.getData();
-  return !data.length;
+  return database.isEmpty();
 }
 
 function shouldIndexOnQuickPickOpen() {
@@ -133,16 +130,18 @@ function handleWillProcessing() {
 }
 
 function handleDidProcessing() {
-  controller.setQuickPickData();
-
+  // No need to load all data into quickPick — it queries DB on demand
   quickPick.loadItems();
   controller.setBusy(false);
 }
 
 function handleWillExecuteAction(action: Action) {
   if (action.type === ActionType.Rebuild) {
-    quickPick.setItems([]);
-    quickPick.loadItems();
+    // Clear QuickPick display
+    if (quickPick.isInitialized()) {
+      const control = quickPick.getControl();
+      control.items = [];
+    }
   }
   logger.logAction(action);
 }
@@ -156,6 +155,9 @@ function handleDidDebounceConfigToggle() {
 function handleDidSortingConfigToggle() {
   controller.setBusy(true);
   quickPick.reloadSortingSettings();
+  if (quickPick.isInitialized()) {
+    quickPick.loadItems();
+  }
   controller.setBusy(false);
 }
 
@@ -166,6 +168,7 @@ function handleWillReindexOnConfigurationChange() {
 async function search(): Promise<void> {
   if (controller.shouldIndexOnQuickPickOpen()) {
     clear();
+    database.clearAll();
     await workspace.index(ActionTrigger.Search);
   }
 
@@ -173,7 +176,7 @@ async function search(): Promise<void> {
     clearConfig();
     !quickPick.isInitialized() && quickPick.init();
     await workspace.removeDataForUnsavedUris();
-    controller.setQuickPickData();
+    // Data is already in SQLite — no need to setQuickPickData
   }
 
   const activeEditorOrUndefined = vscode.window.activeTextEditor;
@@ -192,16 +195,13 @@ async function search(): Promise<void> {
       timeInMsToAvoidListFlashing,
       quickPick.reloadOnDidChangeValueEventListener
     );
-
-    // setTimeout(() => {
-    //   quickPick.reloadOnDidChangeValueEventListener();
-    // }, timeInMsToAvoidListFlashing);
   }
   quickPick.isInitialized() && loadItemsAndShowQuickPick();
 }
 
 async function reload(): Promise<void> {
   clear();
+  database.clearAll();
   clearNotSavedUriPaths();
 
   utils.hasWorkspaceAnyFolder()
@@ -218,7 +218,7 @@ async function startup(): Promise<void> {
     clearConfig();
     !quickPick.isInitialized() && quickPick.init();
     await workspace.removeDataForUnsavedUris();
-    controller.setQuickPickData();
+    // Data is already in SQLite — no need to setQuickPickData
   }
 }
 
@@ -245,6 +245,7 @@ async function init(newExtensionContext: vscode.ExtensionContext) {
   logger.init();
   setExtensionContext(newExtensionContext);
   initCache(controller.getExtensionContext());
+  await database.initDatabase(newExtensionContext);
   await workspace.init();
   registerWorkspaceEventListeners();
 
@@ -261,7 +262,6 @@ export const controller = {
   isInitOnStartupDisabledAndWorkspaceCachingEnabledButDataIsEmpty,
   isInitOnStartupEnabledAndWorkspaceCachingDisabled,
   isInitOnStartupDisabledAndWorkspaceCachingDisabled,
-  setQuickPickData,
   setBusy,
   getExtensionContext,
   init,

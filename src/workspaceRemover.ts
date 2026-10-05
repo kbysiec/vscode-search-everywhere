@@ -1,36 +1,27 @@
 import * as vscode from "vscode";
-import { updateData } from "./cache";
+import { database } from "./database";
 import { DetailedActionType, QuickPickItem } from "./types";
-import { workspaceIndexer as indexer } from "./workspaceIndexer";
 
-function removeUri(data: QuickPickItem[], uri: vscode.Uri): QuickPickItem[] {
-  return data.filter((qpItem: QuickPickItem) => qpItem.uri.path !== uri.path);
+function removeUri(uri: vscode.Uri): void {
+  database.deleteByUri(uri.toString());
 }
 
-function removeFolder(data: QuickPickItem[], uri: vscode.Uri) {
-  return data.filter((qpItem: QuickPickItem) => {
-    return !qpItem.uri.path.includes(uri.path);
-  });
+function removeFolder(uri: vscode.Uri): void {
+  database.deleteByUriPrefix(uri.toString());
 }
 
 export function removeFromCacheByPath(
   uri: vscode.Uri,
   detailedActionType: DetailedActionType
 ) {
-  let data = indexer.getData();
-
   const removeFnByDetailedActionType: { [key: string]: Function } = {
-    [DetailedActionType.RenameOrMoveFile]: removeUri.bind(null, data, uri),
-    [DetailedActionType.RemoveFile]: removeUri.bind(null, data, uri),
-    [DetailedActionType.TextChange]: removeUri.bind(null, data, uri),
-    [DetailedActionType.ReloadUnsavedUri]: removeUri.bind(null, data, uri),
-    [DetailedActionType.RemoveDirectory]: removeFolder.bind(null, data, uri),
-    [DetailedActionType.RenameOrMoveDirectory]: removeFolder.bind(
-      null,
-      data,
-      uri
-    ),
+    [DetailedActionType.RenameOrMoveFile]: removeUri.bind(null, uri),
+    [DetailedActionType.RemoveFile]: removeUri.bind(null, uri),
+    [DetailedActionType.TextChange]: removeUri.bind(null, uri),
+    [DetailedActionType.ReloadUnsavedUri]: removeUri.bind(null, uri),
+    [DetailedActionType.RemoveDirectory]: removeFolder.bind(null, uri),
+    [DetailedActionType.RenameOrMoveDirectory]: removeFolder.bind(null, uri),
   };
-  data = removeFnByDetailedActionType[detailedActionType]();
-  updateData(data);
+  removeFnByDetailedActionType[detailedActionType]();
+  database.schedulePersist();
 }

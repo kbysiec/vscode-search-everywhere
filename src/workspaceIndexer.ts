@@ -1,17 +1,20 @@
 import { performance } from "perf_hooks";
 import * as vscode from "vscode";
 import { actionProcessor } from "./actionProcessor";
-import { getData as getDataFromCache, updateData } from "./cache";
 import { fetchShouldDisplayNotificationInStatusBar } from "./config";
 import { dataConverter } from "./dataConverter";
 import { dataService } from "./dataService";
+import { database } from "./database";
 import { onDidItemIndexed } from "./dataServiceEventsEmitter";
 import { logger } from "./logger";
 import { Action, ActionType, QuickPickItem, WorkspaceData } from "./types";
 import { utils } from "./utils";
 
-function getData(): QuickPickItem[] {
-  return getDataFromCache() || [];
+function getData(query?: string, limit?: number): QuickPickItem[] {
+  if (!database.isReady()) {
+    return [];
+  }
+  return database.search(query || "", limit);
 }
 
 async function index(trigger: string): Promise<void> {
@@ -47,8 +50,11 @@ async function registerAction(
 }
 
 async function downloadData(uris?: vscode.Uri[]): Promise<QuickPickItem[]> {
-  const data = await dataService.fetchData(uris);
-  return dataConverter.convertToQpData(data);
+  const items: QuickPickItem[] = [];
+  await dataService.fetchData(uris, undefined, (batch) => {
+    items.push(...batch);
+  });
+  return items;
 }
 
 function cancelIndexing(): void {
@@ -72,7 +78,7 @@ async function indexWithProgressTask(
   );
 
   const startMeasure = startTimeMeasurement();
-  const data = await indexWorkspace();
+  const data = await indexWorkspace(progress);
 
   resetProgress();
   handleCancellationRequestedSubscription.dispose();
@@ -108,10 +114,35 @@ function printStats(data: WorkspaceData, elapsedTime: number) {
   logger.logStructure(data);
 }
 
-async function indexWorkspace(): Promise<WorkspaceData> {
-  const data = await dataService.fetchData();
-  const qpData = dataConverter.convertToQpData(data);
-  updateData(qpData);
+async function indexWorkspace(
+  progress?: vscode.Progress<{
+    message?: string | undefined;
+    increment?: number | undefined;
+  }>
+): Promise<WorkspaceData> {
+  database.clearAll();
+
+  let batch: QuickPickItem[] = [];
+  const BATCH_SIZE = 2500;
+
+  const onBatch = (items: QuickPickItem[]) => {
+    batch.push(...items);
+    if (batch.length >= BATCH_SIZE) {
+      database.insertSymbolsBatch(batch);
+      batch = [];
+    }
+  };
+
+  const data = await dataService.fetchData(undefined, progress, onBatch);
+
+  if (batch.length > 0) {
+    database.insertSymbolsBatch(batch);
+    batch = [];
+  }
+
+  progress?.report({ message: "Saving index database..." });
+  database.schedulePersist();
+
   return data;
 }
 

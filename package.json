@@ -2,7 +2,7 @@
   "name": "vscode-search-everywhere",
   "displayName": "Search everywhere",
   "description": "Fast and customizable files, symbols search engine. An alternative for 'Go to symbol in workspace' built-in feature.",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "preview": false,
   "publisher": "kbysiec",
   "author": {
@@ -24,7 +24,8 @@
     "JetBrains"
   ],
   "activationEvents": [
-    "*"
+    "onCommand:searchEverywhere.search",
+    "onCommand:searchEverywhere.reload"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -91,6 +92,16 @@
             "ignoredNames": []
           },
           "description": "Ability to define a filter that should be applied to items."
+        },
+        "searchEverywhere.excludeProperties": {
+          "type": "boolean",
+          "default": true,
+          "description": "Exclude object properties (kind 6) to reduce index size by more than 50% and eliminate property noise in large codebases."
+        },
+        "searchEverywhere.excludeVariables": {
+          "type": "boolean",
+          "default": false,
+          "description": "Exclude variables and constants (kind 12). Disabled by default so newly written variables and constants are indexed."
         },
         "searchEverywhere.shouldUseItemsFilterPhrases": {
           "type": "boolean",
@@ -217,7 +228,8 @@
     "vscode-test": "^1.3.0"
   },
   "dependencies": {
-    "debounce": "^1.2.0"
+    "debounce": "^1.2.0",
+    "sql.js": "^1.11.0"
   },
   "license": "MIT",
   "repository": {

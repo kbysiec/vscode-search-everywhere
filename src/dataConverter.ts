@@ -37,7 +37,7 @@ function mapItemElementToQpItem(
   uri: vscode.Uri,
   item: vscode.DocumentSymbol | vscode.Uri
 ): QuickPickItem {
-  return item.hasOwnProperty("range")
+  return "range" in item || "kind" in item
     ? mapDocumentSymbolToQpItem(uri, item as vscode.DocumentSymbol)
     : mapUriToQpItem(item as vscode.Uri);
 }
@@ -61,11 +61,16 @@ function mapDocumentSymbolToQpItem(
     parent
   );
 
+  const range =
+    symbol.range ||
+    (symbol as any).location?.range ||
+    new vscode.Range(new vscode.Position(0, 0), new vscode.Position(0, 0));
+
   return createQuickPickItem(
     uri,
     symbol.kind,
-    symbol.range.start,
-    symbol.range.end,
+    range.start,
+    range.end,
     label,
     description
   );
@@ -77,16 +82,19 @@ function getDocumentSymbolToQpItemDescription(
   symbol: vscode.DocumentSymbol,
   parent: string
 ) {
+  const range = symbol.range || (symbol as any).location?.range;
+  const lineDesc = range
+    ? range.isSingleLine
+      ? `line: ${range.start.line + 1}`
+      : `lines: ${range.start.line + 1} - ${range.end.line + 1}`
+    : "";
+
   return `${
     dataConverter.getShouldUseItemsFilterPhrases() && itemFilterPhrase
       ? `[${itemFilterPhrase}${name}] `
       : ""
-  }${vscode.SymbolKind[symbol.kind]} at ${
-    symbol.range.isSingleLine
-      ? `line: ${symbol.range.start.line + 1}`
-      : `lines: ${symbol.range.start.line + 1} - ${symbol.range.end.line + 1}${
-          parent ? ` in ${parent}` : ""
-        }`
+  }${vscode.SymbolKind[symbol.kind]}${lineDesc ? ` at ${lineDesc}` : ""}${
+    parent ? ` in ${parent}` : ""
   }`;
 }
 
@@ -145,6 +153,20 @@ function reload() {
 
 function cancel() {
   dataConverter.setCancelled(true);
+}
+
+function convertUriAndSymbolsToQpItems(
+  uri: vscode.Uri,
+  symbols?: vscode.DocumentSymbol[]
+): QuickPickItem[] {
+  const qpItems: QuickPickItem[] = [];
+  qpItems.push(mapUriToQpItem(uri));
+  if (symbols && symbols.length) {
+    for (let i = 0; i < symbols.length; i++) {
+      qpItems.push(mapDocumentSymbolToQpItem(uri, symbols[i]));
+    }
+  }
+  return qpItems;
 }
 
 function convertToQpData(data: WorkspaceData): QuickPickItem[] {
@@ -208,5 +230,6 @@ export const dataConverter = {
   reload,
   cancel,
   convertToQpData,
+  convertUriAndSymbolsToQpItems,
   fetchConfig,
 };

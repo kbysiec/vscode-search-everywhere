@@ -32,6 +32,14 @@ const keys = {
       ignoredNames: [],
     } as ItemsFilter,
   },
+  excludeProperties: {
+    name: "excludeProperties",
+    value: true,
+  },
+  excludeVariables: {
+    name: "excludeVariables",
+    value: false,
+  },
   shouldUseItemsFilterPhrases: {
     name: "shouldUseItemsFilterPhrases",
     value: false,
@@ -127,8 +135,37 @@ export function fetchIcons(): Icons {
   return get(keys.icons.name, keys.icons.value);
 }
 
+export function fetchShouldExcludeProperties(): boolean {
+  return get(keys.excludeProperties.name, keys.excludeProperties.value);
+}
+
+export function fetchShouldExcludeVariables(): boolean {
+  return get(keys.excludeVariables.name, keys.excludeVariables.value);
+}
+
 export function fetchItemsFilter(): ItemsFilter {
-  return get(keys.itemsFilter.name, keys.itemsFilter.value);
+  const filter = get(keys.itemsFilter.name, keys.itemsFilter.value);
+  const shouldExcludeProperties = fetchShouldExcludeProperties();
+  const shouldExcludeVariables = fetchShouldExcludeVariables();
+
+  if (shouldExcludeProperties || shouldExcludeVariables) {
+    const ignored = new Set(filter.ignoredKinds || []);
+    const allowed = new Set(filter.allowedKinds || []);
+
+    // vscode.SymbolKind.Property = 6
+    if (shouldExcludeProperties && !allowed.has(6)) {
+      ignored.add(6);
+    }
+    // vscode.SymbolKind.Variable = 12
+    if (shouldExcludeVariables && !allowed.has(12)) {
+      ignored.add(12);
+    }
+    return {
+      ...filter,
+      ignoredKinds: Array.from(ignored),
+    };
+  }
+  return filter;
 }
 
 export function fetchShouldUseItemsFilterPhrases(): boolean {
