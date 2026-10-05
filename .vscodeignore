@@ -11,3 +11,5 @@ vsc-extension-quickstart.md
 **/tslint.json
 **/*.map
 **/*.ts
+local.properties*
+publish.sh

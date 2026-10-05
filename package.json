@@ -275,7 +275,9 @@
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile",
     "test": "node ./dist/test/runTest.js",
-    "cov:fixpaths": "gulp fixCoverageReportSrcPaths"
+    "cov:fixpaths": "gulp fixCoverageReportSrcPaths",
+    "package": "npx @vscode/vsce package",
+    "publish:extension": "node ./scripts/publish.js"
   },
   "devDependencies": {
     "@types/chai": "^4.3.20",

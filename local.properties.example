@@ -1,0 +1,17 @@
+# ==============================================================================
+# Search Everywhere - Marketplace Publishing Configuration
+# ==============================================================================
+# Copy this file to 'local.properties' and fill in your personal access tokens.
+# IMPORTANT: 'local.properties' is gitignored and must NEVER be committed to git.
+# ==============================================================================
+
+# Visual Studio Marketplace (VSCE)
+# Generate token at: https://marketplace.visualstudio.com/manage
+# Azure DevOps Org -> User Settings -> Personal Access Tokens
+# Required Scope: Marketplace -> Manage (All accessible organizations)
+VSCE_PAT=your_vsce_personal_access_token_here
+
+# Open VSX Registry (OVSX)
+# Generate token at: https://open-vsx.org/user-settings/tokens
+# Required Scope: Publish extensions
+OVSX_PAT=your_open_vsx_access_token_here
