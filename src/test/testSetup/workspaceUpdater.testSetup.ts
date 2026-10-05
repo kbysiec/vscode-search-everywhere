@@ -1,9 +1,8 @@
 import * as sinon from "sinon";
-import * as cache from "../../cache";
+import { database } from "../../database";
 import { utils } from "../../utils";
 import { workspaceIndexer as indexer } from "../../workspaceIndexer";
 import {
-  getQpItem,
   getQpItems,
   getQpItemsSymbolAndUri,
 } from "../util/qpItemMockFactory";
@@ -26,6 +25,10 @@ export const getTestSetups = () => {
               method: "index",
             },
             {
+              object: database,
+              method: "deleteByUri",
+            },
+            {
               object: indexer,
               method: "downloadData",
               throws: new Error("test error"),
@@ -43,8 +46,8 @@ export const getTestSetups = () => {
         return stubMultiple(
           [
             {
-              object: cache,
-              method: "updateData",
+              object: database,
+              method: "deleteByUri",
             },
             {
               object: indexer,
@@ -52,9 +55,12 @@ export const getTestSetups = () => {
               returns: Promise.resolve(getQpItemsSymbolAndUri("./fake-new/")),
             },
             {
-              object: indexer,
-              method: "getData",
-              returns: [],
+              object: database,
+              method: "insertSymbolsBatch",
+            },
+            {
+              object: database,
+              method: "schedulePersist",
             },
           ],
           sandbox
@@ -65,18 +71,21 @@ export const getTestSetups = () => {
         return stubMultiple(
           [
             {
-              object: cache,
-              method: "updateData",
+              object: database,
+              method: "deleteByUri",
             },
             {
               object: indexer,
               method: "downloadData",
-              returns: Promise.resolve(getQpItem()),
+              returns: Promise.resolve(getQpItems(1)),
             },
             {
-              object: indexer,
-              method: "getData",
-              returns: [],
+              object: database,
+              method: "insertSymbolsBatch",
+            },
+            {
+              object: database,
+              method: "schedulePersist",
             },
           ],
           sandbox
@@ -87,18 +96,21 @@ export const getTestSetups = () => {
         return stubMultiple(
           [
             {
-              object: cache,
-              method: "updateData",
+              object: database,
+              method: "deleteByUri",
             },
             {
               object: indexer,
               method: "downloadData",
-              returns: Promise.resolve(getQpItem()),
+              returns: Promise.resolve(getQpItems(1)),
             },
             {
-              object: indexer,
-              method: "getData",
-              returns: [],
+              object: database,
+              method: "insertSymbolsBatch",
+            },
+            {
+              object: database,
+              method: "schedulePersist",
             },
           ],
           sandbox
@@ -109,18 +121,8 @@ export const getTestSetups = () => {
         return stubMultiple(
           [
             {
-              object: cache,
-              method: "updateData",
-            },
-            {
-              object: indexer,
-              method: "getData",
-              returns: getQpItems(),
-            },
-            {
-              object: utils,
-              method: "updateQpItemsWithNewDirectoryPath",
-              returns: getQpItems(2, "./fake-new/"),
+              object: database,
+              method: "schedulePersist",
             },
           ],
           sandbox
@@ -131,8 +133,8 @@ export const getTestSetups = () => {
         return stubMultiple(
           [
             {
-              object: cache,
-              method: "updateData",
+              object: database,
+              method: "deleteByUri",
             },
             {
               object: indexer,
@@ -140,9 +142,12 @@ export const getTestSetups = () => {
               returns: Promise.resolve(getQpItemsSymbolAndUri("./fake-new/")),
             },
             {
-              object: indexer,
-              method: "getData",
-              returns: [],
+              object: database,
+              method: "insertSymbolsBatch",
+            },
+            {
+              object: database,
+              method: "schedulePersist",
             },
           ],
           sandbox

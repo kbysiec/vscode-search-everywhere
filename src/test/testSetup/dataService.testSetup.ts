@@ -333,9 +333,9 @@ export const getTestSetups = () => {
         stubMultiple(
           [
             {
-              object: dataService,
-              method: "fetchUris",
-              returns: Promise.resolve(getItems()),
+              object: vscode.workspace,
+              method: "getWorkspaceFolder",
+              returns: { uri: getItems()[0] },
             },
           ],
           sandbox
@@ -346,9 +346,10 @@ export const getTestSetups = () => {
         stubMultiple(
           [
             {
-              object: dataService,
-              method: "fetchUris",
-              returns: Promise.resolve(getItems()),
+              object: vscode.workspace,
+              method: "getWorkspaceFolder",
+              returns: undefined,
+              returnsIsUndefined: true,
             },
           ],
           sandbox

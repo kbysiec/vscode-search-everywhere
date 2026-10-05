@@ -3,6 +3,7 @@ import * as vscode from "vscode";
 import * as cache from "../../cache";
 import * as config from "../../config";
 import { controller } from "../../controller";
+import { database } from "../../database";
 import { patternProvider } from "../../patternProvider";
 import { quickPick } from "../../quickPick";
 import { utils } from "../../utils";
@@ -200,6 +201,11 @@ function stubComponentsForIsInitOnStartupEnabledAndWorkspaceCachingEnabledButDat
         object: workspace,
         method: "getData",
         returns: returnsValues.getData,
+      },
+      {
+        object: database,
+        method: "isEmpty",
+        returns: !(returnsValues.getData && returnsValues.getData.length),
       },
     ],
     sandbox

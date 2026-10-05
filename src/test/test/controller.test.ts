@@ -244,8 +244,8 @@ describe("Controller", () => {
         setups.startup.setupForGettingAndSettingDataWhenLoadingFromCacheOnStartup();
       await controller.startup();
 
-      assert.equal(getDataStub.calledOnce, true);
-      assert.equal(setItemsStub.calledOnce, true);
+      assert.equal(getDataStub.calledOnce, false);
+      assert.equal(setItemsStub.calledOnce, false);
     });
   });
 

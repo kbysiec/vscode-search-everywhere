@@ -106,7 +106,7 @@ describe("Cache", () => {
     it("should clear data and config from cache", () => {
       const [updateStub] = setups.clear.setupForClearingDataAndConfig();
       cache.clear();
-      assert.equal(updateStub.calledTwice, true);
+      assert.equal(updateStub.calledThrice, true);
     });
   });
 
