@@ -2,6 +2,27 @@
 
 All notable changes to the "vscode-search-everywhere" extension will be documented in this file.
 
+## [3.1.0] - 2026-10-05
+### ⚡ Shared Worktree Cache, Recent Items & Enhanced Matching
+- **Shared Repository Cache for Git Worktrees & Clones** (issue #54):
+  - Automatically shares the SQLite database cache across git worktrees and local clones of the same repository (keyed by git remote URL or repository root).
+  - Opening a new git worktree instantly uses the existing indexed database — zero cold-start indexing overhead.
+  - Added setting `searchEverywhere.shareCacheAcrossWorktrees` (default `true`).
+  - Added command `searchEverywhere.clearSharedCache` to explicitly clear shared worktree caches when needed.
+- **Recent Items & Open Editors on Empty Search**:
+  - Opening search with an empty query now displays recently opened symbols/files and currently active editor tabs first.
+  - Deduped navigation with custom separators (`Recent Items`, `Open Editors`) for instant context switching, matching JetBrains / native Quick Open behavior.
+  - Added settings `searchEverywhere.showRecentItemsOnEmpty` (default `true`) and `searchEverywhere.recentItemsLimit` (default `10`).
+- **Clean Name Indexing & Fuzzy Symbol Matching** (issue #49):
+  - Stripped prefixes/icons from database query comparisons (`cleanName`) and created dedicated case-insensitive SQLite B-Tree indexes.
+  - Enhanced search accuracy and speed for fuzzy prefix matching and camelCase/snake_case symbols.
+- **Zero-Dependency Debounce** (issue #53):
+  - Replaced external `debounce` npm package with a custom, typed, zero-dependency debouncer implementation with full unit test coverage.
+  - Unified search input and item loading debouncing into a single reactive event listener.
+- **Dependency & Security Upgrades**:
+  - Pulled in security updates for `minimist` (1.2.8) and `minimatch` (3.1.5), closing Dependabot PRs #38 and #39.
+  - Safely updated `typescript` to 4.9.5, `@types/node` to 16.x, `@types/mocha` to 10.x, and `@types/chai` to 4.3.20.
+
 ## [3.0.0] - 2026-10-05
 ### 🚀 The Next-Gen Engine: SQLite WASM & Ultra-Fast Big-Repo Search
 - **SQLite WASM Architecture**: Replaced in-memory JavaScript heap cache with an embedded SQLite WebAssembly engine (`sql.js`) backed by specialized B-Tree indexes.

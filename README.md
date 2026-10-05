@@ -97,6 +97,10 @@ After the scan is completed, the extension continuously tracks changes in the wo
 
 * Ability to cache the scanned workspaceData to as a result scan the workspace only once
 
+* Shared cache across git worktrees and local clones of the same repository
+
+* Recent items and currently open editor files displayed when search query is empty
+
 ## Commands
 
 * `searchEverywhere.search`
@@ -110,6 +114,10 @@ After the scan is completed, the extension continuously tracks changes in the wo
 * `searchEverywhere.reload`
 
   Re-index the whole workspace.
+
+* `searchEverywhere.clearSharedCache`
+
+  Clear the shared repository cache used across git worktrees and clones.
 
 ## Extension Settings
 
@@ -319,6 +327,21 @@ Default value: `true`
 
 Ability to exclude variables and constants (symbol kind 12) from indexing. Keeping this `false` ensures variables and React functional components remain searchable.
 Default value: `false`
+
+* `searchEverywhere.shareCacheAcrossWorktrees`
+
+Ability to share the indexed database cache across git worktrees and local clones of the same repository.
+Default value: `true`
+
+* `searchEverywhere.showRecentItemsOnEmpty`
+
+Ability to show recently visited items and active editor tabs when the search query is empty.
+Default value: `true`
+
+* `searchEverywhere.recentItemsLimit`
+
+Maximum number of recent items to show when the search query is empty.
+Default value: `10`
 
 ## Release Notes
 
