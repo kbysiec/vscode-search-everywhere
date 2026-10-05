@@ -25,7 +25,8 @@
   ],
   "activationEvents": [
     "onCommand:searchEverywhere.search",
-    "onCommand:searchEverywhere.reload"
+    "onCommand:searchEverywhere.reload",
+    "onCommand:searchEverywhere.clearSharedCache"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -226,25 +227,25 @@
     "cov:fixpaths": "gulp fixCoverageReportSrcPaths"
   },
   "devDependencies": {
-    "@types/chai": "^4.2.11",
-    "@types/glob": "^7.1.1",
-    "@types/mocha": "^7.0.2",
-    "@types/node": "^13.9.2",
-    "@types/sinon": "^7.5.2",
+    "@types/chai": "^4.3.20",
+    "@types/glob": "^7.2.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^16.18.126",
+    "@types/sinon": "^9.0.11",
     "@types/vscode": "1.64.0",
-    "chai": "^4.2.0",
-    "decache": "^4.5.1",
-    "glob": "^7.1.6",
+    "chai": "^4.5.0",
+    "decache": "^4.6.2",
+    "glob": "^7.2.3",
     "gulp": "^4.0.2",
     "gulp-string-replacer": "^1.2.2",
     "istanbul": "^0.4.5",
-    "mocha": "^10.2.0",
+    "mocha": "^10.8.2",
     "remap-istanbul": "^0.13.0",
     "rimraf": "^3.0.2",
-    "sinon": "^9.0.1",
-    "tslint": "^6.1.0",
-    "typescript": "^4.7.4",
-    "vscode-test": "^1.3.0"
+    "sinon": "^9.2.4",
+    "tslint": "^6.1.3",
+    "typescript": "^4.9.5",
+    "vscode-test": "^1.6.1"
   },
   "dependencies": {
     "sql.js": "^1.11.0"
