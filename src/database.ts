@@ -17,19 +17,33 @@ export async function initDatabase(
 
   let locateFileOpt: any = undefined;
   if (context && context.extensionPath) {
-    const wasmPath = path.join(
-      context.extensionPath,
-      "node_modules",
-      "sql.js",
-      "dist",
-      "sql-wasm.wasm"
-    );
-    locateFileOpt = (file: string) => {
-      if (file.endsWith(".wasm") && fs.existsSync(wasmPath)) {
-        return wasmPath;
-      }
-      return file;
-    };
+    const candidates = [
+      path.join(
+        context.extensionPath,
+        "node_modules",
+        "sql.js",
+        "dist",
+        "sql-wasm.wasm"
+      ),
+      path.join(
+        __dirname,
+        "..",
+        "node_modules",
+        "sql.js",
+        "dist",
+        "sql-wasm.wasm"
+      ),
+      path.join(__dirname, "node_modules", "sql.js", "dist", "sql-wasm.wasm"),
+    ];
+    const wasmPath = candidates.find((p) => fs.existsSync(p));
+    if (wasmPath) {
+      locateFileOpt = (file: string) => {
+        if (file.endsWith(".wasm")) {
+          return wasmPath;
+        }
+        return file;
+      };
+    }
   }
 
   sqlJs = await initSqlJs(
@@ -187,6 +201,7 @@ export interface SearchOptions {
   allowedKinds?: number[];
   ignoredKinds?: number[];
   ignoredNames?: string[];
+  sortByKind?: boolean;
 }
 
 const QUERY_COLUMNS =
@@ -209,7 +224,7 @@ export function search(
   }
 
   // Fast-path: Check LRU search cache
-  const cacheKey = `${query}|${limit}|${options?.symbolKind ?? ""}|${options?.allowedKinds?.join(",") ?? ""}|${options?.ignoredKinds?.join(",") ?? ""}|${options?.ignoredNames?.join(",") ?? ""}`;
+  const cacheKey = `${query}|${limit}|${options?.symbolKind ?? ""}|${options?.sortByKind ? "1" : "0"}|${options?.allowedKinds?.join(",") ?? ""}|${options?.ignoredKinds?.join(",") ?? ""}|${options?.ignoredNames?.join(",") ?? ""}`;
   if (searchCache.has(cacheKey)) {
     return searchCache.get(cacheKey)!;
   }
@@ -248,8 +263,11 @@ export function search(
   let matchedItems: QuickPickItem[] = [];
 
   if (!query) {
+    const sortOrder = options?.sortByKind
+      ? "symbol_kind, name COLLATE NOCASE"
+      : "name COLLATE NOCASE";
     const results = db.exec(
-      `SELECT ${QUERY_COLUMNS} FROM symbols ${baseWhere} ORDER BY symbol_kind, name COLLATE NOCASE LIMIT ${limit}`,
+      `SELECT ${QUERY_COLUMNS} FROM symbols ${baseWhere} ORDER BY ${sortOrder} LIMIT ${limit}`,
       params
     );
     if (results && results.length) {

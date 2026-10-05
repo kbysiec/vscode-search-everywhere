@@ -142,6 +142,7 @@ function fetchConfig(): void {
 
   const shouldItemsBeSorted = fetchShouldItemsBeSorted();
   setShouldItemsBeSorted(shouldItemsBeSorted);
+  toggleKeepingSeparatorsVisibleOnFiltering();
 }
 
 function reloadSortingSettings() {
@@ -205,8 +206,10 @@ function toggleKeepingSeparatorsVisibleOnFiltering() {
   const shouldItemsBeSorted = quickPick.getShouldItemsBeSorted();
   const control = quickPick.getControl();
 
-  // necessary hack to keep separators visible on filtering
-  (control as any).sortByLabel = !shouldItemsBeSorted;
+  if (control) {
+    // necessary hack to keep separators visible on filtering
+    (control as any).sortByLabel = !shouldItemsBeSorted;
+  }
 }
 
 function registerEventListeners() {
@@ -270,9 +273,10 @@ function loadItems() {
 
   const itemsFilter = fetchItemsFilter();
 
-  // Query SQLite with clean search text, symbol kind and itemsFilter
+  // Query SQLite with clean search text, symbol kind, sorting and itemsFilter
   const dbResults = database.search(cleanQuery, VIRTUAL_PAGE_SIZE, {
     symbolKind,
+    sortByKind: quickPick.getShouldItemsBeSorted(),
     allowedKinds: itemsFilter.allowedKinds,
     ignoredKinds: itemsFilter.ignoredKinds,
     ignoredNames: itemsFilter.ignoredNames,

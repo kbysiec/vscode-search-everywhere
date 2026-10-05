@@ -2,6 +2,9 @@
 .vscode-test/**
 dist/test/**
 src/**
+scripts/**
+gulpfile.js
+coverage-report-config.json
 .gitignore
 vsc-extension-quickstart.md
 **/tsconfig.json

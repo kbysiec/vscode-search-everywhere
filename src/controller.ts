@@ -21,6 +21,7 @@ import {
 } from "./workspaceEventsEmitter";
 
 function loadItemsAndShowQuickPick() {
+  quickPick.reload();
   quickPick.loadItems();
   quickPick.show();
 
@@ -154,6 +155,9 @@ function handleDidDebounceConfigToggle() {
 function handleDidSortingConfigToggle() {
   controller.setBusy(true);
   quickPick.reloadSortingSettings();
+  if (quickPick.isInitialized()) {
+    quickPick.loadItems();
+  }
   controller.setBusy(false);
 }
 
