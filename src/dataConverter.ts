@@ -155,6 +155,20 @@ function cancel() {
   dataConverter.setCancelled(true);
 }
 
+function convertUriAndSymbolsToQpItems(
+  uri: vscode.Uri,
+  symbols?: vscode.DocumentSymbol[]
+): QuickPickItem[] {
+  const qpItems: QuickPickItem[] = [];
+  qpItems.push(mapUriToQpItem(uri));
+  if (symbols && symbols.length) {
+    for (let i = 0; i < symbols.length; i++) {
+      qpItems.push(mapDocumentSymbolToQpItem(uri, symbols[i]));
+    }
+  }
+  return qpItems;
+}
+
 function convertToQpData(data: WorkspaceData): QuickPickItem[] {
   const qpData = mapDataToQpData(data.items);
   dataConverter.setCancelled(false);
@@ -216,5 +230,6 @@ export const dataConverter = {
   reload,
   cancel,
   convertToQpData,
+  convertUriAndSymbolsToQpItems,
   fetchConfig,
 };

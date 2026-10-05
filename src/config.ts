@@ -32,6 +32,10 @@ const keys = {
       ignoredNames: [],
     } as ItemsFilter,
   },
+  excludeVariablesAndProperties: {
+    name: "excludeVariablesAndProperties",
+    value: true,
+  },
   shouldUseItemsFilterPhrases: {
     name: "shouldUseItemsFilterPhrases",
     value: false,
@@ -127,8 +131,32 @@ export function fetchIcons(): Icons {
   return get(keys.icons.name, keys.icons.value);
 }
 
+export function fetchShouldExcludeVariablesAndProperties(): boolean {
+  return get(
+    keys.excludeVariablesAndProperties.name,
+    keys.excludeVariablesAndProperties.value
+  );
+}
+
 export function fetchItemsFilter(): ItemsFilter {
-  return get(keys.itemsFilter.name, keys.itemsFilter.value);
+  const filter = get(keys.itemsFilter.name, keys.itemsFilter.value);
+  const shouldExclude = fetchShouldExcludeVariablesAndProperties();
+  if (shouldExclude) {
+    const ignored = new Set(filter.ignoredKinds || []);
+    const allowed = new Set(filter.allowedKinds || []);
+    // vscode.SymbolKind.Property = 6, vscode.SymbolKind.Variable = 12
+    if (!allowed.has(6)) {
+      ignored.add(6);
+    }
+    if (!allowed.has(12)) {
+      ignored.add(12);
+    }
+    return {
+      ...filter,
+      ignoredKinds: Array.from(ignored),
+    };
+  }
+  return filter;
 }
 
 export function fetchShouldUseItemsFilterPhrases(): boolean {

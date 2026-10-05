@@ -50,8 +50,11 @@ async function registerAction(
 }
 
 async function downloadData(uris?: vscode.Uri[]): Promise<QuickPickItem[]> {
-  const data = await dataService.fetchData(uris);
-  return dataConverter.convertToQpData(data);
+  const items: QuickPickItem[] = [];
+  await dataService.fetchData(uris, undefined, (batch) => {
+    items.push(...batch);
+  });
+  return items;
 }
 
 function cancelIndexing(): void {
@@ -117,13 +120,27 @@ async function indexWorkspace(
     increment?: number | undefined;
   }>
 ): Promise<WorkspaceData> {
-  const data = await dataService.fetchData(undefined, progress);
+  database.clearAll();
 
-  progress?.report({ message: "Zapisywanie bazy indeksu..." });
-  const qpData = dataConverter.convertToQpData(data);
+  let batch: QuickPickItem[] = [];
+  const BATCH_SIZE = 2500;
 
-  // Store in SQLite instead of workspaceState cache
-  database.insertSymbolsBatch(qpData);
+  const onBatch = (items: QuickPickItem[]) => {
+    batch.push(...items);
+    if (batch.length >= BATCH_SIZE) {
+      database.insertSymbolsBatch(batch);
+      batch = [];
+    }
+  };
+
+  const data = await dataService.fetchData(undefined, progress, onBatch);
+
+  if (batch.length > 0) {
+    database.insertSymbolsBatch(batch);
+    batch = [];
+  }
+
+  progress?.report({ message: "Saving index database..." });
   database.schedulePersist();
 
   return data;

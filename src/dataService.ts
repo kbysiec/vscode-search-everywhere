@@ -1,9 +1,10 @@
 import * as vscode from "vscode";
 import { fetchItemsFilter } from "./config";
+import { dataConverter } from "./dataConverter";
 import { onDidItemIndexedEventEmitter } from "./dataServiceEventsEmitter";
 import { logger } from "./logger";
 import { patternProvider } from "./patternProvider";
-import { Item, ItemsFilter, WorkspaceData } from "./types";
+import { Item, ItemsFilter, QuickPickItem, WorkspaceData } from "./types";
 import { utils } from "./utils";
 
 async function fetchUris(): Promise<vscode.Uri[]> {
@@ -30,7 +31,7 @@ async function warmupLanguageServer(
     increment?: number | undefined;
   }>
 ): Promise<void> {
-  progress?.report({ message: "Inicjalizacja Language Servera..." });
+  progress?.report({ message: "Initializing Language Server..." });
   logger.log("Warming up language servers...");
 
   // 1. Explicitly activate built-in / common language extensions
@@ -91,7 +92,7 @@ async function warmupLanguageServer(
     }
 
     progress?.report({
-      message: `Inicjalizacja Language Servera (${attempt + 1}/${maxAttempts})...`,
+      message: `Initializing Language Server (${attempt + 1}/${maxAttempts})...`,
     });
 
     try {
@@ -105,7 +106,7 @@ async function warmupLanguageServer(
         logger.log(
           `Language server is ready! Found ${rawSymbols.length} symbols in sample file.`
         );
-        progress?.report({ message: "Language Server gotowy! Indeksowanie..." });
+        progress?.report({ message: "Language Server ready! Indexing..." });
         break;
       }
     } catch (e) {
@@ -122,7 +123,8 @@ async function includeSymbols(
   progress?: vscode.Progress<{
     message?: string | undefined;
     increment?: number | undefined;
-  }>
+  }>,
+  onBatch?: (items: QuickPickItem[]) => void
 ): Promise<void> {
   if (!uris.length || dataService.getIsCancelled()) {
     return;
@@ -144,7 +146,17 @@ async function includeSymbols(
         const uri = uris[i];
 
         const symbolsForUri = await tryToGetSymbolsForUri(uri);
-        addSymbolsForUriToWorkspaceData(workspaceData, uri, symbolsForUri);
+        if (onBatch) {
+          const qpItems = dataConverter.convertUriAndSymbolsToQpItems(
+            uri,
+            symbolsForUri
+          );
+          onBatch(qpItems);
+          workspaceData.items.set(uri.path, { uri, elements: [] });
+          workspaceData.count += qpItems.length;
+        } else {
+          addSymbolsForUriToWorkspaceData(workspaceData, uri, symbolsForUri);
+        }
         onDidItemIndexedEventEmitter.fire(uris.length);
       }
     }
@@ -381,13 +393,16 @@ async function fetchData(
   progress?: vscode.Progress<{
     message?: string | undefined;
     increment?: number | undefined;
-  }>
+  }>,
+  onBatch?: (items: QuickPickItem[]) => void
 ): Promise<WorkspaceData> {
   const workspaceData: WorkspaceData = utils.createWorkspaceData();
   const uriItems = await getUrisOrFetchIfEmpty(uris);
 
-  await includeSymbols(workspaceData, uriItems, progress);
-  includeUris(workspaceData, uriItems);
+  await includeSymbols(workspaceData, uriItems, progress, onBatch);
+  if (!onBatch) {
+    includeUris(workspaceData, uriItems);
+  }
 
   dataService.setIsCancelled(false);
 

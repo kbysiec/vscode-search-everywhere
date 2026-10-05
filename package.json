@@ -93,6 +93,11 @@
           },
           "description": "Ability to define a filter that should be applied to items."
         },
+        "searchEverywhere.excludeVariablesAndProperties": {
+          "type": "boolean",
+          "default": true,
+          "description": "Exclude local variables (kind 12) and object properties (kind 6) to reduce index size by ~80% and drastically improve performance."
+        },
         "searchEverywhere.shouldUseItemsFilterPhrases": {
           "type": "boolean",
           "default": true,

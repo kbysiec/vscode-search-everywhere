@@ -240,6 +240,9 @@ function buildStructure(paths: string[], normalizedData: Map<string, number>) {
 }
 
 function getStructure(data: WorkspaceData) {
+  if (data.items.size > 500) {
+    return `[Structure omitted for large workspace (${data.items.size} files, ${data.count} items)]`;
+  }
   const normalizedData = getDataForBuildingStructure(data);
   const paths = Array.from(normalizedData.keys());
   const structure = buildStructure(paths, normalizedData);
