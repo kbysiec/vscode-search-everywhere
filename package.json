@@ -126,8 +126,8 @@
         },
         "searchEverywhere.shouldItemsBeSorted": {
           "type": "boolean",
-          "default": true,
-          "description": "Ability to decide whether items should be sorted by type."
+          "default": false,
+          "description": "Ability to decide whether items should be grouped and sorted by type. When false (recommended), items are ranked strictly by relevance."
         },
         "searchEverywhere.shouldSearchSelection": {
           "type": "boolean",

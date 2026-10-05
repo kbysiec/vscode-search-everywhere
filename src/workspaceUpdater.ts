@@ -7,9 +7,26 @@ import { workspaceIndexer as indexer } from "./workspaceIndexer";
 async function updateUri(uri: vscode.Uri) {
   // Delete old data for this URI, then re-index and insert
   database.deleteByUri(uri.toString());
-  const dataForUri = await indexer.downloadData([uri]);
-  database.insertSymbolsBatch(dataForUri);
-  database.schedulePersist();
+  try {
+    const dataForUri = await indexer.downloadData([uri]);
+    if (dataForUri && dataForUri.length) {
+      database.insertSymbolsBatch(dataForUri);
+    }
+    database.schedulePersist();
+  } catch (err: any) {
+    if (
+      err &&
+      err.message &&
+      (err.message.includes("nonexistent") ||
+        err.message.includes("ENOENT") ||
+        err.message.includes("Unable to resolve") ||
+        err.message.includes("Unable to read file"))
+    ) {
+      database.schedulePersist();
+      return;
+    }
+    throw err;
+  }
 }
 
 function updateFolder(uri: vscode.Uri, oldUri: vscode.Uri) {

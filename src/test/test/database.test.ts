@@ -121,6 +121,100 @@ describe("Database", () => {
       assert.equal(results.length, 2);
       assert.isFalse(results.some((r) => r.label.includes("Controller")));
     });
+
+    it("should prioritize exact stem matches like MapService and map.service.ts on top (Issue #49)", () => {
+      const mapClass: QuickPickItem = {
+        uri: vscode.Uri.file("/workspace/src/MapService.ts"),
+        symbolKind: vscode.SymbolKind.Class,
+        label: "$(symbol-class) MapService",
+      };
+      const mapFile: QuickPickItem = {
+        uri: vscode.Uri.file("/workspace/src/map.service.ts"),
+        symbolKind: vscode.SymbolKind.File,
+        label: "$(symbol-file) map.service.ts",
+      };
+      const mapAdapter: QuickPickItem = {
+        uri: vscode.Uri.file("/workspace/src/MapServiceAdapter.ts"),
+        symbolKind: vscode.SymbolKind.Class,
+        label: "$(symbol-class) MapServiceAdapter",
+      };
+      const mapSpec: QuickPickItem = {
+        uri: vscode.Uri.file("/workspace/src/map.service.spec.ts"),
+        symbolKind: vscode.SymbolKind.File,
+        label: "$(symbol-file) map.service.spec.ts",
+      };
+      const bitmap: QuickPickItem = {
+        uri: vscode.Uri.file("/workspace/src/BitmapService.ts"),
+        symbolKind: vscode.SymbolKind.Class,
+        label: "$(symbol-class) BitmapService",
+      };
+
+      database.clearAll();
+      database.insertSymbolsBatch([bitmap, mapAdapter, mapSpec, mapFile, mapClass]);
+
+      // When searching "mapservice", map.service.ts (File) is #1 and MapService (Class) is #2
+      const results1 = database.search("mapservice");
+      assert.isAtLeast(results1.length, 2);
+      assert.equal(results1[0].label, "$(symbol-file) map.service.ts");
+      assert.equal(results1[1].label, "$(symbol-class) MapService");
+      // BitmapService must be after exact & prefix matches
+      const bitmapIdx = results1.findIndex((r) => r.label.includes("BitmapService"));
+      assert.isAbove(bitmapIdx, 1);
+
+      // When searching "map.service", same top 2 results
+      const results2 = database.search("map.service");
+      assert.isAtLeast(results2.length, 2);
+      assert.equal(results2[0].label, "$(symbol-file) map.service.ts");
+      assert.equal(results2[1].label, "$(symbol-class) MapService");
+
+      // When searching "map-service", same top 2 results
+      const results3 = database.search("map-service");
+      assert.isAtLeast(results3.length, 2);
+      assert.equal(results3[0].label, "$(symbol-file) map.service.ts");
+      assert.equal(results3[1].label, "$(symbol-class) MapService");
+    });
+
+    it("should not return loose fuzzy matches when exact matches are present", () => {
+      const exactClass: QuickPickItem = {
+        uri: vscode.Uri.file("/workspace/src/MapService.ts"),
+        symbolKind: vscode.SymbolKind.Class,
+        label: "$(symbol-class) MapService",
+      };
+      const exactFile: QuickPickItem = {
+        uri: vscode.Uri.file("/workspace/src/map.service.ts"),
+        symbolKind: vscode.SymbolKind.File,
+        label: "$(symbol-file) map.service.ts",
+      };
+      const fuzzyNoiseFile: QuickPickItem = {
+        uri: vscode.Uri.file("/workspace/src/mainProcessService.ts"),
+        symbolKind: vscode.SymbolKind.File,
+        label: "$(symbol-file) mainProcessService.ts",
+      };
+
+      database.clearAll();
+      database.insertSymbolsBatch([fuzzyNoiseFile, exactFile, exactClass]);
+
+      const results = database.search("mapservice");
+      assert.equal(results.length, 2);
+      assert.isFalse(results.some((r) => r.label.includes("mainProcessService")));
+    });
+  });
+
+  describe("extractCleanName and extractCleanStem", () => {
+    it("should extract normalized clean name without punctuation", () => {
+      assert.equal(database.extractCleanName("MapService"), "mapservice");
+      assert.equal(database.extractCleanName("map.service.ts"), "mapservicets");
+      assert.equal(database.extractCleanName("map-service_worker"), "mapserviceworker");
+    });
+
+    it("should extract clean stem stripping extension for files", () => {
+      assert.equal(database.extractCleanStem("MapService"), "mapservice");
+      assert.equal(database.extractCleanStem("map.service.ts"), "mapservice");
+      assert.equal(database.extractCleanStem("map-service.js"), "mapservice");
+      assert.equal(database.extractCleanStem("map_service.py"), "mapservice");
+      assert.equal(database.extractCleanStem(".gitignore"), "gitignore");
+      assert.equal(database.extractCleanStem("map.service.spec.ts"), "mapservicespec");
+    });
   });
 
   describe("deleteByUri", () => {
@@ -170,3 +264,4 @@ describe("Database", () => {
     });
   });
 });
+

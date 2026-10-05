@@ -203,12 +203,11 @@ function init(): void {
 }
 
 function toggleKeepingSeparatorsVisibleOnFiltering() {
-  const shouldItemsBeSorted = quickPick.getShouldItemsBeSorted();
   const control = quickPick.getControl();
 
   if (control) {
-    // necessary hack to keep separators visible on filtering
-    (control as any).sortByLabel = !shouldItemsBeSorted;
+    // Always preserve database relevance ranking; do not let VS Code sort alphabetically
+    (control as any).sortByLabel = false;
   }
 }
 

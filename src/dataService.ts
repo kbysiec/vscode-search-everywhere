@@ -190,7 +190,12 @@ async function tryToGetSymbolsForUri(
     return undefined;
   }
 
-  return await dataService.getSymbolsForUri(uri);
+  try {
+    return await dataService.getSymbolsForUri(uri);
+  } catch (error) {
+    logger.log(`Could not get symbols for ${uri.path}: ${error}`);
+    return undefined;
+  }
 }
 
 function addSymbolsForUriToWorkspaceData(
@@ -276,10 +281,15 @@ async function getSymbolsForUri(
 async function loadAllSymbolsForUri(
   uri: vscode.Uri
 ): Promise<vscode.DocumentSymbol[] | undefined> {
-  return await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
-    "vscode.executeDocumentSymbolProvider",
-    uri
-  );
+  try {
+    return await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
+      "vscode.executeDocumentSymbolProvider",
+      uri
+    );
+  } catch (error) {
+    logger.log(`Could not load symbols for ${uri.path}: ${error}`);
+    return undefined;
+  }
 }
 
 function reduceAndFlatSymbolsArrayForUri(

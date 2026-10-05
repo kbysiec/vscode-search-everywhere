@@ -54,7 +54,7 @@ const keys = {
   },
   shouldItemsBeSorted: {
     name: "shouldItemsBeSorted",
-    value: true,
+    value: false,
   },
   shouldSearchSelection: {
     name: "shouldSearchSelection",
