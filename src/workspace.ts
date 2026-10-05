@@ -61,8 +61,10 @@ async function handleDidChangeConfiguration(
 async function handleDidChangeWorkspaceFolders(
   event: vscode.WorkspaceFoldersChangeEvent
 ) {
-  utils.hasWorkspaceChanged(event) &&
-    (await workspace.index(ActionTrigger.WorkspaceFoldersChange));
+  if (utils.hasWorkspaceChanged(event)) {
+    utils.setWorkspaceFoldersCommonPath();
+    await workspace.index(ActionTrigger.WorkspaceFoldersChange);
+  }
 }
 
 async function handleDidChangeTextDocument(
