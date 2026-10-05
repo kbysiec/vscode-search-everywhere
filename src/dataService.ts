@@ -26,41 +26,48 @@ async function includeSymbols(
   workspaceData: WorkspaceData,
   uris: vscode.Uri[]
 ): Promise<void> {
-  const fetchSymbolsForUriPromises = [];
+  const CONCURRENCY = 20;
+  let currentIndex = 0;
 
-  for (let i = 0; i < uris.length; i++) {
-    if (dataService.getIsCancelled()) {
-      utils.clearWorkspaceData(workspaceData);
-      break;
-    }
+  const workers = Array.from(
+    { length: Math.min(CONCURRENCY, uris.length) },
+    async () => {
+      while (currentIndex < uris.length) {
+        if (dataService.getIsCancelled()) {
+          break;
+        }
+        const i = currentIndex++;
+        const uri = uris[i];
 
-    const uri = uris[i];
-    fetchSymbolsForUriPromises.push(
-      (async () => {
-        let symbolsForUri = await tryToGetSymbolsForUri(uri);
+        const symbolsForUri = await tryToGetSymbolsForUri(uri);
         addSymbolsForUriToWorkspaceData(workspaceData, uri, symbolsForUri);
-
         onDidItemIndexedEventEmitter.fire(uris.length);
-      })()
-    );
+      }
+    }
+  );
+
+  await Promise.all(workers);
+
+  if (dataService.getIsCancelled()) {
+    utils.clearWorkspaceData(workspaceData);
   }
-  await Promise.all(fetchSymbolsForUriPromises);
 }
+
+const NON_SYMBOL_EXTENSIONS = new Set([
+  "png", "jpg", "jpeg", "gif", "ico", "svg", "bmp", "webp",
+  "woff", "woff2", "ttf", "eot", "otf",
+  "zip", "tar", "gz", "map", "lock", "pdf", "exe", "dll",
+  "mp3", "mp4", "wav", "avi"
+]);
 
 async function tryToGetSymbolsForUri(
   uri: vscode.Uri
 ): Promise<vscode.DocumentSymbol[] | undefined> {
-  const maxCounter = 10;
-  let counter = 0;
-  let symbolsForUri: vscode.DocumentSymbol[] | undefined;
-
-  do {
-    symbolsForUri = await dataService.getSymbolsForUri(uri);
-    !!counter && (await utils.sleep(120));
-    counter++;
-  } while (symbolsForUri === undefined && counter < maxCounter);
-
-  return symbolsForUri;
+  const ext = uri.path.split(".").pop()?.toLowerCase();
+  if (ext && NON_SYMBOL_EXTENSIONS.has(ext)) {
+    return undefined;
+  }
+  return await dataService.getSymbolsForUri(uri);
 }
 
 function addSymbolsForUriToWorkspaceData(

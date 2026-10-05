@@ -14,6 +14,7 @@ import {
 import { fetchExcludeMode } from "./config";
 import { dataConverter } from "./dataConverter";
 import { dataService } from "./dataService";
+import { database } from "./database";
 import {
   Action,
   ActionTrigger,
@@ -198,6 +199,7 @@ async function init() {
 
 async function index(indexActionType: ActionTrigger): Promise<void> {
   clear();
+  database.clearAll();
   await indexer.index(indexActionType);
 }
 

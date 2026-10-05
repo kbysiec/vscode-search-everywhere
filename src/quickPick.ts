@@ -7,9 +7,12 @@ import {
   fetchShouldUseDebounce,
   fetchShouldUseItemsFilterPhrases,
 } from "./config";
+import { database } from "./database";
 import { ItemsFilterPhrases, QuickPickItem } from "./types";
 import { utils } from "./utils";
 const debounce = require("debounce");
+
+const VIRTUAL_PAGE_SIZE = 500;
 
 function disposeOnDidChangeValueEventListeners(): void {
   quickPick
@@ -238,17 +241,30 @@ function show(): void {
 }
 
 function loadItems() {
-  quickPick.getShouldItemsBeSorted() ? loadSortedItems() : loadUnsortedItems();
+  if (!database.isReady()) {
+    return;
+  }
+
+  const control = quickPick.getControl();
+  const query = control.value || "";
+
+  // Query SQLite with current search text — returns max VIRTUAL_PAGE_SIZE results
+  const dbResults = database.search(query, VIRTUAL_PAGE_SIZE);
+  reinitQpItemsButton(dbResults);
+
+  quickPick.getShouldItemsBeSorted()
+    ? loadSortedItemsFromResults(dbResults)
+    : loadUnsortedItemsFromResults(dbResults);
 }
 
-function loadUnsortedItems(): void {
+function loadUnsortedItemsFromResults(results: QuickPickItem[]): void {
   const control = quickPick.getControl();
-  control.items = quickPick.getItems();
+  control.items = results;
 }
 
-function loadSortedItems(): void {
+function loadSortedItemsFromResults(results: QuickPickItem[]): void {
   const control = quickPick.getControl();
-  const items = [...quickPick.getItems()];
+  const items = [...results];
   items.sort((firstItem, secondItem) => {
     if (firstItem.symbolKind > secondItem.symbolKind) {
       return 1;
@@ -313,7 +329,6 @@ function setPlaceholder(isBusy: boolean): void {
 }
 
 let control: vscode.QuickPick<QuickPickItem>;
-let items: QuickPickItem[] = [];
 let shouldUseItemsFilterPhrases: boolean;
 let helpPhrase: string;
 let shouldItemsBeSorted: boolean;
@@ -329,13 +344,14 @@ function setControl(newControl: vscode.QuickPick<QuickPickItem>) {
   control = newControl;
 }
 
+// Kept for API compat — returns empty array (data now in DB)
 function getItems() {
-  return items;
+  return [] as QuickPickItem[];
 }
 
-function setItems(newItems: QuickPickItem[]): void {
-  reinitQpItemsButton(newItems);
-  items = newItems;
+// No-op — data is now in SQLite
+function setItems(_newItems: QuickPickItem[]): void {
+  // Items are stored in the database, not in memory
 }
 
 function reinitQpItemsButton(data: QuickPickItem[]) {

@@ -24,7 +24,8 @@
     "JetBrains"
   ],
   "activationEvents": [
-    "*"
+    "onCommand:searchEverywhere.search",
+    "onCommand:searchEverywhere.reload"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -217,7 +218,8 @@
     "vscode-test": "^1.3.0"
   },
   "dependencies": {
-    "debounce": "^1.2.0"
+    "debounce": "^1.2.0",
+    "sql.js": "^1.11.0"
   },
   "license": "MIT",
   "repository": {

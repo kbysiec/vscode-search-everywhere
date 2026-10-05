@@ -68,12 +68,12 @@ describe("DataService", () => {
       assert.equal(items.count, 4);
     });
 
-    it("should repeat trial to get symbols for file if returned undefined", async () => {
+    it("should try to get symbols for file when returned undefined", async () => {
       const [getSymbolsForUriStub] =
         setups.fetchData.setupForRetryingSymbolsFetchWhenUndefinedReturned();
       await dataService.fetchData();
 
-      assert.equal(getSymbolsForUriStub.callCount, 10);
+      assert.equal(getSymbolsForUriStub.callCount, 1);
     });
 
     it("should return empty array of items with workspace data if fetching is canceled", async () => {

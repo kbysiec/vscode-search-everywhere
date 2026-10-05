@@ -1,17 +1,20 @@
 import { performance } from "perf_hooks";
 import * as vscode from "vscode";
 import { actionProcessor } from "./actionProcessor";
-import { getData as getDataFromCache, updateData } from "./cache";
 import { fetchShouldDisplayNotificationInStatusBar } from "./config";
 import { dataConverter } from "./dataConverter";
 import { dataService } from "./dataService";
+import { database } from "./database";
 import { onDidItemIndexed } from "./dataServiceEventsEmitter";
 import { logger } from "./logger";
 import { Action, ActionType, QuickPickItem, WorkspaceData } from "./types";
 import { utils } from "./utils";
 
-function getData(): QuickPickItem[] {
-  return getDataFromCache() || [];
+function getData(query?: string, limit?: number): QuickPickItem[] {
+  if (!database.isReady()) {
+    return [];
+  }
+  return database.search(query || "", limit);
 }
 
 async function index(trigger: string): Promise<void> {
@@ -111,7 +114,11 @@ function printStats(data: WorkspaceData, elapsedTime: number) {
 async function indexWorkspace(): Promise<WorkspaceData> {
   const data = await dataService.fetchData();
   const qpData = dataConverter.convertToQpData(data);
-  updateData(qpData);
+
+  // Store in SQLite instead of workspaceState cache
+  database.insertSymbolsBatch(qpData);
+  database.schedulePersist();
+
   return data;
 }
 
