@@ -3,12 +3,15 @@ import {
   fetchHelpPhrase,
   fetchItemsFilter,
   fetchItemsFilterPhrases,
+  fetchRecentItemsLimit,
   fetchShouldHighlightSymbol,
   fetchShouldItemsBeSorted,
   fetchShouldUseDebounce,
   fetchShouldUseItemsFilterPhrases,
+  fetchShowRecentItemsOnEmptyQuery,
 } from "./config";
 import { database } from "./database";
+import { recentItems } from "./recentItems";
 import { ItemsFilterPhrases, QuickPickItem } from "./types";
 import { utils } from "./utils";
 const debounce = utils.debounce;
@@ -50,6 +53,9 @@ function registerOnDidChangeValueWithoutDebounceEventListeners(): void {
 }
 
 async function openSelected(qpItem: QuickPickItem): Promise<void> {
+  if (qpItem.kind === vscode.QuickPickItemKind.Separator) {
+    return;
+  }
   shouldLoadItemsForFilterPhrase(qpItem)
     ? loadItemsForFilterPhrase(qpItem)
     : await quickPick.openItem(qpItem);
@@ -70,6 +76,10 @@ async function openItem(
   qpItem: QuickPickItem,
   viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active
 ): Promise<void> {
+  if (qpItem.kind === vscode.QuickPickItemKind.Separator) {
+    return;
+  }
+  recentItems.addRecentItem(qpItem);
   const uriOrFileName =
     qpItem.uri!.scheme === "file" ? qpItem.uri!.path : qpItem.uri;
   const document =
@@ -187,6 +197,9 @@ function handleDidHide() {
 async function handleDidTriggerItemButton({
   item: qpItem,
 }: vscode.QuickPickItemButtonEvent<QuickPickItem>) {
+  if (qpItem.kind === vscode.QuickPickItemKind.Separator) {
+    return;
+  }
   await quickPick.openItem(qpItem, vscode.ViewColumn.Beside);
 }
 
@@ -194,7 +207,7 @@ function init(): void {
   const control = vscode.window.createQuickPick<QuickPickItem>();
   setControl(control);
   control.matchOnDetail = true;
-  control.matchOnDescription = true;
+  control.matchOnDescription = false;
 
   quickPick.fetchConfig();
   fetchHelpData();
@@ -241,6 +254,12 @@ function show(): void {
 
 function loadItems() {
   if (!database.isReady()) {
+    const fallbackItems = quickPick.getItems();
+    if (fallbackItems && fallbackItems.length > 0) {
+      quickPick.getShouldItemsBeSorted()
+        ? loadSortedItemsFromResults(fallbackItems)
+        : loadUnsortedItemsFromResults(fallbackItems);
+    }
     return;
   }
 
@@ -270,6 +289,26 @@ function loadItems() {
     }
   }
 
+  if (
+    cleanQuery === "" &&
+    symbolKind === undefined &&
+    fetchShowRecentItemsOnEmptyQuery()
+  ) {
+    const recent = recentItems.getRecentItems(fetchRecentItemsLimit());
+    if (recent.length > 0) {
+      reinitQpItemsButton(recent);
+      syncItemsFilterPhrases(recent);
+      const separator: QuickPickItem = {
+        label: "Recent",
+        kind: vscode.QuickPickItemKind.Separator,
+        symbolKind: vscode.QuickPickItemKind.Separator,
+        uri: vscode.Uri.parse("#"),
+      };
+      loadUnsortedItemsFromResults([separator, ...recent]);
+      return;
+    }
+  }
+
   const itemsFilter = fetchItemsFilter();
 
   // Query SQLite with clean search text, symbol kind, sorting and itemsFilter
@@ -293,6 +332,9 @@ function syncItemsFilterPhrases(items: QuickPickItem[]): void {
   const shouldUse = quickPick.getShouldUseItemsFilterPhrases();
 
   for (const item of items) {
+    if (item.kind === vscode.QuickPickItemKind.Separator) {
+      continue;
+    }
     if (!shouldUse || !filterPhrases) {
       item.description = item.description?.replace(/^\[[^\]]+\]\s*/, "");
       continue;
@@ -399,26 +441,28 @@ function setControl(newControl: vscode.QuickPick<QuickPickItem>) {
   control = newControl;
 }
 
-// Kept for API compat — returns empty array (data now in DB)
+let storedItems: QuickPickItem[] = [];
+
 function getItems() {
-  return [] as QuickPickItem[];
+  return storedItems;
 }
 
-// No-op — data is now in SQLite
-function setItems(_newItems: QuickPickItem[]): void {
-  // Items are stored in the database, not in memory
+function setItems(newItems: QuickPickItem[]): void {
+  storedItems = newItems;
+  reinitQpItemsButton(storedItems);
 }
 
 function reinitQpItemsButton(data: QuickPickItem[]) {
-  data.forEach(
-    (item) =>
-      (item.buttons = [
+  data.forEach((item) => {
+    if (item.kind !== vscode.QuickPickItemKind.Separator) {
+      item.buttons = [
         {
           iconPath: new vscode.ThemeIcon("open-preview"),
           tooltip: "Open to the side",
         },
-      ])
-  );
+      ];
+    }
+  });
 }
 
 function getShouldUseItemsFilterPhrases() {

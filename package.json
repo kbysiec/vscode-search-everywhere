@@ -184,6 +184,16 @@
           "type": "boolean",
           "default": true,
           "description": "Share and seed indexed database cache across git worktrees and clones of the same repository for near-instant startup."
+        },
+        "searchEverywhere.showRecentItemsOnEmptyQuery": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show recent items and open files when search input is empty."
+        },
+        "searchEverywhere.recentItemsLimit": {
+          "type": "number",
+          "default": 10,
+          "description": "Maximum number of recent items to show when search input is empty."
         }
       }
     },

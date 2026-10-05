@@ -231,5 +231,6 @@ export const dataConverter = {
   cancel,
   convertToQpData,
   convertUriAndSymbolsToQpItems,
+  mapUriToQpItem,
   fetchConfig,
 };

@@ -80,6 +80,14 @@ const keys = {
     name: "shareCacheAcrossWorktrees",
     value: true,
   },
+  showRecentItemsOnEmptyQuery: {
+    name: "showRecentItemsOnEmptyQuery",
+    value: true,
+  },
+  recentItemsLimit: {
+    name: "recentItemsLimit",
+    value: 10,
+  },
 };
 
 function getConfigurationByKey<T>(
@@ -235,5 +243,19 @@ export function fetchShareCacheAcrossWorktrees(): boolean {
   return get(
     keys.shareCacheAcrossWorktrees.name,
     keys.shareCacheAcrossWorktrees.value
+  );
+}
+
+export function fetchShowRecentItemsOnEmptyQuery(): boolean {
+  return get(
+    keys.showRecentItemsOnEmptyQuery.name,
+    keys.showRecentItemsOnEmptyQuery.value
+  );
+}
+
+export function fetchRecentItemsLimit(): number {
+  return get(
+    keys.recentItemsLimit.name,
+    keys.recentItemsLimit.value
   );
 }

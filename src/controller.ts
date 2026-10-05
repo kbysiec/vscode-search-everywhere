@@ -131,18 +131,22 @@ function handleWillProcessing() {
   !quickPick.isInitialized() && quickPick.init();
 }
 
+function setQuickPickData() {
+  !quickPick.isInitialized() && quickPick.init();
+  quickPick.setItems(workspace.getData());
+}
+
 function handleDidProcessing() {
-  // No need to load all data into quickPick — it queries DB on demand
+  controller.setQuickPickData();
   quickPick.loadItems();
   controller.setBusy(false);
 }
 
 function handleWillExecuteAction(action: Action) {
   if (action.type === ActionType.Rebuild) {
-    // Clear QuickPick display
     if (quickPick.isInitialized()) {
-      const control = quickPick.getControl();
-      control.items = [];
+      quickPick.setItems([]);
+      quickPick.loadItems();
     }
   }
   logger.logAction(action);
@@ -293,6 +297,7 @@ export const controller = {
   isInitOnStartupEnabledAndWorkspaceCachingDisabled,
   isInitOnStartupDisabledAndWorkspaceCachingDisabled,
   setBusy,
+  setQuickPickData,
   getExtensionContext,
   init,
   search,

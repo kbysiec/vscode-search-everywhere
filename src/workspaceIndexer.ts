@@ -1,6 +1,7 @@
 import { performance } from "perf_hooks";
 import * as vscode from "vscode";
 import { actionProcessor } from "./actionProcessor";
+import * as cache from "./cache";
 import { fetchShouldDisplayNotificationInStatusBar } from "./config";
 import { dataConverter } from "./dataConverter";
 import { dataService } from "./dataService";
@@ -12,7 +13,8 @@ import { utils } from "./utils";
 
 function getData(query?: string, limit?: number): QuickPickItem[] {
   if (!database.isReady()) {
-    return [];
+    const cached = cache.getData();
+    return cached || [];
   }
   return database.search(query || "", limit);
 }
@@ -51,9 +53,12 @@ async function registerAction(
 
 async function downloadData(uris?: vscode.Uri[]): Promise<QuickPickItem[]> {
   const items: QuickPickItem[] = [];
-  await dataService.fetchData(uris, undefined, (batch) => {
+  const workspaceData = await dataService.fetchData(uris, undefined, (batch) => {
     items.push(...batch);
   });
+  if (items.length === 0 && workspaceData && workspaceData.items) {
+    return dataConverter.convertToQpData(workspaceData);
+  }
   return items;
 }
 
