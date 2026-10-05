@@ -1,12 +1,17 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
+import { fetchShareCacheAcrossWorktrees } from "./config";
+import { gitService } from "./gitService";
+import { logger } from "./logger";
 import { QuickPickItem } from "./types";
 
 let db: any;
 let dbPath: string;
 let sqlJs: any;
 let persistTimer: NodeJS.Timeout | undefined;
+let extensionContext: vscode.ExtensionContext | undefined;
+let seededFromTemplate: boolean = false;
 
 const SEARCH_LIMIT = 500;
 
@@ -50,6 +55,7 @@ export async function initDatabase(
     locateFileOpt ? { locateFile: locateFileOpt } : undefined
   );
 
+  extensionContext = context;
   const storageUri = (context && (context.storageUri || context.globalStorageUri)) || undefined;
   if (storageUri && storageUri.fsPath) {
     const storagePath = storageUri.fsPath;
@@ -67,7 +73,58 @@ export async function initDatabase(
       db = new sqlJs.Database();
     }
   } else {
-    db = new sqlJs.Database();
+    let seeded = false;
+    if (
+      dbPath &&
+      fetchShareCacheAcrossWorktrees() &&
+      context &&
+      context.globalStorageUri
+    ) {
+      const workspaceFolder =
+        vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders[0];
+      if (workspaceFolder) {
+        try {
+          const rootPath = workspaceFolder.uri.fsPath;
+          const fingerprint = await gitService.getRepoFingerprint(rootPath);
+          if (fingerprint) {
+            const globalDir = context.globalStorageUri.fsPath;
+            const templateDbPath = path.join(globalDir, `repo-${fingerprint}.db`);
+            const templateMetaPath = path.join(globalDir, `repo-${fingerprint}.json`);
+
+            if (fs.existsSync(templateDbPath) && fs.existsSync(templateMetaPath)) {
+              const meta = JSON.parse(fs.readFileSync(templateMetaPath, "utf8"));
+              const templateRootUriStr = meta.templateRootUri;
+              const currentRootUriStr = workspaceFolder.uri.toString();
+
+              const fileBuffer = fs.readFileSync(templateDbPath);
+              db = new sqlJs.Database(fileBuffer);
+
+              if (templateRootUriStr && templateRootUriStr !== currentRootUriStr) {
+                db.run("UPDATE symbols SET uri = replace(uri, ?, ?)", [
+                  templateRootUriStr,
+                  currentRootUriStr,
+                ]);
+              }
+
+              const data = db.export();
+              fs.writeFileSync(dbPath, Buffer.from(data));
+
+              seededFromTemplate = true;
+              seeded = true;
+              logger.log(
+                `Seeded database from shared repository template (fingerprint: ${fingerprint})`
+              );
+            }
+          }
+        } catch (error) {
+          logger.log(`Failed to seed database from template: ${error}`);
+        }
+      }
+    }
+
+    if (!seeded) {
+      db = new sqlJs.Database();
+    }
   }
 
   // Performance PRAGMAs for SQLite WASM
@@ -75,7 +132,7 @@ export async function initDatabase(
     db.run("PRAGMA synchronous = OFF;");
     db.run("PRAGMA journal_mode = MEMORY;");
     db.run("PRAGMA temp_store = MEMORY;");
-    db.run("PRAGMA cache_size = -64000;");
+    db.run("PRAGMA cache_size = -64000;"); // Bounded to 64 MB dynamic RAM ceiling per window
   } catch {
     // Ignore PRAGMA errors on in-memory databases
   }
@@ -393,8 +450,74 @@ export function persistToFile(): void {
       const data = db.export();
       const buffer = Buffer.from(data);
       fs.writeFileSync(dbPath, buffer);
+
+      if (
+        fetchShareCacheAcrossWorktrees() &&
+        extensionContext &&
+        extensionContext.globalStorageUri
+      ) {
+        const workspaceFolder =
+          vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders[0];
+        if (workspaceFolder) {
+          gitService
+            .getRepoFingerprint(workspaceFolder.uri.fsPath)
+            .then((fingerprint) => {
+              if (fingerprint && extensionContext) {
+                const globalDir = extensionContext.globalStorageUri.fsPath;
+                if (!fs.existsSync(globalDir)) {
+                  fs.mkdirSync(globalDir, { recursive: true });
+                }
+                const templateDbPath = path.join(globalDir, `repo-${fingerprint}.db`);
+                const templateMetaPath = path.join(globalDir, `repo-${fingerprint}.json`);
+                fs.writeFileSync(templateDbPath, buffer);
+                fs.writeFileSync(
+                  templateMetaPath,
+                  JSON.stringify({
+                    fingerprint,
+                    templateRootUri: workspaceFolder.uri.toString(),
+                    symbolCount: getCount(),
+                    lastUpdated: Date.now(),
+                  })
+                );
+              }
+            })
+            .catch(() => {
+              // Non-critical background task
+            });
+        }
+      }
     } catch {
       // silently fail — non-critical
+    }
+  }
+}
+
+export function wasSeededFromTemplate(): boolean {
+  return seededFromTemplate;
+}
+
+export function setSeededFromTemplate(value: boolean): void {
+  seededFromTemplate = value;
+}
+
+export function clearSharedCache(): void {
+  if (extensionContext && extensionContext.globalStorageUri) {
+    const globalDir = extensionContext.globalStorageUri.fsPath;
+    if (fs.existsSync(globalDir)) {
+      const files = fs.readdirSync(globalDir);
+      for (const file of files) {
+        if (
+          file.startsWith("repo-") &&
+          (file.endsWith(".db") || file.endsWith(".json"))
+        ) {
+          try {
+            fs.unlinkSync(path.join(globalDir, file));
+          } catch {
+            // ignore
+          }
+        }
+      }
+      logger.log("Shared repository cache cleared successfully.");
     }
   }
 }
@@ -445,4 +568,7 @@ export const database = {
   deleteDatabaseFile,
   closeDatabase,
   isReady,
+  wasSeededFromTemplate,
+  setSeededFromTemplate,
+  clearSharedCache,
 };

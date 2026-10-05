@@ -179,6 +179,11 @@
           "type": "boolean",
           "default": true,
           "description": "Ability to decide if the workspace should be indexed only once. Each next startup of Visual Studio Code will collect data from cache."
+        },
+        "searchEverywhere.shareCacheAcrossWorktrees": {
+          "type": "boolean",
+          "default": true,
+          "description": "Share and seed indexed database cache across git worktrees and clones of the same repository for near-instant startup."
         }
       }
     },
@@ -190,6 +195,10 @@
       {
         "command": "searchEverywhere.reload",
         "title": "Search everywhere: Reload"
+      },
+      {
+        "command": "searchEverywhere.clearSharedCache",
+        "title": "Search everywhere: Clear Shared Worktree Cache"
       }
     ],
     "keybindings": {

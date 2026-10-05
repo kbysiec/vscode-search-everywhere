@@ -76,6 +76,10 @@ const keys = {
     name: "shouldWorkspaceDataBeCached",
     value: true,
   },
+  shareCacheAcrossWorktrees: {
+    name: "shareCacheAcrossWorktrees",
+    value: true,
+  },
 };
 
 function getConfigurationByKey<T>(
@@ -224,5 +228,12 @@ export function fetchShouldWorkspaceDataBeCached(): boolean {
   return get(
     keys.shouldWorkspaceDataBeCached.name,
     keys.shouldWorkspaceDataBeCached.value
+  );
+}
+
+export function fetchShareCacheAcrossWorktrees(): boolean {
+  return get(
+    keys.shareCacheAcrossWorktrees.name,
+    keys.shareCacheAcrossWorktrees.value
   );
 }

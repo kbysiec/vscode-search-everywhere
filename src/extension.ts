@@ -28,6 +28,15 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(
       "searchEverywhere.reload",
       reload.bind(null, controller)
+    ),
+    vscode.commands.registerCommand(
+      "searchEverywhere.clearSharedCache",
+      () => {
+        database.clearSharedCache();
+        vscode.window.showInformationMessage(
+          "Search everywhere: Shared repository cache has been cleared."
+        );
+      }
     )
   );
 

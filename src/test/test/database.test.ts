@@ -153,4 +153,20 @@ describe("Database", () => {
       assert.equal(database.isEmpty(), true);
     });
   });
+
+  describe("worktree shared cache helpers", () => {
+    it("should allow getting and setting wasSeededFromTemplate flag", () => {
+      assert.isFalse(database.wasSeededFromTemplate());
+      database.setSeededFromTemplate(true);
+      assert.isTrue(database.wasSeededFromTemplate());
+      database.setSeededFromTemplate(false);
+      assert.isFalse(database.wasSeededFromTemplate());
+    });
+
+    it("should execute clearSharedCache safely without throwing", () => {
+      assert.doesNotThrow(() => {
+        database.clearSharedCache();
+      });
+    });
+  });
 });
