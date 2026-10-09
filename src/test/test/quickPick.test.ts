@@ -1,7 +1,8 @@
 import { assert } from "chai";
 import * as sinon from "sinon";
 import * as vscode from "vscode";
-import { ensureUri, quickPick } from "../../quickPick";
+import { database } from "../../database";
+import { ensureUri, parseLineSuffix, quickPick } from "../../quickPick";
 import { getTestSetups } from "../testSetup/quickPick.testSetup";
 import {
   getQuickPickItemButtonEvent,
@@ -380,6 +381,54 @@ describe("QuickPick", () => {
 
       openItemStub.restore();
       hideStub.restore();
+    });
+  });
+
+  describe("parseLineSuffix", () => {
+    it("should return query unchanged when there is no line suffix", () => {
+      assert.deepEqual(parseLineSuffix("Foo.java"), { query: "Foo.java" });
+    });
+
+    it("should extract a 1-based line number as a 0-based position", () => {
+      const result = parseLineSuffix("ForwardRecoveryRejectedException.java:5");
+      assert.equal(result.query, "ForwardRecoveryRejectedException.java");
+      assert.equal(result.position!.line, 4);
+      assert.equal(result.position!.character, 0);
+    });
+
+    it("should extract line and column", () => {
+      const result = parseLineSuffix("src/Foo.java:12:7");
+      assert.equal(result.query, "src/Foo.java");
+      assert.equal(result.position!.line, 11);
+      assert.equal(result.position!.character, 6);
+    });
+
+    it("should not treat a bare line suffix as a query", () => {
+      assert.deepEqual(parseLineSuffix(":5"), { query: ":5" });
+    });
+  });
+
+  describe("loadItems with line suffix", () => {
+    it("should search without the suffix and attach the target position", () => {
+      const control = vscode.window.createQuickPick<any>();
+      control.value = "Foo.java:5";
+      const item = getQpItems()[0];
+      const sandbox = sinon.createSandbox();
+      sandbox.stub(quickPick, "getControl").returns(control);
+      sandbox.stub(quickPick, "getShouldUseItemsFilterPhrases").returns(false);
+      sandbox.stub(quickPick, "getShouldItemsBeSorted").returns(false);
+      sandbox.stub(database, "isReady").returns(true);
+      const searchStub = sandbox.stub(database, "search").returns([item]);
+
+      quickPick.loadItems();
+
+      assert.equal(searchStub.firstCall.args[0], "Foo.java");
+      const loaded = control.items[0];
+      assert.equal(loaded.targetPosition.line, 4);
+      assert.isTrue(loaded.alwaysShow);
+      assert.isUndefined(item.targetPosition);
+      sandbox.restore();
+      control.dispose();
     });
   });
 

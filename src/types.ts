@@ -74,6 +74,7 @@ export interface QuickPickItem extends vscode.QuickPickItem {
   symbolKind: number;
   range?: Range;
   isHelp?: boolean;
+  targetPosition?: vscode.Position;
 }
 
 export interface Range {
