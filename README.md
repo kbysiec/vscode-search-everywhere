@@ -92,6 +92,8 @@ After the scan is completed, the extension continuously tracks changes in the wo
 
 * Drill-down search in a specific file: search symbols inside any file by clicking the right-arrow icon button or using a shortcut (`alt + right`). Return to workspace search anytime with `alt + left` or the Back button.
 
+* Jump to line: append `:line` or `:line:column` to the query (e.g. `UserService.java:42` or `src/user.ts:10:5`) to open the selected item at that position.
+
 * Dedicated output with logs related to triggered actions, scanned directories structure, etc.
 
 * Ability to decide whether the items should be sorted by type

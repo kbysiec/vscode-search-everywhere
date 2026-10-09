@@ -124,6 +124,16 @@ async function openItem(
 }
 
 function selectQpItem(editor: vscode.TextEditor, qpItem: QuickPickItem): void {
+  if (qpItem.targetPosition) {
+    const position = qpItem.targetPosition;
+    editor.selection = new vscode.Selection(position, position);
+    editor.revealRange(
+      new vscode.Range(position, position),
+      vscode.TextEditorRevealType.InCenterIfOutsideViewport
+    );
+    return;
+  }
+
   editor.selection = getSelectionForQpItem(
     qpItem,
     fetchShouldHighlightSymbol()
@@ -132,6 +142,34 @@ function selectQpItem(editor: vscode.TextEditor, qpItem: QuickPickItem): void {
   editor.revealRange(
     qpItem.range as vscode.Range,
     vscode.TextEditorRevealType.Default
+  );
+}
+
+const LINE_SUFFIX_REGEX = /^(.*?\S)\s*:(\d+)(?::(\d+))?$/;
+
+export function parseLineSuffix(query: string): {
+  query: string;
+  position?: vscode.Position;
+} {
+  const match = query.match(LINE_SUFFIX_REGEX);
+  if (!match) {
+    return { query };
+  }
+  const line = Math.max(parseInt(match[2], 10) - 1, 0);
+  const character = match[3] ? Math.max(parseInt(match[3], 10) - 1, 0) : 0;
+  return { query: match[1], position: new vscode.Position(line, character) };
+}
+
+function withTargetPosition(
+  items: QuickPickItem[],
+  position: vscode.Position
+): QuickPickItem[] {
+  // Clone so cached database results are not mutated; alwaysShow keeps VS Code
+  // from hiding items whose label does not contain the ":line" suffix.
+  return items.map((item) =>
+    item.kind === vscode.QuickPickItemKind.Separator
+      ? item
+      : { ...item, targetPosition: position, alwaysShow: true }
   );
 }
 
@@ -546,6 +584,9 @@ function loadItems() {
     }
   }
 
+  const lineSuffix = parseLineSuffix(cleanQuery);
+  cleanQuery = lineSuffix.query;
+
   if (
     !fileScopeUri &&
     cleanQuery === "" &&
@@ -570,7 +611,7 @@ function loadItems() {
   const itemsFilter = fetchItemsFilter();
 
   // Query SQLite with clean search text, symbol kind, sorting and itemsFilter
-  const dbResults = database.search(cleanQuery, VIRTUAL_PAGE_SIZE, {
+  const searchResults = database.search(cleanQuery, VIRTUAL_PAGE_SIZE, {
     symbolKind,
     sortByKind: quickPick.getShouldItemsBeSorted(),
     allowedKinds: itemsFilter.allowedKinds,
@@ -578,6 +619,9 @@ function loadItems() {
     ignoredNames: itemsFilter.ignoredNames,
     fileUri: fileScopeUri,
   });
+  const dbResults = lineSuffix.position
+    ? withTargetPosition(searchResults, lineSuffix.position)
+    : searchResults;
   reinitQpItemsButton(dbResults);
   syncItemsFilterPhrases(dbResults);
 
