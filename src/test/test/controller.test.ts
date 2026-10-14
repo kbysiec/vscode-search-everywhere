@@ -497,6 +497,30 @@ describe("Controller", () => {
     });
   });
 
+  describe("restoreOnDidChangeValueEventListener", () => {
+    it("should reload listeners and load items for a value changed while listeners were detached", () => {
+      const [reloadStub, handleDidChangeValueStub] =
+        setups.restoreOnDidChangeValueEventListener.setupForControlValue(
+          "OrderMeta"
+        );
+      controller.restoreOnDidChangeValueEventListener("");
+
+      assert.equal(reloadStub.calledOnce, true);
+      assert.equal(handleDidChangeValueStub.calledOnceWith("OrderMeta"), true);
+    });
+
+    it("should only reload listeners if the value has not changed", () => {
+      const [reloadStub, handleDidChangeValueStub] =
+        setups.restoreOnDidChangeValueEventListener.setupForControlValue(
+          "test text"
+        );
+      controller.restoreOnDidChangeValueEventListener("test text");
+
+      assert.equal(reloadStub.calledOnce, true);
+      assert.equal(handleDidChangeValueStub.called, false);
+    });
+  });
+
   describe("shouldLoadDataFromCacheOnQuickPickOpen", () => {
     it("should return false if quickPick is already initialized", () => {
       setups.shouldLoadDataFromCacheOnQuickPickOpen.setupForFalseWhenQuickPickInitialized();

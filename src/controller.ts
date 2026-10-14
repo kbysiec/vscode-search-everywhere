@@ -193,16 +193,28 @@ async function search(): Promise<void> {
     quickPick.disposeOnDidChangeValueEventListeners();
 
     const { start, end } = activeEditor.selection;
-    quickPick.setText(
-      activeEditor.document.getText(new vscode.Range(start, end))
+    const selectedText = activeEditor.document.getText(
+      new vscode.Range(start, end)
     );
+    quickPick.setText(selectedText);
 
-    await utils.sleepAndExecute(
-      timeInMsToAvoidListFlashing,
-      quickPick.reloadOnDidChangeValueEventListener
+    await utils.sleepAndExecute(timeInMsToAvoidListFlashing, () =>
+      controller.restoreOnDidChangeValueEventListener(selectedText)
     );
   }
   quickPick.isInitialized() && loadItemsAndShowQuickPick();
+}
+
+// The quick pick is already visible while the listeners are detached, so a
+// value entered in that window (e.g. a paste) fires no event and must be
+// loaded here.
+function restoreOnDidChangeValueEventListener(expectedText: string) {
+  quickPick.reloadOnDidChangeValueEventListener();
+
+  const value = quickPick.getControl().value;
+  if (value !== expectedText) {
+    quickPick.handleDidChangeValue(value);
+  }
 }
 
 async function reload(): Promise<void> {
@@ -320,6 +332,7 @@ export const controller = {
   shouldIndexOnStartup,
   shouldLoadDataFromCacheOnStartup,
   shouldSearchSelection,
+  restoreOnDidChangeValueEventListener,
   isInitOnStartupEnabledAndWorkspaceCachingEnabledButDataIsEmpty,
   isInitOnStartupDisabledAndWorkspaceCachingEnabledButDataIsEmpty,
   isInitOnStartupEnabledAndWorkspaceCachingDisabled,
