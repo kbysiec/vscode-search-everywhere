@@ -1188,6 +1188,31 @@ export const getTestSetups = () => {
       },
     },
 
+    restoreOnDidChangeValueEventListener: {
+      setupForControlValue: (value: string) => {
+        stubComponents(sandbox);
+
+        return stubMultiple(
+          [
+            {
+              object: quickPick,
+              method: "reloadOnDidChangeValueEventListener",
+            },
+            {
+              object: quickPick,
+              method: "handleDidChangeValue",
+            },
+            {
+              object: quickPick,
+              method: "getControl",
+              returns: { value },
+            },
+          ],
+          sandbox
+        );
+      },
+    },
+
     shouldLoadDataFromCacheOnQuickPickOpen: {
       setupForFalseWhenQuickPickInitialized: () => {
         stubComponents(sandbox);
